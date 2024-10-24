@@ -7804,7 +7804,7 @@ contains
       integer(c_int), intent(in) :: max_iter
       real(c_float), intent(in) :: b0, w0, gamma0, mu0, theta0
 
-      real(c_float) :: db, dw, alpha, dalpha, dtheta, dmu
+      real(c_float) :: db, dw, alpha, newalpha, dalpha, dtheta, dmu
       real(c_float) :: rmse, rmse1
       integer :: iter
 
@@ -7821,11 +7821,17 @@ contains
          ! if (abs(db) .lt. tol .and. abs(dw) .lt. tol .and. abs(dgamma) .lt. tol .and. abs(dtheta) .lt. tol .and. abs(dmu) .lt. tol) exit
 
          ! update the parameters
+
          b = b - eta * db
+
          w = w - eta * dw
+
          ! gamma = gamma - eta * dgamma
-         ! alpha = alpha - eta * dalpha
+         newalpha = alpha - eta * dalpha
+         if (newalpha .le. 1.60944) alpha = newalpha ! log(5.0)
+
          ! mu = mu - eta * dmu
+
          ! theta = theta - eta * dtheta
       end do
 
@@ -8068,6 +8074,7 @@ contains
          b = average(viewport) ! bias = the average of the viewport
          w = maxval(viewport) - minval(viewport) - b ! Max[view] - Min[view] - bias
          gamma = real(size(row))/1000 ! a small gamma value
+         ! gamma = 5.0 ! more-or-less one pixel width
          print *, 'b:', b, 'w:', w, 'gamma:', gamma
 
          theta = find_angle(b, w, gamma, mu, view_pixels, view_mask)
