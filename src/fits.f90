@@ -4084,6 +4084,9 @@ contains
             pos = index(value, 'alma')
             if (pos .ne. 0) item%is_optical = .false.
 
+            pos = index(value, 'aste')
+            if (pos .ne. 0) item%is_optical = .false.
+
             pos = index(value, 'vla')
             if (pos .ne. 0) item%is_optical = .false.
 
