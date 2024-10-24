@@ -7828,7 +7828,9 @@ contains
 
          ! gamma = gamma - eta * dgamma
          newalpha = alpha - eta * dalpha
-         if (newalpha .le. 1.60944) alpha = newalpha ! log(5.0)
+
+         ! between log(0.001) and log(5.0)
+         if (newalpha .le. 1.6094379124341003 .and. newalpha .ge. -6.907755278982137) alpha = newalpha
 
          ! mu = mu - eta * dmu
 
