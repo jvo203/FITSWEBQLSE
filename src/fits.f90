@@ -7706,7 +7706,7 @@ contains
    end function derivative_theta
 
    ! a point (i, j) rotated by a theta angle around the point (x0, y0)
-   function rmse_gradient(i, j, x0, y0, theta, b, w, alpha, t, db, dw, dalpha, dtheta, dx0) result(y)
+   function rmse_gradient_theta(i, j, x0, y0, theta, b, w, alpha, t, db, dw, dalpha, dtheta, dx0) result(y)
       implicit none
 
       real, intent(in) :: i, j, x0, y0, theta, b, w, alpha, t
@@ -7729,6 +7729,38 @@ contains
       dalpha = dalpha - error * w * peak * inner2 * gamma
       dtheta = dtheta + error * 2.0 * gamma * w * peak * inner * ((j - y0)*cos(theta) + (i - x0)*sin(theta))
       dx0 = dx0 + error * 2.0 * gamma * w * peak * inner * cos(theta)
+
+   end function rmse_gradient_theta
+
+   ! a point (i, j) rotated by a theta angle around the point (x0, y0)
+   function rmse_gradient(i, j, x0, y0, b, w, alpha, beta, t, db, dw, dalpha, dbeta, dx0) result(y)
+      implicit none
+
+      real, intent(in) :: i, j, x0, y0, b, w, alpha, beta, t
+      real, intent(inout) :: db, dw, dalpha, dbeta, dx0
+
+      real :: y, inner, inner2, gamma, peak, error, sintheta, costheta, dtheta
+
+      ! trigonometric functions   
+      sintheta = beta / sqrt(1.0 + beta**2)
+      costheta = 1.0 / sqrt(1.0 + beta**2)
+
+      ! intermediate variables
+      inner = (i - x0)*costheta - (j - y0)*sintheta
+      inner2 = inner**2
+      gamma = exp(alpha)
+      peak = exp(-gamma * inner2)
+
+      ! output and error
+      y = b + w * peak
+      error = y - t
+
+      db = db + error
+      dw = dw + error * peak
+      dalpha = dalpha - error * w * peak * inner2 * gamma
+      dtheta = dtheta + error * 2.0 * gamma * w * peak * inner * ((j - y0)*costheta + (i - x0)*sintheta)
+      dbeta = dtheta * 0.0 ! TO-DO
+      dx0 = dx0 + error * 2.0 * gamma * w * peak * inner * costheta
 
    end function rmse_gradient
 
