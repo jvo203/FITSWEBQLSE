@@ -7760,7 +7760,7 @@ contains
       dw = dw + error * peak
       dalpha = dalpha - error * w * peak * inner2 * gamma
    
-      dtheta = 2.0 * gamma * w * peak * inner * ((j - y0)*costheta + (i - x0)*sintheta)      
+      dtheta = - 2.0 * gamma * w * peak * inner ! * ((j - y0)*costheta + (i - x0)*sintheta)      
       dbeta = dbeta + error * dtheta * ( (j - y0) * ((beta**2)/(betasqrt**3) - costheta) - (i - x0)*beta/(betasqrt**3))
 
       dx0 = dx0 + error * 2.0 * gamma * w * peak * inner * costheta
@@ -7854,8 +7854,8 @@ contains
 
       do iter = 1, max_iter
          rmse = gradient(b, w, alpha, beta, mu, db, dw, dalpha, dbeta, dmu, view, mask)
-         print *, 'iter:', iter, 'b:', b, 'w:', w, 'alpha:', alpha, 'gamma:', exp(alpha),&
-         & 'beta', beta, 'theta:', atan(beta), 'mu:', mu, 'rmse:', rmse
+         print *, 'iter:', iter, 'b:', b, 'w:', w, 'alpha:', alpha, 'beta', beta, 'theta:',&
+         &'gamma:', exp(alpha), atan(beta), 'mu:', mu, 'rmse:', rmse
 
          ! if (abs(db) .lt. tol .and. abs(dw) .lt. tol .and. abs(dgamma) .lt. tol .and. abs(dtheta) .lt. tol .and. abs(dmu) .lt. tol) exit
 
@@ -7876,7 +7876,7 @@ contains
          ! range-limit to between mu0 - 10 and mu0 + 10
          if (newmu .le. min(dim, mu0 + 10.0) .and. newmu .ge. max(1.0, mu0 - 10.0)) mu = max(1.0,min(dim, newmu))
 
-         beta = beta - eta * dbeta
+         ! beta = beta - eta * dbeta
       end do
 
       gamma = exp(alpha)
