@@ -7804,9 +7804,12 @@ contains
       integer(c_int), intent(in) :: max_iter
       real(c_float), intent(in) :: b0, w0, gamma0, mu0, theta0
 
-      real(c_float) :: db, dw, alpha, newalpha, dalpha, dtheta, dmu
+      real(c_float) :: db, dw, alpha, newalpha, dalpha, dtheta, dmu, newmu
       real(c_float) :: rmse, rmse1
       integer :: iter
+      real :: dim
+
+      dim = real(size(view, 1))
 
       b = b0
       w = w0
@@ -7829,10 +7832,13 @@ contains
          ! gamma = gamma - eta * dgamma
          newalpha = alpha - eta * dalpha
 
-         ! between log(0.001) and log(5.0)
+         ! range-limit between log(0.001) and log(5.0)
          if (newalpha .le. 1.6094379124341003 .and. newalpha .ge. -6.907755278982137) alpha = newalpha
 
-         ! mu = mu - eta * dmu
+         newmu = mu - eta * dmu
+
+         ! range-limit to between mu0 - 10 and mu0 + 10
+         if (newmu .le. min(dim, mu0 + 10.0) .and. newmu .ge. max(1.0, mu0 - 10.0)) mu = max(1.0,min(dim, newmu))
 
          ! theta = theta - eta * dtheta
       end do
