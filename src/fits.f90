@@ -7739,11 +7739,12 @@ contains
       real, intent(in) :: i, j, x0, y0, b, w, alpha, beta, t
       real, intent(inout) :: db, dw, dalpha, dbeta, dx0
 
-      real :: y, inner, inner2, gamma, peak, error, sintheta, costheta, dtheta
+      real :: y, inner, inner2, gamma, peak, error, sintheta, costheta, dtheta, betasqrt
 
-      ! trigonometric functions   
-      sintheta = beta / sqrt(1.0 + beta**2)
-      costheta = 1.0 / sqrt(1.0 + beta**2)
+      ! trigonometric functions, assuming theta = arctan(beta)
+      betasqrt = sqrt(1.0 + beta**2)
+      sintheta = beta / betasqrt
+      costheta = 1.0 / betasqrt
 
       ! intermediate variables
       inner = (i - x0)*costheta - (j - y0)*sintheta
@@ -7758,8 +7759,10 @@ contains
       db = db + error
       dw = dw + error * peak
       dalpha = dalpha - error * w * peak * inner2 * gamma
-      dtheta = dtheta + error * 2.0 * gamma * w * peak * inner * ((j - y0)*costheta + (i - x0)*sintheta)
-      dbeta = dtheta * 0.0 ! TO-DO
+   
+      dtheta = 2.0 * gamma * w * peak * inner * ((j - y0)*costheta + (i - x0)*sintheta)      
+      dbeta = dbeta + error * dtheta * ( (j - y0) * ((beta**2)/(betasqrt**3) - costheta) - (i - x0)*beta/(betasqrt**3))
+
       dx0 = dx0 + error * 2.0 * gamma * w * peak * inner * costheta
 
    end function rmse_gradient
