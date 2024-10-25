@@ -7768,12 +7768,12 @@ contains
    end function rmse_gradient
 
    ! find the gradient of the RMS error function with respect to theta, b, w, gamma and mu
-   function gradient(theta, b, w, alpha, mu, db, dw, dalpha, dtheta, dmu, view, mask) result(rmse)
+   function gradient(b, w, alpha, beta, mu, db, dw, dalpha, dbeta, dmu, view, mask) result(rmse)
       use omp_lib
       implicit none
 
-      real(c_float), intent(in) :: theta, b, w, alpha, mu
-      real(c_float), intent(out) :: db, dw, dalpha, dtheta, dmu
+      real(c_float), intent(in) :: b, w, alpha, beta, mu
+      real(c_float), intent(out) :: db, dw, dalpha, dbeta, dmu
       real(c_float), dimension(:,:), intent(in) :: view
       logical(kind=c_bool), dimension(:,:), intent(in) :: mask
 
@@ -7786,7 +7786,7 @@ contains
       db = 0.0
       dw = 0.0
       dalpha = 0.0
-      dtheta = 0.0
+      dbeta = 0.0
       dmu = 0.0
 
       dimx = size(view, 1)
@@ -7800,16 +7800,16 @@ contains
 
       ! use OpenMP to parallelize the loop, reducing the gradients
 
-      !$omp PARALLEL DEFAULT(SHARED) SHARED(view, mask, dimx, dimy, x0, y0, b, w, alpha, theta)&
+      !$omp PARALLEL DEFAULT(SHARED) SHARED(view, mask, dimx, dimy, x0, y0, b, w, alpha, beta)&
       !$omp& PRIVATE(i, j, rotated)&
-      !$omp& REDUCTION(+:count, rmse, db, dw, dalpha, dtheta, dmu)&
+      !$omp& REDUCTION(+:count, rmse, db, dw, dalpha, dbeta, dmu)&
       !$omp& NUM_THREADS(max_threads)
       !$omp DO
       do j = 1, dimy
          do i = 1, dimx
             if (mask(i, j)) then
                ! call an integrated function: rotation + gradients
-               rotated = rmse_gradient(real(i), real(j), x0, y0, theta, b, w, alpha, view(i, j), db, dw, dalpha, dtheta, dmu)
+               rotated = rmse_gradient(real(i), real(j), x0, y0, b, w, alpha, beta, view(i, j), db, dw, dalpha, dbeta, dmu)
 
                rmse = rmse + (rotated - view(i, j))**2
                count = count + 1
@@ -7824,7 +7824,7 @@ contains
          db = db / real(count)
          dw = dw / real(count)
          dalpha = dalpha / real(count)
-         dtheta = dtheta / real(count)
+         dbeta = dbeta / real(count)
          dmu = dmu / real(count)
       end if
    end function gradient
