@@ -7849,9 +7849,8 @@ contains
       b = b0
       w = w0
       alpha = log(gamma0)
-      mu = mu0
-      theta = theta0
-      beta = tan(theta)
+      beta = tan(theta0)
+      mu = mu0            
 
       do iter = 1, max_iter
          rmse = gradient(b, w, alpha, beta, mu, db, dw, dalpha, dbeta, dmu, view, mask)
