@@ -7839,7 +7839,7 @@ contains
       integer(c_int), intent(in) :: max_iter
       real(c_float), intent(in) :: b0, w0, gamma0, mu0, theta0
 
-      real(c_float) :: db, dw, alpha, newalpha, dalpha, dtheta, dmu, newmu
+      real(c_float) :: db, dw, alpha, newalpha, dalpha, beta, dbeta, dmu, newmu
       real(c_float) :: rmse, rmse1
       integer :: iter
       real :: dim
@@ -7851,10 +7851,12 @@ contains
       alpha = log(gamma0)
       mu = mu0
       theta = theta0
+      beta = tan(theta)
 
       do iter = 1, max_iter
-         rmse = gradient(theta, b, w, alpha, mu, db, dw, dalpha, dtheta, dmu, view, mask)
-         print *, 'iter:', iter, 'b:', b, 'w:', w, 'alpha:', alpha, 'gamma:', exp(alpha), 'theta:', theta, 'mu:', mu, 'rmse:', rmse
+         rmse = gradient(b, w, alpha, beta, mu, db, dw, dalpha, dbeta, dmu, view, mask)
+         print *, 'iter:', iter, 'b:', b, 'w:', w, 'alpha:', alpha, 'gamma:', exp(alpha),&
+         & 'beta', beta, 'theta:', atan(beta), 'mu:', mu, 'rmse:', rmse
 
          ! if (abs(db) .lt. tol .and. abs(dw) .lt. tol .and. abs(dgamma) .lt. tol .and. abs(dtheta) .lt. tol .and. abs(dmu) .lt. tol) exit
 
@@ -7875,10 +7877,11 @@ contains
          ! range-limit to between mu0 - 10 and mu0 + 10
          if (newmu .le. min(dim, mu0 + 10.0) .and. newmu .ge. max(1.0, mu0 - 10.0)) mu = max(1.0,min(dim, newmu))
 
-         ! theta = theta - eta * dtheta
+         beta = beta - eta * dbeta
       end do
 
       gamma = exp(alpha)
+      theta = atan(beta)
    end subroutine gradient_descent
 
    function bisect_angle(a, b, b0, w, gamma, mu, view, mask) result(angle)
