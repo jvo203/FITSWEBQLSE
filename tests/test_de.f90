@@ -7,7 +7,7 @@ program main
     integer, parameter :: dim = 10
 
     integer :: seed = 123
-    integer :: pop_size = 10    
+    integer :: pop_size = 20
     real(float) :: min_val(dim), max_val(dim)
     type(Population) :: pop
 
