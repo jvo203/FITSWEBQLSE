@@ -11,11 +11,11 @@ module differential_evolution
 
    type Individual
       real(float), dimension(:), allocatable :: genotype ! the genotype of the individual solution
-      real(float) :: cost ! the cost of the individual solution
+      real(float) :: cost = huge(0.0_float) ! the cost of the individual solution
 
       ! control parameters
-      real(float) :: cr = 0.5_float
-      real(float) :: f = 0.5_float
+      real(float) :: cr = 0.0_float
+      real(float) :: f = 0.0_float
    end type Individual
 
    type :: Population   
@@ -47,7 +47,35 @@ module differential_evolution
 
    end interface
 
-
 contains
+
+   ! initialize the population
+   subroutine init_population(pop, pop_size, dim, seed)
+      type(Population), intent(inout) :: pop
+      integer, intent(in) :: pop_size, dim
+      integer, intent(in) :: seed
+
+      integer :: i
+
+      pop%pop_size = pop_size
+      pop%dim = dim
+
+      call pop%rand%initialize(seed)
+
+      allocate(pop%curr(pop_size))
+      allocate(pop%best(pop_size))
+
+      do i = 1, pop_size
+         allocate(pop%curr(i)%genotype(dim))
+         allocate(pop%best(i)%genotype(dim))
+
+         ! cr: [0, 1)         
+         pop%curr(i)%cr = pop%rand%genrand64_real2()
+
+         ! f: [0.1, 1]
+         pop%curr(i)%f = 0.1_float + 0.9_float*pop%rand%genrand64_real1()
+      end do
+
+   end subroutine init_population
 
 end module differential_evolution
