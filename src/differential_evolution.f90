@@ -54,7 +54,7 @@ contains
       type(Population), intent(inout) :: pop
       integer, intent(in) :: pop_size, dim
       integer, intent(in) :: seed
-      real(float), intent(in) :: min_val, max_val
+      real(float), intent(in) :: min_val(dim), max_val(dim)
 
       integer :: i
 
@@ -74,7 +74,7 @@ contains
          pop%curr(i)%genotype = min_val + (max_val - min_val)*pop%rand%genrand64_real1()
          pop%best(i)%genotype = 0.0_float
 
-         print *, "genotype#", i, pop%curr(i)%genotype
+         print *, "genotype #", i, pop%curr(i)%genotype
 
          ! cr: [0, 1)         
          pop%curr(i)%cr = pop%rand%genrand64_real2()
