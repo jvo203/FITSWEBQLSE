@@ -1,4 +1,4 @@
-.DEFAULT_GOAL := starlink
+.DEFAULT_GOAL := de
 
 # GCC FORTRAN
 FORT = gfortran
@@ -17,6 +17,10 @@ intel:
 
 #clean:
 #rm -f intel_fixed_array
+
+# differential evolution
+de:
+	$(FORT) $(FLAGS) -fopenmp -o test_de ../src/mt19937-64.f90 ../src/differential_evolution.f90 test_de.f90
 
 INC = `pkg-config --cflags cfitsio` `pkg-config --cflags wcslib`
 LIBS = `pkg-config --libs cfitsio` `pkg-config --libs wcslib`
