@@ -1,7 +1,6 @@
 module differential_evolution
    use,intrinsic :: iso_fortran_env
-   use mt19937_64
-   use omp_lib
+   use mt19937_64   
 
    implicit none
 
@@ -29,8 +28,24 @@ module differential_evolution
       integer :: num_cost_evals = 0 ! number of cost evaluations
       integer :: dim = 0 ! dimension of the problem
 
-      type(mt19937) :: rand ! a random number generator      
+      type(mt19937) :: rand ! a random number generator
+
+      ! a user-supplied procedure
+      ! procedure(cost_func), pointer, nopass :: user_cost => null() ! a fitness function
    end type Population
+
+   abstract interface
+
+      subroutine cost_func(pop, x, cost)
+         import :: float, Population
+         implicit none
+
+         type(Population), intent(inout) :: pop ! the population
+         real(float), dimension(:), intent(in) :: x ! a chromosome
+         real(float), intent(out) :: cost ! a fitness value
+      end subroutine cost_func
+
+   end interface
 
 
 contains
