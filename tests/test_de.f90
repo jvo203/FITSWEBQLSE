@@ -22,6 +22,8 @@ program main
 
     contains
     ! Rosenbrock function
+    ! #Reference
+    ! * [Rosenbrock function](http://en.wikipedia.org/wiki/Rosenbrock_function)
     function rosenbrock(x) result(cost)
         real(float), dimension(:), intent(in) :: x
         real(float) :: cost        
