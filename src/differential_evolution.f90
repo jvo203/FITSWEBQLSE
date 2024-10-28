@@ -4,12 +4,12 @@ module differential_evolution
 
    implicit none
 
-   private
+   public
 
    integer,parameter :: float = real32  ! single precision real kind [4 bytes].
    ! integer,parameter :: float = real64  ! double precision real kind [8 bytes].
 
-   type, public Individual
+   type Individual
       real(float), dimension(:), allocatable :: genotype ! the genotype of the individual solution
       real(float) :: cost ! the cost of the individual solution
 
@@ -18,7 +18,7 @@ module differential_evolution
       real(float) :: f = 0.5_float
    end type Individual
 
-   type, public :: Population
+   type :: Population   
       type(Individual), dimension(:), allocatable :: curr, best ! current and best individuals      
 
       integer :: pop_size = 0 ! population size
