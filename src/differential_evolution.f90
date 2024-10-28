@@ -9,7 +9,7 @@ module differential_evolution
    integer,parameter :: float = real32  ! single precision real kind [4 bytes].
    ! integer,parameter :: float = real64  ! double precision real kind [8 bytes].
 
-   type Individual
+   type, public Individual
       real(float), dimension(:), allocatable :: genotype ! the genotype of the individual solution
       real(float) :: cost ! the cost of the individual solution
 
