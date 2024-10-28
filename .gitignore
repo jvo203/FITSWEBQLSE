@@ -15,6 +15,7 @@
 /tests/test_wcssub
 /tests/test_wcsast
 /tests/test_starlink
+/tests/test_de
 /tests/*.dSYM
 
 # optimization reports
