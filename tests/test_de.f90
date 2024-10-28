@@ -4,7 +4,7 @@ program main
     implicit none
 
     ! make dim a parameter
-    integer, parameter :: dim = 10
+    integer, parameter :: dim = 2
 
     integer :: seed = 123
     integer :: pop_size = 20
@@ -19,4 +19,17 @@ program main
 
     ! initialize the population
     call init_population(pop, pop_size, dim, seed, min_val, max_val)
+
+    contains
+    ! Rosenbrock function
+    function rosenbrock(x) result(cost)
+        real(float), dimension(:), intent(in) :: x
+        real(float) :: cost        
+
+        real(float),parameter :: one     = 1.0_float
+        real(float),parameter :: hundred = 100.0_float
+
+        cost = (one-x(1))**2 + hundred*(x(2)-x(1)**2)**2
+    end function rosenbrock
+    
 end program main
