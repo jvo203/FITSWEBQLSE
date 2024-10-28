@@ -27,7 +27,9 @@ module differential_evolution
 
       real(float) :: best_cost = huge(0.0_float) ! cost of the best individual
       integer :: num_cost_evals = 0 ! number of cost evaluations
-      integer :: dim = 0 ! dimension of the problem      
+      integer :: dim = 0 ! dimension of the problem
+
+      type(mt19937) :: rand ! a random number generator      
    end type Population
 
 
