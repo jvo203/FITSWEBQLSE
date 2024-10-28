@@ -50,10 +50,11 @@ module differential_evolution
 contains
 
    ! initialize the population
-   subroutine init_population(pop, pop_size, dim, seed)
+   subroutine init_population(pop, pop_size, dim, seed, min_val, max_val)
       type(Population), intent(inout) :: pop
       integer, intent(in) :: pop_size, dim
       integer, intent(in) :: seed
+      real(float), intent(in) :: min_val, max_val
 
       integer :: i
 
@@ -68,6 +69,12 @@ contains
       do i = 1, pop_size
          allocate(pop%curr(i)%genotype(dim))
          allocate(pop%best(i)%genotype(dim))
+
+         ! initialize the genotype to [min_val, max_val]
+         pop%curr(i)%genotype = min_val + (max_val - min_val)*pop%rand%genrand64_real1()
+         pop%best(i)%genotype = 0.0_float
+
+         print *, "genotype#", i, pop%curr(i)%genotype
 
          ! cr: [0, 1)         
          pop%curr(i)%cr = pop%rand%genrand64_real2()
