@@ -61,6 +61,7 @@ contains
       do i = 1, pop%pop_size
          ! evaluate the current genotype
          cost = rosenbrock(pop%curr(i)%genotype)
+         pop%curr(i)%cost = cost
 
          ! update the best genotype
          if (cost .lt. pop%best_cost) then
@@ -69,6 +70,8 @@ contains
             pop%best_idx = i
          end if
       end do
+
+      call update_positions(pop)
 
    end subroutine evaluate_population
 
