@@ -30,7 +30,7 @@ program main
    call init_population(pop, pop_size, dim, seed(n), min_val, max_val)
 
    ! evaluate the population for a number of generations
-   do i = 1, 1
+   do i = 1, 100
       call evaluate_population(pop)
 
       ! print the best cost

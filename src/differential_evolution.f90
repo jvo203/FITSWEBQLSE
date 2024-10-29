@@ -148,8 +148,9 @@ contains
       type(Population), intent(inout) :: pop
 
       real(float) :: cost
-      integer :: pop_size, dim, forced_mutation_dim, i
+      integer :: pop_size, dim, forced_mutation_dim
       integer :: idx1, idx2, idx3
+      integer :: i, d
 
       real(float), dimension(:), pointer :: curr_pos, best_pos => null()
       real(float), dimension(:), pointer :: best1_pos, best2_pos, best3_pos => null()
@@ -171,7 +172,7 @@ contains
             if (idx3 .ne. idx1 .and. idx3 .ne. idx2) exit
          end do
 
-         print *, i, idx1, idx2, idx3
+         ! print *, i, idx1, idx2, idx3
 
          if (pop%rand%genrand64_real2() .lt. cr_change_probability) then
             pop%curr(i)%cr = pop%rand%genrand64_real2()
@@ -189,7 +190,15 @@ contains
          best3_pos => pop%best(idx3)%genotype
 
          forced_mutation_dim = modulo(int(pop%rand%genrand64_int64(), kind=4), dim) + 1
-         print *, "dim:", dim, "forced_mutation_dim:", forced_mutation_dim
+         ! print *, "dim:", dim, "forced_mutation_dim:", forced_mutation_dim
+
+         do d = 1, dim
+            if (pop%rand%genrand64_real2() .lt. pop%curr(i)%cr .or. d .eq. forced_mutation_dim) then
+               curr_pos(d) = best1_pos(d) + pop%curr(i)%f*(best2_pos(d) - best3_pos(d))
+            else
+               curr_pos(d) = best_pos(d)
+            end if
+         end do
 
       end do
 
