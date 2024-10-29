@@ -191,8 +191,7 @@ contains
          forced_mutation_dim = modulo(int(pop%rand%genrand64_int64(), kind=4), dim) + 1
 
          ! This implements the DE/rand/1/bin, the most widely used algorithm.
-         ! See "A Comparative Study of Differential Evolution Variants for
-         ! Global Optimization (2006)".
+         ! See "A Comparative Study of Differential Evolution Variants for Global Optimization (2006)".
          do d = 1, dim
             if (pop%rand%genrand64_real2() .lt. pop%curr(i)%cr .or. d .eq. forced_mutation_dim) then
                curr_pos(d) = best1_pos(d) + pop%curr(i)%f*(best2_pos(d) - best3_pos(d))
