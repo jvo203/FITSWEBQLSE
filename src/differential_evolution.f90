@@ -1,6 +1,6 @@
 module differential_evolution
    use,intrinsic :: iso_fortran_env
-   use mt19937_64   
+   use mt19937_64
 
    implicit none
 
@@ -18,8 +18,8 @@ module differential_evolution
       real(float) :: f = 0.0_float
    end type Individual
 
-   type :: Population   
-      type(Individual), dimension(:), allocatable :: curr, best ! current and best individuals      
+   type :: Population
+      type(Individual), dimension(:), allocatable :: curr, best ! current and best individuals
 
       integer :: pop_size = 0 ! population size
       integer :: best_idx = 0 ! index of the best individual
@@ -76,7 +76,7 @@ contains
 
          print *, "genotype #", i, pop%curr(i)%genotype
 
-         ! cr: [0, 1)         
+         ! cr: [0, 1)
          pop%curr(i)%cr = pop%rand%genrand64_real2()
 
          ! f: [0.1, 1]
@@ -84,5 +84,17 @@ contains
       end do
 
    end subroutine init_population
+
+   subroutine update_population(pop)
+      type(Population), intent(inout) :: pop
+
+      real(float) :: cost
+      integer :: i
+
+      do i = 1, pop%pop_size
+
+      end do
+
+   end subroutine update_population
 
 end module differential_evolution

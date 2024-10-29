@@ -35,6 +35,8 @@ program main
 
       ! print the best cost
       print *, "i:", i, "best cost:", pop%best_cost, "best idx:", pop%best_idx, "best genotype:", pop%best(pop%best_idx)%genotype
+
+      call update_population(pop)
    end do
 
 contains
@@ -70,8 +72,6 @@ contains
             pop%best_idx = i
          end if
       end do
-
-      call update_positions(pop)
 
    end subroutine evaluate_population
 
