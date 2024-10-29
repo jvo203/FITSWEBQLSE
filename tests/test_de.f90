@@ -4,7 +4,7 @@ program main
    implicit none
 
    ! make dim a parameter
-   integer, parameter :: dim = 2
+   integer, parameter :: dim = 5
 
    integer, allocatable :: seed(:)
 
@@ -44,6 +44,14 @@ program main
 
 contains
 
+   ! a sum of squares function
+   function sum_of_squares(x) result(cost)
+      real(float), dimension(:), intent(in) :: x
+      real(float) :: cost
+
+      cost = sum(x**2)
+   end function sum_of_squares
+
    ! Rosenbrock function
    ! #Reference
    ! * [Rosenbrock function](http://en.wikipedia.org/wiki/Rosenbrock_function)
@@ -65,7 +73,8 @@ contains
 
       do i = 1, pop%pop_size
          ! evaluate the current genotype
-         cost = rosenbrock(pop%curr(i)%genotype)
+         ! cost = rosenbrock(pop%curr(i)%genotype)
+         cost = sum_of_squares(pop%curr(i)%genotype)
          pop%curr(i)%cost = cost
 
          ! update the best genotype
