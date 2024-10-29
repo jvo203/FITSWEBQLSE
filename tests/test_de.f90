@@ -24,20 +24,21 @@ program main
    allocate(seed(n))
    call random_seed(get=seed)
 
-   print *, "seed:", seed
-
    ! initialize the population
    call init_population(pop, pop_size, dim, seed(n), min_val, max_val)
 
    ! evaluate the population for a number of generations
-   do i = 1, 100
+   do i = 1, 1000
       call evaluate_population(pop)
 
       ! print the best cost
-      print *, "i:", i, "best cost:", pop%best_cost, "best idx:", pop%best_idx, "best genotype:", pop%best(pop%best_idx)%genotype
+      ! print *, "i:", i, "best cost:", pop%best_cost, "best idx:", pop%best_idx, "best genotype:", pop%best(pop%best_idx)%genotype
 
       call update_population(pop)
    end do
+
+   ! print the final best solution
+   print *, "best cost:", pop%best_cost, "best genotype:", pop%best(pop%best_idx)%genotype
 
    call finalize_population(pop)
 
