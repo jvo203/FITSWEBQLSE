@@ -29,6 +29,14 @@ program main
    ! initialize the population
    call init_population(pop, pop_size, dim, seed(n), min_val, max_val)
 
+   ! evaluate the population 100 times
+   do i = 1, 10
+      call evaluate_population(pop)
+
+      ! print the best cost
+      print *, "i:", i, "best cost:", pop%best_cost, "best idx:", pop%best_idx
+   end do
+
 contains
 
    ! Rosenbrock function
@@ -43,5 +51,24 @@ contains
 
       cost = (one-x(1))**2 + hundred*(x(2)-x(1)**2)**2
    end function rosenbrock
+
+   subroutine evaluate_population(pop)
+      type(Population), intent(inout) :: pop
+
+      real(float) :: cost
+      integer :: i
+
+      do i = 1, pop%pop_size
+         ! evaluate the current genotype
+         cost = rosenbrock(pop%curr(i)%genotype)
+
+         ! update the best genotype
+         if (cost < pop%best_cost) then
+            pop%best_cost = cost
+            pop%best_idx = i
+         end if
+      end do
+
+   end subroutine evaluate_population
 
 end program main
