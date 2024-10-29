@@ -10,8 +10,11 @@ module differential_evolution
    integer,parameter :: float = real32  ! single precision real kind [4 bytes].
    ! integer,parameter :: float = real64  ! double precision real kind [8 bytes].
 
+   real(float), parameter :: cr_change_probability = 0.1_float
+   real(float), parameter :: f_change_probability = 0.1_float
+
    type Individual
-      real(float), dimension(:), pointer :: genotype ! the genotype of the individual solution
+      real(float), dimension(:), pointer :: genotype => null() ! the genotype of the individual solution
       real(float) :: cost = huge(0.0_float) ! the cost of the individual solution
 
       ! control parameters
@@ -107,22 +110,22 @@ contains
       integer(int32) :: idx1, idx2, idx3
 
       ! make curr and best pointers
-      real(float), dimension(:), pointer :: curr, best
+      real(float), dimension(:), pointer :: curr, best => null()
 
       dim = pop%dim
       pop_size = pop%pop_size
 
       do i = 1, pop_size
          ! sample three different individuals; modulo works with int32 and returns non-negative values
-         idx1 = modulo(int(pop%rand%genrand64_int64(), int32), pop_size) + 1
+         idx1 = modulo(int(pop%rand%genrand64_int64(), kind=4), pop_size) + 1
 
          do
-            idx2 = modulo(int(pop%rand%genrand64_int64(), int32), pop_size) + 1
+            idx2 = modulo(int(pop%rand%genrand64_int64(), kind=4), pop_size) + 1
             if (idx2 .ne. idx1) exit
          end do
 
          do
-            idx3 = modulo(int(pop%rand%genrand64_int64(), int32), pop_size) + 1
+            idx3 = modulo(int(pop%rand%genrand64_int64(), kind=4), pop_size) + 1
             if (idx3 .ne. idx1 .and. idx3 .ne. idx2) exit
          end do
 
