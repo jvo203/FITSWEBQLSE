@@ -96,16 +96,16 @@ contains
       pop_size = pop%pop_size
 
       do i = 1, pop_size
-         ! sample three different individuals
-         idx1 = int(pop%rand%genrand64_int64(), int32) ! % pop_size + 1
+         ! sample three different individuals; modulo works with int32 and returns non-negative values
+         idx1 = modulo(int(pop%rand%genrand64_int64(), int32), pop_size) + 1
 
          do
-            idx2 = int(pop%rand%genrand64_int64(), int32) ! % pop_size + 1
+            idx2 = modulo(int(pop%rand%genrand64_int64(), int32), pop_size) + 1
             if (idx2 .ne. idx1) exit
          end do
 
          do
-            idx3 = int(pop%rand%genrand64_int64(), int32) ! % pop_size + 1
+            idx3 = modulo(int(pop%rand%genrand64_int64(), int32), pop_size) + 1
             if (idx3 .ne. idx1 .and. idx3 .ne. idx2) exit
          end do
 
