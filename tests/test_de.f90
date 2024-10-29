@@ -92,17 +92,22 @@ contains
       real(float) :: cost
       integer :: i
 
+      !$omp parallel shared(pop) private(i, cost)
+      !$omp do
       do i = 1, pop%pop_size
          ! evaluate the current genotype
          ! cost = rosenbrock(pop%curr(i)%genotype)
          ! cost = sum_of_squares(pop%curr(i)%genotype)
          cost = rastrigin(pop%curr(i)%genotype)
-
          pop%curr(i)%cost = cost
 
+         !$omp critical
          ! update the best genotype
          call update_best(pop, cost, i)
+         !$omp end critical
       end do
+      !$omp end do
+      !$omp end parallel
 
    end subroutine evaluate_population
 
