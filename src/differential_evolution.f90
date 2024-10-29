@@ -86,6 +86,19 @@ contains
 
    end subroutine init_population
 
+   subroutine update_best(pop, cost, idx)
+      type(Population), intent(inout) :: pop
+      real(float), intent(in) :: cost
+      integer, intent(in) :: idx
+
+      if (cost .lt. pop%best_cost) then
+         pop%best_cost = cost
+         pop%best_idx = idx
+         pop%best(idx)%genotype = pop%curr(idx)%genotype
+      end if
+
+   end subroutine update_best
+
    subroutine update_population(pop)
       type(Population), intent(inout) :: pop
 

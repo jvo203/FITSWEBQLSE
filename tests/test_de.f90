@@ -66,11 +66,7 @@ contains
          pop%curr(i)%cost = cost
 
          ! update the best genotype
-         if (cost .lt. pop%best_cost) then
-            pop%best(i)%genotype = pop%curr(i)%genotype
-            pop%best_cost = cost
-            pop%best_idx = i
-         end if
+         call update_best(pop, cost, i)
       end do
 
    end subroutine evaluate_population
