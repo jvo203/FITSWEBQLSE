@@ -14,12 +14,16 @@ module differential_evolution
    real(float), parameter :: f_change_probability = 0.1_float
 
    type Individual
-      real(float), dimension(:), pointer :: genotype => null() ! the genotype of the individual solution
+      real(float), dimension(:), pointer :: genotype ! the genotype of the individual solution
       real(float) :: cost = huge(0.0_float) ! the cost of the individual solution
 
       ! control parameters
       real(float) :: cr = 0.0_float
       real(float) :: f = 0.0_float
+
+   contains
+      ! a finalizer to release the pointer memory
+      final :: finalize_individual
    end type Individual
 
    type :: Population
@@ -34,8 +38,9 @@ module differential_evolution
 
       type(mt19937) :: rand ! a random number generator
 
-      ! a user-supplied procedure
-      ! procedure(cost_func), pointer, nopass :: user_cost => null() ! a fitness function
+   contains
+      ! a finalizer to release the individuals
+      final :: finalize_population
    end type Population
 
    abstract interface
@@ -52,6 +57,39 @@ module differential_evolution
    end interface
 
 contains
+
+   subroutine finalize_individual(ind)
+      type(Individual), intent(inout) :: ind
+
+      if (associated(ind%genotype)) then
+         deallocate(ind%genotype)
+         print *, "deallocated genotype"
+      end if
+
+   end subroutine finalize_individual
+
+   subroutine finalize_population(pop)
+      type(Population), intent(inout) :: pop
+
+      integer :: i
+
+      if (allocated(pop%curr)) then
+         do i = 1, pop%pop_size
+            call finalize_individual(pop%curr(i))
+         end do
+         deallocate(pop%curr)
+         print *, "deallocated curr"
+      end if
+
+      if (allocated(pop%best)) then
+         do i = 1, pop%pop_size
+            call finalize_individual(pop%best(i))
+         end do
+         deallocate(pop%best)
+         print *, "deallocated best"
+      end if
+
+   end subroutine finalize_population
 
    ! initialize the population
    subroutine init_population(pop, pop_size, dim, seed, min_val, max_val)
@@ -106,11 +144,11 @@ contains
       type(Population), intent(inout) :: pop
 
       real(float) :: cost
-      integer(int32) :: pop_size, dim, i
-      integer(int32) :: idx1, idx2, idx3
+      integer :: pop_size, dim, i
+      integer :: idx1, idx2, idx3
 
-      ! make curr and best pointers
-      real(float), dimension(:), pointer :: curr, best => null()
+      real(float), dimension(:), pointer :: curr_pos, best_pos => null()
+      real(float), dimension(:), pointer :: best1_pos, best2_pos, best3_pos => null()
 
       dim = pop%dim
       pop_size = pop%pop_size
@@ -131,8 +169,21 @@ contains
 
          print *, i, idx1, idx2, idx3
 
-         curr => pop%curr(i)%genotype
-         best => pop%best(i)%genotype
+         if (pop%rand%genrand64_real2() .lt. cr_change_probability) then
+            pop%curr(i)%cr = pop%rand%genrand64_real2()
+         end if
+
+         if (pop%rand%genrand64_real2() .lt. f_change_probability) then
+            pop%curr(i)%f = 0.1_float + 0.9_float*pop%rand%genrand64_real1()
+         end if
+
+         curr_pos => pop%curr(i)%genotype
+         best_pos => pop%best(i)%genotype
+
+         best1_pos => pop%best(idx1)%genotype
+         best2_pos => pop%best(idx2)%genotype
+         best3_pos => pop%best(idx3)%genotype
+
       end do
 
    end subroutine update_population

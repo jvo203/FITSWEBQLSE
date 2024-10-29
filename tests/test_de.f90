@@ -39,6 +39,8 @@ program main
       call update_population(pop)
    end do
 
+   call finalize_population(pop)
+
 contains
 
    ! Rosenbrock function
