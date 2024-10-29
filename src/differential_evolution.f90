@@ -77,16 +77,20 @@ contains
          do i = 1, pop%pop_size
             call finalize_individual(pop%curr(i))
          end do
+
          deallocate(pop%curr)
-         print *, "deallocated curr"
+
+         print *, "deallocated pop%curr"
       end if
 
       if (allocated(pop%best)) then
          do i = 1, pop%pop_size
             call finalize_individual(pop%best(i))
          end do
+
          deallocate(pop%best)
-         print *, "deallocated best"
+
+         print *, "deallocated pop%best"
       end if
 
    end subroutine finalize_population
