@@ -173,8 +173,6 @@ contains
             if (idx3 .ne. idx1 .and. idx3 .ne. idx2) exit
          end do
 
-         ! print *, i, idx1, idx2, idx3
-
          if (pop%rand%genrand64_real2() .lt. cr_change_probability) then
             pop%curr(i)%cr = pop%rand%genrand64_real2()
          end if
@@ -191,7 +189,6 @@ contains
          best3_pos => pop%best(idx3)%genotype
 
          forced_mutation_dim = modulo(int(pop%rand%genrand64_int64(), kind=4), dim) + 1
-         ! print *, "dim:", dim, "forced_mutation_dim:", forced_mutation_dim
 
          do d = 1, dim
             if (pop%rand%genrand64_real2() .lt. pop%curr(i)%cr .or. d .eq. forced_mutation_dim) then
