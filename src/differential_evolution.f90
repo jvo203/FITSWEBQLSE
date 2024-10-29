@@ -1,6 +1,7 @@
 module differential_evolution
    use,intrinsic :: iso_fortran_env
    use mt19937_64
+   use omp_lib
 
    implicit none
 
@@ -89,10 +90,26 @@ contains
       type(Population), intent(inout) :: pop
 
       real(float) :: cost
-      integer :: i
+      integer(int32) :: pop_size, dim, i
+      integer(int32) :: idx1, idx2, idx3
 
-      do i = 1, pop%pop_size
+      pop_size = pop%pop_size
 
+      do i = 1, pop_size
+         ! sample three different individuals
+         idx1 = int(pop%rand%genrand64_int64(), int32) ! % pop_size + 1
+
+         do
+            idx2 = int(pop%rand%genrand64_int64(), int32) ! % pop_size + 1
+            if (idx2 .ne. idx1) exit
+         end do
+
+         do
+            idx3 = int(pop%rand%genrand64_int64(), int32) ! % pop_size + 1
+            if (idx3 .ne. idx1 .and. idx3 .ne. idx2) exit
+         end do
+
+         print *, i, idx1, idx2, idx3
       end do
 
    end subroutine update_population
