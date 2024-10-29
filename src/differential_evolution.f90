@@ -137,7 +137,7 @@ contains
       real(float), intent(in) :: cost
       integer, intent(in) :: idx
 
-      if (cost .le. pop%best_cost) then
+      if (cost .lt. pop%best_cost) then
          pop%best_cost = cost
          pop%best_idx = idx
          pop%best(idx)%genotype = pop%curr(idx)%genotype
