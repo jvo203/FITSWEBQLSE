@@ -153,8 +153,8 @@ contains
       integer :: idx1, idx2, idx3
       integer :: i, d
 
-      real(float), dimension(:), pointer :: curr_pos, best_pos => null()
-      real(float), dimension(:), pointer :: best1_pos, best2_pos, best3_pos => null()
+      real(float), dimension(:), pointer :: curr_sol, best_sol => null()
+      real(float), dimension(:), pointer :: best1_sol, best2_sol, best3_sol => null()
 
       dim = pop%dim
       pop_size = pop%pop_size
@@ -181,12 +181,12 @@ contains
             pop%curr(i)%f = 0.1_float + 0.9_float*pop%rand%genrand64_real1()
          end if
 
-         curr_pos => pop%curr(i)%genotype
-         best_pos => pop%best(i)%genotype
+         curr_sol => pop%curr(i)%genotype
+         best_sol => pop%best(i)%genotype
 
-         best1_pos => pop%best(idx1)%genotype
-         best2_pos => pop%best(idx2)%genotype
-         best3_pos => pop%best(idx3)%genotype
+         best1_sol => pop%best(idx1)%genotype
+         best2_sol => pop%best(idx2)%genotype
+         best3_sol => pop%best(idx3)%genotype
 
          forced_mutation_dim = modulo(int(pop%rand%genrand64_int64(), kind=4), dim) + 1
 
@@ -194,9 +194,9 @@ contains
          ! See "A Comparative Study of Differential Evolution Variants for Global Optimization (2006)".
          do d = 1, dim
             if (pop%rand%genrand64_real2() .lt. pop%curr(i)%cr .or. d .eq. forced_mutation_dim) then
-               curr_pos(d) = best1_pos(d) + pop%curr(i)%f*(best2_pos(d) - best3_pos(d))
+               curr_sol(d) = best1_sol(d) + pop%curr(i)%f*(best2_sol(d) - best3_sol(d))
             else
-               curr_pos(d) = best_pos(d)
+               curr_sol(d) = best_sol(d)
             end if
          end do
 
