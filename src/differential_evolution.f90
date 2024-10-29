@@ -63,6 +63,7 @@ contains
 
       if (associated(ind%genotype)) then
          deallocate(ind%genotype)
+         nullify(ind%genotype)
          ! print *, "deallocated genotype"
       end if
 
