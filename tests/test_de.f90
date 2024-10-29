@@ -34,7 +34,7 @@ program main
       call evaluate_population(pop)
 
       ! print the best cost
-      print *, "i:", i, "best cost:", pop%best_cost, "best idx:", pop%best_idx
+      print *, "i:", i, "best cost:", pop%best_cost, "best idx:", pop%best_idx, "best genotype:", pop%best(pop%best_idx)%genotype
    end do
 
 contains
@@ -63,7 +63,8 @@ contains
          cost = rosenbrock(pop%curr(i)%genotype)
 
          ! update the best genotype
-         if (cost < pop%best_cost) then
+         if (cost .lt. pop%best_cost) then
+            pop%best(i)%genotype = pop%curr(i)%genotype
             pop%best_cost = cost
             pop%best_idx = i
          end if
