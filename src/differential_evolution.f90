@@ -63,7 +63,7 @@ contains
 
       if (associated(ind%genotype)) then
          deallocate(ind%genotype)
-         print *, "deallocated genotype"
+         ! print *, "deallocated genotype"
       end if
 
    end subroutine finalize_individual
@@ -80,7 +80,7 @@ contains
 
          deallocate(pop%curr)
 
-         print *, "deallocated pop%curr"
+         ! print *, "deallocated pop%curr"
       end if
 
       if (allocated(pop%best)) then
@@ -90,7 +90,7 @@ contains
 
          deallocate(pop%best)
 
-         print *, "deallocated pop%best"
+         ! print *, "deallocated pop%best"
       end if
 
    end subroutine finalize_population
@@ -148,7 +148,7 @@ contains
       type(Population), intent(inout) :: pop
 
       real(float) :: cost
-      integer :: pop_size, dim, i
+      integer :: pop_size, dim, forced_mutation_dim, i
       integer :: idx1, idx2, idx3
 
       real(float), dimension(:), pointer :: curr_pos, best_pos => null()
@@ -187,6 +187,9 @@ contains
          best1_pos => pop%best(idx1)%genotype
          best2_pos => pop%best(idx2)%genotype
          best3_pos => pop%best(idx3)%genotype
+
+         forced_mutation_dim = modulo(int(pop%rand%genrand64_int64(), kind=4), dim) + 1
+         print *, "dim:", dim, "forced_mutation_dim:", forced_mutation_dim
 
       end do
 
