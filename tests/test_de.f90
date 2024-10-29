@@ -4,7 +4,7 @@ program main
    implicit none
 
    ! make dim a parameter
-   integer, parameter :: dim = 2
+   integer, parameter :: dim = 10
 
    integer, allocatable :: seed(:)
 
@@ -66,9 +66,10 @@ contains
       real(float), parameter :: two_pi = 8.0*atan(1.0)
       integer :: i
 
-      cost = 0.0
+      cost = 10.0 * size(x)
+
       do i = 1, size(x)
-         cost = cost + x(i)**2 - 10.0*cos(two_pi*x(i)) + 10.0
+         cost = cost + x(i)**2 - 10.0*cos(two_pi*x(i))
       end do
    end function rastrigin
 
