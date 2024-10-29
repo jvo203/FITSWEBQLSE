@@ -160,8 +160,11 @@ contains
       pop_size = pop%pop_size
 
       do i = 1, pop_size
-         ! sample three different individuals; modulo works with int32 and returns non-negative values
-         idx1 = modulo(int(pop%rand%genrand64_int64(), kind=4), pop_size) + 1
+         ! sample three distinct individuals, different from i; modulo works with int32 and returns non-negative values
+         do
+            idx1 = modulo(int(pop%rand%genrand64_int64(), kind=4), pop_size) + 1
+            if (idx1 .ne. i) exit
+         end do
 
          do
             idx2 = modulo(int(pop%rand%genrand64_int64(), kind=4), pop_size) + 1
