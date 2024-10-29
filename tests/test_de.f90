@@ -4,7 +4,7 @@ program main
    implicit none
 
    ! make dim a parameter
-   integer, parameter :: dim = 5
+   integer, parameter :: dim = 2
 
    integer, allocatable :: seed(:)
 
@@ -15,8 +15,11 @@ program main
    integer :: i, n
 
    ! set the min and max values for each dimension to [-10, 10]
-   min_val(:) = -10.0
-   max_val(:) = 10.0
+   !min_val(:) = -10.0
+   !max_val(:) = 10.0
+
+   min_val(:) = -5.12
+   max_val(:) = 5.12
 
    ! randomize the integer seed
    call random_seed(size = n)
@@ -52,6 +55,23 @@ contains
       cost = sum(x**2)
    end function sum_of_squares
 
+
+   ! The Rastrigin function is a non-convex function used as a
+   ! performance test problem for optimization algorithms.
+   ! see https://en.wikipedia.org/wiki/Rastrigin_function
+   function rastrigin(x) result(cost)
+      real(float), dimension(:), intent(in) :: x
+      real(float) :: cost
+
+      real(float), parameter :: two_pi = 8.0*atan(1.0)
+      integer :: i
+
+      cost = 0.0
+      do i = 1, size(x)
+         cost = cost + x(i)**2 - 10.0*cos(two_pi*x(i)) + 10.0
+      end do
+   end function rastrigin
+
    ! Rosenbrock function
    ! #Reference
    ! * [Rosenbrock function](http://en.wikipedia.org/wiki/Rosenbrock_function)
@@ -74,7 +94,9 @@ contains
       do i = 1, pop%pop_size
          ! evaluate the current genotype
          ! cost = rosenbrock(pop%curr(i)%genotype)
-         cost = sum_of_squares(pop%curr(i)%genotype)
+         ! cost = sum_of_squares(pop%curr(i)%genotype)
+         cost = rastrigin(pop%curr(i)%genotype)
+
          pop%curr(i)%cost = cost
 
          ! update the best genotype
