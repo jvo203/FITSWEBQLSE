@@ -101,8 +101,12 @@ contains
          cost = rastrigin(pop%curr(i)%genotype)
          pop%curr(i)%cost = cost
 
+         !if (cost .le. pop%best(i)%cost) then
+         !   pop%best(i)%cost = cost
+         !   pop%best(i)%genotype = pop%curr(i)%genotype
+         !end if
+
          !$omp critical
-         ! update the best genotype
          call update_best(pop, cost, i)
          !$omp end critical
       end do
