@@ -11,7 +11,7 @@ module differential_evolution
    ! integer,parameter :: float = real64  ! double precision real kind [8 bytes].
 
    type Individual
-      real(float), dimension(:), allocatable :: genotype ! the genotype of the individual solution
+      real(float), dimension(:), pointer :: genotype ! the genotype of the individual solution
       real(float) :: cost = huge(0.0_float) ! the cost of the individual solution
 
       ! control parameters
@@ -106,6 +106,10 @@ contains
       integer(int32) :: pop_size, dim, i
       integer(int32) :: idx1, idx2, idx3
 
+      ! make curr and best pointers
+      real(float), dimension(:), pointer :: curr, best
+
+      dim = pop%dim
       pop_size = pop%pop_size
 
       do i = 1, pop_size
@@ -123,6 +127,9 @@ contains
          end do
 
          print *, i, idx1, idx2, idx3
+
+         curr => pop%curr(i)%genotype
+         best => pop%best(i)%genotype
       end do
 
    end subroutine update_population
