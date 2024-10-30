@@ -12,7 +12,7 @@ program main
    real(float) :: min_val(dim), max_val(dim)
    type(Population) :: pop
 
-   integer :: i, n
+   integer :: iter, n
 
    ! set the min and max values for each dimension to [-10, 10]
    !min_val(:) = -10.0
@@ -31,11 +31,11 @@ program main
    call init_population(pop, pop_size, dim, seed(n), min_val, max_val)
 
    ! evaluate the population for a number of generations
-   do i = 1, 1000
+   do iter = 1, 1000
       call evaluate_population(pop)
 
       ! print the best cost
-      print *, "i:", i, "best cost:", pop%best_cost, "best idx:", pop%best_idx, "best genotype:", pop%best(pop%best_idx)%genotype
+      print *, "iter:", iter, "best cost:", pop%best_cost, "best idx:", pop%best_idx, "best genotype:", pop%best(pop%best_idx)%genotype
 
       call update_population(pop)
    end do
