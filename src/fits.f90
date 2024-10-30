@@ -7659,6 +7659,28 @@ contains
       return
    end function correlation
 
+   ! a point (i, j) rotated by a theta angle around the point (x0, y0)
+   pure function rmse_derive(i, j, x0, y0, b, w, gamma, theta, t) result(dtheta)
+      implicit none
+
+      real, intent(in) :: i, j, x0, y0, b, w, gamma, theta, t      
+
+      real :: y, inner, inner2, peak, error, dtheta
+
+      ! intermediate variables
+      inner = (i - x0)*cos(theta) - (j - y0)*sin(theta)
+      inner2 = inner**2      
+      peak = exp(-gamma * inner2)
+
+      ! output, error
+      y = b + w * peak
+      error = y - t
+
+      ! derivative
+      dtheta = dtheta + error * 2.0 * gamma * w * peak * inner * ((j - y0)*cos(theta) + (i - x0)*sin(theta))      
+
+   end function rmse_derive
+
    ! find the first derivative of the correlation function with respect to the angle theta
    function derivative_theta(theta, b, w, gamma, mu, view, mask) result(deriv)
       use omp_lib
@@ -7693,7 +7715,6 @@ contains
             if (mask(i, j)) then
                call rotate(real(i), real(j), x0, y0, theta, qx, qy)
                call rotate_derive(real(i), real(j), x0, y0, theta, dqx, dqy)
-
                rotated_derive = gaussian_derive(qx, b, w, gamma, mu)
                deriv = deriv + view(i, j) * rotated_derive * dqx
             end if
@@ -7926,12 +7947,13 @@ contains
       angle = 0.5*(angle1 + angle2)
    end function bisect_angle
 
-   function find_angle(b, w, gamma, mu, view, mask) result(angle_max)
+   function find_angle(b, w, gamma, mu, view, mask, angle1, angle2) result(angle_max)
       implicit none
 
       real(c_float), intent(in) :: b, w, gamma, mu
       real(c_float), dimension(:,:), intent(in) :: view
       logical(kind=c_bool), dimension(:,:), intent(in) :: mask
+      integer, intent(in) :: angle1, angle2
 
       real, parameter :: deg2rad = 0.017453292519943295769236907684886
 
@@ -7941,9 +7963,9 @@ contains
 
       max_corr = -huge(0.0)
       angle_max = 0.0
-      step = 10
+      step = max(nint((angle2 - angle1) / 180.0 * 10), 1)
 
-      do i = -90, 90-step, step
+      do i = angle1, angle2-step, step
          angle = real(i)*deg2rad
          corr = correlation(angle, b, w, gamma, mu, view, mask)
 
@@ -8064,7 +8086,8 @@ contains
       ! peaks detection
       real(kind=c_float), allocatable :: row(:)
       logical(kind=c_bool), allocatable :: mask(:)
-      real(kind=c_float) :: x0, b, w, gamma, mu, theta
+      real(kind=c_float) :: x0, b, w, gamma, mu, theta, angle
+      integer :: angle1, angle2
 
       integer(c_int) :: precision
 
@@ -8125,10 +8148,15 @@ contains
          gamma = real(size(row))/1000 ! a small gamma value
          ! gamma = 5.0 ! more-or-less one pixel width
          print *, 'b:', b, 'w:', w, 'gamma:', gamma
-         
-         ! theta = find_angle(b, w, gamma, x1 + mu - 1, item%pixels, item%mask) ! using the whole image
-         theta = find_angle(b, w, gamma, mu, view_pixels, view_mask)
+                  
+         theta = find_angle(b, w, gamma, mu, view_pixels, view_mask, -90, 90)
          print *, 'theta angle [rad]:', theta , ', degrees:', theta*180/3.1415926535897932384626433832795
+
+         ! angle = theta*180/3.1415926535897932384626433832795
+         ! angle1 = int(nint(angle)) - 10
+         ! angle2 = int(nint(angle)) + 10
+         ! theta = find_angle(b, w, gamma, x1 + mu - 1, item%pixels, item%mask, angle1, angle2) ! using the whole image
+         ! print *, 'theta angle [rad]:', theta , ', degrees:', theta*180/3.1415926535897932384626433832795
 
          ! refine the parameters with a gradient descent
          ! call gradient_descent(b, w, gamma, mu, theta, view_pixels, view_mask, 0.1, 100, 0.001, b, w, gamma, mu, theta)
