@@ -1,7 +1,6 @@
 module differential_evolution
    use,intrinsic :: iso_fortran_env
-   use mt19937_64
-   use omp_lib
+   use mt19937_64   
 
    implicit none
 
