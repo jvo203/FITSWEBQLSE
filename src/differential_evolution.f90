@@ -158,9 +158,11 @@ contains
       dim = pop%dim
       pop_size = pop%pop_size
 
-      ! for each individual i, sample three distinct individuals, different from i
-      ! a note: modulo works with int32 and it returns non-negative values
+      ! for each individual i sample three distinct individuals (.ne. i)
       do i = 1, pop_size
+         ! 'modulo' works with 'int32'
+         ! as opposed to 'mod', 'modulo' returns non-negative values
+
          do
             idx1 = modulo(int(pop%rand%genrand64_int64(), kind=4), pop_size) + 1
             if (idx1 .ne. i) exit
