@@ -7660,6 +7660,24 @@ contains
    end function correlation
 
    ! a point (i, j) rotated by a theta angle around the point (x0, y0)
+   pure function corr_derive(i, j, x0, y0, b, w, gamma, theta) result(dtheta)
+      implicit none
+
+      real, intent(in) :: i, j, x0, y0, b, w, gamma, theta   
+
+      real :: inner, inner2, peak, dtheta
+
+      ! intermediate variables
+      inner = (i - x0)*cos(theta) - (j - y0)*sin(theta)
+      inner2 = inner**2      
+      peak = exp(-gamma * inner2)   
+
+      ! derivative
+      dtheta = 2.0 * gamma * w * peak * inner * ((j - y0)*cos(theta) + (i - x0)*sin(theta))      
+
+   end function corr_derive
+
+   ! a point (i, j) rotated by a theta angle around the point (x0, y0)
    pure function rmse_derive(i, j, x0, y0, b, w, gamma, theta, t) result(dtheta)
       implicit none
 
@@ -7674,10 +7692,10 @@ contains
 
       ! output, error
       y = b + w * peak
-      error = y - t
+      error = y - t      
 
       ! derivative
-      dtheta = dtheta + error * 2.0 * gamma * w * peak * inner * ((j - y0)*cos(theta) + (i - x0)*sin(theta))      
+      dtheta = error * 2.0 * gamma * w * peak * inner * ((j - y0)*cos(theta) + (i - x0)*sin(theta))      
 
    end function rmse_derive
 
@@ -7693,7 +7711,7 @@ contains
       integer :: i, j, dimx, dimy, max_threads
       real :: deriv, qx, qy, dqx, dqy, x0, y0, rotated_derive
 
-      deriv = 0.0
+      deriv = 0.0      
 
       dimx = size(view, 1)
       dimy = size(view, 2)
@@ -7713,15 +7731,16 @@ contains
       do j = 1, dimy
          do i = 1, dimx
             if (mask(i, j)) then
-               call rotate(real(i), real(j), x0, y0, theta, qx, qy)
-               call rotate_derive(real(i), real(j), x0, y0, theta, dqx, dqy)
-               rotated_derive = gaussian_derive(qx, b, w, gamma, mu)
-               deriv = deriv + view(i, j) * rotated_derive * dqx
+               !call rotate(real(i), real(j), x0, y0, theta, qx, qy)
+               !call rotate_derive(real(i), real(j), x0, y0, theta, dqx, dqy)
+               !rotated_derive = gaussian_derive(qx, b, w, gamma, mu)
+               !deriv = deriv + view(i, j) * rotated_derive * dqx
+               deriv = deriv + view(i, j) * corr_derive(real(i), real(j), x0, y0, b, w, gamma, theta)
             end if
          end do
       end do
       !$omp END DO
-      !$omp END PARALLEL
+      !$omp END PARALLEL      
 
       return
    end function derivative_theta
@@ -7775,7 +7794,8 @@ contains
 
       ! output and error
       y = b + w * peak
-      error = y - t
+      !error = y - t
+      error = t ! maximise the correlation instead
 
       db = db + error
       dw = dw + error * peak
@@ -7886,22 +7906,21 @@ contains
 
          ! update the parameters
 
-         b = b - eta * db
+         ! b = b + eta * db
+         ! w = w + eta * dw
 
-         w = w - eta * dw
-
-         ! gamma = gamma - eta * dgamma
-         newalpha = alpha - 0.001*eta * dalpha
+         ! gamma = gamma + eta * dgamma
+         newalpha = alpha + eta * dalpha
 
          ! range-limit between log(0.001) and log(5.0)
          if (newalpha .le. 1.6094379124341003 .and. newalpha .ge. -6.907755278982137) alpha = newalpha
 
-         newmu = mu - 0.01*eta * dmu
+         newmu = mu + 0.1*eta * dmu
 
          ! range-limit to between mu0 - 10 and mu0 + 10
          if (newmu .le. min(dim, mu0 + 10.0) .and. newmu .ge. max(1.0, mu0 - 10.0)) mu = max(1.0,min(dim, newmu))
 
-         ! beta = beta - 0.1 * eta * dbeta
+         ! beta = beta + 0.1 * eta * dbeta
       end do
 
       gamma = exp(alpha)
@@ -8159,11 +8178,14 @@ contains
          ! print *, 'theta angle [rad]:', theta , ', degrees:', theta*180/3.1415926535897932384626433832795
 
          ! refine the parameters with a gradient descent
-         ! call gradient_descent(b, w, gamma, mu, theta, view_pixels, view_mask, 0.1, 100, 0.001, b, w, gamma, mu, theta)
-         ! print *, 'grad.desc. theta [rad]:', theta , ', degrees:', theta*180/3.1415926535897932384626433832795, 'mu:', mu
+         call gradient_descent(b, w, gamma, mu, theta, view_pixels, view_mask, 0.1, 100, 0.001, b, w, gamma, mu, theta)
+         print *, 'grad.desc. theta [rad]:', theta , ', degrees:', theta*180/3.1415926535897932384626433832795, 'mu:', mu
 
          ! and again refine the angle
-         ! theta = find_angle(b, w, gamma, mu, view_pixels, view_mask)
+         angle = theta*180/3.1415926535897932384626433832795
+         angle1 = int(nint(angle)) - 10
+         angle2 = int(nint(angle)) + 10
+         theta = find_angle(b, w, gamma, mu, view_pixels, view_mask, angle1, angle2)
 
          ! y remains the same, x needs to be adjusted
          x = x1 + int(nint(mu)) - 1
