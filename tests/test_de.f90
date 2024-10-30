@@ -8,7 +8,7 @@ program main
 
    integer, allocatable :: seed(:)
 
-   integer :: pop_size = 20
+   integer :: pop_size = 10*dim ! a recommended population size
    real(float) :: min_val(dim), max_val(dim)
    type(Population) :: pop
 
@@ -31,7 +31,7 @@ program main
    call init_population(pop, pop_size, dim, seed(n), min_val, max_val)
 
    ! evaluate the population for a number of generations
-   do i = 1, 10
+   do i = 1, 1000
       call evaluate_population(pop)
 
       ! print the best cost
