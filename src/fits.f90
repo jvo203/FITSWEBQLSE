@@ -8127,16 +8127,15 @@ contains
          print *, 'b:', b, 'w:', w, 'gamma:', gamma
          
          ! theta = find_angle(b, w, gamma, x1 + mu - 1, item%pixels, item%mask) ! using the whole image
-
          theta = find_angle(b, w, gamma, mu, view_pixels, view_mask)
          print *, 'theta angle [rad]:', theta , ', degrees:', theta*180/3.1415926535897932384626433832795
 
          ! refine the parameters with a gradient descent
-         call gradient_descent(b, w, gamma, mu, theta, view_pixels, view_mask, 0.1, 100, 0.001, b, w, gamma, mu, theta)
+         ! call gradient_descent(b, w, gamma, mu, theta, view_pixels, view_mask, 0.1, 100, 0.001, b, w, gamma, mu, theta)
          ! print *, 'grad.desc. theta [rad]:', theta , ', degrees:', theta*180/3.1415926535897932384626433832795, 'mu:', mu
 
          ! and again refine the angle
-         theta = find_angle(b, w, gamma, mu, view_pixels, view_mask)
+         ! theta = find_angle(b, w, gamma, mu, view_pixels, view_mask)
 
          ! y remains the same, x needs to be adjusted
          x = x1 + int(nint(mu)) - 1
