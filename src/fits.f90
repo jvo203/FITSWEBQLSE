@@ -7854,8 +7854,12 @@ contains
 
       do iter = 1, max_iter
          rmse = gradient(b, w, alpha, beta, mu, db, dw, dalpha, dbeta, dmu, view, mask)
+
          print *, 'iter:', iter, 'b:', b, 'w:', w, 'alpha:', alpha, 'beta', beta, 'theta:',&
-         &'gamma:', exp(alpha), atan(beta), 'mu:', mu, 'rmse:', rmse
+         &theta, 'gamma:', exp(alpha), atan(beta), 'mu:', mu, 'rmse:', rmse
+
+         ! print out the gradients too
+         print *, 'db:', db, 'dw:', dw, 'dalpha:', dalpha, 'dbeta:', dbeta, 'dmu:', dmu
 
          ! if (abs(db) .lt. tol .and. abs(dw) .lt. tol .and. abs(dgamma) .lt. tol .and. abs(dtheta) .lt. tol .and. abs(dmu) .lt. tol) exit
 
@@ -7866,17 +7870,17 @@ contains
          w = w - eta * dw
 
          ! gamma = gamma - eta * dgamma
-         newalpha = alpha - eta * dalpha
+         newalpha = alpha - 0.001*eta * dalpha
 
          ! range-limit between log(0.001) and log(5.0)
          if (newalpha .le. 1.6094379124341003 .and. newalpha .ge. -6.907755278982137) alpha = newalpha
 
-         newmu = mu - eta * dmu
+         newmu = mu - 0.01*eta * dmu
 
          ! range-limit to between mu0 - 10 and mu0 + 10
          if (newmu .le. min(dim, mu0 + 10.0) .and. newmu .ge. max(1.0, mu0 - 10.0)) mu = max(1.0,min(dim, newmu))
 
-         ! beta = beta - eta * dbeta
+         ! beta = beta - 0.1 * eta * dbeta
       end do
 
       gamma = exp(alpha)
@@ -8121,14 +8125,18 @@ contains
          gamma = real(size(row))/1000 ! a small gamma value
          ! gamma = 5.0 ! more-or-less one pixel width
          print *, 'b:', b, 'w:', w, 'gamma:', gamma
+         
+         ! theta = find_angle(b, w, gamma, x1 + mu - 1, item%pixels, item%mask) ! using the whole image
 
          theta = find_angle(b, w, gamma, mu, view_pixels, view_mask)
-         ! theta = find_angle(b, w, gamma, x1 + mu - 1, item%pixels, item%mask) ! using the whole image
          print *, 'theta angle [rad]:', theta , ', degrees:', theta*180/3.1415926535897932384626433832795
 
          ! refine the parameters with a gradient descent
-         call gradient_descent(b, w, gamma, mu, theta, view_pixels, view_mask, 0.1, 10, 0.001, b, w, gamma, mu, theta)
+         call gradient_descent(b, w, gamma, mu, theta, view_pixels, view_mask, 0.1, 100, 0.001, b, w, gamma, mu, theta)
          ! print *, 'grad.desc. theta [rad]:', theta , ', degrees:', theta*180/3.1415926535897932384626433832795, 'mu:', mu
+
+         ! and again refine the angle
+         theta = find_angle(b, w, gamma, mu, view_pixels, view_mask)
 
          ! y remains the same, x needs to be adjusted
          x = x1 + int(nint(mu)) - 1
