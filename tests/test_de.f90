@@ -28,7 +28,7 @@ program main
    call random_seed(get=seed)
 
    ! initialize the population
-   call init_population(pop, pop_size, dim, seed(n), min_val, max_val)
+   call init_population(pop, pop_size, dim, min_val, max_val, seed(n))
 
    ! evaluate the population for a number of generations
    do iter = 1, 1000

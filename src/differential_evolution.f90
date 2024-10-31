@@ -96,11 +96,11 @@ contains
    end subroutine finalize_population
 
    ! initialize the population
-   subroutine init_population(pop, pop_size, dim, seed, min_val, max_val)
+   subroutine init_population(pop, pop_size, dim, min_val, max_val, seed)
       type(Population), intent(inout) :: pop
-      integer, intent(in) :: pop_size, dim
-      integer, intent(in) :: seed
+      integer, intent(in) :: pop_size, dim   
       real(float), intent(in) :: min_val(dim), max_val(dim)
+      integer, intent(in) :: seed
 
       integer :: i
 
