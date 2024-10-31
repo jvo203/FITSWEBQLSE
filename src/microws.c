@@ -3372,8 +3372,9 @@ void write_ws_video(websocket_session *session, const int *seq_id, const float *
     // RGB-encode
     x265_nal *pNals = NULL;
     uint32_t iNal = 0;
+    x265_picture *pic_out = NULL;
 
-    int ret = x265_encoder_encode(session->encoder, &pNals, &iNal, session->picture, NULL);
+    int ret = x265_encoder_encode(session->encoder, &pNals, &iNal, session->picture, &pic_out);
     printf("[C] x265_encode::ret = %d, #frames = %d\n", ret, iNal);
 
     for (unsigned int i = 0; i < iNal; i++)
@@ -3497,8 +3498,9 @@ void write_ws_composite_video(websocket_session *session, const int *seq_id, con
     // RGB-encode
     x265_nal *pNals = NULL;
     uint32_t iNal = 0;
+    x265_picture *pic_out = NULL;
 
-    int ret = x265_encoder_encode(session->encoder, &pNals, &iNal, session->picture, NULL);
+    int ret = x265_encoder_encode(session->encoder, &pNals, &iNal, session->picture, &pic_out);
     printf("[C] x265_encode::ret = %d, #frames = %d\n", ret, iNal);
 
     for (unsigned int i = 0; i < iNal; i++)
