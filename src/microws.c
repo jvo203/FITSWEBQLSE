@@ -3374,6 +3374,9 @@ void write_ws_video(websocket_session *session, const int *seq_id, const float *
     uint32_t iNal = 0;
     x265_picture *pic_out = NULL;
 
+    // print x265_version_str
+    printf("[C] x265_version_str: %s\n", x265_version_str);
+
     int ret = x265_encoder_encode(session->encoder, &pNals, &iNal, session->picture, &pic_out);
     printf("[C] x265_encode::ret = %d, #frames = %d\n", ret, iNal);
 
