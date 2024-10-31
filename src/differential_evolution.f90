@@ -100,14 +100,16 @@ contains
       type(Population), intent(inout) :: pop
       integer, intent(in) :: pop_size, dim   
       real(float), intent(in) :: min_val(dim), max_val(dim)
-      integer, intent(in) :: seed
+      integer, optional, intent(in) :: seed
 
       integer :: i
 
       pop%pop_size = pop_size
       pop%dim = dim
 
-      call pop%rand%initialize(seed)
+      if (present(seed)) then
+         call pop%rand%initialize(seed)
+      end if
 
       allocate(pop%curr(pop_size))
       allocate(pop%best(pop_size))
