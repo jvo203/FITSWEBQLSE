@@ -1,3 +1,7 @@
+## [5.1.13] - 2024-11-??
+
+* ensured API compatibility with the x265 v4 C library
+
 ## [5.1.12] - 2024-10-09
 
 * automatic peak detection & tracking in Subaru HDS 2D FITS spectra
