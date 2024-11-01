@@ -7941,8 +7941,8 @@ contains
 
       ! search space dimensionality
       integer, parameter :: noparams = 2
-
       integer :: pop_size = 10*noparams ! a population size
+
       real(float) :: min_val(noparams), max_val(noparams)
       type(Population) :: pop
 
@@ -7964,7 +7964,9 @@ contains
       ! evaluate the population <max_iter> times
 
       ! print the final best solution
-      print *, "best cost:", pop%best_cost, "best genotype:", pop%best(pop%best_idx)%genotype
+      if (pop%best_idx .ne. 0) then
+         print *, "best cost:", pop%best_cost, "best genotype:", pop%best(pop%best_idx)%genotype
+      end if
 
       call finalize_population(pop)
 
