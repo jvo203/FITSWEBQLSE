@@ -7928,6 +7928,7 @@ contains
    end subroutine gradient_descent
 
 
+   ! use Differential Evolution to adjust the peak parameters
    subroutine de_peak(b, w, gamma, mu, theta, view, mask, max_iter)
       use differential_evolution
       use omp_lib
@@ -8189,6 +8190,9 @@ contains
          theta = find_angle(b, w, gamma, mu, view_pixels, view_mask, -90, 90)
          print *, 'theta angle [rad]:', theta , ', degrees:', theta*180/3.1415926535897932384626433832795
 
+         ! next use Differential Evolution
+         call de_peak(b, w, gamma, mu, theta, view_pixels, view_mask, 100)
+
          ! angle = theta*180/3.1415926535897932384626433832795
          ! angle1 = int(nint(angle)) - 10
          ! angle2 = int(nint(angle)) + 10
@@ -8196,14 +8200,14 @@ contains
          ! print *, 'theta angle [rad]:', theta , ', degrees:', theta*180/3.1415926535897932384626433832795
 
          ! refine the parameters with a gradient descent
-         call gradient_descent(b, w, gamma, mu, theta, view_pixels, view_mask, 0.1, 100, 0.001, b, w, gamma, mu, theta)
-         print *, 'grad.desc. theta [rad]:', theta , ', degrees:', theta*180/3.1415926535897932384626433832795, 'mu:', mu
+         ! call gradient_descent(b, w, gamma, mu, theta, view_pixels, view_mask, 0.1, 100, 0.001, b, w, gamma, mu, theta)
+         ! print *, 'grad.desc. theta [rad]:', theta , ', degrees:', theta*180/3.1415926535897932384626433832795, 'mu:', mu
 
          ! and again refine the angle
          angle = theta*180/3.1415926535897932384626433832795
          angle1 = int(nint(angle)) - 10
          angle2 = int(nint(angle)) + 10
-         theta = find_angle(b, w, gamma, mu, view_pixels, view_mask, angle1, angle2)
+         ! theta = find_angle(b, w, gamma, mu, view_pixels, view_mask, angle1, angle2)
 
          ! y remains the same, x needs to be adjusted
          x = x1 + int(nint(mu)) - 1
