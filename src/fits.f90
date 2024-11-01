@@ -7939,8 +7939,34 @@ contains
       logical(kind=c_bool), dimension(:,:), intent(in) :: mask
       integer(c_int), intent(in) :: max_iter
 
+      ! search space dimensionality
+      integer, parameter :: noparams = 2
+
+      integer :: pop_size = 10*noparams ! a population size
+      real(float) :: min_val(noparams), max_val(noparams)
+      type(Population) :: pop
+
       integer :: max_threads
       ! real(c_float) :: b0, w0, gamma0, mu0, theta0
+
+      ! the first parameter is mu
+      min_val(1) = mu - 10.0
+      max_val(1) = mu + 10.0
+
+      ! the second one is theta, +/- 10 degrees around theta [rad]
+      min_val(2) = theta - 10.0/180.0*3.14159265358979323846
+      max_val(2) = theta + 10.0/180.0*3.14159265358979323846
+
+      ! initialize the population
+      call init_population(pop, pop_size, noparams, min_val, max_val)
+
+      ! TO-DO
+      ! evaluate the population <max_iter> times
+
+      ! print the final best solution
+      print *, "best cost:", pop%best_cost, "best genotype:", pop%best(pop%best_idx)%genotype
+
+      call finalize_population(pop)
 
       ! get #physical cores (ignore HT)
       max_threads = get_max_threads()
