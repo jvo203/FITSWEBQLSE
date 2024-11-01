@@ -7927,6 +7927,24 @@ contains
       theta = atan(beta)
    end subroutine gradient_descent
 
+
+   subroutine de_peak(b, w, gamma, mu, theta, view, mask, max_iter)
+      use differential_evolution
+      use omp_lib
+      implicit none
+
+      real(c_float), intent(inout) :: b, w, gamma, mu, theta      
+      real(c_float), dimension(:,:), intent(in) :: view
+      logical(kind=c_bool), dimension(:,:), intent(in) :: mask
+      integer(c_int), intent(in) :: max_iter
+
+      integer :: max_threads
+      ! real(c_float) :: b0, w0, gamma0, mu0, theta0
+
+      ! get #physical cores (ignore HT)
+      max_threads = get_max_threads()
+   end subroutine de_peak
+
    function bisect_angle(a, b, b0, w, gamma, mu, view, mask) result(angle)
       implicit none
 
@@ -8080,7 +8098,7 @@ contains
 
    end subroutine trace_hds_spectrum
 
-   subroutine realtime_hds_spectrum_request(item, req)
+   subroutine realtime_hds_spectrum_request(item, req)      
       use risk
       implicit none
 
