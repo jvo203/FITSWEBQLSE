@@ -46,6 +46,24 @@ gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.
 
     visit https://www.linuxfromscratch.org/blfs/view/svn/multimedia/x265.html
     
+    wget https://bitbucket.org/multicoreware/x265_git/downloads/x265_4.0.tar.gz
+    tar zxvf x265_4.0.tar.gz
+    cd x265_4.0
+
+    Apply a manual change in "source/encoder/api.cpp / x265_encoder_open()":
+
+        x265_print_params(param);
+        PARAM_NS::x265_param_free(zoneParam); /* this line needs to be added */
+        return encoder;
+
+    mkdir -p build
+    cd build
+    cmake ../source
+    make -j16
+    sudo make install
+
+    # old instructions for pre-4.0, no longer applicable
+
     # this is the latest version as of 2024-02-16 but it is buggy
     wget https://anduin.linuxfromscratch.org/BLFS/x265/x265-20240216.tar.xz
     xz -d -v x265-20240216.tar.xz
