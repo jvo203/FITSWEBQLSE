@@ -17461,8 +17461,15 @@ function display_menu() {
                 filename += ".fits";
         }
 
-        let _url = "get_fits?datasetId=" + encodeURIComponent(datasetId);
-        _url += "&filename=" + encodeURIComponent(filename);
+        var _url = "get_fits?";
+
+        if (va_count == 1) {
+            _url += "datasetId=" + encodeURIComponent(datasetId);
+            _url += "&filename=" + encodeURIComponent(filename);
+        } else {
+            for (let index = 1; index <= va_count; index++)
+                _url += "datasetId" + index + "=" + encodeURIComponent(datasetId[index - 1]) + "&";
+        }
 
         fitsDropdown.append("li")
             .append("a")
