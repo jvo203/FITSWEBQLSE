@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-10-18.0";
+    return "JS2024-11-02.0";
 }
 
 function uuidv4() {
@@ -17452,9 +17452,14 @@ function display_menu() {
     } else {
         let filename = datasetId;
 
-        // check if a filename already ends with ".fits"; if not then append ".fits"
-        if (!filename.endsWith(".fits"))
-            filename += ".fits";
+        console.log("filename:", filename);
+
+        // check if filename is a string (not an array)
+        if (typeof filename === 'string' || filename instanceof String) {
+            // check if a filename already ends with ".fits"; if not then append ".fits"
+            if (!filename.endsWith(".fits"))
+                filename += ".fits";
+        }
 
         let _url = "get_fits?datasetId=" + encodeURIComponent(datasetId);
         _url += "&filename=" + encodeURIComponent(filename);
