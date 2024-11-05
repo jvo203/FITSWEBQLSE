@@ -7935,8 +7935,8 @@ contains
       implicit none
 
       real(c_float), intent(inout) :: b, w, gamma, mu, theta      
-      real(c_float), dimension(:,:), intent(in) :: view
-      logical(kind=c_bool), dimension(:,:), intent(in) :: mask
+      real(c_float), dimension(:,:), CONTIGUOUS, intent(in) :: view
+      logical(kind=c_bool), dimension(:,:), CONTIGUOUS, intent(in) :: mask
       integer(c_int), intent(in) :: max_iter
 
       ! search space dimensionality
