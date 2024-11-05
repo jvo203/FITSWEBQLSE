@@ -7946,26 +7946,68 @@ contains
       real(float) :: min_val(noparams), max_val(noparams)
       type(Population) :: pop
 
-      integer :: max_threads
-      ! real(c_float) :: b0, w0, gamma0, mu0, theta0
+      integer :: max_threads, iter, i
+      real(float) :: cost
+      real(c_float) :: mu0, theta0
+
+      ! get #physical cores (ignore HT)
+      max_threads = get_max_threads()
 
       ! the first parameter is mu
       min_val(1) = mu - 10.0
       max_val(1) = mu + 10.0
 
       ! the second one is theta, +/- 10 degrees around theta [rad]
-      min_val(2) = theta - 10.0/180.0*3.14159265358979323846
-      max_val(2) = theta + 10.0/180.0*3.14159265358979323846
+      ! min_val(2) = theta - 10.0/180.0*3.14159265358979323846
+      ! max_val(2) = theta + 10.0/180.0*3.14159265358979323846
+
+      ! the angle search space is between -pi/2 and pi/2
+      min_val(2) = -3.14159265358979323846/2
+      max_val(2) = 3.14159265358979323846/2
 
       ! initialize the population
       call init_population(pop, pop_size, noparams, min_val, max_val)
 
       ! TO-DO
-      ! evaluate the population <max_iter> times
+      ! evaluate the correlation for the population <max_iter> times
+      do iter = 1, max_iter
+         ! evaluate the population
+         !$omp parallel shared(pop, view, mask, b, w, gamma) private(i, cost)&
+         !$omp& NUM_THREADS(max_threads)
+         !$omp do
+         do i = 1, pop_size
+            mu0 = pop%curr(i)%genotype(1)
+            theta0 = pop%curr(i)%genotype(2)
+            cost = - correlation(theta0, b, w, gamma, mu0, view, mask) ! maximize the correlation = minimize the cost
+            pop%curr(i)%cost = cost
+
+            if (cost .le. pop%best(i)%cost) then
+               pop%best(i)%cost = cost
+               pop%best(i)%genotype = pop%curr(i)%genotype
+            end if
+
+            !$omp critical
+            call update_pop_best(pop, cost, i)
+            !$omp end critical
+         end do
+         !$omp end do
+         !$omp end parallel
+
+         ! print the best cost
+         print *, "iter:", iter, "best cost:", pop%best_cost, "best idx:", pop%best_idx, "best genotype:",&
+         & pop%best(pop%best_idx)%genotype
+
+         ! evolve the population
+         call update_population(pop)
+      end do
 
       ! print the final best solution
       if (pop%best_idx .ne. 0) then
          print *, "best cost:", pop%best_cost, "best genotype:", pop%best(pop%best_idx)%genotype
+
+         ! extract the optimal parameters
+         mu = pop%best(pop%best_idx)%genotype(1)
+         theta = pop%best(pop%best_idx)%genotype(2)
       end if
 
       call finalize_population(pop)
@@ -8047,6 +8089,10 @@ contains
       ! the angle is between [angle - step, angle + step], in radians
       angle_max = bisect_angle(angle_max - real(step)*deg2rad, angle_max + real(step)*deg2rad,&
       & b, w, gamma, mu, view, mask)
+
+      ! print the final correlation value for the best angle
+      corr = correlation(angle_max, b, w, gamma, mu, view, mask)
+      print *, 'find_angle [rad]:', angle_max, 'correlation:', corr
 
    end function find_angle
 
