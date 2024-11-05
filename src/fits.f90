@@ -7972,7 +7972,7 @@ contains
       ! evaluate the correlation for the population <max_iter> times
       do iter = 1, max_iter
          ! evaluate the population
-         !$omp parallel shared(pop, view, mask, b, w, gamma) private(i, cost)&
+         !$omp parallel shared(pop, view, mask, b, w, gamma) private(i, cost, mu0, theta0)&
          !$omp& NUM_THREADS(max_threads)
          !$omp do
          do i = 1, pop_size
@@ -7998,7 +7998,7 @@ contains
          & pop%best(pop%best_idx)%genotype
 
          ! evolve the population
-         call update_population(pop)
+         call update_population(pop, min_val, max_val)
       end do
 
       ! print the final best solution
@@ -8261,11 +8261,13 @@ contains
          ! gamma = 5.0 ! more-or-less one pixel width
          print *, 'b:', b, 'w:', w, 'gamma:', gamma
                   
-         theta = find_angle(b, w, gamma, mu, view_pixels, view_mask, -90, 90)
-         print *, 'theta angle [rad]:', theta , ', degrees:', theta*180/3.1415926535897932384626433832795
+         ! theta = find_angle(b, w, gamma, mu, view_pixels, view_mask, -90, 90)
+         ! print *, 'theta angle [rad]:', theta , ', degrees:', theta*180/3.1415926535897932384626433832795         
 
-         ! next use Differential Evolution
+         ! Differential Evolution
          call de_peak(b, w, gamma, mu, theta, view_pixels, view_mask, 100)
+         print *, 'Differential Evolution theta angle [rad]:', theta , ', degrees:',&
+         & theta*180/3.1415926535897932384626433832795, 'mu:', mu
 
          ! angle = theta*180/3.1415926535897932384626433832795
          ! angle1 = int(nint(angle)) - 10

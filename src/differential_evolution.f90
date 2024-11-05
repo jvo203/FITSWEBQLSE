@@ -146,8 +146,9 @@ contains
 
    end subroutine update_pop_best
 
-   subroutine update_population(pop)
+   subroutine update_population(pop, min_val, max_val)
       type(Population), intent(inout) :: pop
+      real(float), optional, intent(in) :: min_val(:), max_val(:)
 
       real(float) :: cost
       integer :: pop_size, dim, forced_mutation_dim
@@ -204,6 +205,10 @@ contains
                curr_sol(d) = best1_sol(d) + pop%curr(i)%f*(best2_sol(d) - best3_sol(d))
             else
                curr_sol(d) = best_sol(d)
+            end if
+
+            if (present(min_val) .and. present(max_val)) then
+               curr_sol(d) = max(min(curr_sol(d), max_val(d)), min_val(d))
             end if
          end do
 
