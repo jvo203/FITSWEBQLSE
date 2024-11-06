@@ -8290,6 +8290,22 @@ function toggle_rest_frequency() {
     setup_axes();
 }
 
+function toggle_redshift(selection) {
+    var unit = document.getElementById('unit');
+
+    sessionStorage.setItem("redshift", selection.value);
+
+    if (selection.value == "v")
+        unit.innerHTML = "km/s";
+
+    if (selection.value == "z")
+        unit.innerHTML = "(z>-1)";
+
+    var m = document.getElementById('redshift');
+    m.value = 0.0.toFixed(1);
+    m.focus();
+}
+
 function toggle_redshift_input_source(selection) {
     var unit = document.getElementById('unit');
 
@@ -17721,12 +17737,48 @@ function display_menu() {
         tmp.append("label")
             .attr("for", "redshift")
             .attr("class", "control-label")
-            .html("redshift z > -1:&nbsp; ");
+            .html("redshift&nbsp;");
 
         previous_redshift = redshift;
 
-        // <input type="radio" id="velV" name="velocity" value="v" style="vertical-align: middle; margin: 0px;" onclick="javascript:toggle_redshift_input_source(this);"> v&nbsp;<input type="radio" id="velZ" name="velocity" value="z" style="vertical-align: middle; margin: 0px;" onclick="javascript:toggle_redshift_input_source(this);"> z&nbsp <span id="unit">km/s</span>
-        // toggle_redshift_input_source(this) --> toggle_redshift(this)
+        // <input type="radio" id="velV" name="velocity" value="v" style="vertical-align: middle; margin: 0px;" onclick="javascript:toggle_redshift_input_source(this);">
+        tmp.append("input")
+            .attr("id", "velV")
+            .attr("type", "radio")
+            .attr("name", "velocity")
+            .attr("value", "v")
+            .style("vertical-align", "middle")
+            .style("margin", "0px")
+            .on("click", function () {
+                toggle_redshift(this);
+            });
+
+        // v&nbsp;
+        tmp.append("span")
+            .html("v&nbsp;");
+
+        // <input type="radio" id="velZ" name="velocity" value="z" style="vertical-align: middle; margin: 0px;" onclick="javascript:toggle_redshift_input_source(this);">
+        tmp.append("input")
+            .attr("id", "velZ")
+            .attr("type", "radio")
+            .attr("name", "velocity")
+            .attr("value", "z")
+            .style("vertical-align", "middle")
+            .style("margin", "0px")
+            .on("click", function () {
+                toggle_redshift(this);
+            });
+
+        // z&nbsp;
+        tmp.append("span")
+            .html("z&nbsp;");
+
+        // &nbsp;
+        tmp.append("span")
+            .html("&nbsp;");
+
+        // make velV checked by default
+        d3.select("#velV").property("checked", true);
 
         tmp.append("input")
             .attr("id", "redshift")
@@ -17735,6 +17787,15 @@ function display_menu() {
             .attr("min", -0.9)
             .attr("step", 0.0001)
             .attr("value", previous_redshift.toFixed(1));
+
+        // &nbsp;
+        tmp.append("span")
+            .html("&nbsp;");
+
+        // <span id="unit">km/s</span>
+        tmp.append("span")
+            .attr("id", "unit")
+            .html("km/s");
 
         var elem = document.getElementById('redshift');
         elem.onblur = validate_redshift;
