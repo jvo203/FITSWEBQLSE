@@ -8442,18 +8442,18 @@ function submit_corrections() {
 };
 
 function validate_redshift() {
-    var value = document.getElementById('redshift-z').valueAsNumber;
+    var value = document.getElementById('redshift').valueAsNumber;
 
     if (isNaN(value))
-        document.getElementById('redshift-z').value = previous_redshift;
+        document.getElementById('redshift').value = previous_redshift;
 
     if (value <= -1)
-        document.getElementById('redshift-z').value = -0.99999;
+        document.getElementById('redshift').value = -0.99999;
 
     if (value > 6.0)
-        document.getElementById('redshift-z').value = 6.0.toFixed(1);
+        document.getElementById('redshift').value = 6.0.toFixed(1);
 
-    redshift = document.getElementById('redshift-z').valueAsNumber;
+    redshift = document.getElementById('redshift').valueAsNumber;
 
     if (redshift != previous_redshift) {
         previous_redshift = redshift;
@@ -8461,11 +8461,11 @@ function validate_redshift() {
         // convert z redshift to velocity
         var c = 299792.458;//speed of light [km/s]
 
-        var tmp = - (1.0 - (1.0 + redshift) * (1.0 + redshift)) / (1.0 + (1.0 + redshift) * (1.0 + redshift));
+        /*var tmp = - (1.0 - (1.0 + redshift) * (1.0 + redshift)) / (1.0 + (1.0 + redshift) * (1.0 + redshift));
         var velocity = c * tmp;
 
         // update the redshift-v input field
-        document.getElementById('redshift-v').value = velocity.toFixed(2);
+        document.getElementById('redshift-v').value = velocity.toFixed(2);*/
 
         // refresh the HDS spectral lines        
         hds_divs.forEach(refresh_hds_spectral_lines);
@@ -8473,7 +8473,7 @@ function validate_redshift() {
 
     //re-attach lost event handlers
     {
-        var elem = document.getElementById('redshift-z');
+        var elem = document.getElementById('redshift');
         elem.onblur = validate_redshift;
         elem.onmouseleave = validate_redshift;
         elem.onkeyup = function (e) {
@@ -17713,27 +17713,30 @@ function display_menu() {
             .attr("class", "dropdown-menu");
 
         let tmp = atomicDropdown.append("li")
-            .attr("id", "redshift_z_li")
+            .attr("id", "redshift_li")
             .append("a")
             .style("class", "form-group")
             .attr("class", "form-horizontal");
 
         tmp.append("label")
-            .attr("for", "redshift-z")
+            .attr("for", "redshift")
             .attr("class", "control-label")
             .html("redshift z > -1:&nbsp; ");
 
         previous_redshift = redshift;
 
+        // <input type="radio" id="velV" name="velocity" value="v" style="vertical-align: middle; margin: 0px;" onclick="javascript:toggle_redshift_input_source(this);"> v&nbsp;<input type="radio" id="velZ" name="velocity" value="z" style="vertical-align: middle; margin: 0px;" onclick="javascript:toggle_redshift_input_source(this);"> z&nbsp <span id="unit">km/s</span>
+        // toggle_redshift_input_source(this) --> toggle_redshift(this)
+
         tmp.append("input")
-            .attr("id", "redshift-z")
+            .attr("id", "redshift")
             .attr("type", "number")
             .style("width", "7em")
             .attr("min", -0.9)
             .attr("step", 0.0001)
             .attr("value", previous_redshift.toFixed(1));
 
-        var elem = document.getElementById('redshift-z');
+        var elem = document.getElementById('redshift');
         elem.onblur = validate_redshift;
         elem.onmouseleave = validate_redshift;
         elem.onkeyup = function (e) {
@@ -17755,7 +17758,7 @@ function display_menu() {
 
         var c = 299792.458;//speed of light [km/s]
 
-        tmp = atomicDropdown.append("li")
+        /*tmp = atomicDropdown.append("li")
             .attr("id", "redshift_v_li")
             .append("a")
             .style("class", "form-group")
@@ -17773,7 +17776,7 @@ function display_menu() {
             .attr("min", -299792)
             .attr("max", 299792)
             .attr("step", 0.1)
-            .attr("value", previous_redshift.toFixed(2));
+            .attr("value", previous_redshift.toFixed(2));*/
     }
 
     //VIEW
