@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-11-02.0";
+    return "JS2024-11-06.0";
 }
 
 function uuidv4() {
@@ -8442,21 +8442,30 @@ function submit_corrections() {
 };
 
 function validate_redshift() {
-    var value = document.getElementById('redshift').valueAsNumber;
+    var value = document.getElementById('redshift-z').valueAsNumber;
 
     if (isNaN(value))
-        document.getElementById('redshift').value = previous_redshift;
+        document.getElementById('redshift-z').value = previous_redshift;
 
     if (value <= -1)
-        document.getElementById('redshift').value = -0.99999;
+        document.getElementById('redshift-z').value = -0.99999;
 
     if (value > 6.0)
-        document.getElementById('redshift').value = 6.0.toFixed(1);
+        document.getElementById('redshift-z').value = 6.0.toFixed(1);
 
-    redshift = document.getElementById('redshift').valueAsNumber;
+    redshift = document.getElementById('redshift-z').valueAsNumber;
 
     if (redshift != previous_redshift) {
-        previous_redshift = value;
+        previous_redshift = redshift;
+
+        // convert z redshift to velocity
+        var c = 299792.458;//speed of light [km/s]
+
+        var tmp = - (1.0 - (1.0 + redshift) * (1.0 + redshift)) / (1.0 + (1.0 + redshift) * (1.0 + redshift));
+        var velocity = c * tmp;
+
+        // update the redshift-v input field
+        document.getElementById('redshift-v').value = velocity.toFixed(2);
 
         // refresh the HDS spectral lines        
         hds_divs.forEach(refresh_hds_spectral_lines);
@@ -8464,7 +8473,7 @@ function validate_redshift() {
 
     //re-attach lost event handlers
     {
-        var elem = document.getElementById('redshift');
+        var elem = document.getElementById('redshift-z');
         elem.onblur = validate_redshift;
         elem.onmouseleave = validate_redshift;
         elem.onkeyup = function (e) {
@@ -17704,27 +17713,27 @@ function display_menu() {
             .attr("class", "dropdown-menu");
 
         let tmp = atomicDropdown.append("li")
-            .attr("id", "redshift_li")
+            .attr("id", "redshift_z_li")
             .append("a")
             .style("class", "form-group")
             .attr("class", "form-horizontal");
 
         tmp.append("label")
-            .attr("for", "redshift")
+            .attr("for", "redshift-z")
             .attr("class", "control-label")
             .html("redshift z > -1:&nbsp; ");
 
         previous_redshift = redshift;
 
         tmp.append("input")
-            .attr("id", "redshift")
+            .attr("id", "redshift-z")
             .attr("type", "number")
             .style("width", "7em")
             .attr("min", -0.9)
             .attr("step", 0.0001)
             .attr("value", previous_redshift.toFixed(1));
 
-        var elem = document.getElementById('redshift');
+        var elem = document.getElementById('redshift-z');
         elem.onblur = validate_redshift;
         elem.onmouseleave = validate_redshift;
         elem.onkeyup = function (e) {
@@ -17743,6 +17752,28 @@ function display_menu() {
                 validate_redshift();
             }, 250);
         };
+
+        var c = 299792.458;//speed of light [km/s]
+
+        tmp = atomicDropdown.append("li")
+            .attr("id", "redshift_v_li")
+            .append("a")
+            .style("class", "form-group")
+            .attr("class", "form-horizontal");
+
+        tmp.append("label")
+            .attr("for", "redshift-v")
+            .attr("class", "control-label")
+            .html("redshift v [km/s]:&nbsp; ");
+
+        tmp.append("input")
+            .attr("id", "redshift-v")
+            .attr("type", "number")
+            .style("width", "5em")
+            .attr("min", -299792)
+            .attr("max", 299792)
+            .attr("step", 0.1)
+            .attr("value", previous_redshift.toFixed(2));
     }
 
     //VIEW
