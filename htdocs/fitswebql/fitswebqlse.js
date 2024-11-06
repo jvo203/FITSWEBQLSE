@@ -8304,6 +8304,8 @@ function toggle_redshift(selection) {
     var m = document.getElementById('redshift');
     m.value = 0.0.toFixed(1);
     m.focus();
+
+    validate_redshift();
 }
 
 function toggle_redshift_input_source(selection) {
@@ -8473,6 +8475,8 @@ function validate_redshift() {
 
     if (redshift != previous_redshift) {
         previous_redshift = redshift;
+
+        // TO-DO: check the radio buttons to see if the source velocity v needs to be converted to z
 
         // convert z redshift to velocity
         var c = 299792.458;//speed of light [km/s]
