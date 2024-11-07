@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-11-06.0";
+    return "JS2024-11-07.0";
 }
 
 function uuidv4() {
@@ -8,9 +8,9 @@ function uuidv4() {
 }
 
 function get_worker_script() {
-    return `self.addEventListener('message', function (e) {        
-        importScripts('https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/fitswebql/marchingsquares-isobands.min.js');        
-        importScripts('https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/fitswebql/marchingsquares-isocontours.min.js');        
+    return `self.addEventListener('message', function (e) {
+        importScripts('https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/fitswebql/marchingsquares-isobands.min.js');
+        importScripts('https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/fitswebql/marchingsquares-isocontours.min.js');
         var band = MarchingSquaresJS.isoBands(e.data.data, e.data.lowerBand, e.data.upperBand - e.data.lowerBand);
         self.postMessage(band);
         self.close();
@@ -595,7 +595,7 @@ function getStrokeStyle() {
         style = "rgba(127,127,127,1.0)";// grey
 
         if (colourmap == "greyscale")
-            style = "rgba(255,204,0,1.0)";//yellowish ALMAWebQL v2	    
+            style = "rgba(255,204,0,1.0)";//yellowish ALMAWebQL v2
     }
 
 
@@ -604,8 +604,8 @@ function getStrokeStyle() {
             //style = "rgba(255,127,80,0.9)";//orange
             //style = "rgba(238,130,238,0.9)" ;
             //style = "rgba(204,204,204,0.9)";//grey
-            style = "rgba(255,204,0,1.0)";//yellowish ALMAWebQL v2	    
-        //style = "rgba(204,204,204,1.0)";//grey		
+            style = "rgba(255,204,0,1.0)";//yellowish ALMAWebQL v2
+        //style = "rgba(204,204,204,1.0)";//grey
 
         if (colourmap == "red")
             style = "rgba(0,191,255,1.0)";//deepskyblue
@@ -772,7 +772,7 @@ function plot_hds_spectrum(data, mask, index) {
 
     var range = get_axes_range(width, height);
     //var dx = range.xMax - range.xMin;
-    //var dy = range.yMax - range.yMin;    
+    //var dy = range.yMax - range.yMin;
 
     var chart_height = (height - 1 - range.yMax - 1);
 
@@ -973,7 +973,7 @@ function plot_spectrum(dataArray) {
 
         data = largestTriangleThreeBuckets(data, dx / 2);
 
-        // binning        
+        // binning
         data = spectrum_binning(data, binning);
 
         var incrx = dx / (data.length - 1);
@@ -1007,7 +1007,7 @@ function plot_spectrum(dataArray) {
 
         ctx.shadowColor = getShadowStyle();
         ctx.shadowBlur = 5;//20
-        //ctx.shadowOffsetX = 10; 
+        //ctx.shadowOffsetX = 10;
         //ctx.shadowOffsetY = 10;
 
         ctx.strokeStyle = getStrokeStyle();
@@ -1033,7 +1033,7 @@ function plot_spectrum(dataArray) {
 
             ctx.shadowColor = getShadowStyle();
             ctx.shadowBlur = 20;
-            //ctx.shadowOffsetX = 10; 
+            //ctx.shadowOffsetX = 10;
             //ctx.shadowOffsetY = 10;
             ctx.strokeStyle = getStrokeStyle();
 
@@ -1262,14 +1262,14 @@ function pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pmean, pstd, 
     var axissvg = d3.select("#PVAXISLINE");
 
     // always use a dark theme for the PV diagram
-    let _axisColour = "rgba(255,204,0,0.8)"; // axisColour    
+    let _axisColour = "rgba(255,204,0,0.8)"; // axisColour
 
     var midx = (x1 + x2) / 2;
     var midy = (y1 + y2) / 2;
 
     let fitsData = fitsContainer[va_count - 1];
 
-    // find the radec for the mid point    
+    // find the radec for the mid point
     let world = pix2sky(fitsData, midx, midy);
     let midra = world[0] / toDegrees;
     let middec = world[1] / toDegrees;
@@ -1400,7 +1400,7 @@ function pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pmean, pstd, 
         console.log("angular position:", angularline_position);
     }
 
-    // add a horizontal "velocityline"    
+    // add a horizontal "velocityline"
     axissvg.append("line")
         .attr("id", "velocityline")
         .attr("x1", 0)
@@ -1460,7 +1460,7 @@ function pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pmean, pstd, 
 
     d3.select("#pv_rectangle").moveToFront();
 
-    // labels    
+    // labels
 
     // attach the statistics to the fitsData object
     fitsData.pvmin = pmin;
@@ -1547,7 +1547,7 @@ function pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pmean, pstd, 
     console.log("upper (pmax,p2): ", pmax, p2);
     math_x[math_x.length - 1] = Math.min(p2, 1.0);
 
-    // adjust the endings of the colour scale to avoid infinities    
+    // adjust the endings of the colour scale to avoid infinities
     math_rgb[0] = wolfram(math_x[0]);
     console.log("lower (Wolfram RGB): ", pmin, math_x[0], math_rgb[0]);
 
@@ -1578,7 +1578,7 @@ function pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pmean, pstd, 
         .cells(10)
         .scale(linear)
         //.labelFormat(d3.format(".2e")); // .1e or .2f
-        .labelFormat(d3.format(".2g")); // .1e or .2f		
+        .labelFormat(d3.format(".2g")); // .1e or .2f
 
     /*console.log(d3.format(".2g")(4.2));
     console.log(d3.format(".2g")(42000));
@@ -1801,7 +1801,7 @@ function composite_pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pme
         console.log("velocity:", velocity, "position:", velocityline_position);
     }
 
-    // add a horizontal "velocityline"    
+    // add a horizontal "velocityline"
     axissvg.append("line")
         .attr("id", "velocityline")
         .attr("x1", 0)
@@ -1899,7 +1899,7 @@ function composite_pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pme
         console.log("upper (pmax,p2): ", pmax[channel], p2);
         math_x[math_x.length - 1] = Math.min(p2, 1.0);
 
-        // adjust the endings of the colour scale to avoid infinities    
+        // adjust the endings of the colour scale to avoid infinities
         math_rgb[0] = wolfram(math_x[0]);
         console.log("lower (Wolfram RGB): ", pmin[channel], math_x[0], math_rgb[0]);
 
@@ -1931,7 +1931,7 @@ function composite_pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pme
             .orient('horizontal')
             .cells(10)
             .scale(linear)
-            .labelFormat(d3.format(".2g")); // .1e or .2f		        
+            .labelFormat(d3.format(".2g")); // .1e or .2f
 
         scalesvg.select("#legendLinear" + channel)
             .call(legendLinear);
@@ -1962,7 +1962,7 @@ function composite_pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pme
 function crosshair_move(event) {
     event.preventDefault = true;
 
-    // get the dimensions of the SVG "PVAXISLINE"    
+    // get the dimensions of the SVG "PVAXISLINE"
     let _svg_top = parseFloat(d3.select("#PVAXISLINE").attr("top"));
     let _svg_left = parseFloat(d3.select("#PVAXISLINE").attr("left"));
     let _svg_width = parseFloat(d3.select("#PVAXISLINE").attr("width"));
@@ -2223,7 +2223,7 @@ function webgl_video_viewport_renderer(index, gl, width, height) {
         fragmentShaderCode = fragmentShaderCode.insert_at(pos, "float r_x = v_texcoord.z;\n float r_y = v_texcoord.w;\n if (r_x * r_x + r_y * r_y > 1.0) gl_FragColor.rgba = vec4(0.0, 0.0, 0.0, 0.0);\n");
     }
 
-    // WebGL2 accepts WebGL1 shaders so there is no need to update the code	
+    // WebGL2 accepts WebGL1 shaders so there is no need to update the code
     if (webgl2) {
         var prefix = "#version 300 es\n";
         vertexShaderCode = prefix + vertexShaderCode;
@@ -2255,7 +2255,7 @@ function webgl_video_viewport_renderer(index, gl, width, height) {
     // look up where the vertex data needs to go.
     var positionLocation = gl.getAttribLocation(frame.program, "a_position");
 
-    // Create a position buffer    
+    // Create a position buffer
     frame.positionBuffer = gl.createBuffer();
 
     gl.bindBuffer(gl.ARRAY_BUFFER, frame.positionBuffer);
@@ -2270,7 +2270,7 @@ function webgl_video_viewport_renderer(index, gl, width, height) {
     ];
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
 
-    // load a texture    
+    // load a texture
     frame.tex = gl.createTexture();
 
     gl.bindTexture(gl.TEXTURE_2D, frame.tex);
@@ -2292,7 +2292,7 @@ function webgl_video_viewport_renderer(index, gl, width, height) {
         console.error(status);
     }
 
-    //WebGL how to convert from clip space to pixels		
+    //WebGL how to convert from clip space to pixels
     //let px = viewport_zoom_settings.px;
     //let py = viewport_zoom_settings.py;
 
@@ -2324,7 +2324,7 @@ function webgl_video_viewport_renderer(index, gl, width, height) {
     let _width = xmax - xmin;
     let _height = ymax - ymin;
 
-    //console.log("xmin:", xmin, "ymin:", ymin, "_width:", _width, "_height:", _height);		
+    //console.log("xmin:", xmin, "ymin:", ymin, "_width:", _width, "_height:", _height);
     gl.uniform4fv(locationOfBox, [xmin, ymin, _width, _height]);
 
     // Setup the attributes to pull data from our buffers
@@ -2385,7 +2385,7 @@ function webgl_video_renderer(index, gl, width, height) {
     var vertexShaderCode = document.getElementById("vertex-shader").text;
     var fragmentShaderCode = document.getElementById("rgba-shader").text;
 
-    // WebGL2 accepts WebGL1 shaders so there is no need to update the code	
+    // WebGL2 accepts WebGL1 shaders so there is no need to update the code
     if (webgl2) {
         var prefix = "#version 300 es\n";
         vertexShaderCode = prefix + vertexShaderCode;
@@ -2417,7 +2417,7 @@ function webgl_video_renderer(index, gl, width, height) {
     // look up where the vertex data needs to go.
     var positionLocation = gl.getAttribLocation(image.program, "a_position");
 
-    // Create a position buffer    
+    // Create a position buffer
     image.positionBuffer = gl.createBuffer();
 
     gl.bindBuffer(gl.ARRAY_BUFFER, image.positionBuffer);
@@ -2432,7 +2432,7 @@ function webgl_video_renderer(index, gl, width, height) {
     ];
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
 
-    // load a texture    
+    // load a texture
     image.tex = gl.createTexture();
 
     gl.bindTexture(gl.TEXTURE_2D, image.tex);
@@ -2454,7 +2454,7 @@ function webgl_video_renderer(index, gl, width, height) {
         console.error(status);
     }
 
-    //WebGL how to convert from clip space to pixels		
+    //WebGL how to convert from clip space to pixels
     if (va_count == 1 || composite_view)
         gl.viewport(Math.round((width - img_width) / 2), Math.round((height - img_height) / 2), Math.round(img_width) - 0, Math.round(img_height) - 0);
     else
@@ -2482,11 +2482,11 @@ function webgl_video_renderer(index, gl, width, height) {
     if (zoom_dims != null)
         if (zoom_dims.view != null) {
             let view = zoom_dims.view;
-            // console.log("view:", view);                
+            // console.log("view:", view);
 
             // handle the zoom view
             xmin = view.x1 / (image.width - 0);// was - 1
-            ymin = view.y1 / (image.height - 0);// was - 1                
+            ymin = view.y1 / (image.height - 0);// was - 1
             _width = view.width / image.width;
             _height = view.height / image.height;
         }
@@ -2533,7 +2533,7 @@ function webgl_viewport_renderer(gl, container, height) {
         fragmentShaderCode = fragmentShaderCode.insert_at(pos, "float r_x = v_texcoord.z;\n float r_y = v_texcoord.w;\n if (r_x * r_x + r_y * r_y > 1.0) gl_FragColor.rgba = vec4(0.0, 0.0, 0.0, 0.0);\n");
     }
 
-    // WebGL2 accepts WebGL1 shaders so there is no need to update the code	
+    // WebGL2 accepts WebGL1 shaders so there is no need to update the code
     if (webgl2) {
         var prefix = "#version 300 es\n";
         vertexShaderCode = prefix + vertexShaderCode;
@@ -2603,7 +2603,7 @@ function webgl_viewport_renderer(gl, container, height) {
 
     let index = va_count;
 
-    //WebGL how to convert from clip space to pixels		
+    //WebGL how to convert from clip space to pixels
     let px = viewport_zoom_settings.px;
     let py = viewport_zoom_settings.py;
     let viewport_size = viewport_zoom_settings.zoomed_size;
@@ -2703,7 +2703,7 @@ function webgl_composite_viewport_renderer(gl, container, height) {
         fragmentShaderCode = fragmentShaderCode.insert_at(pos, "float r_x = v_texcoord.z;\n float r_y = v_texcoord.w;\n if (r_x * r_x + r_y * r_y > 1.0) gl_FragColor.rgba = vec4(0.0, 0.0, 0.0, 0.0);\n");
     }
 
-    // WebGL2 accepts WebGL1 shaders so there is no need to update the code	
+    // WebGL2 accepts WebGL1 shaders so there is no need to update the code
     if (webgl2) {
         var prefix = "#version 300 es\n";
         vertexShaderCode = prefix + vertexShaderCode;
@@ -2771,7 +2771,7 @@ function webgl_composite_viewport_renderer(gl, container, height) {
         console.error(status);
     }
 
-    //WebGL how to convert from clip space to pixels		
+    //WebGL how to convert from clip space to pixels
     let px = viewport_zoom_settings.px;
     let py = viewport_zoom_settings.py;
     let viewport_size = viewport_zoom_settings.zoomed_size;
@@ -2883,7 +2883,7 @@ function webgl_zoom_renderer(gl, height) {
         fragmentShaderCode = fragmentShaderCode.insert_at(pos, "float r_x = v_texcoord.z;\n float r_y = v_texcoord.w;\n if (r_x * r_x + r_y * r_y > 1.0) gl_FragColor.rgba = vec4(0.0, 0.0, 0.0, 0.0);\n");
     }
 
-    // WebGL2 accepts WebGL1 shaders so there is no need to update the code	
+    // WebGL2 accepts WebGL1 shaders so there is no need to update the code
     if (webgl2) {
         var prefix = "#version 300 es\n";
         vertexShaderCode = prefix + vertexShaderCode;
@@ -2915,7 +2915,7 @@ function webgl_zoom_renderer(gl, height) {
     // look up where the vertex data needs to go.
     var positionLocation = gl.getAttribLocation(viewport.program, "a_position");
 
-    // Create a position buffer    
+    // Create a position buffer
     viewport.positionBuffer = gl.createBuffer();
 
     gl.bindBuffer(gl.ARRAY_BUFFER, viewport.positionBuffer);
@@ -2930,7 +2930,7 @@ function webgl_zoom_renderer(gl, height) {
     ];
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
 
-    // load a texture    
+    // load a texture
     viewport.tex = gl.createTexture();
 
     gl.bindTexture(gl.TEXTURE_2D, viewport.tex);
@@ -2990,7 +2990,7 @@ function webgl_zoom_renderer(gl, height) {
 
         let index = va_count;
 
-        //WebGL how to convert from clip space to pixels		
+        //WebGL how to convert from clip space to pixels
         let px = viewport_zoom_settings.px;
         let py = viewport_zoom_settings.py;
         let viewport_size = viewport_zoom_settings.zoomed_size;
@@ -3020,7 +3020,7 @@ function webgl_zoom_renderer(gl, height) {
         let _width = xmax - xmin;
         let _height = ymax - ymin;
 
-        //console.log("xmin:", xmin, "ymin:", ymin, "_width:", _width, "_height:", _height);		
+        //console.log("xmin:", xmin, "ymin:", ymin, "_width:", _width, "_height:", _height);
         gl.uniform4fv(locationOfBox, [xmin, ymin, _width, _height]);
 
         // get the multiplier
@@ -3077,7 +3077,7 @@ function webgl_composite_zoom_renderer(gl, height) {
         fragmentShaderCode = fragmentShaderCode.insert_at(pos, "float r_x = v_texcoord.z;\n float r_y = v_texcoord.w;\n if (r_x * r_x + r_y * r_y > 1.0) gl_FragColor.rgba = vec4(0.0, 0.0, 0.0, 0.0);\n");
     }
 
-    // WebGL2 accepts WebGL1 shaders so there is no need to update the code	
+    // WebGL2 accepts WebGL1 shaders so there is no need to update the code
     if (webgl2) {
         var prefix = "#version 300 es\n";
         vertexShaderCode = prefix + vertexShaderCode;
@@ -3109,7 +3109,7 @@ function webgl_composite_zoom_renderer(gl, height) {
     // look up where the vertex data needs to go.
     var positionLocation = gl.getAttribLocation(viewport.program, "a_position");
 
-    // Create a position buffer    
+    // Create a position buffer
     viewport.positionBuffer = gl.createBuffer();
 
     gl.bindBuffer(gl.ARRAY_BUFFER, viewport.positionBuffer);
@@ -3124,7 +3124,7 @@ function webgl_composite_zoom_renderer(gl, height) {
     ];
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
 
-    // load a texture    
+    // load a texture
     viewport.tex = gl.createTexture();
 
     gl.bindTexture(gl.TEXTURE_2D, viewport.tex);
@@ -3182,7 +3182,7 @@ function webgl_composite_zoom_renderer(gl, height) {
             invalidateViewport = false;
         }
 
-        //WebGL how to convert from clip space to pixels		
+        //WebGL how to convert from clip space to pixels
         let px = viewport_zoom_settings.px;
         let py = viewport_zoom_settings.py;
         let viewport_size = viewport_zoom_settings.zoomed_size;
@@ -3196,7 +3196,7 @@ function webgl_composite_zoom_renderer(gl, height) {
         // the image bounding box
         var locationOfBox = gl.getUniformLocation(viewport.program, "box");
 
-        // image tone mapping        
+        // image tone mapping
         var locationOfParamsR = gl.getUniformLocation(viewport.program, "params_r");
         var locationOfParamsG = gl.getUniformLocation(viewport.program, "params_g");
         var locationOfParamsB = gl.getUniformLocation(viewport.program, "params_b");
@@ -3217,7 +3217,7 @@ function webgl_composite_zoom_renderer(gl, height) {
         let _width = xmax - xmin;
         let _height = ymax - ymin;
 
-        //console.log("xmin:", xmin, "ymin:", ymin, "_width:", _width, "_height:", _height);		
+        //console.log("xmin:", xmin, "ymin:", ymin, "_width:", _width, "_height:", _height);
         gl.uniform4fv(locationOfBox, [xmin, ymin, _width, _height]);
 
         for (index = 1; index <= va_count; index++) {
@@ -3281,7 +3281,7 @@ function init_webgl_zoom_buffers() {
         viewport.gl = ctx;
         // console.log("init_webgl is using the WebGL2 context.");
 
-        // enable floating-point textures filtering			
+        // enable floating-point textures filtering
         ctx.getExtension('OES_texture_float_linear');
 
         // needed by gl.checkFramebufferStatus
@@ -3332,7 +3332,7 @@ function init_webgl_composite_zoom_buffers() {
         viewport.gl = ctx;
         // console.log("init_webgl is using the WebGL2 context.");
 
-        // enable floating-point textures filtering			
+        // enable floating-point textures filtering
         ctx.getExtension('OES_texture_float_linear');
 
         // needed by gl.checkFramebufferStatus
@@ -3409,7 +3409,7 @@ function init_webgl_viewport_buffers(container) {
         var ctx = canvas.getContext("webgl2");
         // console.log("init_webgl is using the WebGL2 context.");
 
-        // enable floating-point textures filtering			
+        // enable floating-point textures filtering
         ctx.getExtension('OES_texture_float_linear');
 
         // needed by gl.checkFramebufferStatus
@@ -3457,7 +3457,7 @@ function init_webgl_composite_viewport_buffers(container) {
         var ctx = canvas.getContext("webgl2");
         // console.log("init_webgl is using the WebGL2 context.");
 
-        // enable floating-point textures filtering			
+        // enable floating-point textures filtering
         ctx.getExtension('OES_texture_float_linear');
 
         // needed by gl.checkFramebufferStatus
@@ -3527,7 +3527,7 @@ function init_webgl_composite_image_buffers() {
         compositeImage.gl = ctx;
         // console.log("init_webgl is using the WebGL2 context.");
 
-        // enable floating-point textures filtering			
+        // enable floating-point textures filtering
         ctx.getExtension('OES_texture_float_linear');
 
         // needed by gl.checkFramebufferStatus
@@ -3584,7 +3584,7 @@ function init_webgl_image_buffers(index) {
         imageContainer[index - 1].gl = ctx;
         // console.log("init_webgl is using the WebGL2 context.");
 
-        // enable floating-point textures filtering			
+        // enable floating-point textures filtering
         ctx.getExtension('OES_texture_float_linear');
 
         // needed by gl.checkFramebufferStatus
@@ -3638,7 +3638,7 @@ function init_webgl_video_buffers(index) {
         videoFrame[index - 1].gl = ctx;
         // console.log("init_webgl is using the WebGL2 context.");
 
-        // enable floating-point textures filtering			
+        // enable floating-point textures filtering
         ctx.getExtension('OES_texture_float_linear');
 
         // needed by gl.checkFramebufferStatus
@@ -3692,7 +3692,7 @@ function init_webgl_video_viewport_buffers(index) {
         videoFrame[index - 1].zoom.gl = ctx;
         // console.log("init_webgl is using the WebGL2 context.");
 
-        // enable floating-point textures filtering			
+        // enable floating-point textures filtering
         ctx.getExtension('OES_texture_float_linear');
 
         // needed by gl.checkFramebufferStatus
@@ -3793,7 +3793,7 @@ function process_hdr_viewport(img_width, img_height, pixels, alpha, index) {
     if (streaming || moving || dragging || windowLeft)
         return;
 
-    // combine pixels with a mask	
+    // combine pixels with a mask
     let len = pixels.length | 0;
     var texture = new Float32Array(2 * len);
     let offset = 0 | 0;
@@ -3837,8 +3837,8 @@ function process_hdr_viewport(img_width, img_height, pixels, alpha, index) {
             // console.log("viewport channel: " + channel + ", offset: " + offset + ", len: " + len + ", cross-check: " + (img_width * img_height));
 
             for (let i = 0 | 0; i < len; i = (i + 1) | 0) {
-                compositeViewportTexture[(offset + channel) | 0] = pixels[i]; // RGB channels    
-                compositeViewportTexture[offset + 3] |= (alpha[i] > 0) ? 1.0 : 0.0; // alpha channel                
+                compositeViewportTexture[(offset + channel) | 0] = pixels[i]; // RGB channels
+                compositeViewportTexture[offset + 3] |= (alpha[i] > 0) ? 1.0 : 0.0; // alpha channel
                 offset = (offset + 4) | 0;
             }
 
@@ -3874,7 +3874,7 @@ function process_hdr_viewport(img_width, img_height, pixels, alpha, index) {
             }
         }
 
-        // display the composite viewport        
+        // display the composite viewport
         init_webgl_composite_viewport_buffers(viewportContainer);
     }
 }
@@ -3942,8 +3942,8 @@ function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, i
             // console.log("image channel: " + channel + ", offset: " + offset + ", len: " + len + ", cross-check: " + (img_width * img_height));
 
             for (let i = 0 | 0; i < len; i = (i + 1) | 0) {
-                compositeImageTexture[(offset + channel) | 0] = pixels[i]; // RGB channels    
-                compositeImageTexture[offset + 3] |= (alpha[i] > 0) ? 1.0 : 0.0; // alpha channel                
+                compositeImageTexture[(offset + channel) | 0] = pixels[i]; // RGB channels
+                compositeImageTexture[offset + 3] |= (alpha[i] > 0) ? 1.0 : 0.0; // alpha channel
                 offset = (offset + 4) | 0;
             }
         } else {
@@ -4032,7 +4032,7 @@ function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, i
                 // clear the composite image buffers
                 clear_webgl_composite_image_buffers();
 
-                //display the composite image        
+                //display the composite image
                 init_webgl_composite_image_buffers();
             }
 
@@ -4179,7 +4179,7 @@ async function process_hds_spectrum(img_width, img_height, pixels, alpha, div) {
 
         // first pass
         for (let i = 0; i < img_width; i++) {
-            let world = pix2sky(fitsData, i + 0.5, 0);// '-' --> '+' for the HDS spectrum            
+            let world = pix2sky(fitsData, i + 0.5, 0);// '-' --> '+' for the HDS spectrum
 
             // if a and b are not NaN, apply a linear transformation
             if (!isNaN(a) && !isNaN(b)) { world[0] = a * i + b; }
@@ -4748,7 +4748,7 @@ function webgl_composite_image_renderer(gl, width, height) {
 
     fragmentShaderCode += document.getElementById("composite-shader").text;
 
-    // WebGL2 accepts WebGL1 shaders so there is no need to update the code	
+    // WebGL2 accepts WebGL1 shaders so there is no need to update the code
     if (webgl2) {
         var prefix = "#version 300 es\n";
         vertexShaderCode = prefix + vertexShaderCode;
@@ -4780,7 +4780,7 @@ function webgl_composite_image_renderer(gl, width, height) {
     // look up where the vertex data needs to go.
     var positionLocation = gl.getAttribLocation(compositeImage.program, "a_position");
 
-    // Create a position buffer    
+    // Create a position buffer
     compositeImage.positionBuffer = gl.createBuffer();
 
     gl.bindBuffer(gl.ARRAY_BUFFER, compositeImage.positionBuffer);
@@ -4795,7 +4795,7 @@ function webgl_composite_image_renderer(gl, width, height) {
     ];
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
 
-    // load a texture    
+    // load a texture
     compositeImage.tex = gl.createTexture();
 
     gl.bindTexture(gl.TEXTURE_2D, compositeImage.tex);
@@ -4834,7 +4834,7 @@ function webgl_composite_image_renderer(gl, width, height) {
         } else
             compositeImage.refresh = false;
 
-        //WebGL how to convert from clip space to pixels	
+        //WebGL how to convert from clip space to pixels
         gl.viewport(Math.round((width - img_width) / 2), Math.round((height - img_height) / 2), Math.round(img_width) - 0, Math.round(img_height) - 0);
         // console.log("gl.viewport:", (width - img_width) / 2, (height - img_height) / 2, img_width, img_height);
         // console.log("gl.viewport:", gl.getParameter(gl.VIEWPORT));
@@ -4952,7 +4952,7 @@ function webgl_image_renderer(index, gl, width, height) {
 
     fragmentShaderCode += document.getElementById(colourmap + "-shader").text;
 
-    // WebGL2 accepts WebGL1 shaders so there is no need to update the code	
+    // WebGL2 accepts WebGL1 shaders so there is no need to update the code
     if (webgl2) {
         var prefix = "#version 300 es\n";
         vertexShaderCode = prefix + vertexShaderCode;
@@ -4984,7 +4984,7 @@ function webgl_image_renderer(index, gl, width, height) {
     // look up where the vertex data needs to go.
     var positionLocation = gl.getAttribLocation(image.program, "a_position");
 
-    // Create a position buffer    
+    // Create a position buffer
     image.positionBuffer = gl.createBuffer();
 
     gl.bindBuffer(gl.ARRAY_BUFFER, image.positionBuffer);
@@ -4999,7 +4999,7 @@ function webgl_image_renderer(index, gl, width, height) {
     ];
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
 
-    // load a texture    
+    // load a texture
     image.tex = gl.createTexture();
 
     gl.bindTexture(gl.TEXTURE_2D, image.tex);
@@ -5081,11 +5081,11 @@ function webgl_image_renderer(index, gl, width, height) {
         if (zoom_dims != null)
             if (zoom_dims.view != null) {
                 let view = zoom_dims.view;
-                // console.log("view:", view);                
+                // console.log("view:", view);
 
                 // handle the zoom view
                 xmin = view.x1 / (image.width - 0);// was - 1
-                ymin = view.y1 / (image.height - 0);// was - 1                
+                ymin = view.y1 / (image.height - 0);// was - 1
                 _width = view.width / image.width;
                 _height = view.height / image.height;
             }
@@ -5147,7 +5147,7 @@ function process_hdr_video(index) {
             if (va_count > 1 && !composite_view) {
                 for (let index = 0; index < va_count; index++) {
                     /*var gl = imageContainer[index].gl;
- 
+
                     if (gl !== undefined && gl != null) {
                         gl.clearColor(0, 0, 0, 0);
                         gl.clear(gl.COLOR_BUFFER_BIT);
@@ -5157,12 +5157,12 @@ function process_hdr_video(index) {
                 }
             } else {
                 /*let gl = null;
- 
+
                 if (!composite_view)
                     gl = imageContainer[va_count - 1].gl;
                 else
                     gl = compositeImage.gl;
- 
+
                 if (gl !== undefined && gl != null) {
                     gl.clearColor(0, 0, 0, 0);
                     gl.clear(gl.COLOR_BUFFER_BIT);
@@ -5220,7 +5220,7 @@ function process_progress_event(data, index) {
                     var speed = notifications_received[index - 1] / elapsed;
                     var remaining_time = (100.0 - notifications_received[index - 1]) / speed;//[s]
 
-                    //console.log("speed:", speed, "remaining:", remaining_time);				
+                    //console.log("speed:", speed, "remaining:", remaining_time);
                     if (remaining_time > 1)
                         PROGRESS_INFO += ", " + numeral(remaining_time).format('00:00:00');
                 }
@@ -5236,7 +5236,7 @@ function process_progress_event(data, index) {
         }
         /*else {
           notifications_completed++;
-    
+
           if (notifications_completed == va_count)
             document.getElementById('welcome').style.display = "none";
         }*/
@@ -5569,7 +5569,7 @@ async function open_websocket_connection(_datasetId, index) {
                         // console.log("computed:", computed, "spectrum length:", spectrum_len, "frame.length:", frame.length);
 
                         waitForModuleReady().then(() => {
-                            // ZFP decoder part				
+                            // ZFP decoder part
                             Module.ready
                                 .then(_ => {
                                     let start = performance.now();
@@ -5622,7 +5622,7 @@ async function open_websocket_connection(_datasetId, index) {
                         var frame_mask = new Uint8Array(received_msg, offset, mask_length);
                         offset += mask_length;
 
-                        // WASM decoder part				
+                        // WASM decoder part
                         /*Module.ready
                           .then(_ => {*/
                         {
@@ -5790,10 +5790,10 @@ async function open_websocket_connection(_datasetId, index) {
                         //clear the Video Canvas
                         /*var c = document.getElementById('VideoCanvas') ;
                         var ctx = c.getContext("2d");
-              	
+
                         var width = c.width ;
                         var height = c.height ;
-                    
+
                         ctx.clearRect(0, 0, width, height);*/
                     }
 
@@ -5809,7 +5809,7 @@ async function open_websocket_connection(_datasetId, index) {
                         var frame = new Uint8Array(received_msg, offset);
 
                         waitForModuleReady().then(() => {
-                            // ZFP decoder part				
+                            // ZFP decoder part
                             Module.ready
                                 .then(_ => {
                                     // var spectrum = Module.decompressZFPspectrum(spectrum_len, frame).map((x) => x); // clone an array
@@ -5955,7 +5955,7 @@ async function open_websocket_connection(_datasetId, index) {
 
                                     var res = Module.hevc_decode_frame(videoFrame[index - 1].width, videoFrame[index - 1].height, frame, index - 1, _colourmap, fill, contours);
                                     // data = new Uint8ClampedArray(Module.HEAPU8.subarray(res[0], res[0] + res[1])); // it's OK to use .subarray() instead of .slice() as a copy is made in "new Uint8ClampedArray()"
-                                    var rgba = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]); // receive RGBA texture from the WASM module                                    
+                                    var rgba = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]); // receive RGBA texture from the WASM module
 
                                     videoFrame[index - 1].rgba = rgba;
 
@@ -6120,14 +6120,14 @@ async function open_websocket_connection(_datasetId, index) {
                         console.log("P-V Diagram: frame_pv.length = ", frame_pv.length);
 
                         if (id == "ZFP") {
-                            // decompress ZFP							
+                            // decompress ZFP
                             if (va_count == 1) {
                                 var res = Module.decompressPVdiagram(pv_width, pv_height, frame_pv);
                             } else {
                                 var res = Module.decompressCompositePVdiagram(pv_width, pv_height, va_count, frame_pv);
                             }
 
-                            const pv = new Uint8ClampedArray(Module.HEAPU8.subarray(res[0], res[0] + res[1])); // it's OK to use .subarray() instead of .slice() as a copy is made in "new Uint8ClampedArray()"							
+                            const pv = new Uint8ClampedArray(Module.HEAPU8.subarray(res[0], res[0] + res[1])); // it's OK to use .subarray() instead of .slice() as a copy is made in "new Uint8ClampedArray()"
 
                             var pvData = new ImageData(pv, pv_width, pv_height);
 
@@ -6147,7 +6147,7 @@ async function open_websocket_connection(_datasetId, index) {
                             var offset = 0.05 * c.height;
 
                             // scale with preserving the aspect ratio
-                            /*var scale = get_pv_image_scale(dst_width, dst_height, pv_width, pv_height);							
+                            /*var scale = get_pv_image_scale(dst_width, dst_height, pv_width, pv_height);
                             var img_width = scale * pv_width;
                             var img_height = scale * pv_height;*/
 
@@ -6176,7 +6176,7 @@ async function open_websocket_connection(_datasetId, index) {
                             var flipY = false;
 
                             if (vmin < vmax) {
-                                // flip both the X and Y axes                                
+                                // flip both the X and Y axes
                                 ctx.translate(c.width, c.height + offset);
                                 ctx.scale(-1, -1); // X was -1
 
@@ -6287,7 +6287,7 @@ async function open_websocket_connection(_datasetId, index) {
                         console.log("HDS X-Y spectra: X:", X, "Y:", Y, "THETA:", THETA);*/
 
                         waitForModuleReady().then(() => {
-                            // ZFP decoder part				
+                            // ZFP decoder part
                             Module.ready
                                 .then(_ => {
                                     //console.log("processing HDS X-Y spectra");
@@ -6426,7 +6426,7 @@ async function open_websocket_connection(_datasetId, index) {
                             }
 
                             try {
-                                //init the HEVC decoder		
+                                //init the HEVC decoder
                                 Module.hevc_init_frame(va_count, width, height);
                             } catch (e) {
                                 //console.log(e);
@@ -6884,7 +6884,7 @@ function display_scale_info() {
         //console.log("Reduced vertical height:", Math.abs(gridScale[1]) * scale);
     }
 
-    //vertical scale	
+    //vertical scale
     var L = Math.abs(gridScale[1]) * scale * img_height;
     var X = 1 * emFontSize;
     if (composite_view)
@@ -7340,7 +7340,7 @@ function display_cd_gridlines() {
             .attr("x", 0)
             .style("fill", fillColour)
             //.attr("dx", ".35em")
-            //.attr("dy", ".35em")			
+            //.attr("dy", ".35em")
             .attr("transform", "rotate(" + label_angle + ")")
             .style("text-anchor", "middle");
     }
@@ -7801,7 +7801,7 @@ function display_dataset_info() {
     /*if(va_count == 1)
     {
     line = fitsData.LINE.trim() ;
-  	
+
     if(line != "")
       line = ' (' + line + ')' ;
     }*/
@@ -7962,9 +7962,9 @@ function display_dataset_info() {
     }
     else if (has_frequency_info) {
         /*if(fitsData.CTYPE3 != "")
-        {	    
+        {
           //an override due to ALMA data errors: use the no middle-point
-          RESTFRQ = (val1+val2)/2 ;//expects [Hz]	
+          RESTFRQ = (val1+val2)/2 ;//expects [Hz]
         }*/
 
         RESTFRQ = (RESTFRQ / 1.0e9).toPrecision(7) * 1.0e9;//slightly rounded, expected unit is [Hz]
@@ -8292,14 +8292,26 @@ function toggle_rest_frequency() {
 
 function toggle_redshift(selection) {
     var unit = document.getElementById('unit');
+    var elem = document.getElementById('redshift');
 
     sessionStorage.setItem("redshift", selection.value);
 
-    if (selection.value == "v")
+    if (selection.value == "v") {
         unit.innerHTML = "km/s";
 
-    if (selection.value == "z")
+        // set the elem "min", "max" and "step" attributes
+        elem.setAttribute("min", -299792);
+        elem.setAttribute("max", 299792);
+        elem.setAttribute("step", 1);
+    }
+
+    if (selection.value == "z") {
         unit.innerHTML = "(z>-1)";
+
+        // set the elem "min" and "step" attributes
+        elem.setAttribute("min", -0.9);
+        elem.setAttribute("step", 0.0001);
+    }
 
     var m = document.getElementById('redshift');
     m.value = 0.0.toFixed(1);
@@ -8487,7 +8499,7 @@ function validate_redshift() {
         // update the redshift-v input field
         document.getElementById('redshift-v').value = velocity.toFixed(2);*/
 
-        // refresh the HDS spectral lines        
+        // refresh the HDS spectral lines
         hds_divs.forEach(refresh_hds_spectral_lines);
     }
 
@@ -8611,7 +8623,7 @@ function change_tone_mapping(index, recursive) {
 
     setup_histogram_interaction(index);
 
-    // set a new tone mapping function 
+    // set a new tone mapping function
     if (imageContainer[index - 1] != null) {
         let image = imageContainer[index - 1];
 
@@ -8690,7 +8702,7 @@ function cube_refresh(index) {
         timestamp: performance.now()
     };
 
-    //send an [image] request to the server    
+    //send an [image] request to the server
     if (wsConn[index - 1].readyState == 1)
         wsConn[index - 1].send(JSON.stringify(request));
 
@@ -8762,13 +8774,13 @@ function display_scale_range_ui(called_from_menu = false) {
     /*var svg = d3.select("#FrontSVG") ;
     var width = parseFloat(svg.attr("width"));
     var height = parseFloat(svg.attr("height"));
-  	
+
     d3.select("#yaxis")
     .attr("data-toggle", "popover")
     .attr("data-trigger", "hover")
     .attr("title", "fixed scale")
     .attr("data-content", "hold 's' and move mouse over the Y-Axis, then use mouse drag/scroll-wheel to adjust the Y-Axis scale");
-  	
+
     $(document).ready(function(){
     $('[data-toggle="popover"]').popover();
     });*/
@@ -9625,7 +9637,7 @@ function update_contours() {
     setTimeout(function () {
         contour_surface();
         /*hide_hourglass() ;*/
-    }, 0);//50, 100    
+    }, 0);//50, 100
 }
 
 function redraw_histogram(index) {
@@ -9910,7 +9922,7 @@ function display_preferences(index) {
         d3.select('#video_fps_control_li').style("display", "none");
     }
 
-    //----------------------------------------	
+    //----------------------------------------
     tmpA = prefDropdown.append("li")
         .attr("id", "binning_li")
         //.style("background-color", "#FFF")
@@ -9931,7 +9943,7 @@ function display_preferences(index) {
     document.getElementById('binning').value = binning.toString();
 
 
-    //----------------------------------------	
+    //----------------------------------------
     tmpA = prefDropdown.append("li")
         .attr("id", "video_fps_control_li")
         //.style("background-color", "#FFF")
@@ -9961,7 +9973,7 @@ function display_preferences(index) {
     //ui_theme
     {
         tmpA = prefDropdown.append("li")
-            //.style("background-color", "#FFF")	
+            //.style("background-color", "#FFF")
             .append("a")
             .style("class", "form-group")
             .attr("class", "form-horizontal");
@@ -9972,7 +9984,7 @@ function display_preferences(index) {
             .html("ui theme:&nbsp; ");
 
         tmpA.append("select")
-            //.attr("class", "form-control")	
+            //.attr("class", "form-control")
             .attr("id", "ui_theme")
             .attr("onchange", "javascript:change_ui_theme();")
             .html("<option>dark</option><option>bright</option>");
@@ -9983,7 +9995,7 @@ function display_preferences(index) {
     //coords_fmt
     {
         tmpA = prefDropdown.append("li")
-            //.style("background-color", "#FFF")	
+            //.style("background-color", "#FFF")
             .append("a")
             .attr("id", "coords_fmt_li")
             .style("class", "form-group")
@@ -9995,7 +10007,7 @@ function display_preferences(index) {
             .html("RA (<i>α</i>) display:&nbsp; ");
 
         tmpA.append("select")
-            //.attr("class", "form-control")	
+            //.attr("class", "form-control")
             .attr("id", "coords_fmt")
             .attr("onchange", "javascript:change_coords_fmt();")
             .html("<option>HMS</option><option>DMS</option>");
@@ -10018,14 +10030,14 @@ function display_preferences(index) {
     previous_contour_lines = 5;
 
     tmpA.append("input")
-        //.attr("class", "form-control")	
+        //.attr("class", "form-control")
         .attr("id", "contour_lines")
         .attr("type", "number")
         .style("width", "3em")
         .attr("min", 1)
         .attr("step", 1)
         .attr("value", previous_contour_lines);
-    //.attr("onchange", "javascript:update_contours();");    
+    //.attr("onchange", "javascript:update_contours();");
 
     var elem = document.getElementById('contour_lines');
     elem.onblur = validate_contour_lines;
@@ -10071,7 +10083,7 @@ function display_preferences(index) {
     }
 
     tmpA = prefDropdown.append("li")
-        //.style("background-color", "#FFF")	
+        //.style("background-color", "#FFF")
         .append("a")
         .attr("id", "zoom_shape_li")
         .style("class", "form-group")
@@ -10083,7 +10095,7 @@ function display_preferences(index) {
         .html("zoom shape:&nbsp; ");
 
     tmpA.append("select")
-        //.attr("class", "form-control")	
+        //.attr("class", "form-control")
         .attr("id", "zoom_shape")
         .attr("onchange", "javascript:change_zoom_shape();")
         .html("<option>circle</option><option>square</option>");
@@ -10436,7 +10448,7 @@ function dragend() {
 
     frame_start = session_frame_start;
     frame_end = session_frame_end;
-    //recalculate {data_band_lo,data_band_hi} based on {frame_start,frame_end} 
+    //recalculate {data_band_lo,data_band_hi} based on {frame_start,frame_end}
 
     //if((freq_start > 0.0) && (freq_end > 0.0))
     // if((frame_start >= 0) && (frame_end >= 0))
@@ -10831,7 +10843,7 @@ function setup_axes() {
              n = d * (fitsData.depth-1) + 1 ;
            else
              n = (1-d) * (fitsData.depth-1) + 1 ;
-           
+
            var freq = fitsData.CRVAL3+fitsData.CDELT3*(n-fitsData.CRPIX3) ;
            freq /= 1e9 ;//convert from Hz to GHz
            return freq.toPrecision(6) ;
@@ -11301,7 +11313,7 @@ function x_axis_mouseenter(offset) {
         .attr("id", "jvoText")
         .attr("x", width / 2)
         .attr("y", height / 2)
-        //.attr("font-family", "Arial")		
+        //.attr("font-family", "Arial")
         .attr("font-family", "Inconsolata")
         .attr("font-weight", "regular")
         .attr("font-size", "5em")
@@ -11614,7 +11626,7 @@ function x_axis_move(offset) {
 
     if (!freqdrag && wasm_supported) {
         //initially assume 10 frames per second for a video
-        //later on use a Kalman Filter to predict the next frame position and request it		
+        //later on use a Kalman Filter to predict the next frame position and request it
         vidInterval = 1000 / vidFPS;
 
         now = performance.now();
@@ -12007,7 +12019,7 @@ function pv_event(event) {
         let dy = y2 - y1;
 
         if (Math.abs(dy) > 0) {
-            let _m = - dx / dy; // a perpendicular line to the P-V line				
+            let _m = - dx / dy; // a perpendicular line to the P-V line
             let _s = emFontSize / Math.sqrt(1 + _m * _m) / golden_ratio;
 
             let _mx = _s;
@@ -12306,7 +12318,7 @@ function pv_event(event) {
                 }
 
                 if (Math.abs(dy) > 0) {
-                    _m = - dx / dy; // a perpendicular line to the P-V line				
+                    _m = - dx / dy; // a perpendicular line to the P-V line
                     _s = emFontSize / Math.sqrt(1 + _m * _m) / 2;
 
                     _mx = _s;
@@ -12366,7 +12378,7 @@ function pv_event(event) {
                             let x = offset[0] - pvsvg_left; // the SVG offset
                             let y = offset[1] - pvsvg_top; // the SVG offset
 
-                            // check if the point is within the image							
+                            // check if the point is within the image
                             x = Math.min(Math.max(x, 0), pvsvg_width - 1);
                             y = Math.min(Math.max(y, 0), pvsvg_height - 1);
 
@@ -12422,7 +12434,7 @@ function pv_event(event) {
                             }
 
                             if (Math.abs(dy) > 0) {
-                                _m = - dx / dy; // a perpendicular line to the P-V line				
+                                _m = - dx / dy; // a perpendicular line to the P-V line
                                 _s = emFontSize / Math.sqrt(1 + _m * _m) / 2;
 
                                 _mx = _s;
@@ -12514,7 +12526,7 @@ function pv_event(event) {
                             let x = offset[0] - pvsvg_left; // the SVG offset
                             let y = offset[1] - pvsvg_top; // the SVG offset
 
-                            // check if the point is within the image							
+                            // check if the point is within the image
                             x = Math.min(Math.max(x, 0), pvsvg_width - 1);
                             y = Math.min(Math.max(y, 0), pvsvg_height - 1);
 
@@ -12570,7 +12582,7 @@ function pv_event(event) {
                             }
 
                             if (Math.abs(dy) > 0) {
-                                _m = - dx / dy; // a perpendicular line to the P-V line				
+                                _m = - dx / dy; // a perpendicular line to the P-V line
                                 _s = emFontSize / Math.sqrt(1 + _m * _m) / 2;
 
                                 _mx = _s;
@@ -12631,7 +12643,7 @@ function dragMid(event) {
     let x = offset[0] - pvsvg_left; // the SVG offset
     let y = offset[1] - pvsvg_top; // the SVG offset
 
-    // check if the point is within the image					
+    // check if the point is within the image
     x = Math.min(Math.max(x, 0), pvsvg_width - 1);
     y = Math.min(Math.max(y, 0), pvsvg_height - 1);
 
@@ -12702,7 +12714,7 @@ function dragMid(event) {
     }
 
     if (Math.abs(dy) > 0) {
-        _m = - dx / dy; // a perpendicular line to the P-V line				
+        _m = - dx / dy; // a perpendicular line to the P-V line
         _s = emFontSize / Math.sqrt(1 + _m * _m) / 2;
 
         _mx = _s;
@@ -13380,7 +13392,7 @@ function setup_image_selection_index(index, topx, topy, img_width, img_height) {
 
     var svg = d3.select("#FrontSVG");
 
-    //add a bounding box			
+    //add a bounding box
     if (theme == 'bright')
         var strokeStyle = "white";
     else
@@ -14259,7 +14271,7 @@ function setup_image_selection() {
                     let dy = y2 - y1;
 
                     if (Math.abs(dy) > 0) {
-                        let _m = - dx / dy; // a perpendicular line to the P-V line				
+                        let _m = - dx / dy; // a perpendicular line to the P-V line
                         let _s = emFontSize / Math.sqrt(1 + _m * _m) / golden_ratio;
 
                         let _mx = _s;
@@ -14276,7 +14288,7 @@ function setup_image_selection() {
                         d3.select("#pvmid").attr("x1", _x1).attr("y1", _y1).attr("x2", _x2).attr("y2", _y2);
                     }
 
-                    // return; // disabled to test zoom-in for the P-V line end point           
+                    // return; // disabled to test zoom-in for the P-V line end point
                 }
 
                 if (d3.select("#pvline").attr("opacity") > 0.0 && mouse_click_end) {
@@ -14293,7 +14305,7 @@ function setup_image_selection() {
             } catch (_) { }
 
             // commented out so that the caching 'wait' cursor remains visible
-            //d3.select(this).style('cursor', 'none');			
+            //d3.select(this).style('cursor', 'none');
 
             event.preventDefault = true;
             if (!has_image) return;
@@ -14501,7 +14513,7 @@ function setup_image_selection() {
                 }
             }
 
-            // update image updates      
+            // update image updates
             if (!mousedown || d3.select("#pvline").attr("opacity") == 1.0) {
                 var px, py;
 
@@ -14548,7 +14560,7 @@ function setup_image_selection() {
                 var pred_mouse_x = Math.round(mouse_position.x + last_x.elements[2] * latency);
                 var pred_mouse_y = Math.round(mouse_position.y + last_x.elements[3] * latency);
                 //var pred_mouse_x = Math.round(mouse_position.x + last_x.elements[0] * latency + 0.5 * last_x.elements[2] * latency * latency) ;
-                //var pred_mouse_y = Math.round(mouse_position.y + last_x.elements[1] * latency + 0.5 * last_x.elements[3] * latency * latency) ;				
+                //var pred_mouse_y = Math.round(mouse_position.y + last_x.elements[1] * latency + 0.5 * last_x.elements[3] * latency * latency) ;
 
                 //console.log("latency = ", latency.toFixed(1), "[ms]", "mx = ", mouse_position.x, "px = ", pred_mouse_x, "my = ", mouse_position.y, "py = ", pred_mouse_y);
                 /*var pred_x = image_bounding_dims.x1 + (pred_mouse_x - d3.select(this).attr("x")) / (d3.select(this).attr("width") - 1) * (image_bounding_dims.width - 1);
@@ -14572,7 +14584,7 @@ function setup_image_selection() {
                 //console.log('active', 'x = ', x, 'y = ', y, 'clipSize = ', clipSize, 'fitsX = ', fitsX, 'fitsY = ', fitsY, 'fitsSize = ', fitsSize) ;
                 //let strLog = 'active x = ' + x + ' y = '+ y + ' clipSize = ' + clipSize + ' fitsX = ' + fitsX + ' fitsY = ' + fitsY + ' fitsSize = ' + fitsSize + ' pred_x = ' + pred_x + ' pred_y = ' + pred_y + ' pred_mouse_x = ' + pred_mouse_x + ' pred_mouse_y = ' + pred_mouse_y ;
 
-                //send a spectrum request to the server				
+                //send a spectrum request to the server
                 var x1 = Math.round(fitsX - fitsSize);
                 var y1 = Math.round(fitsY - fitsSize);
                 var x2 = Math.round(fitsX + fitsSize);
@@ -14585,7 +14597,7 @@ function setup_image_selection() {
                     var dy = range.yMax - range.yMin;
 
                     for (let index = 0; index < va_count; index++) {
-                        // a real-time websocket request                                
+                        // a real-time websocket request
 
                         if (viewport_zoom_settings != null) {
                             let _width = viewport_zoom_settings.zoomed_size;
@@ -14929,7 +14941,7 @@ async function fetch_spectral_lines(datasetId, freq_start, freq_end) {
                 if (received_msg instanceof ArrayBuffer) {
 
                     try {
-                        // bzip2 decoder 
+                        // bzip2 decoder
                         var bytes = new Uint8Array(received_msg);
                         jsonData = bzip2.simple(bzip2.array(bytes));
 
@@ -15216,7 +15228,7 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                 offset += buffer_len;
                                 //console.log("FITS mean spectrum length:", spectrum_len);
 
-                                // ZFP decoder part				
+                                // ZFP decoder part
                                 /*Module.ready
                                   .then(_ => {*/
                                 let start = performance.now();
@@ -15249,7 +15261,7 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                 offset += buffer_len;
                                 //console.log("FITS integrated spectrum length:", spectrum_len);
 
-                                // FPZIP decoder part				
+                                // FPZIP decoder part
                                 /*Module.ready
                                   .then(_ => {*/
                                 let start = performance.now();
@@ -15409,7 +15421,7 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                             //console.log("mean spectrumContainer:", mean_spectrumContainer);
                                             //console.log("integrated spectrumContainer:", integrated_spectrumContainer);
 
-                                            //display an RGB legend in place of REF FRQ			
+                                            //display an RGB legend in place of REF FRQ
                                             display_composite_legend();
 
                                             setup_axes();
@@ -15430,7 +15442,7 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                 }
                             }
 
-                            // WASM decoder part				
+                            // WASM decoder part
                             /*Module.ready
                               .then(_ => {*/
                             {
@@ -15489,7 +15501,7 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
 
                                     let fitsData = fitsContainer[va_count - 1];
 
-                                    // if img_height > 1 and CTYPE1 is 'PIXEL' then it is a 2D image spectrum                                    
+                                    // if img_height > 1 and CTYPE1 is 'PIXEL' then it is a 2D image spectrum
                                     if (img_height > 1 && fitsData.CTYPE1.trim().toUpperCase() == 'PIXEL') {
                                         console.log("2D image spectrum with dimensions: ", img_width, img_height);
 
@@ -15674,7 +15686,7 @@ function tiles_dragmove(event) {
 
     // adjust the zoom_dims.view x1 and y1
     zoom_dims.view.x1 = clamp(zoom_dims.prev_x1 - dx / zoom_dims.scale, 0, zoom_dims.width - zoom_dims.view.width);
-    zoom_dims.view.y1 = clamp(zoom_dims.prev_y1 - (-dy) / zoom_dims.scale, 0, zoom_dims.height - zoom_dims.view.height); // invert the Y-axis    
+    zoom_dims.view.y1 = clamp(zoom_dims.prev_y1 - (-dy) / zoom_dims.scale, 0, zoom_dims.height - zoom_dims.view.height); // invert the Y-axis
 
     for (let i = 1; i <= va_count; i++) {
         refresh_tiles(i);
@@ -16410,7 +16422,7 @@ function updateKalman() {
     var velY = (cur_yPos - last_yPos)/dt;
     var accX = (velX - last_velX)/dt;
     var accY = (velY - last_velY)/dt;
-  	
+
     last_xPos = cur_xPos ;
     last_yPos = cur_yPos ;
     last_velX = velX ;
@@ -16447,18 +16459,18 @@ function updateKalman() {
 
     /*mouse_position.x = cur_x.elements[0];
     mouse_position.y = cur_x.elements[1];
-  	
+
     return;
-  	
+
     //extrapolation
     var predX = last_x;
     var count = 5;//how many frames ahead
-  	
+
     for (var i = 0; i < count; i++)
       predX = (A.multiply(predX)).add(B.multiply(control));
-  	
+
     console.log("extrapolation: x=", predX.elements[0], "y=", predX.elements[1]);
-  	
+
     mouse_position.x = predX.elements[0];
     mouse_position.y = predX.elements[1];*/
 }
@@ -16502,7 +16514,7 @@ function change_noise_sensitivity(index) {
     // set image tone mapping
     var image = imageContainer[index - 1];
     /*let fitsData = fitsContainer[index - 1];
-  	
+
     if (image.tone_mapping.flux == "ratio")
       image.tone_mapping.ratio_sensitivity = multiplier * fitsData.ratio_sensitivity;
     else
@@ -16705,7 +16717,7 @@ function pv_contour(left, top, width, height, pvCanvas, flipY, pv_width, pv_heig
     console.log("zs:", zs);
 
     var completed_levels = 0;
-    //parallel isoBands    
+    //parallel isoBands
     for (var i = 1; i < zs.length; i++) {
         var lowerBand = zs[i - 1];
         var upperBand = zs[i];
@@ -16839,7 +16851,7 @@ function send_pv_request(x1, y1, x2, y2) {
         timestamp: performance.now()
     };
 
-    //send a P-V diagram request to the server    
+    //send a P-V diagram request to the server
     if (wsConn[0].readyState == 1)
         wsConn[0].send(JSON.stringify(request));
 
@@ -17528,7 +17540,7 @@ function display_menu() {
     var imageDropdown = imageMenu.append("ul")
         .attr("id", "imageDropdown")
         .attr("class", "dropdown-menu");
-    //.style("background-color", "rgba(0,0,0,0.4)");    
+    //.style("background-color", "rgba(0,0,0,0.4)");
 
     //PREFERENCES
     var prefMenu = mainUL.append("li")
@@ -17549,7 +17561,7 @@ function display_menu() {
         .attr("id", "prefDropdown")
         .attr("class", "dropdown-menu");
 
-    //SPLATALOGUE    
+    //SPLATALOGUE
     if (!optical_view) {
         var splatMenu = mainUL.append("li")
             .attr("id", "splatMenu")
@@ -17759,7 +17771,13 @@ function display_menu() {
 
         // v&nbsp;
         tmp.append("span")
-            .html("v&nbsp;");
+            .on("click", function () {
+                // switch on velV and toggle redshift
+                let elem = document.getElementById('velV');
+                elem.checked = true;
+                toggle_redshift(elem);
+            })
+            .html("&nbsp;v&nbsp;");
 
         // <input type="radio" id="velZ" name="velocity" value="z" style="vertical-align: middle; margin: 0px;" onclick="javascript:toggle_redshift_input_source(this);">
         tmp.append("input")
@@ -17775,14 +17793,17 @@ function display_menu() {
 
         // z&nbsp;
         tmp.append("span")
-            .html("z&nbsp;");
+            .on("click", function () {
+                // switch on velZ and toggle redshift
+                let elem = document.getElementById('velZ');
+                elem.checked = true;
+                toggle_redshift(elem);
+            })
+            .html("&nbsp;z&nbsp;");
 
         // &nbsp;
         tmp.append("span")
             .html("&nbsp;");
-
-        // make velV checked by default
-        d3.select("#velV").property("checked", true);
 
         tmp.append("input")
             .attr("id", "redshift")
@@ -17794,7 +17815,7 @@ function display_menu() {
 
         // &nbsp;
         tmp.append("span")
-            .html("&nbsp;");
+            .html("&nbsp;&nbsp;");
 
         // <span id="unit">km/s</span>
         tmp.append("span")
@@ -17821,27 +17842,40 @@ function display_menu() {
             }, 250);
         };
 
-        var c = 299792.458;//speed of light [km/s]
+        if (sessionStorage.getItem("redshift") === null) {
+            // make velV checked by default
+            document.getElementById('velV').setAttribute("checked", "");
+            //d3.select("#velV").property("checked", true);
 
-        /*tmp = atomicDropdown.append("li")
-            .attr("id", "redshift_v_li")
-            .append("a")
-            .style("class", "form-group")
-            .attr("class", "form-horizontal");
+            // set the elem "min", "max" and "step" attributes
+            elem.setAttribute("min", -299792);
+            elem.setAttribute("max", 299792);
+            elem.setAttribute("step", 1);
+        }
+        else {
+            let unit = document.getElementById('unit');
+            let value = sessionStorage.getItem("redshift"); // either 'v' or 'z'
 
-        tmp.append("label")
-            .attr("for", "redshift-v")
-            .attr("class", "control-label")
-            .html("redshift v [km/s]:&nbsp; ");
+            // use upper case value
+            document.getElementById('vel' + value.toUpperCase()).setAttribute("checked", "");
 
-        tmp.append("input")
-            .attr("id", "redshift-v")
-            .attr("type", "number")
-            .style("width", "5em")
-            .attr("min", -299792)
-            .attr("max", 299792)
-            .attr("step", 0.1)
-            .attr("value", previous_redshift.toFixed(2));*/
+            if (value == "v") {
+                unit.innerHTML = "km/s";
+
+                // set the elem "min", "max" and "step" attributes
+                elem.setAttribute("min", -299792);
+                elem.setAttribute("max", 299792);
+                elem.setAttribute("step", 1);
+            }
+
+            if (value == "z") {
+                unit.innerHTML = "(z>-1)";
+
+                // set the elem "min" and "step" attributes
+                elem.setAttribute("min", -0.9);
+                elem.setAttribute("step", 0.0001);
+            }
+        }
     }
 
     //VIEW
@@ -17909,17 +17943,17 @@ function display_menu() {
                 //window.location.reload();
 
                 /*var new_loc = window.location.href.replace("&view=", "&dummy=");
-        	
+
                 if (composite_view && optical_view)
                   new_loc += "&view=composite,optical";
                 else {
                   if (composite_view)
                     new_loc += "&view=composite";
-        	
+
                   if (optical_view)
                     new_loc += "&view=optical";
                 }
-        	
+
                 window.location.replace(new_loc);*/
             })
             .html(htmlStr);
@@ -18421,7 +18455,7 @@ function show_welcome() {
     var footer = contentDiv.append("div")
         .attr("class", "modal-footer d-flex justify-content-around");
 
-    /*footer.append("button")	
+    /*footer.append("button")
     .attr("type", "button")
     .attr("data-dismiss", "modal")
       .attr("class", "button btn-lg pull-right")
@@ -18879,14 +18913,14 @@ async function display_FITS_header(index) {
         /*fitsHeader = new Uint8Array(window.atob(fitsData.HEADER.replace(/\s/g, '')).split("").map(function (c) {
           return c.charCodeAt(0);
         }));
-    	
+
         var Buffer = require('buffer').Buffer;
         var LZ4 = require('lz4');
-    	
+
         var uncompressed = new Buffer(parseInt(fitsData.HEADERSIZE, 10));
         uncompressedSize = LZ4.decodeBlock(new Buffer(fitsHeader), uncompressed);
         uncompressed = uncompressed.slice(0, uncompressedSize);
-    	
+
         try {
           fitsHeader = String.fromCharCode.apply(null, uncompressed);
         }
@@ -18976,7 +19010,7 @@ async function display_FITS_header(index) {
                         headerHeap = new Uint8Array(Module.HEAPU8.buffer, headerPtr, nHeaderBytes);
                         headerHeap.set(new Uint8Array(header));
 
-                        // Use byte offset to pass header string to libwcs                    
+                        // Use byte offset to pass header string to libwcs
                         stat = Module.initWcs(index, headerHeap.byteOffset, nkeyrec, va_count);
 
                         // Free memory
@@ -19598,7 +19632,7 @@ function update_legend() {
 function init_webgl_legend_buffers(x, y, width, height, index) {
     //place the image onto the main canvas
     var canvas = document.getElementById('LegendCanvas');
-    canvas.style.display = "block";// a hack needed by Apple Safari    
+    canvas.style.display = "block";// a hack needed by Apple Safari
 
     if (webgl1 || webgl2) {
         canvas.addEventListener("webglcontextlost", function (event) {
@@ -19618,7 +19652,7 @@ function init_webgl_legend_buffers(x, y, width, height, index) {
         imageContainer[index - 1].legend_gl = ctx;
         // console.log("init_webgl is using the WebGL2 context.");
 
-        // enable floating-point textures filtering			
+        // enable floating-point textures filtering
         ctx.getExtension('OES_texture_float_linear');
 
         // needed by gl.checkFramebufferStatus
@@ -19650,7 +19684,7 @@ function clear_webgl_legend_buffers(index) {
     if (gl === undefined || gl == null)
         return;
 
-    // position buffer	
+    // position buffer
     if (image.legend_positionBuffer !== undefined)
         gl.deleteBuffer(image.legend_positionBuffer);
 
@@ -19676,7 +19710,7 @@ function webgl_legend_renderer(index, gl, x, y, width, height) {
     // remove the alpha blending multiplier
     fragmentShaderCode = fragmentShaderCode.replace(/gl_FragColor.rgb *= gl_FragColor.a;/g, "");
 
-    // WebGL2 accepts WebGL1 shaders so there is no need to update the code	
+    // WebGL2 accepts WebGL1 shaders so there is no need to update the code
     if (webgl2) {
         var prefix = "#version 300 es\n";
         vertexShaderCode = prefix + vertexShaderCode;
@@ -19708,7 +19742,7 @@ function webgl_legend_renderer(index, gl, x, y, width, height) {
     // look up where the vertex data needs to go.
     var positionLocation = gl.getAttribLocation(image.legend_program, "a_position");
 
-    // Create a position buffer    
+    // Create a position buffer
     image.legend_positionBuffer = gl.createBuffer();
 
     gl.bindBuffer(gl.ARRAY_BUFFER, image.legend_positionBuffer);
@@ -19724,7 +19758,7 @@ function webgl_legend_renderer(index, gl, x, y, width, height) {
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
 
     // no need for an animation loop, just handle the lost context
-    //WebGL how to convert from clip space to pixels	
+    //WebGL how to convert from clip space to pixels
     gl.viewport(Math.round(x), Math.round(y), Math.round(width), Math.round(height));
 
     // Clear the canvas
@@ -19873,7 +19907,7 @@ function contour_surface_marching_squares() {
         var pixel = 4 * (ycoord * imageCanvas.width + xcoord);
 
         for (var w = 0; w < image_bounding_dims.width; w++) {
-            //var z = imageDataCopy[pixel];	    
+            //var z = imageDataCopy[pixel];
             var r = imageDataCopy[pixel];
             var g = imageDataCopy[pixel + 1];
             var b = imageDataCopy[pixel + 2];
@@ -19913,7 +19947,7 @@ function contour_surface_marching_squares() {
         isoBands.push({ "coords": band, "level": i, "val": zs[i] });
     }
 
-    //console.log(isoBands);    
+    //console.log(isoBands);
 
     //return ;
 
@@ -20054,7 +20088,7 @@ function contour_surface_webworker() {
     //console.log("zs:", zs);
 
     var completed_levels = 0;
-    //parallel isoBands    
+    //parallel isoBands
     for (var i = 1; i < zs.length; i++) {
         var lowerBand = zs[i - 1];
         var upperBand = zs[i];
@@ -20253,7 +20287,7 @@ async function fetch_glsl() {
         return response.arrayBuffer();
     }).then(function (buffer) {
         try {
-            // bzip2 decoder 
+            // bzip2 decoder
             var bytes = new Uint8Array(buffer);
             var xml = bzip2.simple(bzip2.array(bytes));
 
@@ -20342,7 +20376,7 @@ async function mainRenderer() {
     if (localStorage.getItem("ui_theme") === null) {
         //if(isLocal)
         {
-            /*theme = "bright" ;	
+            /*theme = "bright" ;
             colourmap = "haxby" ;*/
 
             theme = "dark";
@@ -20439,7 +20473,7 @@ async function mainRenderer() {
         video_fps_control = localStorage.getItem("video_fps_control");
 
     composite_view = (parseInt(votable.getAttribute('data-composite')) == 1) ? true : false;
-    // composite_view = false; // an override during development    
+    // composite_view = false; // an override during development
     console.log("composite view:", composite_view);
 
     optical_view = false;
@@ -20635,7 +20669,7 @@ async function mainRenderer() {
         }
 
         va_count = parseInt(votable.getAttribute('data-va_count'));
-        datasetId = votable.getAttribute('data-datasetId');//make it a global variable	
+        datasetId = votable.getAttribute('data-datasetId');//make it a global variable
 
         spectrum_stack = new Array(va_count);
         spectrum_scale = new Array(va_count);
@@ -20679,7 +20713,7 @@ async function mainRenderer() {
             .attr("id", "ClusterSVG")
             .attr("width", width)
             .attr("height", 9)
-            .attr('style', 'position: fixed; left: 10px; top: 0px; z-index: 0'); // top: -2px        
+            .attr('style', 'position: fixed; left: 10px; top: 0px; z-index: 0'); // top: -2px
 
         if (va_count > 1 && !composite_view) {
             for (let index = 0; index < va_count; index++) {
