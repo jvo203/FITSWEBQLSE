@@ -8472,32 +8472,43 @@ function submit_corrections() {
 };
 
 function validate_redshift() {
+    var toggle = sessionStorage.getItem("redshift");
     var value = document.getElementById('redshift').valueAsNumber;
 
     if (isNaN(value))
-        document.getElementById('redshift').value = previous_redshift;
+        //document.getElementById('redshift').value = previous_redshift;
+        document.getElementById('redshift').value = 0.0.toFixed(1);
 
-    if (value <= -1)
-        document.getElementById('redshift').value = -0.99999;
+    // range checks for z
+    if (toggle == 'z') {
+        if (value <= -1)
+            document.getElementById('redshift').value = -0.99999;
 
-    if (value > 6.0)
-        document.getElementById('redshift').value = 6.0.toFixed(1);
+        if (value > 6.0)
+            document.getElementById('redshift').value = 6.0.toFixed(1);
 
-    redshift = document.getElementById('redshift').valueAsNumber;
+        // no need to convert anything, use the value 'as-is'
+        redshift = document.getElementById('redshift').valueAsNumber;
+    }
+
+    // range checks for v
+    if (toggle == 'v') {
+        if (value < -299792)
+            document.getElementById('redshift').value = -299792;
+
+        if (value > 299792)
+            document.getElementById('redshift').value = 299792;
+
+        // convert z redshift to velocity
+        let c = 299792.458;//speed of light [km/s]
+        let vel = document.getElementById('redshift').valueAsNumber;
+
+        let beta = vel / c;
+        redshift = Math.sqrt((1.0 + beta) / (1.0 - beta)) - 1.0;
+    }
 
     if (redshift != previous_redshift) {
         previous_redshift = redshift;
-
-        // TO-DO: check the radio buttons to see if the source velocity v needs to be converted to z
-
-        // convert z redshift to velocity
-        var c = 299792.458;//speed of light [km/s]
-
-        /*var tmp = - (1.0 - (1.0 + redshift) * (1.0 + redshift)) / (1.0 + (1.0 + redshift) * (1.0 + redshift));
-        var velocity = c * tmp;
-
-        // update the redshift-v input field
-        document.getElementById('redshift-v').value = velocity.toFixed(2);*/
 
         // refresh the HDS spectral lines
         hds_divs.forEach(refresh_hds_spectral_lines);
