@@ -1657,8 +1657,8 @@ export uniform bool fits2float64(uniform int64 src[], uniform float dest[], unif
 //float tmp = half_to_float_fast(cubeData[y*stride+x]) ;
 export uniform float correlationSIMD(uniform float theta, uniform float b, uniform float w, uniform float gamma, uniform float mu, uniform float pixels[], uniform unsigned int8 mask[], uniform int dimx, uniform int dimy)
 {       
-    varying float x0 = mu;
-    varying float y0 = 0.5f * (float) dimy;
+    varying float x0 = mu - 1.0f;
+    varying float y0 = 0.5f * (float) dimy - 1.0f;
     varying float partial_corr = 0.0f ;
 
     foreach(j=0 ... dimy, i=0 ... dimx)    
