@@ -7633,11 +7633,11 @@ contains
       implicit none
 
       real(c_float), intent(in) :: theta, b, w, gamma, mu
-      real(c_float), dimension(:,:), intent(in) :: view
-      logical(kind=c_bool), dimension(:,:), intent(in) :: mask
+      real(c_float), dimension(:,:), intent(in), target :: view
+      logical(kind=c_bool), dimension(:,:), intent(in), target :: mask
 
       integer :: i, j, dimx, dimy, max_threads
-      real :: corr, x0, y0
+      real :: corr, corr2, x0, y0
 
       corr = 0.0
 
@@ -7667,7 +7667,9 @@ contains
       !$omp END DO
       !$omp END PARALLEL
 
-      return
+      corr2 = correlationSIMD(theta, b, w, gamma, mu, c_loc(view), c_loc(mask), dimx, dimy)
+
+      print *, 'corr:', corr, 'corr2:', corr2
    end function correlation
 
    ! a point (i, j) rotated by a theta angle around the point (x0, y0)

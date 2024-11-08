@@ -1661,7 +1661,7 @@ export uniform float correlationSIMD(uniform float theta, uniform float b, unifo
     varying float y0 = 0.5f * (float) dimy;
     varying float partial_corr = 0.0f ;
 
-    foreach(j=0 ... dimy, i=0 ... dimx)
+    foreach(j=0 ... dimy, i=0 ... dimx)    
     {
         varying int offset = j*dimx + i ;        
         varying float view = pixels[offset] ;
