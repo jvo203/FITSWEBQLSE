@@ -1082,6 +1082,17 @@ module fits
 
       end subroutine make_video_frame_fixed_legacy_threaded
 
+      ! export uniform float correlationSIMD(uniform float theta, uniform float b, uniform float w, uniform float gamma, uniform float mu, uniform float pixels[], uniform unsigned int8 mask[], uniform int dimx, uniform int dimy)
+      real(c_float) function correlationSIMD(theta, b, w, gamma, mu, pixels, mask, dimx, dimy) BIND(C, name="correlationSIMD")
+         use, intrinsic :: ISO_C_BINDING
+         implicit none
+
+         real(c_float), value, intent(in) :: theta, b, w, gamma, mu
+         type(C_PTR), value, intent(in) :: pixels, mask
+         integer(c_int), value, intent(in) :: dimx, dimy
+
+      end function correlationSIMD
+
       ! resizeLanczos(Ipp32f *pSrc, int srcWidth, int srcHeight, Ipp32f *pDest, int dstWidth, int dstHeight, int numLobes)
       subroutine resizeLanczos(pSrc, srcWidth, srcHeight, pDest, dstWidth, dstHeight, numLobes) BIND(C, name='resizeLanczos')
          use, intrinsic :: ISO_C_BINDING
@@ -7663,17 +7674,17 @@ contains
    pure function corr_derive(i, j, x0, y0, b, w, gamma, theta) result(dtheta)
       implicit none
 
-      real, intent(in) :: i, j, x0, y0, b, w, gamma, theta   
+      real, intent(in) :: i, j, x0, y0, b, w, gamma, theta
 
       real :: inner, inner2, peak, dtheta
 
       ! intermediate variables
       inner = (i - x0)*cos(theta) - (j - y0)*sin(theta)
-      inner2 = inner**2      
-      peak = exp(-gamma * inner2)   
+      inner2 = inner**2
+      peak = exp(-gamma * inner2)
 
       ! derivative
-      dtheta = 2.0 * gamma * w * peak * inner * ((j - y0)*cos(theta) + (i - x0)*sin(theta))      
+      dtheta = 2.0 * gamma * w * peak * inner * ((j - y0)*cos(theta) + (i - x0)*sin(theta))
 
    end function corr_derive
 
@@ -7681,21 +7692,21 @@ contains
    pure function rmse_derive(i, j, x0, y0, b, w, gamma, theta, t) result(dtheta)
       implicit none
 
-      real, intent(in) :: i, j, x0, y0, b, w, gamma, theta, t      
+      real, intent(in) :: i, j, x0, y0, b, w, gamma, theta, t
 
       real :: y, inner, inner2, peak, error, dtheta
 
       ! intermediate variables
       inner = (i - x0)*cos(theta) - (j - y0)*sin(theta)
-      inner2 = inner**2      
+      inner2 = inner**2
       peak = exp(-gamma * inner2)
 
       ! output, error
       y = b + w * peak
-      error = y - t      
+      error = y - t
 
       ! derivative
-      dtheta = error * 2.0 * gamma * w * peak * inner * ((j - y0)*cos(theta) + (i - x0)*sin(theta))      
+      dtheta = error * 2.0 * gamma * w * peak * inner * ((j - y0)*cos(theta) + (i - x0)*sin(theta))
 
    end function rmse_derive
 
@@ -7711,7 +7722,7 @@ contains
       integer :: i, j, dimx, dimy, max_threads
       real :: deriv, qx, qy, dqx, dqy, x0, y0, rotated_derive
 
-      deriv = 0.0      
+      deriv = 0.0
 
       dimx = size(view, 1)
       dimy = size(view, 2)
@@ -7740,7 +7751,7 @@ contains
          end do
       end do
       !$omp END DO
-      !$omp END PARALLEL      
+      !$omp END PARALLEL
 
       return
    end function derivative_theta
@@ -7800,8 +7811,8 @@ contains
       db = db + error
       dw = dw + error * peak
       dalpha = dalpha - error * w * peak * inner2 * gamma
-   
-      dtheta = - 2.0 * gamma * w * peak * inner ! * ((j - y0)*costheta + (i - x0)*sintheta)      
+
+      dtheta = - 2.0 * gamma * w * peak * inner ! * ((j - y0)*costheta + (i - x0)*sintheta)
       dbeta = dbeta + error * dtheta * ( (j - y0) * ((beta**2)/(betasqrt**3) - costheta) - (i - x0)*beta/(betasqrt**3))
 
       dx0 = dx0 + error * 2.0 * gamma * w * peak * inner * costheta
@@ -7891,7 +7902,7 @@ contains
       w = w0
       alpha = log(gamma0)
       beta = tan(theta0)
-      mu = mu0            
+      mu = mu0
 
       do iter = 1, max_iter
          rmse = gradient(b, w, alpha, beta, mu, db, dw, dalpha, dbeta, dmu, view, mask)
@@ -7934,7 +7945,7 @@ contains
       use omp_lib
       implicit none
 
-      real(c_float), intent(inout) :: b, w, gamma, mu, theta      
+      real(c_float), intent(inout) :: b, w, gamma, mu, theta
       real(c_float), dimension(:,:), CONTIGUOUS, intent(in) :: view
       logical(kind=c_bool), dimension(:,:), CONTIGUOUS, intent(in) :: mask
       integer(c_int), intent(in) :: max_iter
@@ -8173,7 +8184,7 @@ contains
 
    end subroutine trace_hds_spectrum
 
-   subroutine realtime_hds_spectrum_request(item, req)      
+   subroutine realtime_hds_spectrum_request(item, req)
       use risk
       implicit none
 
@@ -8260,9 +8271,9 @@ contains
          gamma = real(size(row))/1000 ! a small gamma value
          ! gamma = 5.0 ! more-or-less one pixel width
          print *, 'b:', b, 'w:', w, 'gamma:', gamma
-                  
+
          ! theta = find_angle(b, w, gamma, mu, view_pixels, view_mask, -90, 90)
-         ! print *, 'theta angle [rad]:', theta , ', degrees:', theta*180/3.1415926535897932384626433832795         
+         ! print *, 'theta angle [rad]:', theta , ', degrees:', theta*180/3.1415926535897932384626433832795
 
          ! Differential Evolution
          call de_peak(b, w, gamma, mu, theta, view_pixels, view_mask, 100)
