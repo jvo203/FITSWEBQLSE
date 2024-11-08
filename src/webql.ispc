@@ -46,7 +46,7 @@ bool isinf(float tmp)
   return ( (i & 0x7fffffff) == 0x7f800000 ) || ( (i & 0xffffffff) == 0xff800000 ) ;
 }
 
-export void  make_image_spectrumF32(uniform float src[], uniform float pixels[], uniform unsigned int8 mask[], uniform unsigned int8 data_mask[], uniform double ignrval, uniform double datamin, uniform double datamax,  uniform double cdelt3, uniform float res[], uniform int64 npixels)
+export void make_image_spectrumF32(uniform float src[], uniform float pixels[], uniform unsigned int8 mask[], uniform unsigned int8 data_mask[], uniform double ignrval, uniform double datamin, uniform double datamax,  uniform double cdelt3, uniform float res[], uniform int64 npixels)
 {
   uniform float frame_min, frame_max;
   uniform double mean, integrated;
@@ -174,7 +174,7 @@ export void standardise_array(uniform float pixels[], uniform float pmean, unifo
 
 export uniform float brightness_ratio(uniform float pixels[], uniform float black, uniform float sensitivity, uniform int offset, uniform int total_size)
 {
-  float partial_sum = 0.0f ;  
+  float partial_sum = 0.0f ;
 
   foreach(j=0 ... total_size)
   {    
@@ -1652,3 +1652,31 @@ export uniform bool fits2float64(uniform int64 src[], uniform float dest[], unif
 
     return any(error) ;
 } ;
+
+//foreach (y=y1 ... y2, x=x1 ... x2)
+//float tmp = half_to_float_fast(cubeData[y*stride+x]) ;
+export uniform float correlationSIMD(uniform float theta, uniform float b, uniform float w, uniform float gamma, uniform float mu, uniform float pixels[], uniform unsigned int8 mask[], uniform int dimx, uniform int dimy)
+{       
+    varying float x0 = mu;
+    varying float y0 = 0.5f * (float) dimy;
+    varying float partial_corr = 0.0f ;
+
+    foreach(j=0 ... dimy, i=0 ... dimx)
+    {
+        varying int offset = j*dimx + i ;        
+        varying float view = pixels[offset] ;
+        varying unsigned int8 _mask = mask[offset] ;      
+
+        cif(_mask)
+        {            
+            varying float inner = ((float)i - x0) * cos(theta) - ((float)j - y0) * sin(theta) ;
+            varying float y = b + w * exp(-gamma * inner * inner) ;
+
+            partial_corr += view * y;
+        }
+    }
+
+    uniform float sum = reduce_add(partial_corr);
+
+    return sum ;
+}
