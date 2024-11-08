@@ -7633,11 +7633,11 @@ contains
       implicit none
 
       real(c_float), intent(in) :: theta, b, w, gamma, mu
-      real(c_float), dimension(:,:), intent(in), target :: view
-      logical(kind=c_bool), dimension(:,:), intent(in), target :: mask
+      real(c_float), dimension(:,:), intent(in) :: view
+      logical(kind=c_bool), dimension(:,:), intent(in) :: mask
 
       integer :: i, j, dimx, dimy, max_threads
-      real :: corr, corr2, x0, y0
+      real :: corr, x0, y0
 
       corr = 0.0
 
@@ -7666,10 +7666,6 @@ contains
       end do
       !$omp END DO
       !$omp END PARALLEL
-
-      corr2 = correlationSIMD(theta, b, w, gamma, mu, c_loc(view), c_loc(mask), dimx, dimy)
-
-      print *, 'corr:', corr, 'corr2:', corr2
    end function correlation
 
    ! a point (i, j) rotated by a theta angle around the point (x0, y0)
@@ -7948,8 +7944,8 @@ contains
       implicit none
 
       real(c_float), intent(inout) :: b, w, gamma, mu, theta
-      real(c_float), dimension(:,:), CONTIGUOUS, intent(in) :: view
-      logical(kind=c_bool), dimension(:,:), CONTIGUOUS, intent(in) :: mask
+      real(c_float), dimension(:,:), CONTIGUOUS, target, intent(in) :: view
+      logical(kind=c_bool), dimension(:,:), CONTIGUOUS, target, intent(in) :: mask
       integer(c_int), intent(in) :: max_iter
 
       ! search space dimensionality
@@ -7959,9 +7955,12 @@ contains
       real(float) :: min_val(noparams), max_val(noparams)
       type(Population) :: pop
 
-      integer :: max_threads, iter, i
+      integer :: max_threads, iter, i, dimx, dimy
       real(float) :: cost
       real(c_float) :: mu0, theta0
+
+      dimx = size(view, 1)
+      dimy = size(view, 2)
 
       ! get #physical cores (ignore HT)
       max_threads = get_max_threads()
@@ -7981,17 +7980,17 @@ contains
       ! initialize the population
       call init_population(pop, pop_size, noparams, min_val, max_val)
 
-      ! TO-DO
       ! evaluate the correlation for the population <max_iter> times
       do iter = 1, max_iter
          ! evaluate the population
          !$omp parallel shared(pop, view, mask, b, w, gamma) private(i, cost, mu0, theta0)&
          !$omp& NUM_THREADS(max_threads)
-         !$omp do
+         !$omp do schedule(dynamic)
          do i = 1, pop_size
             mu0 = pop%curr(i)%genotype(1)
             theta0 = pop%curr(i)%genotype(2)
-            cost = - correlation(theta0, b, w, gamma, mu0, view, mask) ! maximize the correlation = minimize the cost
+            ! cost = - correlation(theta0, b, w, gamma, mu0, view, mask) ! maximize the correlation = minimize the cost
+            cost = - correlationSIMD(theta0, b, w, gamma, mu0, c_loc(view), c_loc(mask), dimx, dimy)
             pop%curr(i)%cost = cost
 
             if (cost .le. pop%best(i)%cost) then
