@@ -8,6 +8,7 @@ function connect_db(db_name)
     password = user * String(UInt8.([33]))
     # host = "jvof" # on zodiac
     host = "jvox.vo.nao.ac.jp" # on the cluster
+    port = 5433
 
     url = "postgresql://" * user
 
@@ -16,6 +17,11 @@ function connect_db(db_name)
     end
 
     url *= "@" * host
+
+    if port != 5432
+        url *= ":" * string(port)
+    end
+
     url *= "/" * db_name
 
     return LibPQ.Connection(url)
