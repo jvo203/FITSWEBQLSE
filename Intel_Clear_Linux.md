@@ -38,7 +38,7 @@
 
     sudo make install
 
-    adjust LD_LIBRARY_PATH and PKG_CONFIG_PATH in .bashrc (see point 15.)
+    adjust LD_LIBRARY_PATH and PKG_CONFIG_PATH in .bashrc (see point 17.)
 
 # 7. jemalloc    
     wget https://github.com/jemalloc/jemalloc/releases/download/5.3.0/jemalloc-5.3.0.tar.bz2
@@ -106,7 +106,17 @@
 
     sudo make install
 
-# 12. Starlink AST
+# 12. WCSLIB
+
+    wget ftp://ftp.atnf.csiro.au/pub/software/wcslib/wcslib.tar.bz2
+    bunzip2 wcslib.tar.bz2
+    tar xvf wcslib.tar
+    cd wcslib-8.3
+    ./configure --prefix=/usr/local
+    make
+    sudo make install
+
+# 13. Starlink AST
 
     wget https://github.com/Starlink/ast/releases/download/v9.2.11/ast-9.2.11.tar.gz
     tar zxvf ast-9.2.11.tar.gz
@@ -115,7 +125,7 @@
     make -j16
     sudo make install
 
-# 13. FPZIP
+# 14. FPZIP
 
     git clone https://github.com/LLNL/fpzip.git
 
@@ -131,11 +141,11 @@
 
     sudo make install
 
-# 14. NASM
+# 15. NASM
 
     sudo swupd bundle-add nasm
 
-# 15. x265
+# 16. x265
 
     visit https://www.linuxfromscratch.org/blfs/view/svn/multimedia/x265.html
 
@@ -160,7 +170,7 @@
 
     sudo make install
 
-# 16. Adjust the environment variables in the .bashrc
+# 17. Adjust the environment variables in the .bashrc
 
     Add
 
@@ -170,7 +180,7 @@
 
     to .bashrc and re-login
 
-# 17. Intel oneAPI
+# 18. Intel oneAPI
 
     i) intel-basekit
         
@@ -190,7 +200,7 @@
 
     to .bashrc and re-login
 
-# 18. libdill (C coroutines) (not needed / not used at the moment)
+# 19. libdill (C coroutines) (not needed / not used at the moment)
 
     (compilation errors in both Fedora 35 and Intel Clear Linux ...)
     (a fix: make CC=clang)
@@ -213,16 +223,16 @@
 
     sudo make install
 
-# 19. Splatalogue & Atomic Spectra Database (ADS)
+# 20. Splatalogue & Atomic Spectra Database (ADS)
 
     wget http://jvo.nao.ac.jp/~chris/splatalogue_v3.db
     wget http://jvo.nao.ac.jp/~chris/asd.db
 
-# 20. Intel SPMD C (ispc)
+# 21. Intel SPMD C (ispc)
 
     manually add ispc from https://ispc.github.io/downloads.html
 
-# 21. MPI launcher (we do not use MPI internally!)
+# 22. MPI launcher (we do not use MPI internally!)
 
     # AMD
     mpiexec -silent-abort -machinefile amd.txt -n 4 ./fitswebqlse -c config.ini
@@ -230,7 +240,7 @@
     # Intel
     mpiexec -silent-abort -machinefile intel.txt -n 3 ./fitswebqlse -c config_ssd.ini
 
-# 22. Replication
+# 23. Replication
 
     # full
 
