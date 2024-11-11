@@ -59,11 +59,11 @@
     sudo swupd bundle-add devpkg-lz4
 
 # 9. libcpuid
-    wget https://github.com/anrieff/libcpuid/releases/download/v0.5.1/libcpuid-0.5.1.tar.gz
+    wget https://github.com/anrieff/libcpuid/releases/download/v0.7.0/libcpuid-0.7.0.tar.gz
     
-    tar zxvf libcpuid-0.5.1.tar.gz
+    tar zxvf libcpuid-0.7.0.tar.gz
     
-    cd libcpuid-0.5.1
+    cd libcpuid-0.7.0
 
     ./configure
 
