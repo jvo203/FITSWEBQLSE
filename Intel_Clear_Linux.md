@@ -213,9 +213,10 @@
 
     sudo make install
 
-# 19. Splatalogue
+# 19. Splatalogue & Atomic Spectra Database (ADS)
 
     wget http://jvo.nao.ac.jp/~chris/splatalogue_v3.db
+    wget http://jvo.nao.ac.jp/~chris/asd.db
 
 # 20. Intel SPMD C (ispc)
 
