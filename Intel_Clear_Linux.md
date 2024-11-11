@@ -33,7 +33,6 @@ connection_add.c:1031:7: error: implicit declaration of function 'accept4'; did 
 
     the fix is to force '-Wno-error=implicit-function-declaration'
 
-
 # 5. bzip2
 
     sudo swupd bundle-add devpkg-bzip2
@@ -58,7 +57,7 @@ connection_add.c:1031:7: error: implicit declaration of function 'accept4'; did 
 
     sudo make install
 
-    adjust LD_LIBRARY_PATH and PKG_CONFIG_PATH in .bashrc (see point 18.)
+    adjust LD_LIBRARY_PATH and PKG_CONFIG_PATH in .bashrc (see point 19.)
 
 # 8. jemalloc    
     wget https://github.com/jemalloc/jemalloc/releases/download/5.3.0/jemalloc-5.3.0.tar.bz2
@@ -75,10 +74,21 @@ connection_add.c:1031:7: error: implicit declaration of function 'accept4'; did 
 
     sudo make install
 
-# 9. lz4-devel
+# 9. mimalloc
+
+    git clone https://github.com/microsoft/mimalloc.git
+    cd mimalloc
+    mkdir -p out/release
+    cd out/release
+    cmake ../..
+    make -j8
+    sudo make install
+
+
+# 10. lz4-devel
     sudo swupd bundle-add devpkg-lz4
 
-# 10. libcpuid
+# 11. libcpuid
     wget https://github.com/anrieff/libcpuid/releases/download/v0.7.0/libcpuid-0.7.0.tar.gz
     
     tar zxvf libcpuid-0.7.0.tar.gz
@@ -91,7 +101,7 @@ connection_add.c:1031:7: error: implicit declaration of function 'accept4'; did 
 
     sudo make install
 
-# 11. libcURL
+# 12. libcURL
 
     // libcURL appears to leak memory in Intel Clear Linux ...
     // apparently it's OK, it is not a real memory leak, just dbus caching ...
@@ -113,7 +123,7 @@ connection_add.c:1031:7: error: implicit declaration of function 'accept4'; did 
 
     sudo make install
 
-# 12. CFITSIO    
+# 13. CFITSIO    
     wget http://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/cfitsio-4.5.0.tar.gz
 
     tar zxvf cfitsio-4.5.0.tar.gz
@@ -126,7 +136,7 @@ connection_add.c:1031:7: error: implicit declaration of function 'accept4'; did 
 
     sudo make install
 
-# 13. WCSLIB
+# 14. WCSLIB
 
     wget ftp://ftp.atnf.csiro.au/pub/software/wcslib/wcslib.tar.bz2
     bunzip2 wcslib.tar.bz2
@@ -136,7 +146,7 @@ connection_add.c:1031:7: error: implicit declaration of function 'accept4'; did 
     make
     sudo make install
 
-# 14. Starlink AST
+# 15. Starlink AST
 
     wget https://github.com/Starlink/ast/releases/download/v9.2.12/ast-9.2.12.tar.gz
     tar zxvf ast-9.2.12.tar.gz
@@ -145,7 +155,7 @@ connection_add.c:1031:7: error: implicit declaration of function 'accept4'; did 
     make -j16
     sudo make install
 
-# 15. FPZIP (not needed / not used at the moment)
+# 16. FPZIP (not needed / not used at the moment)
 
     git clone https://github.com/LLNL/fpzip.git
 
@@ -161,11 +171,11 @@ connection_add.c:1031:7: error: implicit declaration of function 'accept4'; did 
 
     sudo make install
 
-# 16. NASM
+# 17. NASM
 
     sudo swupd bundle-add nasm
 
-# 17. x265
+# 18. x265
 
     visit https://www.linuxfromscratch.org/blfs/view/svn/multimedia/x265.html
 
@@ -189,7 +199,7 @@ connection_add.c:1031:7: error: implicit declaration of function 'accept4'; did 
 
     sudo make install
 
-# 18. Adjust the environment variables in the .bashrc
+# 19. Adjust the environment variables in the .bashrc
 
     Add
 
@@ -199,7 +209,7 @@ connection_add.c:1031:7: error: implicit declaration of function 'accept4'; did 
 
     to .bashrc and re-login
 
-# 19. Intel oneAPI
+# 20. Intel oneAPI
 
     i) intel-basekit
 
@@ -219,7 +229,7 @@ connection_add.c:1031:7: error: implicit declaration of function 'accept4'; did 
 
     to .bashrc and re-login
 
-# 20. libdill (C coroutines) (not needed / not used at the moment)
+# 21. libdill (C coroutines) (not needed / not used at the moment)
 
     (compilation errors in both Fedora 35 and Intel Clear Linux ...)
     (a fix: make CC=clang)
@@ -242,12 +252,12 @@ connection_add.c:1031:7: error: implicit declaration of function 'accept4'; did 
 
     sudo make install
 
-# 21. Splatalogue & Atomic Spectra Database (ADS)
+# 22. Splatalogue & Atomic Spectra Database (ADS)
 
     wget http://jvo.nao.ac.jp/~chris/splatalogue_v3.db
     wget http://jvo.nao.ac.jp/~chris/asd.db
 
-# 22. Intel SPMD C (ispc)
+# 23. Intel SPMD C (ispc)
 
     manually add ispc from https://ispc.github.io/downloads.html
 
@@ -255,7 +265,7 @@ connection_add.c:1031:7: error: implicit declaration of function 'accept4'; did 
 
     extract and copy the binary to /usr/local/bin
 
-# 23. MPI launcher (we do not use MPI internally!)
+# 24. MPI launcher (we do not use MPI internally!)
 
     # AMD
     mpiexec -silent-abort -machinefile amd.txt -n 4 ./fitswebqlse -c config.ini
@@ -263,7 +273,7 @@ connection_add.c:1031:7: error: implicit declaration of function 'accept4'; did 
     # Intel
     mpiexec -silent-abort -machinefile intel.txt -n 3 ./fitswebqlse -c config_ssd.ini
 
-# 24. Replication
+# 25. Replication
 
     # full
 
@@ -295,3 +305,7 @@ connection_add.c:1031:7: error: implicit declaration of function 'accept4'; did 
     # All
     cd ~/FITSWEBQLSE
     mpiexec -silent-abort -machinefile all.txt -n 7 ./fitswebqlse
+
+# 26. valgrind (debugging)
+
+    sudo swupd bundle-add valgrind
