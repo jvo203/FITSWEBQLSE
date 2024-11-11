@@ -231,6 +231,10 @@
 
     manually add ispc from https://ispc.github.io/downloads.html
 
+    i.e. wget https://github.com/ispc/ispc/releases/download/v1.25.3/ispc-v1.25.3-linux-oneapi.tar.gz
+
+    extract and copy the binary to /usr/local/bin
+
 # 22. MPI launcher (we do not use MPI internally!)
 
     # AMD
