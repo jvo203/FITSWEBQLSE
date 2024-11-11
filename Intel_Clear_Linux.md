@@ -108,9 +108,9 @@
 
 # 12. Starlink AST
 
-    wget https://github.com/Starlink/ast/releases/download/v9.2.10/ast-9.2.10.tar.gz
-    tar zxvf ast-9.2.10.tar.gz
-    cd ast-9.2.10
+    wget https://github.com/Starlink/ast/releases/download/v9.2.11/ast-9.2.11.tar.gz
+    tar zxvf ast-9.2.11.tar.gz
+    cd ast-9.2.11
     ./configure --prefix=/usr/local
     make -j16
     sudo make install
