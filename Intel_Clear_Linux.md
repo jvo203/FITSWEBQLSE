@@ -16,7 +16,20 @@
     sudo ldconfig
 
 # 4. libmicrohttpd
-    sudo swupd bundle-add devpkg-libmicrohttpd
+    sudo swupd bundle-add devpkg-libmicrohttpd (does not include WebSockets)
+
+    wget https://ftpmirror.gnu.org/libmicrohttpd/libmicrohttpd-latest.tar.gz
+    tar zxvf libmicrohttpd-latest.tar.gz
+    cd libmicrohttpd-1.0.1
+    ./configure --enable-experimental
+    make
+    sudo make install
+
+    currently there is an error:
+    connection_add.c: In function 'MHD_accept_connection_':
+connection_add.c:1031:7: error: implicit declaration of function 'accept4'; did you mean 'accept'? [-Wimplicit-function-declaration]
+ 1031 |   s = accept4 (fd,
+
 
 # 5. sqlite3-devel
     sudo swupd bundle-add devpkg-sqlite-autoconf
