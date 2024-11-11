@@ -21,14 +21,18 @@
     wget https://ftpmirror.gnu.org/libmicrohttpd/libmicrohttpd-latest.tar.gz
     tar zxvf libmicrohttpd-latest.tar.gz
     cd libmicrohttpd-1.0.1
+    export CFLAGS="$CFLAGS -Wno-error=implicit-function-declaration"
     ./configure --enable-experimental
     make
     sudo make install
 
-    currently there is an error:
+    there is an error:
     connection_add.c: In function 'MHD_accept_connection_':
 connection_add.c:1031:7: error: implicit declaration of function 'accept4'; did you mean 'accept'? [-Wimplicit-function-declaration]
  1031 |   s = accept4 (fd,
+
+    the fix is to force '-Wno-error=implicit-function-declaration'
+    
 
 
 # 5. sqlite3-devel
