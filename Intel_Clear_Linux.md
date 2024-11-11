@@ -125,7 +125,7 @@
     make -j16
     sudo make install
 
-# 14. FPZIP
+# 14. FPZIP (not needed / not used at the moment)
 
     git clone https://github.com/LLNL/fpzip.git
 
@@ -182,16 +182,16 @@
 # 18. Intel oneAPI
 
     i) intel-basekit
-        
-        wget https://registrationcenter-download.intel.com/akdlm/irc_nas/18487/l_BaseKit_p_2022.1.2.146_offline.sh
 
-        sudo sh ./l_BaseKit_p_2022.1.2.146_offline.sh
+        wget https://registrationcenter-download.intel.com/akdlm/IRC_NAS/96aa5993-5b22-4a9b-91ab-da679f422594/intel-oneapi-base-toolkit-2025.0.0.885_offline.sh
+
+        sudo sh ./intel-oneapi-base-toolkit-2025.0.0.885_offline.sh -a --silent --cli --eula accept        
 
     ii) intel-hpckit
 
-        wget https://registrationcenter-download.intel.com/akdlm/irc_nas/18479/l_HPCKit_p_2022.1.2.117_offline.sh
+        wget https://registrationcenter-download.intel.com/akdlm/IRC_NAS/0884ef13-20f3-41d3-baa2-362fc31de8eb/intel-oneapi-hpc-toolkit-2025.0.0.825_offline.sh
 
-        sudo sh ./l_HPCKit_p_2022.1.2.117_offline.sh
+        sudo sh ./intel-oneapi-hpc-toolkit-2025.0.0.825_offline.sh -a --silent --cli --eula accept        
 
     Add
 
