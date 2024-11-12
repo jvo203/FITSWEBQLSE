@@ -8039,6 +8039,103 @@ contains
       max_threads = get_max_threads()
    end subroutine de_peak
 
+   ! use Differential Evolution to adjust the peak parameters
+   subroutine de_window(b, w, gamma, mu, theta, view, mask, max_iter)
+      use differential_evolution
+      use omp_lib
+      implicit none
+
+      real(c_float), intent(inout) :: b, w, gamma, mu, theta
+      real(c_float), dimension(:,:), CONTIGUOUS, target, intent(in) :: view
+      logical(kind=c_bool), dimension(:,:), CONTIGUOUS, target, intent(in) :: mask
+      integer(c_int), intent(in) :: max_iter
+
+      ! search space dimensionality
+      integer, parameter :: noparams = 3
+      integer :: pop_size = 10*noparams ! a population size
+
+      real(float) :: min_val(noparams), max_val(noparams)
+      type(Population) :: pop
+
+      integer :: max_threads, iter, i, dimx, dimy
+      real(float) :: cost
+      real(c_float) :: mu0, sigma0, theta0
+
+      dimx = size(view, 1)
+      dimy = size(view, 2)
+
+      ! get #physical cores (ignore HT)
+      max_threads = get_max_threads()
+
+      ! the first parameter is mu
+      min_val(1) = mu - 10.0
+      max_val(1) = mu + 10.0
+
+      ! the second one is theta, +/- 10 degrees around theta [rad]
+      ! min_val(2) = theta - 10.0/180.0*3.14159265358979323846
+      ! max_val(2) = theta + 10.0/180.0*3.14159265358979323846
+
+      ! the angle search space is between -pi/2 and pi/2
+      min_val(2) = -3.14159265358979323846/2
+      max_val(2) = 3.14159265358979323846/2
+
+      ! the third parameter is the window width sigma
+      min_val(3) = 0.5
+      max_val(3) = 10.0
+
+      ! initialize the population
+      call init_population(pop, pop_size, noparams, min_val, max_val)
+
+      ! evaluate the correlation for the population <max_iter> times
+      do iter = 1, max_iter
+         ! evaluate the population
+         !$omp parallel shared(pop, view, mask, w, gamma) private(i, cost, mu0, sigma0, theta0)&
+         !$omp& NUM_THREADS(max_threads)
+         !$omp do schedule(dynamic)
+         do i = 1, pop_size
+            mu0 = pop%curr(i)%genotype(1)
+            theta0 = pop%curr(i)%genotype(2)
+            sigma0 = pop%curr(i)%genotype(3)
+
+            cost = WindowSIMDErr(theta0, w, mu0, sigma0, c_loc(view), c_loc(mask), dimx, dimy)
+            pop%curr(i)%cost = cost
+
+            if (cost .le. pop%best(i)%cost) then
+               pop%best(i)%cost = cost
+               pop%best(i)%genotype = pop%curr(i)%genotype
+            end if
+
+            !$omp critical
+            call update_pop_best(pop, cost, i)
+            !$omp end critical
+         end do
+         !$omp end do
+         !$omp end parallel
+
+         ! print the best cost
+         print *, "iter:", iter, "best cost:", pop%best_cost, "best idx:", pop%best_idx, "best genotype:",&
+         & pop%best(pop%best_idx)%genotype
+
+         ! evolve the population
+         call update_population(pop, min_val, max_val)
+      end do
+
+      ! print the final best solution
+      if (pop%best_idx .ne. 0) then
+         print *, "best cost:", pop%best_cost, "best genotype:", pop%best(pop%best_idx)%genotype
+
+         ! extract the optimal parameters
+         mu = pop%best(pop%best_idx)%genotype(1)
+         theta = pop%best(pop%best_idx)%genotype(2)
+         gamma = pop%best(pop%best_idx)%genotype(3)
+      end if
+
+      call finalize_population(pop)
+
+      ! get #physical cores (ignore HT)
+      max_threads = get_max_threads()
+   end subroutine de_window
+
    function bisect_angle(a, b, b0, w, gamma, mu, view, mask) result(angle)
       implicit none
 
@@ -8288,14 +8385,15 @@ contains
          ! print *, 'theta angle [rad]:', theta , ', degrees:', theta*180/3.1415926535897932384626433832795
 
          ! Differential Evolution
-         call de_peak(b, w, gamma, mu, theta, view_pixels, view_mask, 100)
+         ! call de_peak(b, w, gamma, mu, theta, view_pixels, view_mask, 100)
+         call de_window(b, w, gamma, mu, theta, view_pixels, view_mask, 100)
 
          !mu = x1 + mu - 1
          !call de_peak(b, w, gamma, mu, theta, item%pixels, item%mask, 100) ! whole-image optim. is still too slow
          !mu = mu - x1 + 1
 
          print *, 'Differential Evolution theta angle [rad]:', theta , ', degrees:',&
-         & theta*180/3.1415926535897932384626433832795, 'mu:', mu
+         & theta*180/3.1415926535897932384626433832795, 'mu:', mu, 'gamma:', gamma
 
          ! angle = theta*180/3.1415926535897932384626433832795
          ! angle1 = int(nint(angle)) - 10
