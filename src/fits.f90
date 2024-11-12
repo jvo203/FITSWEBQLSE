@@ -8089,7 +8089,7 @@ contains
       ! evaluate the correlation for the population <max_iter> times
       do iter = 1, max_iter
          ! evaluate the population
-         !$omp parallel shared(pop, view, mask, w, gamma) private(i, cost, mu0, sigma0, theta0)&
+         !$omp parallel shared(pop, view, mask, w) private(i, cost, mu0, sigma0, theta0)&
          !$omp& NUM_THREADS(max_threads)
          !$omp do schedule(dynamic)
          do i = 1, pop_size

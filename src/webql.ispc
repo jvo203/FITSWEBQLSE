@@ -1670,7 +1670,7 @@ export uniform float CorrelationSIMD(uniform float theta, uniform float b, unifo
             varying float inner = ((float)i - x0) * cos(theta) - ((float)j - y0) * sin(theta) ;
             varying float y = b + w * exp(-gamma * inner * inner) ;
 
-            partial_corr += view * y;
+            partial_corr += view * y; // correlation
         }
     }
 
@@ -1697,7 +1697,7 @@ export uniform float WindowSIMDErr(uniform float theta, uniform float w, uniform
             varying float x = ((float)i - x0) * cos(theta) - ((float)j - y0) * sin(theta) ;            
             varying float y = (x > -sigma) && (x < sigma) ? w : 0.0f ;            
 
-            partial_cost += (view - y) * (view - y); // L2 norm            
+            partial_cost += (view - y) * (view - y); // squared error
         }
     }
 
