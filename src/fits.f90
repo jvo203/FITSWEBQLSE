@@ -1083,7 +1083,7 @@ module fits
       end subroutine make_video_frame_fixed_legacy_threaded
 
       ! export uniform float correlationSIMD(uniform float theta, uniform float b, uniform float w, uniform float gamma, uniform float mu, uniform float pixels[], uniform unsigned int8 mask[], uniform int dimx, uniform int dimy)
-      real(c_float) function correlationSIMD(theta, b, w, gamma, mu, pixels, mask, dimx, dimy) BIND(C, name="correlationSIMD")
+      real(c_float) function CorrelationSIMD(theta, b, w, gamma, mu, pixels, mask, dimx, dimy) BIND(C, name="CorrelationSIMD")
          use, intrinsic :: ISO_C_BINDING
          implicit none
 
@@ -1091,7 +1091,18 @@ module fits
          type(C_PTR), value, intent(in) :: pixels, mask
          integer(c_int), value, intent(in) :: dimx, dimy
 
-      end function correlationSIMD
+      end function CorrelationSIMD
+
+      ! export uniform float WindowSIMDErr(uniform float theta, uniform float w, uniform float mu, uniform float sigma, uniform float pixels[], uniform unsigned int8 mask[], uniform int dimx, uniform int dimy)
+      real(c_float) function WindowSIMDErr(theta, w, mu, sigma, pixels, mask, dimx, dimy) BIND(C, name="WindowSIMDErr")
+         use, intrinsic :: ISO_C_BINDING
+         implicit none
+
+         real(c_float), value, intent(in) :: theta, w, mu, sigma
+         type(C_PTR), value, intent(in) :: pixels, mask
+         integer(c_int), value, intent(in) :: dimx, dimy
+
+      end function WindowSIMDErr
 
       ! resizeLanczos(Ipp32f *pSrc, int srcWidth, int srcHeight, Ipp32f *pDest, int dstWidth, int dstHeight, int numLobes)
       subroutine resizeLanczos(pSrc, srcWidth, srcHeight, pDest, dstWidth, dstHeight, numLobes) BIND(C, name='resizeLanczos')
@@ -7990,7 +8001,7 @@ contains
             mu0 = pop%curr(i)%genotype(1)
             theta0 = pop%curr(i)%genotype(2)
             ! cost = - correlation(theta0, b, w, gamma, mu0, view, mask) ! maximize the correlation = minimize the cost
-            cost = - correlationSIMD(theta0, b, w, gamma, mu0, c_loc(view), c_loc(mask), dimx, dimy)
+            cost = - CorrelationSIMD(theta0, b, w, gamma, mu0, c_loc(view), c_loc(mask), dimx, dimy)
             pop%curr(i)%cost = cost
 
             if (cost .le. pop%best(i)%cost) then
@@ -8276,7 +8287,7 @@ contains
          ! theta = find_angle(b, w, gamma, mu, view_pixels, view_mask, -90, 90)
          ! print *, 'theta angle [rad]:', theta , ', degrees:', theta*180/3.1415926535897932384626433832795
 
-         ! Differential Evolution      
+         ! Differential Evolution
          call de_peak(b, w, gamma, mu, theta, view_pixels, view_mask, 100)
 
          !mu = x1 + mu - 1

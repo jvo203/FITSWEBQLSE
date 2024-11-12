@@ -1653,7 +1653,7 @@ export uniform bool fits2float64(uniform int64 src[], uniform float dest[], unif
     return any(error) ;
 } ;
 
-export uniform float correlationSIMD(uniform float theta, uniform float b, uniform float w, uniform float gamma, uniform float mu, uniform float pixels[], uniform unsigned int8 mask[], uniform int dimx, uniform int dimy)
+export uniform float CorrelationSIMD(uniform float theta, uniform float b, uniform float w, uniform float gamma, uniform float mu, uniform float pixels[], uniform unsigned int8 mask[], uniform int dimx, uniform int dimy)
 {       
     varying float x0 = mu - 1.0f;
     varying float y0 = 0.5f * (float) dimy - 1.0f;
@@ -1675,6 +1675,33 @@ export uniform float correlationSIMD(uniform float theta, uniform float b, unifo
     }
 
     uniform float sum = reduce_add(partial_corr);
+
+    return sum ;
+}
+
+// a hard thresholding window function
+export uniform float WindowSIMDErr(uniform float theta, uniform float w, uniform float mu, uniform float sigma, uniform float pixels[], uniform unsigned int8 mask[], uniform int dimx, uniform int dimy)
+{       
+    varying float x0 = mu - 1.0f;
+    varying float y0 = 0.5f * (float) dimy - 1.0f;
+    varying float partial_cost = 0.0f ;
+
+    foreach(j=0 ... dimy, i=0 ... dimx)    
+    {
+        varying int offset = j*dimx + i ;        
+        varying float view = pixels[offset] ;
+        varying unsigned int8 _mask = mask[offset] ;      
+
+        cif(_mask)
+        {            
+            varying float inner = ((float)i - x0) * cos(theta) - ((float)j - y0) * sin(theta) ;            
+            varying float y = (inner > -sigma) && (inner < sigma) ? 1.0f : 0.0f ;
+
+            partial_cost += (view - y) * (view - y);
+        }
+    }
+
+    uniform float sum = reduce_add(partial_cost);
 
     return sum ;
 }

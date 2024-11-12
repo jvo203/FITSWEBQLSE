@@ -49,6 +49,8 @@ struct fixed_block_t {
 #if defined(__cplusplus) && (! defined(__ISPC_NO_EXTERN_C) || !__ISPC_NO_EXTERN_C )
 extern "C" {
 #endif // __cplusplus
+    extern float CorrelationSIMD(float theta, float b, float w, float gamma, float mu, float * pixels, uint8_t * mask, int32_t dimx, int32_t dimy);
+    extern float WindowSIMDErr(float theta, float w, float mu, float sigma, float * pixels, uint8_t * mask, int32_t dimx, int32_t dimy);
     extern void array_stat(float * pixels, float * pmin, float * pmax, float * pmean, int64_t npixels);
     extern float array_std(float * pixels, float pmean, int64_t npixels);
     extern float brightness_ratio(float * pixels, float black, float sensitivity, int32_t offset, int32_t total_size);
@@ -56,7 +58,6 @@ extern "C" {
     extern float calculate_radial_viewport_spectrumF16(int16_t * cubeData, uint32_t cubeStride, float * pixels, bool * mask, uint32_t stride, int32_t x1, int32_t x2, int32_t y1, int32_t y2, int32_t cx, int32_t cy, int32_t r2, bool average, float cdelt3);
     extern float calculate_square_spectrumF16(int16_t * cubeData, uint32_t stride, int32_t x1, int32_t x2, int32_t y1, int32_t y2, bool average, float cdelt3);
     extern float calculate_square_viewport_spectrumF16(int16_t * cubeData, uint32_t cubeStride, float * pixels, bool * mask, uint32_t stride, int32_t x1, int32_t x2, int32_t y1, int32_t y2, bool average, float cdelt3);
-    extern float correlationSIMD(float theta, float b, float w, float gamma, float mu, float * pixels, uint8_t * mask, int32_t dimx, int32_t dimy);
     extern void fits2float32(int32_t * src, float * dest, uint32_t size);
     extern bool fits2float64(int64_t * src, float * dest, uint32_t size);
     extern void fits2int16(int16_t * src, float * dest, uint32_t size);
