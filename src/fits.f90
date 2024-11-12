@@ -8081,7 +8081,7 @@ contains
 
       ! the third parameter is the window width sigma
       min_val(3) = 0.5
-      max_val(3) = 10.0
+      max_val(3) = dimx / 5.0
 
       ! initialize the population
       call init_population(pop, pop_size, noparams, min_val, max_val)
@@ -8386,7 +8386,7 @@ contains
 
          ! Differential Evolution
          ! call de_peak(b, w, gamma, mu, theta, view_pixels, view_mask, 100)
-         call de_window(b, w, gamma, mu, theta, view_pixels, view_mask, 100)
+         call de_window(b, w, gamma, mu, theta, view_pixels, view_mask, 300)
 
          !mu = x1 + mu - 1
          !call de_peak(b, w, gamma, mu, theta, item%pixels, item%mask, 100) ! whole-image optim. is still too slow
