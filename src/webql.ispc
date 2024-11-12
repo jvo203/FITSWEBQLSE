@@ -1694,8 +1694,8 @@ export uniform float WindowSIMDErr(uniform float theta, uniform float w, uniform
 
         cif(_mask)
         {            
-            varying float inner = ((float)i - x0) * cos(theta) - ((float)j - y0) * sin(theta) ;            
-            varying float y = (inner > -sigma) && (inner < sigma) ? 1.0f : 0.0f ;
+            varying float x = ((float)i - x0) * cos(theta) - ((float)j - y0) * sin(theta) ;            
+            varying float y = (x > -sigma) && (x < sigma) ? w : 0.0f ;            
 
             partial_cost += (view - y) * (view - y);
         }
