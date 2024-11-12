@@ -1679,7 +1679,7 @@ export uniform float CorrelationSIMD(uniform float theta, uniform float b, unifo
     return sum ;
 }
 
-// a hard thresholding window function
+// a rectangular window (threshold) function
 export uniform float WindowSIMDErr(uniform float theta, uniform float w, uniform float mu, uniform float sigma, uniform float pixels[], uniform unsigned int8 mask[], uniform int dimx, uniform int dimy)
 {       
     varying float x0 = mu - 1.0f;
