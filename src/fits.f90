@@ -8388,9 +8388,9 @@ contains
          ! call de_peak(b, w, gamma, mu, theta, view_pixels, view_mask, 100)
          call de_window(b, w, gamma, mu, theta, view_pixels, view_mask, 300)
 
-         !mu = x1 + mu - 1
-         !call de_peak(b, w, gamma, mu, theta, item%pixels, item%mask, 100) ! whole-image optim. is still too slow
-         !mu = mu - x1 + 1
+         ! mu = x1 + mu - 1
+         ! call de_peak(b, w, gamma, mu, theta, item%pixels, item%mask, 100) ! whole-image optim. is still too slow
+         ! mu = mu - x1 + 1
 
          print *, 'Differential Evolution theta angle [rad]:', theta , ', degrees:',&
          & theta*180/3.1415926535897932384626433832795, 'mu:', mu, 'gamma:', gamma
