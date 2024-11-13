@@ -4585,6 +4585,9 @@ contains
 
          end do
 
+         ! print the number of .true. in the local_mask
+         print *, 'local_mask:', count(local_mask)
+
          call update_progress(item, 1)
 
          item%dmin = dmin
