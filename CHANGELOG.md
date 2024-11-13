@@ -1,4 +1,4 @@
-## [5.1.13] - 2024-11-14
+## [5.1.13] - 2024-11-?? (upcoming)
 
 * Subaru HDS 1D spectra user-provided _*redshift*_: added support for source velocity [km/s]
 * improved Subaru HDS 2D FITS real-time peak tracking (fitting the width, location and rotation) by using _*genetic algorithms*_ (Differential Evolution), resulting in a better support for wide peaks, i.e. the Moon

@@ -7695,7 +7695,7 @@ contains
       ! derivative
       dtheta = 2.0 * gamma * w * peak * inner * ((j - y0)*cos(theta) + (i - x0)*sin(theta))
 
-   end function corr_derive   
+   end function corr_derive
 
    ! find the first derivative of the correlation function with respect to the angle theta
    function derivative_theta(theta, b, w, gamma, mu, view, mask) result(deriv)
@@ -7741,7 +7741,7 @@ contains
       !$omp END PARALLEL
 
       return
-   end function derivative_theta   
+   end function derivative_theta
 
    ! use Differential Evolution to adjust the peak parameters
    subroutine de_peak(b, w, gamma, mu, theta, view, mask, max_iter)
@@ -7908,8 +7908,8 @@ contains
          !$omp end parallel
 
          ! print the best cost
-         print *, "iter:", iter, "best cost:", pop%best_cost, "best idx:", pop%best_idx, "best genotype:",&
-         & pop%best(pop%best_idx)%genotype
+         ! print *, "iter:", iter, "best cost:", pop%best_cost, "best idx:", pop%best_idx, "best genotype:",&
+         ! & pop%best(pop%best_idx)%genotype
 
          ! evolve the population
          call update_population(pop, min_val, max_val)
@@ -8189,7 +8189,7 @@ contains
 
          print *, 'Differential Evolution theta angle [rad]:', theta , ', degrees:',&
          & theta*180/3.1415926535897932384626433832795, 'mu:', mu, 'gamma:', gamma
-         
+
          ! y remains the same, x needs to be adjusted
          x = x1 + int(nint(mu)) - 1
 
