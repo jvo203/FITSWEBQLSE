@@ -6,6 +6,10 @@ valgrind --leak-check=full --suppressions=/usr/share/glib-2.0/valgrind/glib.supp
 
 valgrind --leak-check=full --track-origins=yes --suppressions=/usr/share/glib-2.0/valgrind/glib.supp ./fitswebqlse
 
+# multithreading:
+
+valgrind --tool=helgrind --suppressions=/usr/share/glib-2.0/valgrind/glib.supp ./fitswebqlse
+
 what is this (on jvof)?
 
 ==509007== Warning: set address range perms: large range [0x3fb18040, 0x51e3901c) (undefined)
