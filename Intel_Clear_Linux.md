@@ -262,6 +262,7 @@ connection_add.c:1031:7: error: implicit declaration of function 'accept4'; did 
     manually add ispc from https://ispc.github.io/downloads.html
 
     i.e. wget https://github.com/ispc/ispc/releases/download/v1.25.3/ispc-v1.25.3-linux-oneapi.tar.gz
+    or wget https://github.com/ispc/ispc/releases/download/v1.25.3/ispc-v1.25.3-linux.tar.gz
 
     extract and copy the binary to /usr/local/bin
 
