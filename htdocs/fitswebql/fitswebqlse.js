@@ -680,6 +680,8 @@ function plot_hds_crosshair(x0, y0, theta) {
     var img_y = parseFloat(elem.getAttribute("y"));
 
     var x1, x2, y1, y2;
+    var aLine, edgeL, edgeR, intersectL, intersectR;
+    var xmin, xmax, ymin, ymax;
 
     // take the largest dimension
     var dim = Math.max(fitsData.width, fitsData.height);
@@ -721,6 +723,13 @@ function plot_hds_crosshair(x0, y0, theta) {
 
     // update the yline
     d3.select("#yline").attr("x1", p1.x).attr("y1", p1.y).attr("x2", p2.x).attr("y2", p2.y).attr("opacity", 1.0);
+
+    aLine = Line.create([p1.x, p1.y], [p2.x - p1.x, p2.y - p1.y]);
+    edgeL = Line.create([img_x, img_y], [0, img_height]);
+    edgeR = Line.create([img_x + img_width, 0], [0, img_height]);
+    intersectL = aLine.intersectionWith(edgeL);
+    intersectR = aLine.intersectionWith(edgeR);
+    console.log("intersections:", intersectL, intersectR);
 
     // set the HDS svg opacity
     d3.select("#hds_svg").attr("opacity", 1);
