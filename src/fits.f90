@@ -8181,7 +8181,7 @@ contains
 
          ! Differential Evolution
          ! call de_peak(b, w, gamma, mu, theta, view_pixels, view_mask, 100)
-         call de_window(b, w, gamma, mu, theta, view_pixels, view_mask, 300)
+         call de_window(b, w, gamma, mu, theta, view_pixels, view_mask, 500)
 
          ! mu = x1 + mu - 1
          ! call de_peak(b, w, gamma, mu, theta, item%pixels, item%mask, 100) ! whole-image optim. is still too slow
