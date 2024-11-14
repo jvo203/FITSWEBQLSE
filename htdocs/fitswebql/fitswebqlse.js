@@ -752,9 +752,12 @@ function plot_hds_crosshair(x0, y0, theta) {
 
     // set the HDS svg opacity
     d3.select("#hds_svg").attr("opacity", 1);
+
+    // returns the spectrum horizontal & vertical boundaries
+    return { xmin: xmin, xmax: xmax, ymin: ymin, ymax: ymax };
 }
 
-function plot_hds_spectrum(data, mask, index) {
+function plot_hds_spectrum(data, mask, bmin, bmax, index) {
     // console.log("plot_hds_spectrum:", data, mask, index);
 
     if (mousedown)
@@ -795,8 +798,8 @@ function plot_hds_spectrum(data, mask, index) {
     var img_x = parseFloat(elem.getAttribute("x"));
     var img_y = parseFloat(elem.getAttribute("y"));
 
-    var dx = img_width;
-    var dy = img_height;
+    var dx = bmax - bmin;//img_width;
+    var dy = bmax - bmin;//img_height;
 
     var range = get_axes_range(width, height);
     //var dx = range.xMax - range.xMin;
@@ -807,10 +810,10 @@ function plot_hds_spectrum(data, mask, index) {
     // the X-axis
     if (index == 0) {
         var incrx = dx / (len - 1);
-        var offset = img_x;//range.xMin;
+        var offset = img_x + bmin;//range.xMin;
     } else {
         var incrx = dy / (len - 1);
-        var offset = img_y + dy;//range.yMax;
+        var offset = img_y + bmin + dy;//range.yMax;
     }
 
     var offsetx = 0;
@@ -13923,13 +13926,13 @@ function setup_image_selection() {
                         ctx.clearRect(0, 0, width, height);
 
                         // update the cross-hair
-                        plot_hds_crosshair(data.x0, data.y0, data.angle);
+                        var bounds = plot_hds_crosshair(data.x0, data.y0, data.angle);
 
                         // X direction
-                        plot_hds_spectrum(data.xspectrum, data.xmask, 0);
+                        plot_hds_spectrum(data.xspectrum, data.xmask, bounds.xmin, bounds.xmax, 0);
 
                         // Y direction
-                        plot_hds_spectrum(data.yspectrum, data.ymask, 1);
+                        plot_hds_spectrum(data.yspectrum, data.ymask, bounds.ymin, bounds.ymax, 1);
                     }
                 }
 
