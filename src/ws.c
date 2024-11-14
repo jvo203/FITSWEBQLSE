@@ -198,7 +198,7 @@ void delete_session(websocket_session *session)
 
     // WS spectrum thread
     session->ws_exit = true;
-    pthread_cond_signal(&session->ws_cond); // wake up the ws event loop    
+    pthread_cond_signal(&session->ws_cond); // wake up the ws event loop
     pthread_join(session->ws_thread, NULL); // wait for the ws thread to end (this does not work under valgrind, ret = 35 (EDEADLK))
 
     pthread_cond_destroy(&session->ws_cond);
@@ -406,7 +406,7 @@ void *ws_event_loop(void *arg)
         int last_seq_id = -1;
 
         // get the requests from the ring buffer
-        while (session->ws_ring != NULL && (req = (struct image_spectrum_request *)ring_get(session->ws_ring)) != NULL)
+        while ((req = (struct image_spectrum_request *)ring_get(session->ws_ring)) != NULL)
         {
             if (session->ws_exit)
             {
@@ -441,7 +441,7 @@ void *ws_event_loop(void *arg)
             realtime_image_spectrum_request_simd(req);
         }
     }
-    
+
     pthread_mutex_unlock(&session->ws_cond_mtx);
 
     session = NULL;
