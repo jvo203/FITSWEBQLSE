@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-11-14.1";
+    return "JS2024-11-14.2";
 }
 
 function uuidv4() {
@@ -710,6 +710,23 @@ function plot_hds_crosshair(x0, y0, theta) {
 
     // update the xline
     d3.select("#xline").attr("x1", p1.x).attr("y1", p1.y).attr("x2", p2.x).attr("y2", p2.y).attr("opacity", 1.0);
+    aLine = Line.create([p1.x, p1.y], [p2.x - p1.x, p2.y - p1.y]);
+
+    let edgeT = Line.create([0, 0], [img_width, 0]);
+    let edgeB = Line.create([0, img_height], [img_width, 0]);
+
+    let intersectT = aLine.intersectionWith(edgeT);
+    let intersectB = aLine.intersectionWith(edgeB);
+
+    if (intersectT != null && intersectB != null) {
+        console.log("intersections:", intersectT.elements, intersectB.elements);
+
+        // calculate the spectrum horizontal boundaries
+        // vector elements begin at 1
+        xmin = Math.max(0, intersectB.e(1));
+        xmax = Math.min(img_width, intersectT.e(1));
+        console.log("xmin:", xmin, "xmax:", xmax);
+    }
 
     // the Y-axis
     x1 = x0;
@@ -730,9 +747,7 @@ function plot_hds_crosshair(x0, y0, theta) {
 
     // update the yline
     d3.select("#yline").attr("x1", p1.x).attr("y1", p1.y).attr("x2", p2.x).attr("y2", p2.y).attr("opacity", 1.0);
-
     aLine = Line.create([p1.x, p1.y], [p2.x - p1.x, p2.y - p1.y]);
-    console.log("aLine:", aLine);
 
     let edgeL = Line.create([0, 0], [0, img_height]);
     let edgeR = Line.create([img_width, 0], [0, img_height]);
