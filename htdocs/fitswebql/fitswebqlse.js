@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-11-07.0";
+    return "JS2024-11-14.0";
 }
 
 function uuidv4() {
@@ -13894,14 +13894,14 @@ function setup_image_selection() {
                         var height = canvas.height;
                         ctx.clearRect(0, 0, width, height);
 
+                        // update the cross-hair
+                        plot_hds_crosshair(data.x0, data.y0, data.angle);
+
                         // X direction
                         plot_hds_spectrum(data.xspectrum, data.xmask, 0);
 
                         // Y direction
                         plot_hds_spectrum(data.yspectrum, data.ymask, 1);
-
-                        // update the cross-hair
-                        plot_hds_crosshair(data.x0, data.y0, data.angle);
                     }
                 }
 
