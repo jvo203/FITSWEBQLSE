@@ -678,10 +678,16 @@ function plot_hds_crosshair(x0, y0, theta) {
     var img_height = parseFloat(elem.getAttribute("height"));
     var img_x = parseFloat(elem.getAttribute("x"));
     var img_y = parseFloat(elem.getAttribute("y"));
+    console.log("img_width:", img_width, "img_height:", img_height, "img_x:", img_x, "img_y:", img_y);
 
     var x1, x2, y1, y2;
     var aLine, edgeL, edgeR, intersectL, intersectR;
-    var xmin, xmax, ymin, ymax;
+
+    // the spectrum X-Y starting point offsets
+    var xmin = 0;
+    var xmax = img_width;
+    var ymin = 0;
+    var ymax = img_height;
 
     // take the largest dimension
     var dim = Math.max(fitsData.width, fitsData.height);
@@ -720,16 +726,28 @@ function plot_hds_crosshair(x0, y0, theta) {
     // convert the rotated cross-hair to image coordinates
     p1 = fits2image(fitsData, image, elem, p1.x, p1.y);
     p2 = fits2image(fitsData, image, elem, p2.x, p2.y);
+    console.log("p1:", p1, "p2:", p2);
 
     // update the yline
     d3.select("#yline").attr("x1", p1.x).attr("y1", p1.y).attr("x2", p2.x).attr("y2", p2.y).attr("opacity", 1.0);
 
     aLine = Line.create([p1.x, p1.y], [p2.x - p1.x, p2.y - p1.y]);
-    edgeL = Line.create([img_x, img_y], [0, img_height]);
-    edgeR = Line.create([img_x + img_width, 0], [0, img_height]);
+    console.log("aLine:", aLine);
+
+    edgeL = Line.create([0, 0], [0, img_height]);
+    edgeR = Line.create([img_width, 0], [0, img_height]);
+
     intersectL = aLine.intersectionWith(edgeL);
     intersectR = aLine.intersectionWith(edgeR);
-    console.log("intersections:", intersectL, intersectR);
+
+    if (intersectL != null && intersectR != null) {
+        console.log("intersections:", intersectL.elements, intersectR.elements);
+
+        // calculate the spectrum vertical boundaries
+        ymin = Math.max(0, intersectL.elements[1]);
+        ymax = Math.min(img_height, intersectR.elements[1]);
+        console.log("ymin:", ymin, "ymax:", ymax);
+    }
 
     // set the HDS svg opacity
     d3.select("#hds_svg").attr("opacity", 1);
