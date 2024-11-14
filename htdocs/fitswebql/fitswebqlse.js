@@ -681,7 +681,7 @@ function plot_hds_crosshair(x0, y0, theta) {
     console.log("img_width:", img_width, "img_height:", img_height, "img_x:", img_x, "img_y:", img_y);
 
     var x1, x2, y1, y2;
-    var aLine, edgeL, edgeR, intersectL, intersectR;
+    var aLine;
 
     // the spectrum X-Y starting point offsets
     var xmin = 0;
@@ -734,11 +734,11 @@ function plot_hds_crosshair(x0, y0, theta) {
     aLine = Line.create([p1.x, p1.y], [p2.x - p1.x, p2.y - p1.y]);
     console.log("aLine:", aLine);
 
-    edgeL = Line.create([0, 0], [0, img_height]);
-    edgeR = Line.create([img_width, 0], [0, img_height]);
+    let edgeL = Line.create([0, 0], [0, img_height]);
+    let edgeR = Line.create([img_width, 0], [0, img_height]);
 
-    intersectL = aLine.intersectionWith(edgeL);
-    intersectR = aLine.intersectionWith(edgeR);
+    let intersectL = aLine.intersectionWith(edgeL);
+    let intersectR = aLine.intersectionWith(edgeR);
 
     if (intersectL != null && intersectR != null) {
         console.log("intersections:", intersectL.elements, intersectR.elements);
