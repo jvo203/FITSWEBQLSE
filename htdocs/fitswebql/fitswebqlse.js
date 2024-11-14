@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-11-14.0";
+    return "JS2024-11-14.1";
 }
 
 function uuidv4() {
@@ -8337,7 +8337,7 @@ function toggle_redshift(selection) {
     }
 
     if (selection.value == "z") {
-        unit.innerHTML = "(z>-1)";
+        unit.innerHTML = "(z > -1)";
 
         // set the elem "min" and "step" attributes
         elem.setAttribute("min", -0.9);
@@ -17911,7 +17911,7 @@ function display_menu() {
             }
 
             if (value == "z") {
-                unit.innerHTML = "(z>-1)";
+                unit.innerHTML = "(z > -1)";
 
                 // set the elem "min" and "step" attributes
                 elem.setAttribute("min", -0.9);
