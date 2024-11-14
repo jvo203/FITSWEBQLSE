@@ -744,8 +744,9 @@ function plot_hds_crosshair(x0, y0, theta) {
         console.log("intersections:", intersectL.elements, intersectR.elements);
 
         // calculate the spectrum vertical boundaries
-        ymin = Math.max(0, intersectL.elements[1]);
-        ymax = Math.min(img_height, intersectR.elements[1]);
+        // vector elements begin at 1
+        ymin = Math.max(0, intersectL.e(2));
+        ymax = Math.min(img_height, intersectR.e(2));
         console.log("ymin:", ymin, "ymax:", ymax);
     }
 
