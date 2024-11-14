@@ -7917,7 +7917,7 @@ contains
 
       ! print the final best solution
       if (pop%best_idx .ne. 0) then
-         print *, "best cost:", pop%best_cost, "best genotype:", pop%best(pop%best_idx)%genotype
+         print *, "DE best cost:", pop%best_cost, "best genotype:", pop%best(pop%best_idx)%genotype
 
          ! extract the optimal parameters
          mu = pop%best(pop%best_idx)%genotype(1)
