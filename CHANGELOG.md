@@ -1,9 +1,11 @@
-## [5.1.13] - 2024-11-15
+## [5.1.14] - 2024-11-15
 
 * Subaru HDS 1D spectra user-provided _*redshift*_: added support for inputting the source velocity [km/s]
 * improved real-time peak tracking (fitting the width, location and rotation) in Subaru HDS 2D FITS spectra by using _*genetic algorithms*_ (Differential Evolution), resulting in a better support for wide peaks (i.e. the Moon)
 * lowered the display limit to 100 for the Subaru HDS spectral lines
 * ensured API compatibility with the x265 C library version 4
+
+### _*[~~5.1.13] - 2024-11-15~~ (deleted)*_
 
 ## [5.1.12] - 2024-10-09
 
