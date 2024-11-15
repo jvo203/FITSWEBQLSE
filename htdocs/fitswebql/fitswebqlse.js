@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-11-15.0";
+    return "JS2024-11-15.1";
 }
 
 function uuidv4() {
@@ -17922,10 +17922,13 @@ function display_menu() {
             elem.setAttribute("min", -299792);
             elem.setAttribute("max", 299792);
             elem.setAttribute("step", 1);
+
+            sessionStorage.setItem("redshift", "v");
         }
         else {
             let unit = document.getElementById('unit');
             let value = sessionStorage.getItem("redshift"); // either 'v' or 'z'
+            console.log("existing redshift value:", value);
 
             // use upper case value
             document.getElementById('vel' + value.toUpperCase()).setAttribute("checked", "");
