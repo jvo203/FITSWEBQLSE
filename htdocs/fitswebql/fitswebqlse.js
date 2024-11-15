@@ -17923,12 +17923,13 @@ function display_menu() {
             elem.setAttribute("max", 299792);
             elem.setAttribute("step", 1);
 
+            console.log("setting redshift to v in the sessionStorage");
             sessionStorage.setItem("redshift", "v");
         }
         else {
             let unit = document.getElementById('unit');
             let value = sessionStorage.getItem("redshift"); // either 'v' or 'z'
-            console.log("existing redshift value:", value);
+            console.log("sessionStorage redshift value:", value);
 
             // use upper case value
             document.getElementById('vel' + value.toUpperCase()).setAttribute("checked", "");
