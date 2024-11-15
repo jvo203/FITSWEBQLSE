@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-11-14.2";
+    return "JS2024-11-15.0";
 }
 
 function uuidv4() {
@@ -723,8 +723,15 @@ function plot_hds_crosshair(x0, y0, theta) {
 
         // calculate the spectrum horizontal boundaries
         // vector elements begin at 1
-        xmin = Math.max(0, intersectB.e(1));
-        xmax = Math.min(img_width, intersectT.e(1));
+
+        if (theta < 0.0) {
+            xmin = Math.max(0, intersectB.e(1));
+            xmax = Math.min(img_width, intersectT.e(1));
+        } else {
+            xmin = Math.max(0, intersectT.e(1));
+            xmax = Math.min(img_width, intersectB.e(1));
+        }
+
         console.log("xmin:", xmin, "xmax:", xmax);
     }
 
@@ -760,8 +767,15 @@ function plot_hds_crosshair(x0, y0, theta) {
 
         // calculate the spectrum vertical boundaries
         // vector elements begin at 1
-        ymin = Math.max(0, intersectL.e(2));
-        ymax = Math.min(img_height, intersectR.e(2));
+
+        if (theta < 0.0) {
+            ymin = Math.max(0, intersectL.e(2));
+            ymax = Math.min(img_height, intersectR.e(2));
+        } else {
+            ymin = Math.max(0, intersectR.e(2));
+            ymax = Math.min(img_height, intersectL.e(2));
+        }
+
         console.log("ymin:", ymin, "ymax:", ymax);
     }
 
