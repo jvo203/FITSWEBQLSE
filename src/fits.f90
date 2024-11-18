@@ -8088,6 +8088,44 @@ contains
 
    end subroutine trace_hds_spectrum
 
+   subroutine rotate_hds_image_spectrum(pixels, mask, x0, y0, theta)
+      implicit none
+
+      real(c_float), dimension(:,:), intent(in) :: pixels
+      logical(kind=c_bool), dimension(:,:), intent(in) :: mask
+      real(c_float), intent(in) :: x0, y0, theta
+
+      ! the viewport and the mask
+      real(c_float), allocatable :: view_pixels(:,:)
+      logical(kind=c_bool), allocatable :: view_mask(:,:)
+
+      integer :: dimx, dimy, i, j, tx, ty
+      real :: qx, qy
+
+      dimx = size(pixels, 1)
+      dimy = size(pixels, 2)
+
+      ! allocate the viewport and the mask arrays using the pixels and mask dimensions
+      allocate (view_pixels(dimx, dimy))
+      allocate (view_mask(dimx, dimy))
+
+      ! go through the i, j pixels and rotate them around the point (x0, y0) by the angle theta
+      do j = 1, dimy
+         do i = 1, dimx
+            call rotate(real(i), real(j), x0, y0, theta, qx, qy)
+            tx = int(nint(qx))
+            ty = int(nint(qy))
+
+            ! check if tx and ty are within the bounds
+            if ((tx .lt. 1) .or. (tx .gt. dimx) .or. (ty .lt. 1) .or. (ty .gt. dimy)) cycle
+
+            view_pixels(i, j) = pixels(tx, ty)
+            view_mask(i, j) = mask(tx, ty)
+         end do
+      end do
+
+   end subroutine rotate_hds_image_spectrum
+
    subroutine realtime_hds_spectrum_request(item, req)
       use risk
       implicit none
