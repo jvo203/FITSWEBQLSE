@@ -8088,7 +8088,7 @@ contains
 
    end subroutine trace_hds_spectrum
 
-   subroutine rotate_hds_image_spectrum(pixels, mask, x0, y0, theta)
+   subroutine rotate_hds_image_spectrum(pixels, mask, x0, y0, theta, xspec, xmask, yspec, ymask)
       implicit none
 
       real(c_float), dimension(:,:), intent(in) :: pixels
@@ -8099,7 +8099,11 @@ contains
       real(c_float), allocatable :: view_pixels(:,:)
       logical(kind=c_bool), allocatable :: view_mask(:,:), matrix(:,:)
 
-      integer :: dimx, dimy, i, j, tx, ty
+      ! X and Y spectra
+      real(c_float), allocatable, intent(out) :: xspec(:), yspec(:)
+      logical(kind=c_bool), allocatable, intent(out) :: xmask(:), ymask(:)
+
+      integer :: dimx, dimy, i, j, tx, ty, xint, yint
       real :: qx, qy
 
       dimx = size(pixels, 1)
@@ -8128,6 +8132,12 @@ contains
             matrix(i, j) = .true.
          end do
       end do
+
+      xint = int(nint(x0))
+      yint = int(nint(y0))
+
+      ! take the X and Y spectra
+
 
    end subroutine rotate_hds_image_spectrum
 
@@ -8239,7 +8249,12 @@ contains
          x = max(1, x)
          x = min(item%naxes(1), x)
 
-         call rotate_hds_image_spectrum(item%pixels, item%mask, real(x), real(y), -theta)
+         if (allocated(xspec)) deallocate(xspec)
+         if (allocated(xmask)) deallocate(xmask)
+         if (allocated(yspec)) deallocate(yspec)
+         if (allocated(ymask)) deallocate(ymask)
+
+         call rotate_hds_image_spectrum(item%pixels, item%mask, real(x), real(y), -theta, xspec, xmask, yspec, ymask)
 
          block
             integer :: len
