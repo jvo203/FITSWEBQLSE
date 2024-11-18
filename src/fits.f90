@@ -8133,10 +8133,22 @@ contains
          end do
       end do
 
+      ! take the X and Y spectra
       xint = int(nint(x0))
       yint = int(nint(y0))
 
-      ! take the X and Y spectra
+      ! check the bounds
+      xint = max(1, xint)
+      xint = min(dimx, xint)
+
+      yint = max(1, yint)
+      yint = min(dimy, yint)
+
+      xspec = view_pixels(:, yint)
+      xmask = view_mask(:, yint)
+
+      yspec = view_pixels(xint, :)
+      ymask = view_mask(xint, :)
 
 
    end subroutine rotate_hds_image_spectrum
