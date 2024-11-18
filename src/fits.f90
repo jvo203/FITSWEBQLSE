@@ -8097,7 +8097,7 @@ contains
 
       ! the viewport and the mask
       real(c_float), allocatable :: view_pixels(:,:)
-      logical(kind=c_bool), allocatable :: view_mask(:,:)
+      logical(kind=c_bool), allocatable :: view_mask(:,:), matrix(:,:)
 
       integer :: dimx, dimy, i, j, tx, ty
       real :: qx, qy
@@ -8108,6 +8108,7 @@ contains
       ! allocate the viewport and the mask arrays using the pixels and mask dimensions
       allocate (view_pixels(dimx, dimy))
       allocate (view_mask(dimx, dimy))
+      allocate (matrix(dimx, dimy))
 
       ! go through the i, j pixels and rotate them around the point (x0, y0) by the angle theta
       do j = 1, dimy
@@ -8117,10 +8118,14 @@ contains
             ty = int(nint(qy))
 
             ! check if tx and ty are within the bounds
-            if ((tx .lt. 1) .or. (tx .gt. dimx) .or. (ty .lt. 1) .or. (ty .gt. dimy)) cycle
+            if ((tx .lt. 1) .or. (tx .gt. dimx) .or. (ty .lt. 1) .or. (ty .gt. dimy)) then
+               matrix(i, j) = .false.
+               cycle
+            end if
 
             view_pixels(i, j) = pixels(tx, ty)
             view_mask(i, j) = mask(tx, ty)
+            matrix(i, j) = .true.
          end do
       end do
 
@@ -8233,6 +8238,8 @@ contains
 
          x = max(1, x)
          x = min(item%naxes(1), x)
+
+         call rotate_hds_image_spectrum(item%pixels, item%mask, real(x), real(y), -theta)
 
          block
             integer :: len
