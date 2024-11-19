@@ -8088,12 +8088,12 @@ contains
 
    end subroutine trace_hds_spectrum
 
-   subroutine rotate_hds_image_spectrum(pixels, mask, x0, y0, theta, xspec, xmask, yspec, ymask)
+   subroutine rotate_hds_image_spectrum(pixels, mask, x0, y0, theta, gamma, xspec, xmask, yspec, ymask)
       implicit none
 
       real(c_float), dimension(:,:), intent(in) :: pixels
       logical(kind=c_bool), dimension(:,:), intent(in) :: mask
-      real(c_float), intent(in) :: x0, y0, theta
+      real(c_float), intent(in) :: x0, y0, theta, gamma
 
       ! the viewport and the mask
       real(c_float), allocatable :: view_pixels(:,:)
@@ -8104,6 +8104,9 @@ contains
       logical(kind=c_bool), allocatable, intent(out) :: xmask(:), ymask(:)
 
       integer :: dimx, dimy, i, j, tx, ty, xint, yint
+      integer :: x1, x2, y1, y2 ! non-NaN spectrum bounds
+      logical(kind=c_bool), allocatable :: valid(:)
+
       real :: qx, qy
 
       dimx = size(pixels, 1)
@@ -8144,11 +8147,50 @@ contains
       yint = max(1, yint)
       yint = min(dimy, yint)
 
-      xspec = view_pixels(:, yint)
-      xmask = view_mask(:, yint)
+      ! find the non-NaN bounds
+      x1 = 1
+      x2 = dimx
+      y1 = 1
+      y2 = dimy
 
-      yspec = view_pixels(xint, :)
-      ymask = view_mask(xint, :)
+      ! X bounds
+      valid = matrix(:, yint)
+
+      do i = 1, dimx
+         if (valid(i)) then
+            x1 = i
+            exit
+         end if
+      end do
+
+      do i = dimx, 1, -1
+         if (valid(i)) then
+            x2 = i
+            exit
+         end if
+      end do
+
+      ! Y bounds
+      valid = matrix(xint, :)
+
+      do i = 1, dimy
+         if (valid(i)) then
+            y1 = i
+            exit
+         end if
+      end do
+
+      do i = dimy, 1, -1
+         if (valid(i)) then
+            y2 = i
+            exit
+         end if
+      end do
+
+      xspec = view_pixels(x1:x2, yint)
+      xmask = view_mask(x1:x2, yint)
+      yspec = view_pixels(xint, y1:y2)
+      ymask = view_mask(xint, y1:y2)
 
 
    end subroutine rotate_hds_image_spectrum
@@ -8266,7 +8308,7 @@ contains
          if (allocated(yspec)) deallocate(yspec)
          if (allocated(ymask)) deallocate(ymask)
 
-         call rotate_hds_image_spectrum(item%pixels, item%mask, real(x), real(y), -theta, xspec, xmask, yspec, ymask)
+         call rotate_hds_image_spectrum(item%pixels, item%mask, real(x), real(y), -theta, gamma, xspec, xmask, yspec, ymask)
 
          block
             integer :: len
