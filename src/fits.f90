@@ -8112,6 +8112,17 @@ contains
       dimx = size(pixels, 1)
       dimy = size(pixels, 2)
 
+      ! take the X and Y spectra
+      xint = int(nint(x0))
+      yint = int(nint(y0))
+
+      ! check the bounds
+      xint = max(1, xint)
+      xint = min(dimx, xint)
+
+      yint = max(1, yint)
+      yint = min(dimy, yint)
+
       ! allocate the viewport and the mask arrays using the pixels and mask dimensions
       allocate (view_pixels(dimx, dimy))
       allocate (view_mask(dimx, dimy))
@@ -8135,17 +8146,6 @@ contains
             matrix(i, j) = .true.
          end do
       end do
-
-      ! take the X and Y spectra
-      xint = int(nint(x0))
-      yint = int(nint(y0))
-
-      ! check the bounds
-      xint = max(1, xint)
-      xint = min(dimx, xint)
-
-      yint = max(1, yint)
-      yint = min(dimy, yint)
 
       ! find the non-NaN bounds
       xmin = 1
