@@ -8120,6 +8120,8 @@ contains
       x1 = max(1, x1)
       x2 = min(dimx, x2)
 
+      print *, 'rotate_hds_image_spectrum x1,x2 band limits:', x1, x2
+
       ! take the X and Y spectra
       xint = int(nint(x0))
       yint = int(nint(y0))
