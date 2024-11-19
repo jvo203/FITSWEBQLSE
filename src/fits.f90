@@ -8104,7 +8104,7 @@ contains
       logical(kind=c_bool), allocatable, intent(out) :: xmask(:), ymask(:)
 
       integer :: dimx, dimy, i, j, tx, ty, xint, yint
-      integer :: x1, x2, y1, y2 ! non-NaN spectrum bounds
+      integer :: xmin, xmax, ymin, ymax ! non-NaN spectrum bounds
       logical(kind=c_bool), allocatable :: valid(:)
 
       real :: qx, qy
@@ -8148,24 +8148,24 @@ contains
       yint = min(dimy, yint)
 
       ! find the non-NaN bounds
-      x1 = 1
-      x2 = dimx
-      y1 = 1
-      y2 = dimy
+      xmin = 1
+      xmax = dimx
+      ymin = 1
+      ymax = dimy
 
       ! X bounds
       valid = matrix(:, yint)
 
       do i = 1, dimx
          if (valid(i)) then
-            x1 = i
+            xmin = i
             exit
          end if
       end do
 
       do i = dimx, 1, -1
          if (valid(i)) then
-            x2 = i
+            xmax = i
             exit
          end if
       end do
@@ -8175,22 +8175,22 @@ contains
 
       do i = 1, dimy
          if (valid(i)) then
-            y1 = i
+            ymin = i
             exit
          end if
       end do
 
       do i = dimy, 1, -1
          if (valid(i)) then
-            y2 = i
+            ymax = i
             exit
          end if
       end do
 
-      xspec = view_pixels(x1:x2, yint)
-      xmask = view_mask(x1:x2, yint)
-      yspec = view_pixels(xint, y1:y2)
-      ymask = view_mask(xint, y1:y2)
+      xspec = view_pixels(xmin:xmax, yint)
+      xmask = view_mask(xmin:xmax, yint)
+      yspec = view_pixels(xint, ymin:ymax)
+      ymask = view_mask(xint, ymin:ymax)
 
 
    end subroutine rotate_hds_image_spectrum
