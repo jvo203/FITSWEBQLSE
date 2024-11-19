@@ -8096,8 +8096,8 @@ contains
       real(c_float), intent(in) :: x0, y0, theta, gamma
 
       ! the viewport and the mask
-      real(c_float), allocatable :: view_pixels(:,:)
-      logical(kind=c_bool), allocatable :: view_mask(:,:), matrix(:,:)
+      real(c_float), allocatable :: view_pixels(:,:), outspec(:)
+      logical(kind=c_bool), allocatable :: view_mask(:,:), matrix(:,:), outmask(:)
 
       ! X and Y spectra
       real(c_float), allocatable, intent(out) :: xspec(:), yspec(:)
@@ -8108,7 +8108,8 @@ contains
       logical(kind=c_bool), allocatable :: valid(:)
       integer :: x1, x2 ! the Y spectrum band
 
-      real :: qx, qy
+      real :: qx, qy, val
+      integer :: count
 
       dimx = size(pixels, 1)
       dimy = size(pixels, 2)
@@ -8137,6 +8138,10 @@ contains
       allocate (view_pixels(x1:x2, dimy))
       allocate (view_mask(x1:x2, dimy))
       allocate (matrix(x1:x2, dimy))
+
+      ! a full wide-band Y spectrum
+      allocate(outspec(dimy))
+      allocate(outmask(dimy))
 
       ! go through the i, j pixels and rotate them around the point (x0, y0) by the angle theta
       do j = 1, dimy
@@ -8199,9 +8204,52 @@ contains
 
       !xspec = view_pixels(xmin:xmax, yint)
       !xmask = view_mask(xmin:xmax, yint)
-      yspec = view_pixels(xint, ymin:ymax)
-      ymask = view_mask(xint, ymin:ymax)
+      !yspec = view_pixels(xint, ymin:ymax)
+      !ymask = view_mask(xint, ymin:ymax)
 
+      ymin = 1
+      ymax = dimy
+      valid = .false.
+
+      do j = 1, dimy
+         ! sum up each row
+         count = 0
+         val = 0.0
+
+         outspec(j) = 0.0
+         outmask(j) = .false.
+
+         do i = x1, x2
+            if (matrix(i, j)) then
+               valid(j) = .true. ! there is at least one 'in-range' pixel in the row
+
+               if (view_mask(i,j)) then
+                  val = val + view_pixels(i, j)
+                  outmask(j) = .true.
+                  count = count + 1
+               end if
+            end if
+         end do
+
+         if (count .gt. 0) outspec(j) = val / real(count)
+      end do
+
+      do i = 1, dimy
+         if (valid(i)) then
+            ymin = i
+            exit
+         end if
+      end do
+
+      do i = dimy, 1, -1
+         if (valid(i)) then
+            ymax = i
+            exit
+         end if
+      end do
+
+      yspec = outspec(ymin:ymax)
+      ymask = outmask(ymin:ymax)
 
    end subroutine rotate_hds_image_spectrum
 
