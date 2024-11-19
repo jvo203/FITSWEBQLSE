@@ -8106,11 +8106,19 @@ contains
       integer :: dimx, dimy, i, j, tx, ty, xint, yint
       integer :: xmin, xmax, ymin, ymax ! non-NaN spectrum bounds
       logical(kind=c_bool), allocatable :: valid(:)
+      integer :: x1, x2 ! the Y spectrum band
 
       real :: qx, qy
 
       dimx = size(pixels, 1)
       dimy = size(pixels, 2)
+
+      x1 = int(nint(x0-gamma))
+      x2 = int(nint(x0+gamma))
+
+      ! check the bounds
+      x1 = max(1, x1)
+      x2 = min(dimx, x2)
 
       ! take the X and Y spectra
       xint = int(nint(x0))
@@ -8124,13 +8132,13 @@ contains
       yint = min(dimy, yint)
 
       ! allocate the viewport and the mask arrays using the pixels and mask dimensions
-      allocate (view_pixels(dimx, dimy))
-      allocate (view_mask(dimx, dimy))
-      allocate (matrix(dimx, dimy))
+      allocate (view_pixels(x1:x2, dimy))
+      allocate (view_mask(x1:x2, dimy))
+      allocate (matrix(x1:x2, dimy))
 
       ! go through the i, j pixels and rotate them around the point (x0, y0) by the angle theta
       do j = 1, dimy
-         do i = 1, dimx
+         do i = x1, x2
             call rotate(real(i), real(j), x0, y0, theta, qx, qy)
             tx = int(nint(qx))
             ty = int(nint(qy))
@@ -8148,27 +8156,27 @@ contains
       end do
 
       ! find the non-NaN bounds
-      xmin = 1
-      xmax = dimx
+      !xmin = 1
+      !xmax = dimx
       ymin = 1
       ymax = dimy
 
       ! X bounds
-      valid = matrix(:, yint)
+      !valid = matrix(:, yint)
 
-      do i = 1, dimx
-         if (valid(i)) then
-            xmin = i
-            exit
-         end if
-      end do
+      !do i = 1, dimx
+      !   if (valid(i)) then
+      !      xmin = i
+      !      exit
+      !   end if
+      !end do
 
-      do i = dimx, 1, -1
-         if (valid(i)) then
-            xmax = i
-            exit
-         end if
-      end do
+      !do i = dimx, 1, -1
+      !   if (valid(i)) then
+      !      xmax = i
+      !      exit
+      !   end if
+      !end do
 
       ! Y bounds
       valid = matrix(xint, :)
@@ -8187,8 +8195,8 @@ contains
          end if
       end do
 
-      xspec = view_pixels(xmin:xmax, yint)
-      xmask = view_mask(xmin:xmax, yint)
+      !xspec = view_pixels(xmin:xmax, yint)
+      !xmask = view_mask(xmin:xmax, yint)
       yspec = view_pixels(xint, ymin:ymax)
       ymask = view_mask(xint, ymin:ymax)
 
@@ -8325,10 +8333,10 @@ contains
             x2 = x + len
             y2 = y
 
-            !if (allocated(xspec)) deallocate(xspec)
-            !if (allocated(xmask)) deallocate(xmask)
-            !call trace_hds_spectrum(real(x1), real(y1), real(x2), real(y2), real(x), real(y),&
-            !& 4*len, -theta, item%pixels, item%mask, xspec, xmask)
+            if (allocated(xspec)) deallocate(xspec)
+            if (allocated(xmask)) deallocate(xmask)
+            call trace_hds_spectrum(real(x1), real(y1), real(x2), real(y2), real(x), real(y),&
+            & 4*len, -theta, item%pixels, item%mask, xspec, xmask)
             !$omp end task
             !$omp end single
 
