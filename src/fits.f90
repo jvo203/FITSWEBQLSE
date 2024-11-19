@@ -8283,10 +8283,10 @@ contains
             x2 = x + len
             y2 = y
 
-            if (allocated(xspec)) deallocate(xspec)
-            if (allocated(xmask)) deallocate(xmask)
-            call trace_hds_spectrum(real(x1), real(y1), real(x2), real(y2), real(x), real(y),&
-            & 4*len, -theta, item%pixels, item%mask, xspec, xmask)
+            !if (allocated(xspec)) deallocate(xspec)
+            !if (allocated(xmask)) deallocate(xmask)
+            !call trace_hds_spectrum(real(x1), real(y1), real(x2), real(y2), real(x), real(y),&
+            !& 4*len, -theta, item%pixels, item%mask, xspec, xmask)
             !$omp end task
             !$omp end single
 
@@ -8299,10 +8299,10 @@ contains
             x2 = x
             y2 = y + len
 
-            if (allocated(yspec)) deallocate(yspec)
-            if (allocated(ymask)) deallocate(ymask)
-            call trace_hds_spectrum(real(x1), real(y1), real(x2), real(y2), real(x), real(y),&
-            & 4*len, -theta, item%pixels, item%mask, yspec, ymask)
+            !if (allocated(yspec)) deallocate(yspec)
+            !if (allocated(ymask)) deallocate(ymask)
+            !call trace_hds_spectrum(real(x1), real(y1), real(x2), real(y2), real(x), real(y),&
+            !& 4*len, -theta, item%pixels, item%mask, yspec, ymask)
             !$omp end task
             !$omp end single
             !$omp end parallel
