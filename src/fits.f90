@@ -8157,6 +8157,8 @@ contains
       allocate(outmask(dimy))
       allocate(valid(dimy))
 
+      valid = .false.
+
       ! go through the i, j pixels and rotate them around the point (x0, y0) by the angle theta
       do j = 1, dimy
          do i = x1, x2
@@ -8179,7 +8181,6 @@ contains
       ! find the non-NaN bounds
       ymin = 1
       ymax = dimy
-      valid = .false.
 
       do j = 1, dimy
          ! sum up each row
