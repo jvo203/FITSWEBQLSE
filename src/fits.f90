@@ -1104,6 +1104,18 @@ module fits
 
       end function WindowSIMDErr
 
+      ! export void hds_image_spectrum_x(uniform float x0, uniform float y0, uniform float theta, uniform float pixels[], uniform unsigned int8 mask[], uniform int dimx, uniform int dimy, uniform float outspec[], uniform unsigned int8 outmask[], uniform unsigned int8 valid[])
+      subroutine hds_image_spectrum_x(x0, y0, theta, pixels, mask, dimx, dimy, outspec, outmask, valid) BIND(C, name="hds_image_spectrum_x")
+         use, intrinsic :: ISO_C_BINDING
+         implicit none
+
+         real(c_float), value, intent(in) :: x0, y0, theta
+         type(C_PTR), value, intent(in) :: pixels, mask
+         integer(c_int), value, intent(in) :: dimx, dimy
+         type(C_PTR), value, intent(in) :: outspec, outmask, valid
+
+      end subroutine hds_image_spectrum_x
+
       ! resizeLanczos(Ipp32f *pSrc, int srcWidth, int srcHeight, Ipp32f *pDest, int dstWidth, int dstHeight, int numLobes)
       subroutine resizeLanczos(pSrc, srcWidth, srcHeight, pDest, dstWidth, dstHeight, numLobes) BIND(C, name='resizeLanczos')
          use, intrinsic :: ISO_C_BINDING
