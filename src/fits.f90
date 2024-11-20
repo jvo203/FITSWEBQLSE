@@ -8269,8 +8269,8 @@ contains
    subroutine rotate_hds_image_spectrum_x(pixels, mask, x0, y0, theta, gamma, xspec, xmask)
       implicit none
 
-      real(c_float), dimension(:,:), intent(in) :: pixels
-      logical(kind=c_bool), dimension(:,:), intent(in) :: mask
+      real(c_float), dimension(:,:), intent(in), target :: pixels
+      logical(kind=c_bool), dimension(:,:), intent(in), target :: mask
       real(c_float), intent(in) :: x0, y0, theta, gamma
 
       ! X and Y spectra
@@ -8278,13 +8278,12 @@ contains
       logical(kind=c_bool), allocatable, intent(out) :: xmask(:)
 
       ! the intermediate spectrum and the mask
-      real(c_float), allocatable :: outspec(:)
-      logical(kind=c_bool), allocatable :: outmask(:)
+      real(c_float), allocatable, target :: outspec(:)
+      logical(kind=c_bool), allocatable, target :: outmask(:)
 
-      integer :: dimx, dimy, i, tx, ty
+      integer :: dimx, dimy, i
       integer :: xmin, xmax ! non-NaN spectrum bounds
-      logical(kind=c_bool), allocatable :: valid(:)
-      real :: qx, qy
+      logical(kind=c_bool), allocatable, target :: valid(:)
 
       dimx = size(pixels, 1)
       dimy = size(pixels, 2)
@@ -8294,22 +8293,9 @@ contains
       allocate(valid(dimx))
 
       ! go through the X axis pixels, rotate them around the point (x0, y0) by the angle theta
-      do i = 1, dimx
-         call rotate(real(i), y0, x0, y0, theta, qx, qy)
-         tx = int(nint(qx))
-         ty = int(nint(qy))
-
-         ! check if tx and ty lie within the 2D image bounds
-         if ((tx .lt. 1) .or. (tx .gt. dimx) .or. (ty .lt. 1) .or. (ty .gt. dimy)) then
-            outspec(i) = 0.0
-            valid(i) = .false.
-            outmask(i) = .false.
-         else
-            outspec(i) = pixels(tx, ty)
-            outmask(i) = mask(tx, ty)
-            valid(i) = .true.
-         end if
-      end do
+      ! C array indexing starts from 0
+      call hds_image_spectrum_x(x0 - 1.0, y0 - 1.0, theta, c_loc(pixels), c_loc(mask), dimx, dimy,&
+      & c_loc(outspec), c_loc(outmask), c_loc(valid))
 
       ! find the non-NaN X min/max bounds
       xmin = 1
