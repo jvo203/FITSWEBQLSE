@@ -8101,23 +8101,23 @@ contains
 
    end subroutine trace_hds_spectrum
 
-   subroutine rotate_hds_image_spectrum(pixels, mask, x0, y0, theta, gamma, xspec, xmask, yspec, ymask)
+   subroutine rotate_hds_image_spectrum_y(pixels, mask, x0, y0, theta, gamma, yspec, ymask)
       implicit none
 
       real(c_float), dimension(:,:), intent(in) :: pixels
       logical(kind=c_bool), dimension(:,:), intent(in) :: mask
       real(c_float), intent(in) :: x0, y0, theta, gamma
 
+      ! X and Y spectra
+      real(c_float), allocatable, intent(out) :: yspec(:)
+      logical(kind=c_bool), allocatable, intent(out) :: ymask(:)
+
       ! the viewport and the mask
       real(c_float), allocatable :: view_pixels(:,:), outspec(:)
       logical(kind=c_bool), allocatable :: view_mask(:,:), matrix(:,:), outmask(:)
 
-      ! X and Y spectra
-      real(c_float), allocatable, intent(out) :: xspec(:), yspec(:)
-      logical(kind=c_bool), allocatable, intent(out) :: xmask(:), ymask(:)
-
       integer :: dimx, dimy, i, j, tx, ty, xint, yint
-      integer :: xmin, xmax, ymin, ymax ! non-NaN spectrum bounds
+      integer :: ymin, ymax ! non-NaN spectrum bounds
       logical(kind=c_bool), allocatable :: valid(:)
       integer :: x1, x2 ! the Y spectrum band
 
@@ -8155,6 +8155,7 @@ contains
       ! a full wide-band Y spectrum
       allocate(outspec(dimy))
       allocate(outmask(dimy))
+      allocate(valid(dimy))
 
       ! go through the i, j pixels and rotate them around the point (x0, y0) by the angle theta
       do j = 1, dimy
@@ -8176,50 +8177,6 @@ contains
       end do
 
       ! find the non-NaN bounds
-      !xmin = 1
-      !xmax = dimx
-      ymin = 1
-      ymax = dimy
-
-      ! X bounds
-      !valid = matrix(:, yint)
-
-      !do i = 1, dimx
-      !   if (valid(i)) then
-      !      xmin = i
-      !      exit
-      !   end if
-      !end do
-
-      !do i = dimx, 1, -1
-      !   if (valid(i)) then
-      !      xmax = i
-      !      exit
-      !   end if
-      !end do
-
-      ! Y bounds
-      valid = matrix(xint, :)
-
-      do i = 1, dimy
-         if (valid(i)) then
-            ymin = i
-            exit
-         end if
-      end do
-
-      do i = dimy, 1, -1
-         if (valid(i)) then
-            ymax = i
-            exit
-         end if
-      end do
-
-      !xspec = view_pixels(xmin:xmax, yint)
-      !xmask = view_mask(xmin:xmax, yint)
-      !yspec = view_pixels(xint, ymin:ymax)
-      !ymask = view_mask(xint, ymin:ymax)
-
       ymin = 1
       ymax = dimy
       valid = .false.
@@ -8264,7 +8221,7 @@ contains
       yspec = outspec(ymin:ymax)
       ymask = outmask(ymin:ymax)
 
-   end subroutine rotate_hds_image_spectrum
+   end subroutine rotate_hds_image_spectrum_y
 
    subroutine rotate_hds_image_spectrum_x(pixels, mask, x0, y0, theta, gamma, xspec, xmask)
       implicit none
@@ -8428,13 +8385,6 @@ contains
          x = max(1, x)
          x = min(item%naxes(1), x)
 
-         if (allocated(xspec)) deallocate(xspec)
-         if (allocated(xmask)) deallocate(xmask)
-         if (allocated(yspec)) deallocate(yspec)
-         if (allocated(ymask)) deallocate(ymask)
-
-         call rotate_hds_image_spectrum(item%pixels, item%mask, real(x), real(y), -theta, gamma, xspec, xmask, yspec, ymask)
-
          block
             integer :: len
 
@@ -8467,10 +8417,11 @@ contains
             x2 = x
             y2 = y + len
 
-            !if (allocated(yspec)) deallocate(yspec)
-            !if (allocated(ymask)) deallocate(ymask)
+            if (allocated(yspec)) deallocate(yspec)
+            if (allocated(ymask)) deallocate(ymask)
             !call trace_hds_spectrum(real(x1), real(y1), real(x2), real(y2), real(x), real(y),&
             !& 4*len, -theta, item%pixels, item%mask, yspec, ymask)
+            call rotate_hds_image_spectrum_y(item%pixels, item%mask, real(x), real(y), -theta, gamma, yspec, ymask)
             !$omp end task
             !$omp end single
             !$omp end parallel
