@@ -1705,10 +1705,33 @@ export uniform float WindowSIMDErr(uniform float theta, uniform float w, uniform
 }
 
 // to be called from within FORTRAN "rotate_hds_image_spectrum_x"
+// remember to subtract 1.0 from x0 and y0 when calling from FORTRAN
 export void hds_image_spectrum_x(uniform float x0, uniform float y0, uniform float theta, uniform float gamma, uniform float pixels[], uniform unsigned int8 mask[], uniform int dimx, uniform int dimy, uniform float outspec[], uniform unsigned int8 outmask[], uniform unsigned int8 valid[])
 {    
     foreach(i=0 ... dimx)
     {
+        // call rotate(real(i), y0, x0, y0, theta, qx, qy)
+        varying float dx = (float)i - x0 ;
+        // varying float dy = 0.0f ;
+        varying float qx = x0 + dx * cos(theta); // dy is ZERO
+        varying float qy = y0 + dx * sin(theta); // dy is ZERO
 
+        varying int tx = (int)round(qx) ;
+        varying int ty = (int)round(qy) ;
+
+        // check if tx and ty lie within the 2D image bounds        
+        cif ((tx >= 0) && (tx < dimx) && (ty >= 0) && (ty < dimy))
+        {
+            varying int offset = ty*dimx + tx ;
+            outspec[i] = pixels[offset] ;
+            outmask[i] = mask[offset] ;
+            valid[i] = 1 ;
+        }
+        else
+        {
+            outspec[i] = 0.0f ;
+            outmask[i] = 0 ;
+            valid[i] = 0 ;
+        }
     }
 }
