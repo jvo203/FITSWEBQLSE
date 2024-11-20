@@ -1703,3 +1703,12 @@ export uniform float WindowSIMDErr(uniform float theta, uniform float w, uniform
 
     return sum ;
 }
+
+// to be called from within FORTRAN "rotate_hds_image_spectrum_x"
+export void hds_image_spectrum_x(uniform float x0, uniform float y0, uniform float theta, uniform float gamma, uniform float pixels[], uniform unsigned int8 mask[], uniform int dimx, uniform int dimy, uniform float outspec[], uniform unsigned int8 outmask[], uniform unsigned int8 valid[])
+{    
+    foreach(i=0 ... dimx)
+    {
+
+    }
+}

@@ -64,6 +64,7 @@ extern "C" {
     extern void fits2int32(int32_t * src, float * dest, uint32_t size);
     extern void fits2int64(int64_t * src, float * dest, uint32_t size);
     extern void fits2uint8(uint8_t * src, float * dest, uint32_t size);
+    extern void hds_image_spectrum_x(float x0, float y0, float theta, float gamma, float * pixels, uint8_t * mask, int32_t dimx, int32_t dimy, float * outspec, uint8_t * outmask, uint8_t * valid);
     extern void make_global_statistics(struct fixed_block_t * compressed, int32_t width, int32_t height, float median, float * sumP, int64_t * countP, float * sumN, int64_t * countN);
     extern void make_image_spectrumF32(float * src, float * pixels, uint8_t * mask, uint8_t * data_mask, double ignrval, double datamin, double datamax, double cdelt3, float * res, int64_t npixels);
     extern void make_video_frameF16_legacy(uint16_t * src, int32_t width, int32_t height, int32_t src_stride, uint8_t * dst_luma, uint8_t * dst_mask, int32_t dst_width, int32_t dst_height, int32_t dst_stride, float dmin, float dmax, float lmin, float lmax);
