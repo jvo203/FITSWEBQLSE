@@ -8253,6 +8253,74 @@ contains
 
    end subroutine rotate_hds_image_spectrum
 
+   subroutine rotate_hds_image_spectrum_x(pixels, mask, x0, y0, theta, gamma, xspec, xmask)
+      implicit none
+
+      real(c_float), dimension(:,:), intent(in) :: pixels
+      logical(kind=c_bool), dimension(:,:), intent(in) :: mask
+      real(c_float), intent(in) :: x0, y0, theta, gamma
+
+      ! X and Y spectra
+      real(c_float), allocatable, intent(out) :: xspec(:)
+      logical(kind=c_bool), allocatable, intent(out) :: xmask(:)
+
+      ! the intermediate spectrum and the mask
+      real(c_float), allocatable :: outspec(:)
+      logical(kind=c_bool), allocatable :: outmask(:)
+
+      integer :: dimx, dimy, i, tx, ty
+      integer :: xmin, xmax ! non-NaN spectrum bounds
+      logical(kind=c_bool), allocatable :: valid(:)
+      real :: qx, qy
+
+      dimx = size(pixels, 1)
+      dimy = size(pixels, 2)
+
+      allocate(outspec(dimx))
+      allocate(outmask(dimx))
+      allocate(valid(dimx))
+
+      ! go through the X axis pixels, rotate them around the point (x0, y0) by the angle theta
+      do i = 1, dimx
+         call rotate(real(i), y0, x0, y0, theta, qx, qy)
+         tx = int(nint(qx))
+         ty = int(nint(qy))
+
+         ! check if tx and ty lie within the 2D image bounds
+         if ((tx .lt. 1) .or. (tx .gt. dimx) .or. (ty .lt. 1) .or. (ty .gt. dimy)) then
+            outspec(i) = 0.0
+            valid(i) = .false.
+            outmask(i) = .false.
+         else
+            outspec(i) = pixels(tx, ty)
+            outmask(i) = mask(tx, ty)
+            valid(i) = .true.
+         end if
+      end do
+
+      ! find the non-NaN X min/max bounds
+      xmin = 1
+      xmax = dimx
+
+      do i = 1, dimx
+         if (valid(i)) then
+            xmin = i
+            exit
+         end if
+      end do
+
+      do i = dimx, 1, -1
+         if (valid(i)) then
+            xmax = i
+            exit
+         end if
+      end do
+
+      xspec = outspec(xmin:xmax)
+      xmask = outmask(xmin:xmax)
+
+   end subroutine rotate_hds_image_spectrum_x
+
    subroutine realtime_hds_spectrum_request(item, req)
       use risk
       implicit none
