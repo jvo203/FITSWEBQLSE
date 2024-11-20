@@ -8453,8 +8453,9 @@ contains
 
             if (allocated(xspec)) deallocate(xspec)
             if (allocated(xmask)) deallocate(xmask)
-            call trace_hds_spectrum(real(x1), real(y1), real(x2), real(y2), real(x), real(y),&
-            & 4*len, -theta, item%pixels, item%mask, xspec, xmask)
+            ! call trace_hds_spectrum(real(x1), real(y1), real(x2), real(y2), real(x), real(y),&
+            ! & 4*len, -theta, item%pixels, item%mask, xspec, xmask)
+            call rotate_hds_image_spectrum_x(item%pixels, item%mask, real(x), real(y), -theta, gamma, xspec, xmask)
             !$omp end task
             !$omp end single
 
