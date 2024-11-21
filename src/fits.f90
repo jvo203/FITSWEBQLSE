@@ -7914,7 +7914,7 @@ contains
          ! evaluate the population
          !$omp parallel shared(pop, view, mask, w) private(i, cost, mu0, sigma0, theta0)&
          !$omp& NUM_THREADS(max_threads)
-         !$omp do schedule(dynamic, 4)
+         !$omp do schedule(dynamic, 1)
          do i = 1, pop_size
             mu0 = pop%curr(i)%genotype(1)
             theta0 = pop%curr(i)%genotype(2)
