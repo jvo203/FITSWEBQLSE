@@ -7874,6 +7874,7 @@ contains
 
       ! get #physical cores (ignore HT)
       max_threads = get_max_threads()
+      print *, 'de_window <max_threads>:', max_threads
 
       ! the first parameter is mu
       min_val(1) = mu - 10.0
