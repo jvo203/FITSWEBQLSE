@@ -8153,6 +8153,7 @@ contains
          outmask(j) = .false.
          valid(j) = .false.
 
+         !$omp simd
          do i = x1, x2
             call rotate(real(i), real(j), x0, y0, theta, qx, qy)
             tx = int(nint(qx))

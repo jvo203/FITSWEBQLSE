@@ -219,13 +219,13 @@ ifeq ($(UNAME_S),Darwin)
 
 	# try clang for a change; force the use of libgomp instead of libomp (FORTRAN has been compiled with gfortran, flang is immature at the moment)
 	CC = ${HOMEBREW_PREFIX}/opt/llvm/bin/clang
-	CFLAGS := -Xpreprocessor -Ofast -flto -fopenmp=libgomp -fno-finite-math-only -Wno-register -funroll-loops -ftree-vectorize -Rpass=loop-vectorize -flax-vector-conversions -Wl,-no_compact_unwind -Wno-unused-command-line-argument
+	CFLAGS := -Xpreprocessor -Ofast -flto -fopenmp=libgomp -fno-finite-math-only -Wno-register -funroll-loops -ftree-vectorize -Rpass-missed=loop-vectorize -Rpass=loop-vectorize -flax-vector-conversions -Wl,-no_compact_unwind -Wno-unused-command-line-argument
 	# CFLAGS += -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free
 	## INC += -I${HOMEBREW_PREFIX}/opt/libomp/include
 	## LIBS += -L${HOMEBREW_PREFIX}/opt/llvm/lib -lomp	
 
 	# CC = zig cc
-	# CFLAGS := -Xpreprocessor -Ofast -fopenmp=libgomp -fno-finite-math-only -Wno-register -funroll-loops -ftree-vectorize -Rpass=loop-vectorize -flax-vector-conversions
+	# CFLAGS := -Xpreprocessor -Ofast -fopenmp=libgomp -fno-finite-math-only -Wno-register -funroll-loops -ftree-vectorize -Rpass-missed=loop-vectorize -Rpass=loop-vectorize -flax-vector-conversions
 	## -flto -Wl,-no_compact_unwind -Wno-unused-command-line-argument
 	# LIBS += -lgomp
 	## INC += -I${HOMEBREW_PREFIX}/opt/libomp/include
@@ -270,7 +270,7 @@ ifeq ($(CC),gcc)
 	LIBS +=  -lgfortran -lm
 
 	# try the zig compiler
-	# override CFLAGS = -Ofast -fopenmp=libgomp -fno-finite-math-only -Wno-register -funroll-loops -ftree-vectorize -Rpass=loop-vectorize -flax-vector-conversions
+	# override CFLAGS = -Ofast -fopenmp=libgomp -fno-finite-math-only -Wno-register -funroll-loops -ftree-vectorize -Rpass-missed=loop-vectorize -Rpass=loop-vectorize -flax-vector-conversions
 	# CC = zig cc
 	# LIBS += -lgomp
 endif
