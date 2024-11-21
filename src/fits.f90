@@ -8113,10 +8113,10 @@ contains
       logical(kind=c_bool), allocatable, intent(out) :: ymask(:)
 
       ! the viewport and the mask
-      real(c_float), allocatable :: view_pixels(:,:), outspec(:)
-      logical(kind=c_bool), allocatable :: view_mask(:,:), matrix(:,:), outmask(:)
+      real(c_float), allocatable :: outspec(:)
+      logical(kind=c_bool), allocatable :: outmask(:)
 
-      integer :: dimx, dimy, i, j, tx, ty, xint, yint
+      integer :: dimx, dimy, i, j, tx, ty
       integer :: ymin, ymax ! non-NaN spectrum bounds
       logical(kind=c_bool), allocatable :: valid(:)
       integer :: x1, x2 ! the Y spectrum band
@@ -8136,22 +8136,6 @@ contains
 
       print *, 'rotate_hds_image_spectrum x1,x2 band limits:', x1, x2
 
-      ! take the X and Y spectra
-      xint = int(nint(x0))
-      yint = int(nint(y0))
-
-      ! check the bounds
-      xint = max(1, xint)
-      xint = min(dimx, xint)
-
-      yint = max(1, yint)
-      yint = min(dimy, yint)
-
-      ! allocate the viewport and the mask arrays using the pixels and mask dimensions
-      allocate (view_pixels(x1:x2, dimy))
-      allocate (view_mask(x1:x2, dimy))
-      allocate (matrix(x1:x2, dimy))
-
       ! a full wide-band Y spectrum
       allocate(outspec(dimy))
       allocate(outmask(dimy))
@@ -8161,49 +8145,37 @@ contains
 
       ! go through the i, j pixels and rotate them around the point (x0, y0) by the angle theta
       do j = 1, dimy
-         do i = x1, x2
-            call rotate(real(i), real(j), x0, y0, theta, qx, qy)
-            tx = int(nint(qx))
-            ty = int(nint(qy))
-
-            ! check if tx and ty are within the bounds
-            if ((tx .lt. 1) .or. (tx .gt. dimx) .or. (ty .lt. 1) .or. (ty .gt. dimy)) then
-               matrix(i, j) = .false.
-               cycle
-            end if
-
-            view_pixels(i, j) = pixels(tx, ty)
-            view_mask(i, j) = mask(tx, ty)
-            matrix(i, j) = .true.
-         end do
-      end do
-
-      ! find the non-NaN bounds
-      ymin = 1
-      ymax = dimy
-
-      do j = 1, dimy
          ! sum up each row
          count = 0
          val = 0.0
 
          outspec(j) = 0.0
          outmask(j) = .false.
+         valid(j) = .false.
 
          do i = x1, x2
-            if (matrix(i, j)) then
-               valid(j) = .true. ! there is at least one 'in-range' pixel in the row
+            call rotate(real(i), real(j), x0, y0, theta, qx, qy)
+            tx = int(nint(qx))
+            ty = int(nint(qy))
 
-               if (view_mask(i,j)) then
-                  val = val + view_pixels(i, j)
-                  outmask(j) = .true.
-                  count = count + 1
-               end if
+            ! check if tx and ty are within the bounds
+            if ((tx .lt. 1) .or. (tx .gt. dimx) .or. (ty .lt. 1) .or. (ty .gt. dimy)) cycle
+
+            if(mask(tx, ty)) then
+               outmask(j) = .true.
+               val = val + pixels(tx, ty)
+               count = count + 1
             end if
+
+            valid(j) = .true. ! there is at least one 'in-range' pixel in the row
          end do
 
          if (count .gt. 0) outspec(j) = val / real(count)
       end do
+
+      ! find the non-NaN bounds
+      ymin = 1
+      ymax = dimy
 
       do i = 1, dimy
          if (valid(i)) then
