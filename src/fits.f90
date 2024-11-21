@@ -8120,8 +8120,8 @@ contains
       use omp_lib
       implicit none
 
-      real(c_float), dimension(:,:), intent(in) :: pixels
-      logical(kind=c_bool), dimension(:,:), intent(in) :: mask
+      real(c_float), dimension(:,:), intent(in), target :: pixels
+      logical(kind=c_bool), dimension(:,:), intent(in), target :: mask
       real(c_float), intent(in) :: x0, y0, theta, gamma
 
       ! X and Y spectra
@@ -8129,12 +8129,12 @@ contains
       logical(kind=c_bool), allocatable, intent(out) :: ymask(:)
 
       ! the viewport and the mask
-      real(c_float), allocatable :: outspec(:)
-      logical(kind=c_bool), allocatable :: outmask(:)
+      real(c_float), allocatable, target :: outspec(:)
+      logical(kind=c_bool), allocatable, target :: outmask(:)
 
       integer :: dimx, dimy, i, j, tx, ty, max_threads
       integer :: ymin, ymax ! non-NaN spectrum bounds
-      logical(kind=c_bool), allocatable :: valid(:)
+      logical(kind=c_bool), allocatable, target :: valid(:)
       integer :: x1, x2 ! the Y spectrum band
 
       real :: qx, qy, val
@@ -8195,6 +8195,9 @@ contains
       end do
       !$omp end do
       !$omp end parallel
+
+      call hds_image_spectrum_y(x1 - 1, x2 - 1, x0 - 1.0, y0 - 1.0, theta, c_loc(pixels), c_loc(mask), dimx, dimy,&
+      & c_loc(outspec), c_loc(outmask), c_loc(valid))
 
       ! find the non-NaN bounds
       ymin = 1
