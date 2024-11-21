@@ -7860,13 +7860,13 @@ contains
 
       ! search space dimensionality
       integer, parameter :: noparams = 3
-      integer :: pop_size = 10*noparams ! a population size
+      integer, parameter :: pop_size = 10*noparams ! a population size
 
       real(float) :: min_val(noparams), max_val(noparams)
       type(Population) :: pop
 
       integer :: max_threads, iter, i, dimx, dimy
-      real(float) :: cost
+      real(float) :: cost, fitness(pop_size)
       real(c_float) :: mu0, sigma0, theta0
 
       dimx = size(view, 1)
@@ -7898,7 +7898,7 @@ contains
       ! evaluate the correlation for the population <max_iter> times
       do iter = 1, max_iter
          ! evaluate the population
-         !$omp parallel shared(pop, view, mask, w) private(i, cost, mu0, sigma0, theta0)&
+         !$omp parallel shared(pop, view, mask, w, fitness) private(i, cost, mu0, sigma0, theta0)&
          !$omp& NUM_THREADS(max_threads)
          !$omp do schedule(dynamic, 4)
          do i = 1, pop_size
@@ -7908,18 +7908,23 @@ contains
 
             cost = WindowSIMDErr(theta0, w, mu0, sigma0, c_loc(view), c_loc(mask), dimx, dimy)
             pop%curr(i)%cost = cost
+            fitness(i) = cost
 
             if (cost .le. pop%best(i)%cost) then
                pop%best(i)%cost = cost
                pop%best(i)%genotype = pop%curr(i)%genotype
             end if
 
-            !$omp critical
-            call update_pop_best(pop, cost, i)
-            !$omp end critical
+            !$!omp critical
+            ! call update_pop_best(pop, cost, i)
+            !$!omp end critical
          end do
          !$omp end do
          !$omp end parallel
+
+         do i = 1, pop_size
+            call update_pop_best(pop, fitness(i), i)
+         end do
 
          ! print the best cost
          ! print *, "iter:", iter, "best cost:", pop%best_cost, "best idx:", pop%best_idx, "best genotype:",&
