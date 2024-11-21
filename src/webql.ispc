@@ -1741,7 +1741,7 @@ export void hds_image_spectrum_x(uniform float x0, uniform float y0, uniform flo
 }
 
 // to be called from within FORTRAN "rotate_hds_image_spectrum_y"
-// remember to subtract 1.0 from x0 and y0 when calling from FORTRAN
+// remember to subtract 1.0 from x0 and y0 when calling from FORTRAN, and 1 from x1 and x2
 export void hds_image_spectrum_y(uniform int x1, uniform int x2, uniform float x0, uniform float y0, uniform float theta, uniform float pixels[], uniform unsigned int8 mask[], uniform int dimx, uniform int dimy, uniform float outspec[], uniform unsigned int8 outmask[], uniform unsigned int8 valid[])
 {
   for (uniform int j = 0; j < dimy; j++)
@@ -1751,5 +1751,40 @@ export void hds_image_spectrum_y(uniform int x1, uniform int x2, uniform float x
     
     varying unsigned int8 _outmask = 0 ;
     varying unsigned int8 _valid = 0 ;
+
+    foreach(i=x1 ... x2+1)
+    {
+      // call rotate(real(i), real(j), x0, y0, theta, qx, qy)
+      varying float dx = (float)i - x0 ;
+      varying float dy = (float)j - y0 ;
+      varying float qx = x0 + dx * cos(theta) - dy * sin(theta);
+      varying float qy = y0 + dx * sin(theta) + dy * cos(theta);
+
+      varying int tx = (int)round(qx) ;
+      varying int ty = (int)round(qy) ;
+
+      // check if tx and ty lie within the 2D image bounds        
+      cif ((tx >= 0) && (tx < dimx) && (ty >= 0) && (ty < dimy))
+      {
+        varying int offset = ty*dimx + tx ;
+        cif (mask[offset])
+        {
+          val +=  pixels[offset] ;
+          _outmask = 1 ;          
+          count++ ;
+        }
+
+        _valid = 1 ;
+      } else      
+        _valid = 0 ;      
+    }
+
+    // sum up the count
+    uniform int _count = reduce_add(count) ;
+    uniform float _val = reduce_add(val) ;
+
+    outspec[j] = _count > 0 ? _val / (float)_count : 0.0f ;
+    outmask[j] = any(_outmask) ? 1 : 0 ;
+    valid[j] = any(_valid) ? 1 : 0 ;
   }
 }
