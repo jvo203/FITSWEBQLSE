@@ -1685,7 +1685,7 @@ export uniform float WindowSIMDErr(uniform float theta, uniform float w, uniform
     varying float y0 = 0.5f * (float) dimy - 1.0f;
     varying float partial_cost = 0.0f ;
 
-    foreach_tiled(j=0 ... dimy, i=0 ... dimx)    
+    foreach(j=0 ... dimy, i=0 ... dimx)    
     {
         varying int offset = j*dimx + i ;        
         varying float view = pixels[offset] ;
