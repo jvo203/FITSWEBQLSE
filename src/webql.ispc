@@ -1694,12 +1694,12 @@ export uniform float WindowSIMDErr(uniform float theta, uniform float w, uniform
         cif(_mask)
         {            
             varying float x = ((float)i - x0) * cos(theta) - ((float)j - y0) * sin(theta) ; // rotation
-            
+
             // varying float y = (x >= -sigma) && (x <= sigma) ? w : 0.0f ; // a rectangular window function
             // partial_cost += (view - y) * (view - y) ; // squared error
 
             varying float tmp = (x >= -sigma) && (x <= sigma) ? (view - w) : view ; // a rectangular window function
-            partial_cost += tmp * tmp ; // squared error
+            partial_cost += tmp * tmp ; // squared error            
         }
     }
 
