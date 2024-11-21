@@ -7874,6 +7874,7 @@ contains
 
       ! get #physical cores (ignore HT)
       max_threads = get_max_threads()
+      print *, 'de_window <max_threads>:', max_threads
 
       ! the first parameter is mu
       min_val(1) = mu - 10.0
@@ -7899,7 +7900,7 @@ contains
          ! evaluate the population
          !$omp parallel shared(pop, view, mask, w) private(i, cost, mu0, sigma0, theta0)&
          !$omp& NUM_THREADS(max_threads)
-         !$omp do schedule(dynamic)
+         !$omp do schedule(dynamic, 4)
          do i = 1, pop_size
             mu0 = pop%curr(i)%genotype(1)
             theta0 = pop%curr(i)%genotype(2)
