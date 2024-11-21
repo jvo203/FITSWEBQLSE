@@ -7889,7 +7889,7 @@ contains
 
       ! the third parameter is the window width sigma
       min_val(3) = 0.5
-      max_val(3) = dimx / 10.0
+      max_val(3) = dimx / 5.0
 
       ! initialize the population
       call init_population(pop, pop_size, noparams, min_val, max_val)
