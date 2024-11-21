@@ -8102,6 +8102,7 @@ contains
    end subroutine trace_hds_spectrum
 
    subroutine rotate_hds_image_spectrum_y(pixels, mask, x0, y0, theta, gamma, yspec, ymask)
+      use omp_lib
       implicit none
 
       real(c_float), dimension(:,:), intent(in) :: pixels
@@ -8116,7 +8117,7 @@ contains
       real(c_float), allocatable :: outspec(:)
       logical(kind=c_bool), allocatable :: outmask(:)
 
-      integer :: dimx, dimy, i, j, tx, ty
+      integer :: dimx, dimy, i, j, tx, ty, max_threads
       integer :: ymin, ymax ! non-NaN spectrum bounds
       logical(kind=c_bool), allocatable :: valid(:)
       integer :: x1, x2 ! the Y spectrum band
@@ -8126,6 +8127,9 @@ contains
 
       dimx = size(pixels, 1)
       dimy = size(pixels, 2)
+
+      ! get #physical cores (ignore HT)
+      max_threads = get_max_threads()
 
       x1 = int(nint(x0-gamma))
       x2 = int(nint(x0+gamma))
@@ -8141,9 +8145,10 @@ contains
       allocate(outmask(dimy))
       allocate(valid(dimy))
 
-      valid = .false.
-
       ! go through the i, j pixels and rotate them around the point (x0, y0) by the angle theta
+      !$omp parallel shared(outspec, outmask, valid, pixels, mask, x1, x2) private(i, count, val, qx, qy, tx, ty)&
+      !$omp& NUM_THREADS(max_threads)
+      !$omp do schedule(dynamic, 4)
       do j = 1, dimy
          ! sum up each row
          count = 0
@@ -8173,6 +8178,8 @@ contains
 
          if (count .gt. 0) outspec(j) = val / real(count)
       end do
+      !$omp end do
+      !$omp end parallel
 
       ! find the non-NaN bounds
       ymin = 1
