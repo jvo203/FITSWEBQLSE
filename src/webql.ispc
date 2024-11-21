@@ -1739,3 +1739,17 @@ export void hds_image_spectrum_x(uniform float x0, uniform float y0, uniform flo
         }
     }
 }
+
+// to be called from within FORTRAN "rotate_hds_image_spectrum_y"
+// remember to subtract 1.0 from x0 and y0 when calling from FORTRAN
+export void hds_image_spectrum_y(uniform int x1, uniform int x2, uniform float x0, uniform float y0, uniform float theta, uniform float pixels[], uniform unsigned int8 mask[], uniform int dimx, uniform int dimy, uniform float outspec[], uniform unsigned int8 outmask[], uniform unsigned int8 valid[])
+{
+  for (uniform int j = 0; j < dimy; j++)
+  {
+    varying int count = 0;
+    varying float val = 0.0f;
+    
+    varying unsigned int8 _outmask = 0 ;
+    varying unsigned int8 _valid = 0 ;
+  }
+}
