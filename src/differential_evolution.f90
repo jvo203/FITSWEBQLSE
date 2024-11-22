@@ -1,6 +1,6 @@
 module differential_evolution
    use,intrinsic :: iso_fortran_env
-   use mt19937_64   
+   use mt19937_64
 
    implicit none
 
@@ -98,7 +98,7 @@ contains
    ! initialize the population
    subroutine init_population(pop, pop_size, dim, min_val, max_val, seed)
       type(Population), intent(inout) :: pop
-      integer, intent(in) :: pop_size, dim   
+      integer, intent(in) :: pop_size, dim
       real(float), intent(in) :: min_val(dim), max_val(dim)
       integer, optional, intent(in) :: seed
 
