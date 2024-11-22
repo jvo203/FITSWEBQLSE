@@ -1,5 +1,19 @@
 .DEFAULT_GOAL := de
 
+# get the Homebrew installation directory
+# brew --prefix is not available from inside the Homebrew environment
+HOMEBREW_PREFIX := $(shell brew --prefix)
+
+# assume Intel macOS	
+ifeq ($(HOMEBREW_PREFIX),)
+	HOMEBREW_PREFIX := $(shell /usr/local/bin/brew --prefix)
+endif
+
+# if it still cannot be found assume Apple Silicon macOS
+ifeq ($(HOMEBREW_PREFIX),)
+	HOMEBREW_PREFIX := $(shell /opt/homebrew/bin/brew --prefix)
+endif
+
 # GCC FORTRAN
 FORT = gfortran
 FLAGS = -march=native -g -Ofast -fPIC -fno-finite-math-only -funroll-loops -ftree-vectorize
@@ -20,9 +34,14 @@ intel:
 
 # differential evolution
 FORT := flang-new
-FLAGS := -Ofast -flto -fopenmp=libomp
+FLAGS := -Ofast -flto -fopenmp
+#=libomp
+#MOD := -I${HOMEBREW_PREFIX}/opt/libomp/include
+FLIBS := -L${HOMEBREW_PREFIX}/opt/llvm/lib -lomp
+#LIBRARY_PATH=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib flang-new main.f90  
+
 de:
-	$(FORT) $(FLAGS) -fopenmp -o test_de ../src/mt19937-64.f90 ../src/differential_evolution.f90 test_de.f90
+	LIBRARY_PATH=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib $(FORT) $(FLAGS) $(MOD) -o test_de ../src/mt19937-64.f90 ../src/differential_evolution.f90 test_de.f90 $(FLIBS)
 
 INC = `pkg-config --cflags cfitsio` `pkg-config --cflags wcslib`
 LIBS = `pkg-config --libs cfitsio` `pkg-config --libs wcslib`

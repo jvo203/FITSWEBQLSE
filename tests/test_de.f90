@@ -1,6 +1,5 @@
 program main
    use differential_evolution
-   use omp_lib
    implicit none
 
    ! make dim a parameter
@@ -8,7 +7,7 @@ program main
 
    integer, allocatable :: seed(:)
 
-   integer :: pop_size = 10*dim ! a recommended population size
+   integer, parameter :: pop_size = 10*dim ! a recommended population size
    real(float) :: min_val(dim), max_val(dim)
    type(Population) :: pop
 
