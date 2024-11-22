@@ -219,6 +219,13 @@ ifeq ($(UNAME_S),Darwin)
 
 	# try clang for a change; force the use of libgomp instead of libomp (FORTRAN has been compiled with gfortran, flang is immature at the moment)
 	#CC = ${HOMEBREW_PREFIX}/opt/llvm/bin/clang
+	##FORT = ${HOMEBREW_PREFIX}/opt/flang/bin/flang-new	
+	#CFLAGS := -Xpreprocessor -Ofast -flto -fopenmp=libgomp -fno-finite-math-only -Wno-register -funroll-loops -ftree-vectorize -Rpass-missed=loop-vectorize -Rpass=loop-vectorize -flax-vector-conversions -Wl,-no_compact_unwind -Wno-unused-command-line-argument	
+	#FLAGS := -Ofast -flto -fopenmp=libomp
+	#-Wno-register -Rpass-missed=loop-vectorize -Rpass=loop-vectorize
+	#-Wl,-no_compact_unwind
+	#-Wno-unused-command-line-argument
+
 	#CFLAGS := -Xpreprocessor -Ofast -flto -fopenmp=libgomp -fno-finite-math-only -Wno-register -funroll-loops -ftree-vectorize -Rpass-missed=loop-vectorize -Rpass=loop-vectorize -flax-vector-conversions -Wl,-no_compact_unwind -Wno-unused-command-line-argument
 	# CFLAGS += -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free
 	## INC += -I${HOMEBREW_PREFIX}/opt/libomp/include
@@ -242,8 +249,8 @@ ifeq ($(UNAME_S),Darwin)
 	ifeq ($(FORT),nagfor)
 		MPI_LINK_FLAGS = $(shell mpifort --showme:link)
 		FLAGS := -target=core2 -O4 -f2018 -kind=byte -openmp -colour $(MPI_LINK_FLAGS)
-	else
-		FLAGS += -cpp -D__$(OS)__ -fallow-invalid-boz -fmax-stack-var-size=32768
+	else		
+		FLAGS += -cpp -D__$(OS)__ -fallow-invalid-boz -fmax-stack-var-size=32768		
 	endif
 endif
 
