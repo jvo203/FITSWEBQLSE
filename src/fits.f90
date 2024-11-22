@@ -7888,7 +7888,6 @@ contains
 
       ! get #physical cores (ignore HT)
       max_threads = get_max_threads()
-      print *, 'de_window <max_threads>:', max_threads
 
       ! the first parameter is mu
       min_val(1) = mu - 10.0
@@ -8121,7 +8120,6 @@ contains
    end subroutine trace_hds_spectrum
 
    subroutine rotate_hds_image_spectrum_y(pixels, mask, x0, y0, theta, gamma, yspec, ymask)
-      use omp_lib
       implicit none
 
       real(c_float), dimension(:,:), intent(in), target :: pixels
@@ -8136,7 +8134,7 @@ contains
       real(c_float), allocatable, target :: outspec(:)
       logical(kind=c_bool), allocatable, target :: outmask(:)
 
-      integer :: dimx, dimy, i, j, tx, ty, max_threads
+      integer :: dimx, dimy, i, j, tx, ty
       integer :: ymin, ymax ! non-NaN spectrum bounds
       logical(kind=c_bool), allocatable, target :: valid(:)
       integer :: x1, x2 ! the Y spectrum band
@@ -8147,19 +8145,12 @@ contains
       dimx = size(pixels, 1)
       dimy = size(pixels, 2)
 
-      ! get #physical cores (ignore HT)
-      max_threads = get_max_threads()
-
       x1 = int(nint(x0-gamma))
       x2 = int(nint(x0+gamma))
 
       ! check the bounds
       x1 = max(1, x1)
       x2 = min(dimx, x2)
-
-      ! debugging override:
-      x1 = x0
-      x2 = x0
 
       print *, 'rotate_hds_image_spectrum x1,x2 band limits:', x1, x2
 
@@ -8169,51 +8160,8 @@ contains
       allocate(valid(dimy))
 
       ! go through the i, j pixels and rotate them around the point (x0, y0) by the angle theta
-      !$!omp parallel shared(outspec, outmask, valid, pixels, mask, x1, x2) private(i, count, val, qx, qy, tx, ty)&
-      !$!omp& NUM_THREADS(max_threads)
-      !$!omp do schedule(dynamic, 4)
-      do j = 1, dimy
-         ! sum up each row
-         count = 0
-         val = 0.0
-
-         outspec(j) = 0.0
-         outmask(j) = .false.
-         valid(j) = .false.
-
-         !$!omp simd
-         do i = x1, x2
-            call rotate(real(i), real(j), x0, y0, theta, qx, qy)
-            tx = int(nint(qx))
-            ty = int(nint(qy))
-
-            ! check if tx and ty are within the bounds
-            if ((tx .lt. 1) .or. (tx .gt. dimx) .or. (ty .lt. 1) .or. (ty .gt. dimy)) cycle
-
-            if(mask(tx, ty)) then
-               outmask(j) = .true.
-               val = val + pixels(tx, ty)
-               count = count + 1
-            end if
-
-            valid(j) = .true. ! there is at least one 'in-range' pixel in the row
-         end do
-
-         if (count .gt. 0) outspec(j) = val / real(count)
-      end do
-      !$!omp end do
-      !$!omp end parallel
-
-      ! print the first 10 values of outspec and outmask
-      print *, 'outspec:', outspec(1:10)
-      print *, 'outmask:', outmask(1:10)
-
       call hds_image_spectrum_y(x1 - 1, x2 - 1, x0 - 1.0, y0 - 1.0, theta, c_loc(pixels), c_loc(mask), dimx, dimy,&
       & c_loc(outspec), c_loc(outmask), c_loc(valid))
-
-      ! print the first 10 values of outspec and outmask
-      print *, 'outspec:', outspec(1:10)
-      print *, 'outmask:', outmask(1:10)
 
       ! find the non-NaN bounds
       ymin = 1
@@ -8240,8 +8188,8 @@ contains
       print *, 'rotate_hds_image_spectrum_y count:', size(yspec)
 
       ! print the first 10 values of yspec and ymask
-      print *, '  yspec:', yspec(1:10)
-      print *, '  ymask:', ymask(1:10)
+      ! print *, '  yspec:', yspec(1:10)
+      ! print *, '  ymask:', ymask(1:10)
 
    end subroutine rotate_hds_image_spectrum_y
 
@@ -8441,10 +8389,8 @@ contains
 
             if (allocated(yspec)) deallocate(yspec)
             if (allocated(ymask)) deallocate(ymask)
-            call trace_hds_spectrum(real(x1), real(y1), real(x2), real(y2), real(x), real(y),&
-            & 4*len, -theta, item%pixels, item%mask, yspec, ymask)
-            if (allocated(yspec)) deallocate(yspec)
-            if (allocated(ymask)) deallocate(ymask)
+            !call trace_hds_spectrum(real(x1), real(y1), real(x2), real(y2), real(x), real(y),&
+            !& 4*len, -theta, item%pixels, item%mask, yspec, ymask)
             call rotate_hds_image_spectrum_y(item%pixels, item%mask, real(x), real(y), -theta, gamma, yspec, ymask)
             !$omp end task
             !$omp end single

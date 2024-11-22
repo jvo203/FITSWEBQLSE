@@ -296,3 +296,120 @@ subroutine rotate_hds_image_spectrum_x(pixels, mask, x0, y0, theta, gamma, xspec
    xmask = outmask(xmin:xmax)
 
 end subroutine rotate_hds_image_spectrum_x
+
+subroutine rotate_hds_image_spectrum_y(pixels, mask, x0, y0, theta, gamma, yspec, ymask)
+   use omp_lib
+   implicit none
+
+   real(c_float), dimension(:,:), intent(in), target :: pixels
+   logical(kind=c_bool), dimension(:,:), intent(in), target :: mask
+   real(c_float), intent(in) :: x0, y0, theta, gamma
+
+   ! X and Y spectra
+   real(c_float), allocatable, intent(out) :: yspec(:)
+   logical(kind=c_bool), allocatable, intent(out) :: ymask(:)
+
+   ! the viewport and the mask
+   real(c_float), allocatable, target :: outspec(:)
+   logical(kind=c_bool), allocatable, target :: outmask(:)
+
+   integer :: dimx, dimy, i, j, tx, ty, max_threads
+   integer :: ymin, ymax ! non-NaN spectrum bounds
+   logical(kind=c_bool), allocatable, target :: valid(:)
+   integer :: x1, x2 ! the Y spectrum band
+
+   real :: qx, qy, val
+   integer :: count
+
+   dimx = size(pixels, 1)
+   dimy = size(pixels, 2)
+
+   ! get #physical cores (ignore HT)
+   max_threads = get_max_threads()
+
+   x1 = int(nint(x0-gamma))
+   x2 = int(nint(x0+gamma))
+
+   ! debugging override:
+   !x1 = x0-1
+   !x2 = x0+1
+
+   ! check the bounds
+   x1 = max(1, x1)
+   x2 = min(dimx, x2)
+
+   print *, 'rotate_hds_image_spectrum x1,x2 band limits:', x1, x2
+
+   ! a full wide-band Y spectrum
+   allocate(outspec(dimy))
+   allocate(outmask(dimy))
+   allocate(valid(dimy))
+
+   ! go through the i, j pixels and rotate them around the point (x0, y0) by the angle theta
+   !$omp parallel shared(outspec, outmask, valid, pixels, mask, x1, x2) private(i, count, val, qx, qy, tx, ty)&
+   !$omp& NUM_THREADS(max_threads)
+   !$omp do schedule(dynamic, 4)
+   do j = 1, dimy
+      ! sum up each row
+      count = 0
+      val = 0.0
+
+      outspec(j) = 0.0
+      outmask(j) = .false.
+      valid(j) = .false.
+
+      !$omp simd
+      do i = x1, x2
+         call rotate(real(i), real(j), x0, y0, theta, qx, qy)
+         tx = int(nint(qx))
+         ty = int(nint(qy))
+
+         ! check if tx and ty are within the bounds
+         if ((tx .lt. 1) .or. (tx .gt. dimx) .or. (ty .lt. 1) .or. (ty .gt. dimy)) cycle
+
+         if(mask(tx, ty)) then
+            outmask(j) = .true.
+            val = val + pixels(tx, ty)
+            count = count + 1
+         end if
+
+         valid(j) = .true. ! there is at least one 'in-range' pixel in the row
+      end do
+
+      if (count .gt. 0) outspec(j) = val / real(count)
+   end do
+   !$omp end do
+   !$omp end parallel
+
+   call hds_image_spectrum_y(x1 - 1, x2 - 1, x0 - 1.0, y0 - 1.0, theta, c_loc(pixels), c_loc(mask), dimx, dimy,&
+   & c_loc(outspec), c_loc(outmask), c_loc(valid))
+
+   ! find the non-NaN bounds
+   ymin = 1
+   ymax = dimy
+
+   do i = 1, dimy
+      if (valid(i)) then
+         ymin = i
+         exit
+      end if
+   end do
+
+   do i = dimy, 1, -1
+      if (valid(i)) then
+         ymax = i
+         exit
+      end if
+   end do
+
+   yspec = outspec(ymin:ymax)
+   ymask = outmask(ymin:ymax)
+
+   ! print the final count
+   print *, 'rotate_hds_image_spectrum_y count:', size(yspec)
+
+   ! print the first 10 values of yspec and ymask
+   ! print *, '  yspec:', yspec(1:10)
+   ! print *, '  ymask:', ymask(1:10)
+
+end subroutine rotate_hds_image_spectrum_y
