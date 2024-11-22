@@ -1,3 +1,8 @@
+## [5.1.15] - 2024-11-?? (upcoming)
+
+* improved the _*signal-to-noise*_ ratio in Subaru HDS 2D FITS real-time spectra (Y-axis) by summing over the peak width, itself estimated with _*genetic algorithms*_
+* speeded-up the Subaru HDS 2D real-time X-Y spectra calculation by using the Intel ISPC SPMD C compiler
+
 ## [5.1.14] - 2024-11-15
 
 * Subaru HDS 1D spectra user-provided _*redshift*_: added support for inputting the source velocity [km/s]
