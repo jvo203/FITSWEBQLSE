@@ -19,6 +19,8 @@ intel:
 #rm -f intel_fixed_array
 
 # differential evolution
+FORT := flang-new
+FLAGS := -Ofast -flto -fopenmp=libomp
 de:
 	$(FORT) $(FLAGS) -fopenmp -o test_de ../src/mt19937-64.f90 ../src/differential_evolution.f90 test_de.f90
 
