@@ -8236,6 +8236,13 @@ contains
       yspec = outspec(ymin:ymax)
       ymask = outmask(ymin:ymax)
 
+      ! print the final count
+      print *, 'rotate_hds_image_spectrum_y count:', size(yspec)
+
+      ! print the first 10 values of yspec and ymask
+      print *, '  yspec:', yspec(1:10)
+      print *, '  ymask:', ymask(1:10)
+
    end subroutine rotate_hds_image_spectrum_y
 
    subroutine rotate_hds_image_spectrum_x(pixels, mask, x0, y0, theta, gamma, xspec, xmask)
