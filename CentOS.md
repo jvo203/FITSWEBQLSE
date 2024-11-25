@@ -5,10 +5,10 @@
     sudo dnf install git
     sudo dnf autoremove
 
-# 0.1 GCC Toolset 13
+# 0.1 GCC Toolset 14
 
-    sudo dnf install gcc-toolset-13
-    ~/.bash_profile: scl enable gcc-toolset-13 bash
+    sudo dnf install gcc-toolset-14
+    ~/.bash_profile: scl enable gcc-toolset-14 bash
 
 # 1. Install Intel oneAPI Base + HPC kits (works well on AMD CPUs too, not just Intel's)
 
