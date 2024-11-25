@@ -46,9 +46,9 @@ gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.
 
     visit https://www.linuxfromscratch.org/blfs/view/svn/multimedia/x265.html
     
-    wget https://bitbucket.org/multicoreware/x265_git/downloads/x265_4.1.tar.gz
-    tar zxvf x265_4.1.tar.gz
-    cd x265_4.1
+    wget https://bitbucket.org/multicoreware/x265_git/downloads/x265_4.0.tar.gz
+    tar zxvf x265_4.0.tar.gz
+    cd x265_4.0
 
     Apply a manual change in "source/encoder/api.cpp / x265_encoder_open()":
 
