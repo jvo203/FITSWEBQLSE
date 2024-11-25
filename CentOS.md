@@ -101,9 +101,9 @@ gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.
 
 # 6. libcpuid
     
-    wget https://github.com/anrieff/libcpuid/releases/download/v0.6.4/libcpuid-0.6.4.tar.gz
-    tar zxvf libcpuid-0.6.4.tar.gz
-    cd libcpuid-0.6.4
+    wget https://github.com/anrieff/libcpuid/releases/download/v0.7.0/libcpuid-0.7.0.tar.gz
+    tar zxvf libcpuid-0.7.0.tar.gz
+    cd libcpuid-0.7.0
     ./configure
     make
     sudo make install
