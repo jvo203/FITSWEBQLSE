@@ -110,9 +110,9 @@ gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.
 
 # 7. CFITSIO
 
-    wget http://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/cfitsio-4.4.0.tar.gz
-    tar zxvf cfitsio-4.4.0.tar.gz
-    cd cfitsio-4.4.0
+    wget http://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/cfitsio-4.5.0.tar.gz
+    tar zxvf cfitsio-4.5.0.tar.gz
+    cd cfitsio-4.5.0
     ./configure --prefix=/usr/local --enable-reentrant
     make -j16
     sudo make install
@@ -122,7 +122,7 @@ gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.
     wget ftp://ftp.atnf.csiro.au/pub/software/wcslib/wcslib.tar.bz2
     bunzip2 wcslib.tar.bz2
     tar xvf wcslib.tar
-    cd wcslib-8.3
+    cd wcslib-8.4
     ./configure --prefix=/usr/local
     make
     sudo make install
