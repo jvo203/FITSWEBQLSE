@@ -7919,7 +7919,7 @@ contains
             ! tid = 1 + OMP_GET_THREAD_NUM()
             ! print *, 'tid:', tid, 'i:', i
 
-            genes(:) = pop%curr(i)%genotype(:)
+            genes = pop%curr(i)%genotype
             mu0 = genes(1)
             theta0 = genes(2)
             sigma0 = genes(3)
