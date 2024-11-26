@@ -7876,7 +7876,7 @@ contains
       integer, parameter :: noparams = 3
       integer, parameter :: pop_size = 10*noparams ! a population size
 
-      real(float) :: min_val(noparams), max_val(noparams), chromosome(noparams)
+      real(float) :: min_val(noparams), max_val(noparams), genome(noparams)
       type(Population) :: pop
 
       integer :: max_threads, tid, iter, i, dimx, dimy
@@ -7911,7 +7911,7 @@ contains
       ! evaluate the correlation for the population <max_iter> times
       do iter = 1, max_iter
          ! evaluate the population
-         !$omp parallel shared(pop, view, mask, w) private(tid, i, cost, mu0, sigma0, theta0, chromosome)&
+         !$omp parallel shared(pop, view, mask, w) private(tid, i, cost, mu0, sigma0, theta0, genome)&
          !$omp& NUM_THREADS(max_threads)
          !$omp do schedule(dynamic, 1)
          do i = 1, pop_size
@@ -7919,10 +7919,10 @@ contains
             ! tid = 1 + OMP_GET_THREAD_NUM()
             ! print *, 'tid:', tid, 'i:', i
 
-            chromosome = pop%curr(i)%genotype
-            mu0 = chromosome(1)
-            theta0 = chromosome(2)
-            sigma0 = chromosome(3)
+            genome = pop%curr(i)%genotype
+            mu0 = genome(1)
+            theta0 = genome(2)
+            sigma0 = genome(3)
 
             !mu0 = pop%curr(i)%genotype(1)
             !theta0 = pop%curr(i)%genotype(2)
