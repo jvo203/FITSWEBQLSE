@@ -7876,7 +7876,7 @@ contains
       integer, parameter :: noparams = 3
       integer, parameter :: pop_size = 10*noparams ! a population size
 
-      real(float) :: min_val(noparams), max_val(noparams)
+      real(float) :: min_val(noparams), max_val(noparams), genes(noparams)
       type(Population) :: pop
 
       integer :: max_threads, tid, iter, i, dimx, dimy
@@ -7911,7 +7911,7 @@ contains
       ! evaluate the correlation for the population <max_iter> times
       do iter = 1, max_iter
          ! evaluate the population
-         !$omp parallel shared(pop, view, mask, w) private(tid, i, cost, mu0, sigma0, theta0)&
+         !$omp parallel shared(pop, view, mask, w) private(tid, i, cost, mu0, sigma0, theta0, genes)&
          !$omp& NUM_THREADS(max_threads)
          !$omp do schedule(dynamic, 1)
          do i = 1, pop_size
@@ -7919,9 +7919,14 @@ contains
             ! tid = 1 + OMP_GET_THREAD_NUM()
             ! print *, 'tid:', tid, 'i:', i
 
-            mu0 = pop%curr(i)%genotype(1)
-            theta0 = pop%curr(i)%genotype(2)
-            sigma0 = pop%curr(i)%genotype(3)
+            genes(:) = pop%curr(i)%genotype(:)
+            mu0 = genes(1)
+            theta0 = genes(2)
+            sigma0 = genes(3)
+
+            !mu0 = pop%curr(i)%genotype(1)
+            !theta0 = pop%curr(i)%genotype(2)
+            !sigma0 = pop%curr(i)%genotype(3)
 
             cost = WindowSIMDErr(theta0, w, mu0, sigma0, c_loc(view), c_loc(mask), dimx, dimy)
             pop%curr(i)%cost = cost
