@@ -7879,7 +7879,7 @@ contains
       real(float) :: min_val(noparams), max_val(noparams)
       type(Population) :: pop
 
-      integer :: max_threads, iter, i, dimx, dimy
+      integer :: max_threads, tid, iter, i, dimx, dimy
       real(float) :: cost
       real(c_float) :: mu0, sigma0, theta0
 
@@ -7911,10 +7911,14 @@ contains
       ! evaluate the correlation for the population <max_iter> times
       do iter = 1, max_iter
          ! evaluate the population
-         !$omp parallel shared(pop, view, mask, w) private(i, cost, mu0, sigma0, theta0)&
+         !$omp parallel shared(pop, view, mask, w) private(tid, i, cost, mu0, sigma0, theta0)&
          !$omp& NUM_THREADS(max_threads)
          !$omp do schedule(dynamic, 1)
          do i = 1, pop_size
+            ! get a current OpenMP thread (starting from 0 as in C)
+            ! tid = 1 + OMP_GET_THREAD_NUM()
+            ! print *, 'tid:', tid, 'i:', i
+
             mu0 = pop%curr(i)%genotype(1)
             theta0 = pop%curr(i)%genotype(2)
             sigma0 = pop%curr(i)%genotype(3)
