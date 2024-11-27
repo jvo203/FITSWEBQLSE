@@ -7916,8 +7916,8 @@ contains
          !$omp do schedule(dynamic, 1)
          do i = 1, pop_size
             ! get a current OpenMP thread (starting from 0 as in C)
-            ! tid = 1 + OMP_GET_THREAD_NUM()
-            ! print *, 'tid:', tid, 'i:', i
+            tid = 1 + OMP_GET_THREAD_NUM()
+            print *, 'tid:', tid, 'i:', i
 
             genome = pop%curr(i)%genotype
             mu0 = genome(1)
@@ -7944,8 +7944,8 @@ contains
          !$omp end parallel
 
          ! print the best cost
-         ! print *, "iter:", iter, "best cost:", pop%best_cost, "best idx:", pop%best_idx, "best genotype:",&
-         ! & pop%best(pop%best_idx)%genotype
+         print *, "iter:", iter, "best cost:", pop%best_cost, "best idx:", pop%best_idx, "best genotype:",&
+         & pop%best(pop%best_idx)%genotype
 
          ! evolve the population
          call update_population(pop, min_val, max_val)
