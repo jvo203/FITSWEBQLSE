@@ -7879,7 +7879,8 @@ contains
       real(float) :: min_val(noparams), max_val(noparams), genome(noparams)
       type(Population) :: pop
 
-      integer :: max_threads, tid, iter, i, dimx, dimy
+      integer :: iter, i, dimx, dimy
+      integer :: tid, max_threads, work_size
       real(float) :: cost
       real(c_float) :: mu0, sigma0, theta0
 
@@ -7888,6 +7889,8 @@ contains
 
       ! get #physical cores (ignore HT)
       max_threads = get_max_threads()
+      work_size = int(nint(real(pop_size) / real(max_threads))) ! a slight over-allocation of work per core
+      ! print *, 'max_threads:', max_threads, 'work_size:', work_size
 
       ! the first parameter is mu
       min_val(1) = mu - 10.0
@@ -7913,39 +7916,40 @@ contains
          ! evaluate the population
          !$omp parallel shared(pop, view, mask, w) private(tid, i, cost, mu0, sigma0, theta0, genome)&
          !$omp& NUM_THREADS(max_threads)
-         !$omp do schedule(dynamic, 1)
-         do i = 1, pop_size
-            ! get a current OpenMP thread (starting from 0 as in C)
-            tid = 1 + OMP_GET_THREAD_NUM()
-            print *, 'tid:', tid, 'i:', i
+         ! get a current OpenMP thread (starting from 0 as in C)
+         tid = OMP_GET_THREAD_NUM()
 
-            genome = pop%curr(i)%genotype
-            mu0 = genome(1)
-            theta0 = genome(2)
-            sigma0 = genome(3)
+         ! each thread does work_size iterations, tid starts from 0
+         ! the last thread may do less work
+         if (1 + tid*work_size .le. pop_size) then
+            do i = 1 + tid*work_size, min(pop_size, (tid + 1)*work_size)
+               genome = pop%curr(i)%genotype
+               mu0 = genome(1)
+               theta0 = genome(2)
+               sigma0 = genome(3)
 
-            !mu0 = pop%curr(i)%genotype(1)
-            !theta0 = pop%curr(i)%genotype(2)
-            !sigma0 = pop%curr(i)%genotype(3)
+               !mu0 = pop%curr(i)%genotype(1)
+               !theta0 = pop%curr(i)%genotype(2)
+               !sigma0 = pop%curr(i)%genotype(3)
 
-            cost = WindowSIMDErr(theta0, w, mu0, sigma0, c_loc(view), c_loc(mask), dimx, dimy)
-            pop%curr(i)%cost = cost
+               cost = WindowSIMDErr(theta0, w, mu0, sigma0, c_loc(view), c_loc(mask), dimx, dimy)
+               pop%curr(i)%cost = cost
 
-            if (cost .le. pop%best(i)%cost) then
-               pop%best(i)%cost = cost
-               pop%best(i)%genotype = pop%curr(i)%genotype
-            end if
+               if (cost .le. pop%best(i)%cost) then
+                  pop%best(i)%cost = cost
+                  pop%best(i)%genotype = pop%curr(i)%genotype
+               end if
 
-            !$omp critical
-            call update_pop_best(pop, cost, i)
-            !$omp end critical
-         end do
-         !$omp end do
+               !$omp critical
+               call update_pop_best(pop, cost, i)
+               !$omp end critical
+            end do
+         end if
          !$omp end parallel
 
          ! print the best cost
-         print *, "iter:", iter, "best cost:", pop%best_cost, "best idx:", pop%best_idx, "best genotype:",&
-         & pop%best(pop%best_idx)%genotype
+         ! print *, "iter:", iter, "best cost:", pop%best_cost, "best idx:", pop%best_idx, "best genotype:",&
+         ! & pop%best(pop%best_idx)%genotype
 
          ! evolve the population
          call update_population(pop, min_val, max_val)
