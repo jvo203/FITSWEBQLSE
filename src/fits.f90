@@ -11,7 +11,7 @@ module fits
 
    ! the number used at the beginning of the binary cache disk file
    ! when the number change is detected the binary cache gets invalidated and rebuilt
-   integer(kind=4), parameter :: MAGIC_NUMBER = 20240912
+   integer(kind=4), parameter :: MAGIC_NUMBER = 20241204
 
    integer(c_int), parameter :: ZFP_HIGH_PRECISION = 16
    integer(c_int), parameter :: ZFP_MEDIUM_PRECISION = 11
@@ -2344,7 +2344,8 @@ contains
       if (ios .ne. 0) go to 300
 
       ! check for a mismatch in the magic number
-      if (magic .ne. MAGIC_NUMBER) then
+      ! if (magic .ne. MAGIC_NUMBER) then
+      if (.true.) then ! ignore the magic number for the time being, remove any existing cache (on-going work on polarisation)
          print *, 'error: magic number mismatch in ', trim(file), ', invalidating cache'
 
          ! delete the file
