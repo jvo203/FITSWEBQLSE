@@ -3802,7 +3802,7 @@ contains
       ! re-set the timeout timer
       call system_clock(item%timestamp)
 
-      ! call insert_dataset(item%datasetid, size(item%datasetid), c_loc(item))
+      call insert_dataset(item%datasetid, size(item%datasetid), c_loc(item))
 
       ! start the timer
       call system_clock(count=start, count_rate=crate, count_max=cmax)

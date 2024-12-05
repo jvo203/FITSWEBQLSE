@@ -2550,7 +2550,7 @@ on_ws_connection(void *cls,
                     if (session->id != NULL)
                         free(session->id);
 
-                    free(session);
+                    g_atomic_rc_box_release(session);
                     session = NULL;
 
                     goto end_of_session;
