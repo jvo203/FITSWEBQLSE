@@ -258,9 +258,9 @@ static enum MHD_Result http_no_content(struct MHD_Connection *connection)
 {
     struct MHD_Response *response = NULL;
     int ret;
-    const char *errorstr = ""; // 204 No Content should not have a body
 
-    response = MHD_create_response_from_buffer(strlen(errorstr), (void *)errorstr, MHD_RESPMEM_PERSISTENT);
+    // 204 No Content should not have a body
+    response = MHD_create_response_from_buffer(0, NULL, MHD_RESPMEM_PERSISTENT);
 
     if (NULL != response)
     {
