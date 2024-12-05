@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-11-15.1";
+    return "JS2024-12-05.0";
 }
 
 function uuidv4() {
@@ -18828,7 +18828,7 @@ function setup_help() {
         .text("CREDITS:");
 
     footer.append("p")
-        .text("Software Development Ⓒ Christopher A. Zapart @ NAOJ, 2015 - 2024. JavaScript RA/DEC conversion Ⓒ Robert Martin Ayers, 2009, 2011, 2014.");
+        .text("Software Development Ⓒ Christopher A. Zapart @ NAOJ, 2015 - 2025. JavaScript RA/DEC conversion Ⓒ Robert Martin Ayers, 2009, 2011, 2014.");
 
     footer.append("h3")
         .text("VERSION:");
@@ -18891,7 +18891,7 @@ function setup_changelog() {
         .text("CREDITS:");
 
     footer.append("p")
-        .text("Software Development Ⓒ Christopher A. Zapart @ NAOJ, 2015 - 2024. JavaScript RA/DEC conversion Ⓒ Robert Martin Ayers, 2009, 2011, 2014.");
+        .text("Software Development Ⓒ Christopher A. Zapart @ NAOJ, 2015 - 2025. JavaScript RA/DEC conversion Ⓒ Robert Martin Ayers, 2009, 2011, 2014.");
 
     footer.append("h4")
         .text("VERSION:");
