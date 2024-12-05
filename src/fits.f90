@@ -11,7 +11,7 @@ module fits
 
    ! the number used at the beginning of the binary cache disk file
    ! when the number change is detected the binary cache gets invalidated and rebuilt
-   integer(kind=4), parameter :: MAGIC_NUMBER = 20241204
+   integer(kind=4), parameter :: MAGIC_NUMBER = 20241205
 
    integer(c_int), parameter :: ZFP_HIGH_PRECISION = 16
    integer(c_int), parameter :: ZFP_MEDIUM_PRECISION = 11
@@ -409,6 +409,7 @@ module fits
       ! an array holding pointers to fixed-point 2D channel images
       type(array_ptr), dimension(:), allocatable :: compressed
 
+      logical :: is_stokes = .false.
       logical :: is_optical = .true.
       logical :: is_spectrum = .false.
       logical :: is_xray = .false.
@@ -2251,6 +2252,10 @@ contains
          if (ios .ne. 0) bSuccess = bSuccess .and. .false.
       end if
 
+      ! item%is_stokes
+      write (unit=fileunit, IOSTAT=ios) item%is_stokes
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
       ! item%is_optical
       write (unit=fileunit, IOSTAT=ios) item%is_optical
       if (ios .ne. 0) bSuccess = bSuccess .and. .false.
@@ -2684,6 +2689,10 @@ contains
          if (ios .ne. 0) go to 300
       end if
 
+      ! item%is_stokes
+      read (unit=fileunit, IOSTAT=ios) item%is_stokes
+      if (ios .ne. 0) go to 300
+
       ! item%is_optical
       read (unit=fileunit, IOSTAT=ios) item%is_optical
       if (ios .ne. 0) go to 300
@@ -2927,8 +2936,8 @@ contains
       print *, 'CD1_1: ', item%cd1_1, 'CD1_2: ', item%cd1_2
       print *, 'CD2_1: ', item%cd2_1, 'CD2_2: ', item%cd2_2
       print *, 'BIN_FCT1: ', item%bin_fct1, 'BIN_FCT2: ', item%bin_fct2
-      print *, 'IS_OPTICAL: ', item%is_optical, ', IS_XRAY: ', item%is_xray, 'IS_SPECTRUM: ', item%is_spectrum,&
-      &', FLUX: ', trim(item%flux)
+      print *, 'IS_STOKES: ', item%is_stokes, ', IS_OPTICAL: ', item%is_optical,&
+      & ', IS_XRAY: ', item%is_xray, ', IS_SPECTRUM: ', item%is_spectrum, ', FLUX: ', trim(item%flux)
       print *, 'has_frequency:', item%has_frequency,&
       & ', has_velocity:', item%has_velocity,&
       & ', frame_multiplier = ', item%frame_multiplier
@@ -4120,6 +4129,22 @@ contains
       status = 0; call FTGKYJ(unit, 'BIN-FCT1', item%bin_fct1, comment, status)
 
       status = 0; call FTGKYJ(unit, 'BIN-FCT2', item%bin_fct2, comment, status)
+
+      status = 0; call FTGKYS(unit, 'CTYPE4', value, comment, status)
+
+      ! handle the Stokes parameters
+      if (status .eq. 0) then
+         ! first convert the value to lower case
+         call lower_case(value)
+
+         block
+            integer pos
+
+            pos = index(value, 'stokes')
+            if (pos .ne. 0) item%is_stokes = .true.
+         end block
+
+      end if
 
       status = 0; call FTGKYS(unit, 'TELESCOP', value, comment, status)
 
@@ -6311,6 +6336,7 @@ contains
       call add_json_long(json, 'filesize'//c_null_char, filesize)
       call add_json_integer(json, 'BITPIX'//c_null_char, item%bitpix)
       call add_json_double(json, 'IGNRVAL'//c_null_char, item%ignrval)
+      call add_json_logical(json, 'is_stokes'//c_null_char, logical(item%is_stokes, kind=c_bool))
       call add_json_logical(json, 'is_optical'//c_null_char, logical(item%is_optical, kind=c_bool))
       call add_json_logical(json, 'is_spectrum'//c_null_char, logical(item%is_spectrum, kind=c_bool))
 
