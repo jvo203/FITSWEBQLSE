@@ -256,17 +256,14 @@ static enum MHD_Result http_accepted(struct MHD_Connection *connection)
 
 static enum MHD_Result http_no_content(struct MHD_Connection *connection)
 {
-    struct MHD_Response *response;
+    struct MHD_Response *response = NULL;
     int ret;
-    const char *errorstr = "204 No Content";
+    const char *errorstr = ""; // 204 No Content should not have a body
 
     response = MHD_create_response_from_buffer(strlen(errorstr), (void *)errorstr, MHD_RESPMEM_PERSISTENT);
 
     if (NULL != response)
     {
-        //  set plain text response type
-        MHD_add_response_header(response, "Content-Type", "text/plain");
-
         ret = MHD_queue_response(connection, MHD_HTTP_NO_CONTENT, response);
         MHD_destroy_response(response);
         return ret;
