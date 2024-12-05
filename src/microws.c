@@ -2521,7 +2521,7 @@ on_ws_connection(void *cls,
 
                 if (!is_valid)
                 {
-                    printf("[C] rejecting the WebSocket connection for '%s'.\n", datasetId);
+                    printf("[C] rejecting the WebSocket connection for '%s' (session->items == NULL).\n", datasetId);
 
                     // clean up the items
                     if (session->items != NULL)
