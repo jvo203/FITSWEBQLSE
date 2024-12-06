@@ -82,7 +82,8 @@ ifeq ($(UNAME_S),Linux)
 
 endif
 
-JEMALLOC = `pkg-config --libs jemalloc` -L`jemalloc-config --libdir` -Wl,-rpath,`jemalloc-config --libdir` -ljemalloc `jemalloc-config --libs`
+# `pkg-config --libs jemalloc`
+JEMALLOC = -L`jemalloc-config --libdir` -Wl,-rpath,`jemalloc-config --libdir` -ljemalloc `jemalloc-config --libs`
 TCMALLOC = -ltcmalloc
 # `pkg-config --libs libtcmalloc`
 TARGET = fitswebqlse
