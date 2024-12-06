@@ -406,8 +406,9 @@ module fits
       real(kind=c_float), allocatable :: pixels(:, :)
       logical(kind=c_bool), allocatable :: mask(:, :)
 
-      ! an array holding pointers to fixed-point 2D channel images
-      type(array_ptr), dimension(:), allocatable :: compressed
+      ! arrays holding pointers to compressed 2D intensity channels
+      type(array_ptr), dimension(:), allocatable :: compressed ! non-Stokes intensity
+      type(array_ptr), dimension(:,:), allocatable :: Stokes ! IQUV Stokes parameters (depth, polarization), up to 4 channels
 
       logical :: is_stokes = .false.
       logical :: is_optical = .true.
@@ -1619,7 +1620,7 @@ contains
       character(len=:), allocatable :: file
       logical :: file_exists, bSuccess
 
-      integer :: i, rc, status
+      integer :: i, j, rc, status
       integer :: ios
       integer :: index_unit
       integer(kind=c_int) :: data_unit
@@ -1683,6 +1684,20 @@ contains
 
             deallocate (item%compressed)
          end if
+
+         ! deallocate compressed Stokes parameters
+         if (allocated(item%Stokes)) then
+            ! go through all IQUV channels
+            do j = 1, size(item%Stokes,2)
+               do i = 1, size(item%Stokes,1)
+                  if (associated(item%Stokes(i,j)%ptr)) then
+                     deallocate (item%Stokes(i,j)%ptr)
+                     nullify (item%Stokes(i,j)%ptr)
+                  end if
+               end do
+            end do
+         end if
+
 
          ! unlock & destroy the mutex
          rc = c_pthread_mutex_unlock(item%loading_mtx)
