@@ -404,6 +404,7 @@ module fits
       real(kind=c_float) dmad, dmadN, dmadP
       real(kind=4), allocatable :: frame_min(:), frame_max(:), frame_median(:)
       real(kind=c_float), allocatable :: pixels(:, :)
+      real(kind=c_float), allocatable :: angle(:, :)
       logical(kind=c_bool), allocatable :: mask(:, :)
 
       ! arrays holding pointers to compressed 2D intensity channels
@@ -2252,6 +2253,20 @@ contains
          if (ios .ne. 0) bSuccess = bSuccess .and. .false.
       end if
 
+      ! item%angle
+      if (allocated(item%angle) .and. bSuccess) then
+         write (unit=fileunit, IOSTAT=ios) size(item%angle)
+         if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
+         ! write (unit=fileunit, IOSTAT=ios) item%angle(:, :)
+         array_size = int(sizeof(item%angle), kind=c_size_t)
+         ios = write_array(cache//'/'//'angle'//c_null_char, c_loc(item%angle), array_size)
+         if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+      else
+         write (unit=fileunit, IOSTAT=ios) 0
+         if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+      end if
+
       ! item%mask
       if (allocated(item%mask) .and. bSuccess) then
          write (unit=fileunit, IOSTAT=ios) size(item%mask)
@@ -2688,6 +2703,19 @@ contains
          ! read (unit=fileunit, IOSTAT=ios) item%pixels(:, :)
          array_size = int(sizeof(item%pixels), kind=c_size_t)
          ios = read_array(cache//'/'//'pixels'//c_null_char, c_loc(item%pixels), array_size)
+         if (ios .ne. 0) go to 300
+      end if
+
+      ! item%angle
+      read (unit=fileunit, IOSTAT=ios) N
+      if (ios .ne. 0) go to 300
+
+      if ((dims(1)*dims(2) .eq. N) .and. (N .gt. 0)) then
+         if (allocated(item%angle)) deallocate (item%angle)
+         allocate (item%angle(dims(1), dims(2)))
+         ! read (unit=fileunit, IOSTAT=ios) item%angle(:, :)
+         array_size = int(sizeof(item%angle), kind=c_size_t)
+         ios = read_array(cache//'/'//'angle'//c_null_char, c_loc(item%angle), array_size)
          if (ios .ne. 0) go to 300
       end if
 
