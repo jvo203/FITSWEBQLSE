@@ -4443,7 +4443,7 @@ contains
       logical :: anynull
 
       ! local buffers
-      real(kind=4), allocatable :: local_buffer(:)
+      real(kind=4), allocatable :: local_buffer(:), local_angle(:)
       logical(kind=1), allocatable :: local_mask(:)
 
       ! shared variables
@@ -4686,8 +4686,8 @@ contains
          item%dmin = dmin
          item%dmax = dmax
 
-         item%pixels = reshape(local_buffer, naxes(1:2))
-         item%mask = reshape(local_mask, naxes(1:2))
+         item%pixels = reshape(local_buffer(1:npixels), naxes(1:2))
+         item%mask = reshape(local_mask(1:npixels), naxes(1:2))
 
          call set_image_status(item, .true.)
       else
