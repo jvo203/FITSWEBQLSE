@@ -4626,24 +4626,35 @@ contains
 
       ! calculate the range for each image
       if (naxis .eq. 1 .or. naxis .eq. 2 .or. naxes(3) .eq. 1) then
+         ! read a 2D image on the root node only
          ! client nodes can skip 2D images
          if (c_associated(root)) then
             bSuccess = .true. ! setting this to .true. prevents the error from getting set further on
             return
          end if
 
-         ! local buffers
-         allocate (local_buffer(npixels))
-         allocate (local_mask(npixels))
-
-         ! read a 2D image on the root node only
-         ! use a code capable of supporting very large 2D images
-
          ! starting bounds
          fpixels = (/1, 1, 1, 1/)
 
-         ! ending bounds
-         lpixels = (/naxes(1), naxes(2), 1, 1/)
+         if(item%is_stokes .and. naxes(4) .gt. 2) then
+            ! ending bounds
+            lpixels = (/naxes(1), naxes(2), 1, naxes(4)/)
+
+            ! local pixels
+            allocate (local_buffer(npixels*int(naxes(4), kind=8)))
+
+            ! allocate the angle too
+            if(naxes(4) .eq. 4) allocate (local_angle(npixels))
+         else
+            ! ending bounds
+            lpixels = (/naxes(1), naxes(2), 1, 1/)
+
+            ! local pixels
+            allocate (local_buffer(npixels))
+         end if
+
+         ! local mask
+         allocate (local_mask(npixels))
 
          ! do not skip over any pixels
          incs = 1
@@ -4651,6 +4662,7 @@ contains
          ! reset the status
          status = 0
 
+         ! use a code capable of supporting very large 2D images
          call ftgsve(unit, group, naxis, naxes, fpixels, lpixels, incs, nullval, local_buffer, anynull, status)
 
          ! abort upon an error
@@ -4688,6 +4700,9 @@ contains
 
          item%pixels = reshape(local_buffer(1:npixels), naxes(1:2))
          item%mask = reshape(local_mask(1:npixels), naxes(1:2))
+
+         ! an optional polarisation angle
+         if(allocated(local_angle)) item%angle = reshape(local_angle(1:npixels), naxes(1:2))
 
          call set_image_status(item, .true.)
       else
