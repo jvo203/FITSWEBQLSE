@@ -4670,6 +4670,16 @@ contains
 
          if(item%is_stokes .and. naxes(4) .gt. 2) then
             ! TO-DO
+
+            ! I,Q,U, no angle
+            if(naxes(4) .eq. 3) then
+               ! TO-DO
+            end if
+
+            ! I,Q,U,V --> angle
+            if(naxes(4) .eq. 4) then
+               ! TO-DO
+            end if
          else
             ! calculate the min/max values
             do j = 1, npixels
