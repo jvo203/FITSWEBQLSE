@@ -4669,8 +4669,6 @@ contains
          if (status .ne. 0) go to 200
 
          if(item%is_stokes .and. naxes(4) .gt. 2) then
-            ! TO-DO
-
             ! I,Q,U, no angle
             if(naxes(4) .eq. 3) then
                ! TO-DO
