@@ -4438,7 +4438,7 @@ contains
       integer, dimension(4) :: fpixels, lpixels, incs
       logical test_ignrval
 
-      real :: nullval, tmp
+      real :: nullval, tmp, tmpI, tmpQ, tmpU, tmpV
       character :: record*80, key*10, value*70, comment*70
       logical :: anynull
 
@@ -4676,7 +4676,28 @@ contains
 
             ! I,Q,U,V --> angle
             if(naxes(4) .eq. 4) then
-               ! TO-DO
+               ! calculate the total intensity, polarisation angle and intensity min/max values
+               do j = 1, npixels
+
+                  tmpI = local_buffer(j)
+                  tmpQ = local_buffer(j + npixels)
+                  tmpU = local_buffer(j + 2*npixels)
+                  tmpV = local_buffer(j + 3*npixels)
+                  tmp = sqrt(tmpQ**2 + tmpU**2 + tmpV**2) / tmpI ! total intensity
+
+                  print *, 'j:', j, 'I:', tmpI, 'Q:', tmpQ, 'U:', tmpU, 'V:', tmpV, 'mT:', tmp
+
+                  if ((.not. ieee_is_nan(tmp)) .and. (tmp .ge. item%datamin) .and. (tmp .le. item%datamax)) then
+                     dmin = min(dmin, tmp)
+                     dmax = max(dmax, tmp)
+                     local_buffer(j) = tmp
+                     local_mask(j) = .true.
+                  else
+                     local_buffer(j) = 0.0
+                     local_mask(j) = .false.
+                  end if
+
+               end do
             end if
          else
             ! calculate the min/max values
