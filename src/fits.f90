@@ -4668,30 +4668,34 @@ contains
          ! abort upon an error
          if (status .ne. 0) go to 200
 
-         ! calculate the min/max values
-         do j = 1, npixels
+         if(item%is_stokes .and. naxes(4) .gt. 2) then
+            ! TO-DO
+         else
+            ! calculate the min/max values
+            do j = 1, npixels
 
-            tmp = local_buffer(j)
+               tmp = local_buffer(j)
 
-            if ((.not. ieee_is_nan(tmp)) .and. (tmp .ge. item%datamin) .and. (tmp .le. item%datamax)) then
-               if (test_ignrval) then
-                  if (abs(tmp - item%ignrval) .le. epsilon(tmp)) then
-                     ! skip the IGNRVAL pixels
-                     local_buffer(j) = 0.0
-                     local_mask(j) = .false.
-                     cycle
+               if ((.not. ieee_is_nan(tmp)) .and. (tmp .ge. item%datamin) .and. (tmp .le. item%datamax)) then
+                  if (test_ignrval) then
+                     if (abs(tmp - item%ignrval) .le. epsilon(tmp)) then
+                        ! skip the IGNRVAL pixels
+                        local_buffer(j) = 0.0
+                        local_mask(j) = .false.
+                        cycle
+                     end if
                   end if
+
+                  dmin = min(dmin, tmp)
+                  dmax = max(dmax, tmp)
+                  local_mask(j) = .true.
+               else
+                  local_buffer(j) = 0.0
+                  local_mask(j) = .false.
                end if
 
-               dmin = min(dmin, tmp)
-               dmax = max(dmax, tmp)
-               local_mask(j) = .true.
-            else
-               local_buffer(j) = 0.0
-               local_mask(j) = .false.
-            end if
-
-         end do
+            end do
+         end if
 
          call update_progress(item, 1)
 
