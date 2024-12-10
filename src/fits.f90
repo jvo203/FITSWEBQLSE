@@ -4438,9 +4438,11 @@ contains
       integer, dimension(4) :: fpixels, lpixels, incs
       logical test_ignrval
 
-      real :: nullval, tmp, tmpI, tmpQ, tmpU, tmpV
+      real :: nullval, tmp, tmpA, tmpI, tmpQ, tmpU, tmpV
       character :: record*80, key*10, value*70, comment*70
       logical :: anynull
+
+      real, parameter :: pi = 3.14159265358979323846
 
       ! local buffers
       real(kind=4), allocatable :: local_buffer(:), local_angle(:)
@@ -4677,9 +4679,14 @@ contains
                   tmpI = local_buffer(j)
                   tmpQ = local_buffer(j + npixels)
                   tmpU = local_buffer(j + 2*npixels)
-                  tmp = sqrt(tmpQ**2 + tmpU**2) / tmpI ! total intensity
 
-                  print *, 'j:', j, 'I:', tmpI, 'Q:', tmpQ, 'U:', tmpU, 'mL:', tmp
+                  if(tmpI .eq. 0.0) then
+                     tmp = ieee_value(0.0, ieee_quiet_nan)
+                  else
+                     tmp = sqrt(tmpQ**2 + tmpU**2) / tmpI ! total intensity
+                  end if
+
+                  ! print *, 'j:', j, 'I:', tmpI, 'Q:', tmpQ, 'U:', tmpU, 'mL:', tmp
 
                   if ((.not. ieee_is_nan(tmp)) .and. (tmp .ge. item%datamin) .and. (tmp .le. item%datamax)) then
                      dmin = min(dmin, tmp)
@@ -4703,17 +4710,32 @@ contains
                   tmpQ = local_buffer(j + npixels)
                   tmpU = local_buffer(j + 2*npixels)
                   tmpV = local_buffer(j + 3*npixels)
-                  tmp = sqrt(tmpQ**2 + tmpU**2 + tmpV**2) / tmpI ! total intensity
 
-                  print *, 'j:', j, 'I:', tmpI, 'Q:', tmpQ, 'U:', tmpU, 'V:', tmpV, 'mT:', tmp
+                  if(tmpI .eq. 0.0) then
+                     tmp = ieee_value(0.0, ieee_quiet_nan)
+                  else
+                     tmp = sqrt(tmpQ**2 + tmpU**2 + tmpV**2) / tmpI ! total intensity
+                  end if
 
-                  if ((.not. ieee_is_nan(tmp)) .and. (tmp .ge. item%datamin) .and. (tmp .le. item%datamax)) then
+                  if (tmpQ .eq. 0.0) then
+                     tmpA = ieee_value(0.0, ieee_quiet_nan)
+                  else
+                     tmpA = 0.5 * atan2(tmpU, tmpQ) ! polarisation angle
+                  end if
+
+                  ! print *, 'I:', tmpI, 'Q:', tmpQ, 'U:', tmpU, 'V:', tmpV, 'mT:', tmp, 'A:', tmpA * 180.0 / pi
+
+                  if ((.not. ieee_is_nan(tmpA)) .and. (.not. ieee_is_nan(tmp)) .and. (tmp .ge. item%datamin)&
+                  & .and. (tmp .le. item%datamax)) then
                      dmin = min(dmin, tmp)
                      dmax = max(dmax, tmp)
+
                      local_buffer(j) = tmp
+                     local_angle(j) = tmpA
                      local_mask(j) = .true.
                   else
                      local_buffer(j) = 0.0
+                     local_angle(j) = 0.0
                      local_mask(j) = .false.
                   end if
 
