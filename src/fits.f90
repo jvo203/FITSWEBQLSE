@@ -4683,7 +4683,7 @@ contains
                   if(tmpI .eq. 0.0) then
                      tmp = ieee_value(0.0, ieee_quiet_nan)
                   else
-                     tmp = sqrt(tmpQ**2 + tmpU**2) / tmpI ! total intensity
+                     tmp = sqrt(tmpQ**2 + tmpU**2) / tmpI ! linear intensity
                   end if
 
                   ! print *, 'j:', j, 'I:', tmpI, 'Q:', tmpQ, 'U:', tmpU, 'mL:', tmp
