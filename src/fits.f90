@@ -4442,8 +4442,6 @@ contains
       character :: record*80, key*10, value*70, comment*70
       logical :: anynull
 
-      real, parameter :: pi = 3.14159265358979323846
-
       ! local buffers
       real(kind=4), allocatable :: local_buffer(:), local_angle(:)
       logical(kind=1), allocatable :: local_mask(:)
@@ -4717,13 +4715,13 @@ contains
                      tmp = sqrt(tmpQ**2 + tmpU**2 + tmpV**2) / tmpI ! total intensity
                   end if
 
-                  if (tmpQ .eq. 0.0) then
+                  if (tmpQ .eq. 0.0 .and. tmpU .eq. 0.0) then
                      tmpA = ieee_value(0.0, ieee_quiet_nan)
                   else
                      tmpA = 0.5 * atan2(tmpU, tmpQ) ! polarisation angle
                   end if
 
-                  ! print *, 'I:', tmpI, 'Q:', tmpQ, 'U:', tmpU, 'V:', tmpV, 'mT:', tmp, 'A:', tmpA * 180.0 / pi
+                  ! print *, 'I:', tmpI, 'Q:', tmpQ, 'U:', tmpU, 'V:', tmpV, 'mT:', tmp, 'A:', tmpA, 0.5 * atan2d(tmpU, tmpQ)
 
                   if ((.not. ieee_is_nan(tmpA)) .and. (.not. ieee_is_nan(tmp)) .and. (tmp .ge. item%datamin)&
                   & .and. (tmp .le. item%datamax)) then
