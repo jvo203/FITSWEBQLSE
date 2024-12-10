@@ -4184,7 +4184,10 @@ contains
             integer pos
 
             pos = index(value, 'stokes')
-            if (pos .ne. 0) item%is_stokes = .true.
+            if (pos .ne. 0) then
+               item%is_stokes = .true.
+               item%flux = 'logistic'
+            end if
          end block
 
       end if
