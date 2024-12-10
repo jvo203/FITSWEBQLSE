@@ -4671,10 +4671,30 @@ contains
          if(item%is_stokes .and. naxes(4) .gt. 2) then
             ! I,Q,U, no angle
             if(naxes(4) .eq. 3) then
-               ! TO-DO
+               ! calculate the linear intensity and its min/max values
+               do j = 1, npixels
+
+                  tmpI = local_buffer(j)
+                  tmpQ = local_buffer(j + npixels)
+                  tmpU = local_buffer(j + 2*npixels)
+                  tmp = sqrt(tmpQ**2 + tmpU**2) / tmpI ! total intensity
+
+                  print *, 'j:', j, 'I:', tmpI, 'Q:', tmpQ, 'U:', tmpU, 'mL:', tmp
+
+                  if ((.not. ieee_is_nan(tmp)) .and. (tmp .ge. item%datamin) .and. (tmp .le. item%datamax)) then
+                     dmin = min(dmin, tmp)
+                     dmax = max(dmax, tmp)
+                     local_buffer(j) = tmp
+                     local_mask(j) = .true.
+                  else
+                     local_buffer(j) = 0.0
+                     local_mask(j) = .false.
+                  end if
+
+               end do
             end if
 
-            ! I,Q,U,V --> angle
+            ! I,Q,U,V and a derived angle
             if(naxes(4) .eq. 4) then
                ! calculate the total intensity, polarisation angle and intensity min/max values
                do j = 1, npixels
