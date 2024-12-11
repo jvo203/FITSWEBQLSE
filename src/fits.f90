@@ -6783,6 +6783,8 @@ contains
       deallocate (pixels)
       deallocate (mask)
 
+      if (allocated(angle)) deallocate (angle)
+
       if (fetch_data .eq. 1) then
 
          ! JSON string
