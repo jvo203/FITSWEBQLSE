@@ -6588,7 +6588,7 @@ contains
       type(dataset), pointer :: item
       integer(kind=c_int), intent(in), value :: width, height, precision, fetch_data, fd
 
-      real(kind=c_float), dimension(:, :), allocatable, target :: pixels
+      real(kind=c_float), dimension(:, :), allocatable, target :: pixels, angle
       logical(kind=c_bool), dimension(:, :), allocatable, target :: mask
 
       ! image histogram
@@ -6602,14 +6602,14 @@ contains
       type(inner_dims_req_t), target :: inner_dims
       type(image_req_t), target :: image_req
       type(c_ptr) :: pid
-      integer(kind=c_int) :: rc
+      integer(kind=c_int) :: rc, pixels_rc, angle_rc
 
       integer inner_width, inner_height
       integer img_width, img_height
       real scale
 
-      type(resize_task_t), target :: task
-      type(c_ptr) :: task_pid
+      type(resize_task_t), target :: pixels_task, angle_task
+      type(c_ptr) :: pixels_pid, angle_pid
 
       ! timing
       real(8) :: t1, t2 ! OpenMP TIME
@@ -6677,35 +6677,62 @@ contains
 
          t1 = omp_get_wtime()
 
-         task%pSrc = c_loc(item%pixels)
-         task%srcWidth = item%naxes(1)
-         task%srcHeight = item%naxes(2)
+         pixels_task%pSrc = c_loc(item%pixels)
+         pixels_task%srcWidth = item%naxes(1)
+         pixels_task%srcHeight = item%naxes(2)
 
-         task%pDest = c_loc(pixels)
-         task%dstWidth = img_width
-         task%dstHeight = img_height
+         pixels_task%pDest = c_loc(pixels)
+         pixels_task%dstWidth = img_width
+         pixels_task%dstHeight = img_height
 
          if (scale .gt. 0.2) then
-            task%numLobes = 3
+            pixels_task%numLobes = 3
             ! call resizeLanczos(c_loc(item%pixels), item%naxes(1), item%naxes(2), c_loc(pixels), img_width, img_height, 3)
          else
-            task%numLobes = 0
+            pixels_task%numLobes = 0
             ! call resizeSuper(c_loc(item%pixels), item%naxes(1), item%naxes(2), c_loc(pixels), img_width, img_height)
          end if
 
          ! launch a pthread to resize pixels
-         task_pid = my_pthread_create(start_routine=c_funloc(launch_resize_task), arg=c_loc(task), rc=rc)
+         pixels_pid = my_pthread_create(start_routine=c_funloc(launch_resize_task), arg=c_loc(pixels_task), rc=pixels_rc)
+
+         ! an optional polarisation angle map
+         if (allocated(item%angle)) then
+            allocate (angle(img_width, img_height))
+
+            angle_task%pSrc = c_loc(item%angle)
+            angle_task%srcWidth = item%naxes(1)
+            angle_task%srcHeight = item%naxes(2)
+
+            angle_task%pDest = c_loc(angle)
+            angle_task%dstWidth = img_width
+            angle_task%dstHeight = img_height
+
+            if (scale .gt. 0.2) then
+               angle_task%numLobes = 3
+               ! call resizeLanczos(c_loc(item%angle), item%naxes(1), item%naxes(2), c_loc(angle), img_width, img_height, 3)
+            else
+               angle_task%numLobes = 0
+               ! call resizeSuper(c_loc(item%angle), item%naxes(1), item%naxes(2), c_loc(angle), img_width, img_height)
+            end if
+
+            ! launch a pthread to resize angle
+            angle_pid = my_pthread_create(start_routine=c_funloc(launch_resize_task), arg=c_loc(angle_task), rc=angle_rc)
+         end if
 
          ! Boolean mask: the naive Nearest-Neighbour method
          call resizeNearest(c_loc(item%mask), item%naxes(1), item%naxes(2), c_loc(mask), img_width, img_height)
          ! call resizeMask(item%mask, item%naxes(1), item%naxes(2), mask, img_width, img_height)
 
-         ! join a thread
-         rc = my_pthread_join(task_pid)
+         ! join a pixels thread
+         rc = my_pthread_join(pixels_pid)
+
+         ! join an angle thread
+         if (allocated(item%angle)) rc = my_pthread_join(angle_pid)
 
          t2 = omp_get_wtime()
 
-         print *, 'resize pixels/mask elapsed time:', 1000*(t2 - t1), '[ms]'
+         print *, 'resize pixels/(angle)/mask elapsed time:', 1000*(t2 - t1), '[ms]'
 
       else
          img_width = item%naxes(1)
@@ -6714,6 +6741,9 @@ contains
          ! make a copy of item%pixels / item%mask
          allocate (pixels(img_width, img_height), source=item%pixels)
          allocate (mask(img_width, img_height), source=item%mask)
+
+         ! an optional polarisation angle map
+         if(allocated(item%angle)) allocate (angle(img_width, img_height), source=item%angle)
 
       end if
 
