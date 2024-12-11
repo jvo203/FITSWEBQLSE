@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-12-11.0";
+    return "JS2024-12-11.1";
 }
 
 function uuidv4() {
@@ -15530,12 +15530,21 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                 // console.log("processing an HDR image");
                                 let start = performance.now();
 
+                                var res;
+
                                 // decompressZFP returns std::vector<float>
                                 // decompressZFPimage returns Float32Array but emscripten::typed_memory_view is buggy
-                                var res = Module.decompressZFPimage(img_width, img_height, frame_pixels);
+                                res = Module.decompressZFPimage(img_width, img_height, frame_pixels);
                                 const pixels = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
 
-                                var res = Module.decompressLZ4mask(img_width, img_height, frame_mask);
+                                // an optional polarisation angle map
+                                if (angle_length > 0) {
+                                    res = Module.decompressZFPimage(img_width, img_height, frame_angle);
+                                    const angle = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
+                                    console.log("polarisation angles [radians]:", angle);
+                                }
+
+                                res = Module.decompressLZ4mask(img_width, img_height, frame_mask);
                                 const alpha = Module.HEAPU8.slice(res[0], res[0] + res[1]);
 
                                 let elapsed = Math.round(performance.now() - start);
