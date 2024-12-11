@@ -7023,7 +7023,7 @@ void write_image_spectrum(int fd, const char *flux, float pmin, float pmax, floa
             pixels_zfpsize = zfp_compress(zfp, field);
 
             if (pixels_zfpsize == 0)
-                printf("[C] ZFP compression failed!\n");
+                printf("[C] ZFP compression of pixels failed!\n");
             else
                 printf("[C] image pixels compressed size: %zu bytes\n", pixels_zfpsize);
 
@@ -7038,6 +7038,54 @@ void write_image_spectrum(int fd, const char *flux, float pmin, float pmax, floa
     // clean up
     zfp_field_free(field);
     zfp_stream_close(zfp);
+
+    // (optional) compress angle with ZFP if not NULL
+    if (angle != NULL)
+    {
+        field = zfp_field_2d((void *)angle, data_type, nx, ny);
+
+        // allocate metadata for a compressed stream
+        zfp = zfp_stream_open(NULL);
+
+        // zfp_stream_set_rate(zfp, 8.0, data_type, 2, 0);
+        zfp_stream_set_precision(zfp, precision);
+
+        // allocate buffer for compressed data
+        bufsize = zfp_stream_maximum_size(zfp, field);
+
+        compressed_angle = (uchar *)malloc(bufsize);
+
+        if (compressed_angle != NULL)
+        {
+            // associate bit stream with allocated buffer
+            stream = bitstream_open((void *)compressed_angle, bufsize);
+
+            if (stream != NULL)
+            {
+                zfp_stream_set_bit_stream(zfp, stream);
+
+                zfp_write_header(zfp, field, ZFP_HEADER_FULL);
+
+                // compress entire array
+                angle_zfpsize = zfp_compress(zfp, field);
+
+                if (angle_zfpsize == 0)
+                    printf("[C] ZFP compression of angles failed!\n");
+                else
+                    printf("[C] polarisation angle compressed size: %zu bytes\n", angle_zfpsize);
+
+                bitstream_close(stream);
+
+                // the compressed part is available at compressed_angle[0..angle_zfpsize-1]
+            }
+        }
+        else
+            printf("[C] a NULL compressed_angle buffer!\n");
+
+        // clean up
+        zfp_field_free(field);
+        zfp_stream_close(zfp);
+    }
 
     // compress mask with LZ4-HC
     mask_size = width * height;
