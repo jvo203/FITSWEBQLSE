@@ -6970,7 +6970,8 @@ void write_image_spectrum(int fd, const char *flux, float pmin, float pmax, floa
     zfp_stream *zfp = NULL;
     size_t bufsize = 0;
     bitstream *stream = NULL;
-    size_t zfpsize = 0;
+    size_t pixels_zfpsize = 0;
+    size_t angle_zfpsize = 0;
     uint nx = width;
     uint ny = height;
 
@@ -7019,16 +7020,16 @@ void write_image_spectrum(int fd, const char *flux, float pmin, float pmax, floa
             zfp_write_header(zfp, field, ZFP_HEADER_FULL);
 
             // compress entire array
-            zfpsize = zfp_compress(zfp, field);
+            pixels_zfpsize = zfp_compress(zfp, field);
 
-            if (zfpsize == 0)
+            if (pixels_zfpsize == 0)
                 printf("[C] ZFP compression failed!\n");
             else
-                printf("[C] image pixels compressed size: %zu bytes\n", zfpsize);
+                printf("[C] image pixels compressed size: %zu bytes\n", pixels_zfpsize);
 
             bitstream_close(stream);
 
-            // the compressed part is available at compressed_pixels[0..zfpsize-1]
+            // the compressed part is available at compressed_pixels[0..pixels_zfpsize-1]
         }
     }
     else
@@ -7068,7 +7069,8 @@ void write_image_spectrum(int fd, const char *flux, float pmin, float pmax, floa
 
     uint32_t img_width = width;
     uint32_t img_height = height;
-    uint32_t pixels_len = zfpsize;
+    uint32_t pixels_len = pixels_zfpsize;
+    uint32_t angle_len = angle_zfpsize;
     uint32_t mask_len = compressed_size;
 
     // the flux length
@@ -7122,6 +7124,9 @@ void write_image_spectrum(int fd, const char *flux, float pmin, float pmax, floa
     // release the memory
     if (compressed_pixels != NULL)
         free(compressed_pixels);
+
+    if (compressed_angle != NULL)
+        free(compressed_angle);
 
     if (compressed_mask != NULL)
         free(compressed_mask);
