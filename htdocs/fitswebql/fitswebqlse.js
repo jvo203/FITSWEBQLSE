@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-12-05.0";
+    return "JS2024-12-11.0";
 }
 
 function uuidv4() {
@@ -15237,6 +15237,16 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
 
                             var frame_pixels = new Uint8Array(received_msg, offset, pixels_length);
                             offset += pixels_length;
+
+                            var angle_length = dv.getUint32(offset, endianness);
+                            offset += 4;
+
+                            //console.log('angle length:', angle_length);
+
+                            if (angle_length > 0) {
+                                var frame_angle = new Uint8Array(received_msg, offset, angle_length);
+                                offset += angle_length;
+                            }
 
                             var mask_length = dv.getUint32(offset, endianness);
                             offset += 4;
