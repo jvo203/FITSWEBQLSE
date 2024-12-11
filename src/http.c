@@ -7155,7 +7155,7 @@ void write_image_spectrum(int fd, const char *flux, float pmin, float pmax, floa
     tmp = black;
     chunked_write(fd, (const char *)&tmp, sizeof(tmp));
 
-    // the image + mask
+    // the image + (optional) polarisation angle + mask
     chunked_write(fd, (const char *)&img_width, sizeof(img_width));
     chunked_write(fd, (const char *)&img_height, sizeof(img_height));
 
@@ -7163,6 +7163,11 @@ void write_image_spectrum(int fd, const char *flux, float pmin, float pmax, floa
     chunked_write(fd, (const char *)&pixels_len, sizeof(pixels_len));
     if (compressed_pixels != NULL)
         chunked_write(fd, (char *)compressed_pixels, pixels_len);
+
+    // angle (use a chunked version for larger tranfers)
+    chunked_write(fd, (const char *)&angle_len, sizeof(angle_len));
+    if (compressed_angle != NULL)
+        chunked_write(fd, (char *)compressed_angle, angle_len);
 
     // mask (use a chunked version for larger tranfers)
     chunked_write(fd, (const char *)&mask_len, sizeof(mask_len));
