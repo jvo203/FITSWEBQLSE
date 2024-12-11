@@ -1193,7 +1193,7 @@ module fits
          pmin, pmax, pmedian, &
       &black, white, sensitivity, ratio_sensitivity,&
       &width, height, precision,&
-      &pixels, mask)&
+      &pixels, angle, mask)&
       &BIND(C, name='write_image_spectrum')
          use, intrinsic :: ISO_C_BINDING
          implicit none
@@ -1203,7 +1203,7 @@ module fits
          real(kind=c_float), value, intent(in) :: pmin, pmax, pmedian
          real(kind=c_float), value, intent(in) :: black, white
          real(kind=c_float), value, intent(in) :: sensitivity, ratio_sensitivity
-         type(C_PTR), value :: pixels, mask
+         type(C_PTR), value :: pixels, angle, mask
       end subroutine write_image_spectrum
 
       ! void write_pv_diagram(int fd, int width, int height, int precision, const float *restrict pv, const float pmean, const float pstd, const float pmin, const float pmax, const int xmin, const int xmax, const double vmin, const double vmax, const int x1, const int y1, const int x2, const int y2);
@@ -6775,10 +6775,17 @@ contains
       ! make an image histogram, decide on the flux etc.
       call make_image_statistics(item, img_width, img_height, pixels, mask, hist, tone)
 
-      call write_image_spectrum(fd, trim(tone%flux)//c_null_char,&
-      &tone%pmin, tone%pmax, tone%pmedian,&
-      &tone%black, tone%white, tone%sensitivity, tone%ratio_sensitivity,&
-      & img_width, img_height, precision, c_loc(pixels), c_loc(mask))
+      if (.not. allocated(angle)) then
+         call write_image_spectrum(fd, trim(tone%flux)//c_null_char,&
+         &tone%pmin, tone%pmax, tone%pmedian,&
+         &tone%black, tone%white, tone%sensitivity, tone%ratio_sensitivity,&
+         & img_width, img_height, precision, c_loc(pixels), c_null_ptr, c_loc(mask))
+      else
+         call write_image_spectrum(fd, trim(tone%flux)//c_null_char,&
+         &tone%pmin, tone%pmax, tone%pmedian,&
+         &tone%black, tone%white, tone%sensitivity, tone%ratio_sensitivity,&
+         & img_width, img_height, precision, c_loc(pixels), c_loc(angle), c_loc(mask))
+      end if
 
       deallocate (pixels)
       deallocate (mask)
@@ -11189,7 +11196,7 @@ contains
          call write_image_spectrum(req%fd, trim(tone%flux)//c_null_char,&
          &tone%pmin, tone%pmax, tone%pmedian,&
          &tone%black, tone%white, tone%sensitivity, tone%ratio_sensitivity,&
-         & img_width, img_height, precision, c_loc(view_pixels), c_loc(view_mask))
+         & img_width, img_height, precision, c_loc(view_pixels), c_null_ptr, c_loc(view_mask))
 
          deallocate (view_pixels)
          deallocate (view_mask)
