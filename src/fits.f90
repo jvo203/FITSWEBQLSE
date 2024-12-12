@@ -4481,6 +4481,7 @@ contains
       naxis = 0
       naxes = (/0, 0, 0, 0/)
       bSuccess = .false.
+      total_per_node = 0
 
       record = ''
       key = ''
@@ -4632,6 +4633,8 @@ contains
             bSuccess = .true. ! setting this to .true. prevents the error from getting set further on
             return
          end if
+
+         total_per_node = total_per_node + 1
 
          ! starting bounds
          fpixels = (/1, 1, 1, 1/)
