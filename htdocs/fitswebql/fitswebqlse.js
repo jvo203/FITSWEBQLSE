@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-12-12.0";
+    return "JS2024-12-12.1";
 }
 
 function uuidv4() {
@@ -3937,6 +3937,30 @@ function process_hdr_viewport(img_width, img_height, pixels, alpha, index) {
         // display the composite viewport
         init_webgl_composite_viewport_buffers(viewportContainer);
     }
+}
+
+function process_polarisation(pol_width, pol_height, angle, mask) {
+    console.log("process_polarisation pol_width:", pol_width, "pol_height:", pol_height, "angles [rad]:", angle, "mask:", mask);
+
+    // get the image rectangle
+    var rect_elem = d3.select("#image_rectangle");
+    var width = parseFloat(rect_elem.attr("width"));
+    var height = parseFloat(rect_elem.attr("height"));
+    var x = parseFloat(rect_elem.attr("x"));
+    var y = parseFloat(rect_elem.attr("y"));
+    console.log("rect. width:", width, "rect. height:", height, "image x:", x, "image y:", y);
+
+    var image_bounding_dims = imageContainer[va_count - 1].image_bounding_dims;
+    var scale = get_image_scale(width, height, image_bounding_dims.width, image_bounding_dims.height);
+    var img_width = Math.floor(scale * image_bounding_dims.width);
+    var img_height = Math.floor(scale * image_bounding_dims.height);
+    console.log("scaling by", scale, "new width:", img_width, "new height:", img_height, "orig. width:", image_bounding_dims.width, "orig. height:", image_bounding_dims.height);
+
+    // first assume a fixed number of vectors
+    const vec_num = 10;
+    const vec_x = Math.min(vec_num, pol_width);
+    const vec_y = Math.min(vec_num, pol_height);
+    console.log("vec_x:", vec_x, "vec_y:", vec_y);
 }
 
 function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index) {
@@ -15540,7 +15564,7 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                 // console.log("processing an HDR image");
                                 let start = performance.now();
 
-                                var res;
+                                var res, angle;
 
                                 // decompressZFP returns std::vector<float>
                                 // decompressZFPimage returns Float32Array but emscripten::typed_memory_view is buggy
@@ -15550,8 +15574,8 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                 // an optional polarisation angle map
                                 if (angle_length > 0) {
                                     res = Module.decompressZFPimage(img_width, img_height, frame_angle);
-                                    const angle = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
-                                    console.log("polarisation angles [radians]:", angle);
+                                    angle = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
+                                    // console.log("polarisation angles [radians]:", angle);
                                 }
 
                                 res = Module.decompressLZ4mask(img_width, img_height, frame_mask);
@@ -15565,6 +15589,10 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                     d3.select("#peak_tracking").remove();
 
                                     process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index);
+
+                                    if (angle_length > 0 && va_count == 1) {
+                                        process_polarisation(img_width, img_height, angle, alpha);
+                                    }
 
                                     if (has_json) {
                                         display_histogram(index);
