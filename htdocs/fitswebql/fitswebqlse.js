@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-12-11.1";
+    return "JS2024-12-12.0";
 }
 
 function uuidv4() {
@@ -7817,6 +7817,16 @@ function display_dataset_info() {
 
     if (fitsData == null)
         return;
+
+    // remove the polarisation SVG when not needed
+    try {
+        if (!fitsData.is_stokes || fitsData.polarisation < 3) {
+            d3.select("#PolarisationSVG").remove();
+        }
+    }
+    catch (e) {
+        console.log(e);
+    }
 
     var svg = d3.select("#FrontSVG");
     var width = parseFloat(svg.attr("width"));
@@ -20838,28 +20848,34 @@ async function mainRenderer() {
             .attr('style', 'position: fixed; left: 10px; top: 10px; z-index: 51');
 
         d3.select("#mainDiv").append("svg")
-            .attr("id", "BackgroundSVG")
+            .attr("id", "PolarisationSVG")
             .attr("width", width)
             .attr("height", height)
             .attr('style', 'position: fixed; left: 10px; top: 10px; z-index: 52');
 
-        d3.select("#mainDiv").append("canvas")
-            .attr("id", "ZOOMCanvas")
+        d3.select("#mainDiv").append("svg")
+            .attr("id", "BackgroundSVG")
             .attr("width", width)
             .attr("height", height)
             .attr('style', 'position: fixed; left: 10px; top: 10px; z-index: 53');
 
         d3.select("#mainDiv").append("canvas")
-            .attr("id", "ViewportCanvas")
+            .attr("id", "ZOOMCanvas")
             .attr("width", width)
             .attr("height", height)
             .attr('style', 'position: fixed; left: 10px; top: 10px; z-index: 54');
+
+        d3.select("#mainDiv").append("canvas")
+            .attr("id", "ViewportCanvas")
+            .attr("width", width)
+            .attr("height", height)
+            .attr('style', 'position: fixed; left: 10px; top: 10px; z-index: 55');
 
         d3.select("#mainDiv").append("svg")
             .attr("id", "BackSVG")
             .attr("width", width)
             .attr("height", height)
-            .attr('style', 'position: fixed; left: 10px; top: 10px; z-index: 55; cursor: default; mix-blend-mode: none');//difference or lighten or screen //other than none causes problems with an older Firefox v45
+            .attr('style', 'position: fixed; left: 10px; top: 10px; z-index: 56; cursor: default; mix-blend-mode: none');//difference or lighten or screen //other than none causes problems with an older Firefox v45
 
         //spectrum
         var blend = '';
