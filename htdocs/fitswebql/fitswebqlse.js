@@ -4022,21 +4022,17 @@ function process_polarisation(pol_width, pol_height, intensity, angle, mask) {
     const vec_y = Math.min(vec_num, pol_height);
     console.log("vec_x:", vec_x, "vec_y:", vec_y);
 
-    // copy the intensity and angle arrays
-    var intensity_copy = new Float32Array(intensity);
-    var angle_copy = new Float32Array(angle);
-
     // set intensity and angle to zero where the mask is zero
-    let len = intensity.length | 0;
+    let len = mask.length | 0;
     for (let i = 0 | 0; i < len; i = (i + 1) | 0) {
         if (mask[i] == 0) {
             console.log("masking pixel:", i);
-            intensity_copy[i] = 0.0;
-            angle_copy[i] = 0.0;
+            intensity[i] = 0.0;
+            angle[i] = 0.0;
         }
     }
 
-    const resized = ResizeLanczos(intensity_copy, angle_copy, pol_width, pol_height, vec_x, 3);
+    const resized = ResizeLanczos(intensity, angle, pol_width, pol_height, vec_x, 3);
     console.log("resized intensity:", resized.I, "resized angle:", resized.A);
 }
 
