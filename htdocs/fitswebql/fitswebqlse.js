@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-12-12.1";
+    return "JS2024-12-16.0";
 }
 
 function uuidv4() {
@@ -3939,8 +3939,68 @@ function process_hdr_viewport(img_width, img_height, pixels, alpha, index) {
     }
 }
 
-function process_polarisation(pol_width, pol_height, angle, mask) {
-    console.log("process_polarisation pol_width:", pol_width, "pol_height:", pol_height, "angles [rad]:", angle, "mask:", mask);
+function ResizeLanczos(srcI, srcA, sw, sh, dw, lobes) {
+    const dh = Math.round(sh * dw / sw); // keep the aspect ratio
+
+    var obj = {
+        dstI: new Float32Array(dw * dh), // intensity
+        dstA: new Float32Array(dw * dh), // angle
+        lanczos: function (x) {
+            if (x > lobes) return 0;
+            x *= Math.PI;
+            if (Math.abs(x) < 1e-16) return 1;
+            var xx = x / lobes;
+            return Math.sin(x) * Math.sin(xx) / x / xx;
+        },
+        ratio: sw / dw,
+        rcp_ratio: 2 / (sw / dw),
+        range2: Math.ceil((sw / dw) * lobes / 2),
+        cacheLanc: {},
+        center: {},
+        icenter: {},
+        process: function (self, u) {
+            self.center.x = (u + 0.5) * self.ratio;
+            self.icenter.x = Math.floor(self.center.x);
+
+            for (var v = 0; v < dh; v++) {
+                self.center.y = (v + 0.5) * self.ratio;
+                self.icenter.y = Math.floor(self.center.y);
+                var I = 0, A = 0, z = 0;
+                for (var i = self.icenter.x - self.range2; i <= self.icenter.x + self.range2; i++) {
+                    if (i < 0 || i >= sw) continue;
+
+                    var f_x = Math.floor(1000 * Math.abs(i - self.center.x));
+                    if (!self.cacheLanc[f_x]) self.cacheLanc[f_x] = {};
+
+                    for (var j = self.icenter.y - self.range2; j <= self.icenter.y + self.range2; j++) {
+                        if (j < 0 || j >= sh) continue;
+
+                        var f_y = Math.floor(1000 * Math.abs(j - self.center.y));
+                        if (self.cacheLanc[f_x][f_y] == undefined) self.cacheLanc[f_x][f_y] = self.lanczos(Math.sqrt(Math.pow(f_x * self.rcp_ratio, 2) + Math.pow(f_y * self.rcp_ratio, 2)) / 1000);
+
+                        z += (self.cacheLanc[f_x][f_y] < 0) ? 0 : self.cacheLanc[f_x][f_y];
+                        I += (self.cacheLanc[f_x][f_y] < 0) ? 0 : self.cacheLanc[f_x][f_y] * srcI[j * sw + i];
+                        A += (self.cacheLanc[f_x][f_y] < 0) ? 0 : self.cacheLanc[f_x][f_y] * srcA[j * sw + i];
+                    }
+                }
+                self.dstI[v * sw + u] = I / z;
+                self.dstA[v * sw + u] = A / z;
+            }
+
+            if (++u < dw) {
+                return self.process(self, u);
+            }
+            else {
+                return { I: self.dstI, A: self.dstA };
+            }
+        }
+    };
+
+    return obj.process(obj, 0);
+}
+
+function process_polarisation(pol_width, pol_height, intensity, angle, mask) {
+    console.log("process_polarisation pol_width:", pol_width, "pol_height:", pol_height, "intensity:", intensity, "angles [rad]:", angle, "mask:", mask);
 
     // get the image rectangle
     var rect_elem = d3.select("#image_rectangle");
@@ -3957,10 +4017,27 @@ function process_polarisation(pol_width, pol_height, angle, mask) {
     console.log("scaling by", scale, "new width:", img_width, "new height:", img_height, "orig. width:", image_bounding_dims.width, "orig. height:", image_bounding_dims.height);
 
     // first assume a fixed number of vectors
-    const vec_num = 10;
+    const vec_num = 25 + 2; // + 2 for the borders
     const vec_x = Math.min(vec_num, pol_width);
     const vec_y = Math.min(vec_num, pol_height);
     console.log("vec_x:", vec_x, "vec_y:", vec_y);
+
+    // copy the intensity and angle arrays
+    var intensity_copy = new Float32Array(intensity);
+    var angle_copy = new Float32Array(angle);
+
+    // set intensity and angle to zero where the mask is zero
+    let len = intensity.length | 0;
+    for (let i = 0 | 0; i < len; i = (i + 1) | 0) {
+        if (mask[i] == 0) {
+            console.log("masking pixel:", i);
+            intensity_copy[i] = 0.0;
+            angle_copy[i] = 0.0;
+        }
+    }
+
+    const resized = ResizeLanczos(intensity_copy, angle_copy, pol_width, pol_height, vec_x, 3);
+    console.log("resized intensity:", resized.I, "resized angle:", resized.A);
 }
 
 function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index) {
@@ -15591,7 +15668,7 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                     process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index);
 
                                     if (angle_length > 0 && va_count == 1) {
-                                        process_polarisation(img_width, img_height, angle, alpha);
+                                        process_polarisation(img_width, img_height, pixels, angle, alpha);
                                     }
 
                                     if (has_json) {
