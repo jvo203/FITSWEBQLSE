@@ -4017,7 +4017,7 @@ function process_polarisation(pol_width, pol_height, intensity, angle, mask) {
     console.log("scaling by", scale, "new width:", img_width, "new height:", img_height, "orig. width:", image_bounding_dims.width, "orig. height:", image_bounding_dims.height);
 
     // first assume a fixed number of vectors
-    const vec_num = 25 + 2; // + 2 for the borders
+    const vec_num = 50 + 2; // + 2 for the borders
     const vec_x = Math.min(vec_num, pol_width);
     const vec_y = Math.min(vec_num, pol_height);
     console.log("vec_x:", vec_x, "vec_y:", vec_y);
@@ -4036,32 +4036,88 @@ function process_polarisation(pol_width, pol_height, intensity, angle, mask) {
     console.log("resized:", resized);
 
     // for width and height
-    const vec_width = resized.width;
+    /*const vec_width = resized.width;
     const vec_height = resized.height;
 
     // for intensity and angle
     const vec_intensity = resized.I;
-    const vec_angle = resized.A;
+    const vec_angle = resized.A;*/
+
+    // non-resized
+    const vec_width = pol_width;
+    const vec_height = pol_height;
+
+    // non-resized
+    const vec_intensity = intensity;
+    const vec_angle = angle;
 
     // create the vectors
     var vectors = [];
+
+    const xScale = d3.scaleLinear().domain([0, vec_width]).range([x, x + width]);
+    const yScale = d3.scaleLinear().domain([0, vec_height]).range([y + height, y]);
+    const grid_spacing = 10.0;
 
     // skip the borders
     for (let j = 1; j < vec_height - 1; j++) {
         for (let i = 1; i < vec_width - 1; i++) {
             let index = j * vec_width + i;
-            console.log(i, j, "index:", index, "intensity:", vec_intensity[index], "angle:", vec_angle[index]);
+            //let index = i * vec_height + j; // inverted indexing (column-major Fortran order)
+            // console.log(i, j, "index:", index, "intensity:", vec_intensity[index], "angle:", vec_angle[index]);
 
+            let angle = Math.abs(180.0 * vec_angle[index] / Math.PI);
             let mag = Math.abs(vec_intensity[index]);
 
-            if (Math.abs(mag) > 1e-16) {
-                let vector = { x: i, y: j, dx: 1, dy: Math.tan(vec_angle[index]), mag: mag };
+            // skip too-big angles greater
+            if (mag > 1e-16 && angle <= 75.0) {
+                let vector = { x: i, y: j, vx: 1, vy: Math.tan(vec_angle[index]), magnitude: mag };
                 vectors.push(vector);
             }
         }
     }
 
     console.log("vectors:", vectors);
+
+    var max_magnitude = vectors.reduce(function (max_, it) {
+        return max_ > it.magnitude ? max_ : it.magnitude;
+    }, 0);
+
+    //max_magnitude = Math.ceil(max_magnitude / grid_spacing) * grid_spacing;
+    // put a ceiling on the magnitude
+    max_magnitude = Math.min(10.0, Math.ceil(max_magnitude / grid_spacing) * grid_spacing);
+    console.log("max_magnitude:", max_magnitude);
+
+    const vscale = d3.scalePow().domain([0, max_magnitude]).range([0, grid_spacing]);
+
+
+
+    // get the SVG element
+    var svg = d3.select("#PolarisationSVG");
+
+    vectors.forEach(function (p) {
+        // we first scale down to a unit vector
+        p.vx /= p.magnitude;
+        p.vy /= p.magnitude;
+
+        // and now scale it to our own scale
+        p.vx *= vscale(p.magnitude);
+        p.vy *= vscale(p.magnitude);
+
+        // omit the large vectors
+        if (p.magnitude <= max_magnitude) {
+            svg.append("g")
+                .append("path")
+                .attr("d", "M" + xScale(0) + " " + yScale(0) + " L" + xScale(p.vx) + " " + yScale(p.vy))
+                .attr("stroke", "blue")
+                .attr("stroke-width", 1)
+                .attr("fill", "none")
+                .attr("opacity", 0.5)
+                .attr("transform", "translate(" + (xScale(p.x) - xScale(0)) + "," + (yScale(p.y) - yScale(0)) + ")");
+        }
+    });
+
+    // set the SVG opacity
+    svg.attr("opacity", 1.0);
 }
 
 function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index) {
