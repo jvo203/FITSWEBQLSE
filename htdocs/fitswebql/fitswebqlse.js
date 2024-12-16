@@ -4000,7 +4000,7 @@ function ResizeLanczos(srcI, srcA, sw, sh, dw, lobes) {
 }
 
 function process_polarisation(pol_width, pol_height, intensity, angle, mask) {
-    console.log("process_polarisation pol_width:", pol_width, "pol_height:", pol_height, "intensity:", intensity, "angles [rad]:", angle, "mask:", mask);
+    console.log("process_polarisation pol_width:", pol_width, "pol_height:", pol_height);
 
     // get the image rectangle
     var rect_elem = d3.select("#image_rectangle");
@@ -4034,6 +4034,34 @@ function process_polarisation(pol_width, pol_height, intensity, angle, mask) {
 
     const resized = ResizeLanczos(intensity, angle, pol_width, pol_height, vec_x, 3);
     console.log("resized:", resized);
+
+    // for width and height
+    const vec_width = resized.width;
+    const vec_height = resized.height;
+
+    // for intensity and angle
+    const vec_intensity = resized.I;
+    const vec_angle = resized.A;
+
+    // create the vectors
+    var vectors = [];
+
+    // skip the borders
+    for (let j = 1; j < vec_height - 1; j++) {
+        for (let i = 1; i < vec_width - 1; i++) {
+            let index = j * vec_width + i;
+            console.log(i, j, "index:", index, "intensity:", vec_intensity[index], "angle:", vec_angle[index]);
+
+            let mag = Math.abs(vec_intensity[index]);
+
+            if (Math.abs(mag) > 1e-16) {
+                let vector = { x: i, y: j, dx: 1, dy: Math.tan(vec_angle[index]), mag: mag };
+                vectors.push(vector);
+            }
+        }
+    }
+
+    console.log("vectors:", vectors);
 }
 
 function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index) {
