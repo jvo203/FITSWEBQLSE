@@ -3991,7 +3991,7 @@ function ResizeLanczos(srcI, srcA, sw, sh, dw, lobes) {
                 return self.process(self, u);
             }
             else {
-                return { I: self.dstI, A: self.dstA };
+                return { width: dw, height: dh, I: self.dstI, A: self.dstA };
             }
         }
     };
@@ -4033,7 +4033,7 @@ function process_polarisation(pol_width, pol_height, intensity, angle, mask) {
     }
 
     const resized = ResizeLanczos(intensity, angle, pol_width, pol_height, vec_x, 3);
-    console.log("resized intensity:", resized.I, "resized angle:", resized.A);
+    console.log("resized:", resized);
 }
 
 function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index) {
