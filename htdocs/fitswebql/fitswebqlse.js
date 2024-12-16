@@ -4065,12 +4065,12 @@ function process_polarisation(pol_width, pol_height, intensity, angle, mask) {
             //let index = i * vec_height + j; // inverted indexing (column-major Fortran order)
             // console.log(i, j, "index:", index, "intensity:", vec_intensity[index], "angle:", vec_angle[index]);
 
-            let angle = Math.abs(180.0 * vec_angle[index] / Math.PI);
+            let angle = vec_angle[index];
             let mag = Math.abs(vec_intensity[index]);
 
-            // skip too-big angles greater
-            if (mag > 1e-16 && angle <= 75.0) {
-                let vector = { x: i, y: j, vx: 1, vy: Math.tan(vec_angle[index]), magnitude: mag };
+            // skip the zero vectors
+            if (mag > 1e-16) {
+                let vector = { x: i - 0.0 * Math.cos(angle), y: j - 0.0 * Math.sin(angle), vx: Math.cos(angle), vy: Math.sin(angle), magnitude: mag };
                 vectors.push(vector);
             }
         }
