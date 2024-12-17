@@ -4089,36 +4089,6 @@ function process_polarisation(pol_width, pol_height, intensity, angle, mask) {
 
     const vscale = d3.scalePow().domain([0, max_magnitude]).range([0, grid_spacing]);
 
-
-
-    // get the SVG element
-    /*var svg = d3.select("#PolarisationSVG");
-
-    vectors.forEach(function (p) {
-        // we first scale down to a unit vector
-        p.vx /= p.magnitude;
-        p.vy /= p.magnitude;
-
-        // and now scale it to our own scale
-        p.vx *= vscale(p.magnitude);
-        p.vy *= vscale(p.magnitude);
-
-        // omit the large vectors
-        if (p.magnitude <= max_magnitude) {
-            svg.append("g")
-                .append("path")
-                .attr("d", "M" + xScale(0) + " " + yScale(0) + " L" + xScale(p.vx) + " " + yScale(p.vy))
-                .attr("stroke", "blue")
-                .attr("stroke-width", 1)
-                .attr("fill", "none")
-                .attr("opacity", 0.5)
-                .attr("transform", "translate(" + (xScale(p.x) - xScale(0)) + "," + (yScale(p.y) - yScale(0)) + ")");
-        }
-    });
-
-    // set the SVG opacity
-    svg.attr("opacity", 1.0);*/
-
     var elem = document.getElementById("PolarisationCanvas");
     if (displaySpectrum) {
         elem.style.display = "block";
@@ -4132,6 +4102,38 @@ function process_polarisation(pol_width, pol_height, intensity, angle, mask) {
     var width = canvas.width;
     var height = canvas.height;
     ctx.clearRect(0, 0, width, height);
+
+    ctx.save();
+    ctx.beginPath();
+
+    vectors.forEach(function (p) {
+        // we first scale down to a unit vector
+        p.vx /= p.magnitude;
+        p.vy /= p.magnitude;
+
+        // and now scale it to our own scale
+        p.vx *= vscale(p.magnitude);
+        p.vy *= vscale(p.magnitude);
+
+        // omit the large vectors
+        if (p.magnitude <= max_magnitude) {
+            ctx.moveTo(xScale(p.x), yScale(p.y));
+            ctx.lineTo(xScale(p.x + p.vx), yScale(p.y + p.vy));
+        }
+    });
+
+    ctx.strokeStyle = getStrokeStyle();
+    // use a blue colour
+    //ctx.strokeStyle = "blue";
+    ctx.lineWidth = 1;
+    ctx.strokeWidth = emStrokeWidth;
+
+    ctx.stroke();
+    ctx.closePath();
+    ctx.restore();
+
+    // set the canvas opacity
+    ctx.globalAlpha = 0.5;
 }
 
 function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index) {
@@ -21012,6 +21014,12 @@ async function mainRenderer() {
         var width = Math.round(rect.width - 20);
         var height = Math.round(rect.height - 20);
 
+        // canvas styling
+        var blend = '';
+
+        if (theme == 'bright')
+            blend = 'mix-blend-mode: difference; ';
+
         d3.select("#mainDiv").append("svg")
             .attr("id", "ClusterSVG")
             .attr("width", width)
@@ -21046,48 +21054,37 @@ async function mainRenderer() {
             .attr("height", height)
             .attr('style', 'position: fixed; left: 10px; top: 10px; z-index: 51');
 
-        /*d3.select("#mainDiv").append("svg")
-            .attr("id", "PolarisationSVG")
+        d3.select("#mainDiv").append("canvas")
+            .attr("id", "PolarisationCanvas")
             .attr("width", width)
             .attr("height", height)
-            .attr('style', 'position: fixed; left: 10px; top: 10px; z-index: 52');*/
+            .attr('style', blend + 'position: fixed; left: 10px; top: 10px; z-index: 52');// mix-blend-mode: difference;
 
         d3.select("#mainDiv").append("svg")
             .attr("id", "BackgroundSVG")
             .attr("width", width)
             .attr("height", height)
-            .attr('style', 'position: fixed; left: 10px; top: 10px; z-index: 52');
+            .attr('style', 'position: fixed; left: 10px; top: 10px; z-index: 53');
 
         d3.select("#mainDiv").append("canvas")
             .attr("id", "ZOOMCanvas")
             .attr("width", width)
             .attr("height", height)
-            .attr('style', 'position: fixed; left: 10px; top: 10px; z-index: 53');
+            .attr('style', 'position: fixed; left: 10px; top: 10px; z-index: 54');
 
         d3.select("#mainDiv").append("canvas")
             .attr("id", "ViewportCanvas")
             .attr("width", width)
             .attr("height", height)
-            .attr('style', 'position: fixed; left: 10px; top: 10px; z-index: 54');
+            .attr('style', 'position: fixed; left: 10px; top: 10px; z-index: 55');
 
         d3.select("#mainDiv").append("svg")
             .attr("id", "BackSVG")
             .attr("width", width)
             .attr("height", height)
-            .attr('style', 'position: fixed; left: 10px; top: 10px; z-index: 55; cursor: default; mix-blend-mode: none');//difference or lighten or screen //other than none causes problems with an older Firefox v45
+            .attr('style', 'position: fixed; left: 10px; top: 10px; z-index: 56; cursor: default; mix-blend-mode: none');//difference or lighten or screen //other than none causes problems with an older Firefox v45
 
         //spectrum
-        var blend = '';
-
-        if (theme == 'bright')
-            blend = 'mix-blend-mode: difference; ';
-
-        d3.select("#mainDiv").append("canvas")
-            .attr("id", "PolarisationCanvas")
-            .attr("width", width)
-            .attr("height", height)
-            .attr('style', blend + 'position: fixed; left: 10px; top: 10px; z-index: 56');// mix-blend-mode: difference;
-
         d3.select("#mainDiv").append("canvas")
             .attr("id", "SpectrumCanvas")
             .attr("width", width)
