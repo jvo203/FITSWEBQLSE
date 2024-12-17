@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-12-17.0";
+    return "JS2024-12-18.0";
 }
 
 function uuidv4() {
@@ -4102,8 +4102,8 @@ function process_polarisation(pol_width, pol_height, intensity, angle, mask) {
     // skip the borders
     for (let j = 1; j < vec_height - 1; j++) {
         for (let i = 1; i < vec_width - 1; i++) {
-            //let index = j * vec_width + i;
-            let index = i * vec_height + j; // inverted indexing (column-major Fortran order)            
+            let index = j * vec_width + i;
+            //let index = i * vec_height + j; // inverted indexing (column-major Fortran order)            
 
             let angle = vec_angle[index];
             let mag = vec_intensity[index];
