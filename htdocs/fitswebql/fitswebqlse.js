@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-12-16.0";
+    return "JS2024-12-17.0";
 }
 
 function uuidv4() {
@@ -4092,7 +4092,7 @@ function process_polarisation(pol_width, pol_height, intensity, angle, mask) {
 
 
     // get the SVG element
-    var svg = d3.select("#PolarisationSVG");
+    /*var svg = d3.select("#PolarisationSVG");
 
     vectors.forEach(function (p) {
         // we first scale down to a unit vector
@@ -4117,7 +4117,7 @@ function process_polarisation(pol_width, pol_height, intensity, angle, mask) {
     });
 
     // set the SVG opacity
-    svg.attr("opacity", 1.0);
+    svg.attr("opacity", 1.0);*/
 }
 
 function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index) {
@@ -8002,7 +8002,7 @@ function display_dataset_info() {
     // remove the polarisation SVG when not needed
     try {
         if (!fitsData.is_stokes || fitsData.polarisation < 3) {
-            d3.select("#PolarisationSVG").remove();
+            d3.select("#PolarisationCanvas").remove();
         }
     }
     catch (e) {
@@ -21032,35 +21032,35 @@ async function mainRenderer() {
             .attr("height", height)
             .attr('style', 'position: fixed; left: 10px; top: 10px; z-index: 51');
 
-        d3.select("#mainDiv").append("svg")
+        /*d3.select("#mainDiv").append("svg")
             .attr("id", "PolarisationSVG")
             .attr("width", width)
             .attr("height", height)
-            .attr('style', 'position: fixed; left: 10px; top: 10px; z-index: 52');
+            .attr('style', 'position: fixed; left: 10px; top: 10px; z-index: 52');*/
 
         d3.select("#mainDiv").append("svg")
             .attr("id", "BackgroundSVG")
             .attr("width", width)
             .attr("height", height)
-            .attr('style', 'position: fixed; left: 10px; top: 10px; z-index: 53');
+            .attr('style', 'position: fixed; left: 10px; top: 10px; z-index: 52');
 
         d3.select("#mainDiv").append("canvas")
             .attr("id", "ZOOMCanvas")
             .attr("width", width)
             .attr("height", height)
-            .attr('style', 'position: fixed; left: 10px; top: 10px; z-index: 54');
+            .attr('style', 'position: fixed; left: 10px; top: 10px; z-index: 53');
 
         d3.select("#mainDiv").append("canvas")
             .attr("id", "ViewportCanvas")
             .attr("width", width)
             .attr("height", height)
-            .attr('style', 'position: fixed; left: 10px; top: 10px; z-index: 55');
+            .attr('style', 'position: fixed; left: 10px; top: 10px; z-index: 54');
 
         d3.select("#mainDiv").append("svg")
             .attr("id", "BackSVG")
             .attr("width", width)
             .attr("height", height)
-            .attr('style', 'position: fixed; left: 10px; top: 10px; z-index: 56; cursor: default; mix-blend-mode: none');//difference or lighten or screen //other than none causes problems with an older Firefox v45
+            .attr('style', 'position: fixed; left: 10px; top: 10px; z-index: 55; cursor: default; mix-blend-mode: none');//difference or lighten or screen //other than none causes problems with an older Firefox v45
 
         //spectrum
         var blend = '';
@@ -21069,17 +21069,23 @@ async function mainRenderer() {
             blend = 'mix-blend-mode: difference; ';
 
         d3.select("#mainDiv").append("canvas")
+            .attr("id", "PolarisationCanvas")
+            .attr("width", width)
+            .attr("height", height)
+            .attr('style', blend + 'position: fixed; left: 10px; top: 10px; z-index: 56');// mix-blend-mode: difference;
+
+        d3.select("#mainDiv").append("canvas")
             .attr("id", "SpectrumCanvas")
             .attr("width", width)
             .attr("height", height)
-            .attr('style', blend + 'position: fixed; left: 10px; top: 10px; z-index: 55');// mix-blend-mode: difference;
+            .attr('style', blend + 'position: fixed; left: 10px; top: 10px; z-index: 57');// mix-blend-mode: difference;            
 
         d3.select("#mainDiv").append("svg")
             .attr("id", "FrontSVG")
             .attr("width", width)
             .attr("height", height)
             .on("mouseenter", hide_navigation_bar)
-            .attr('style', 'position: fixed; left: 10px; top: 10px; z-index: 56; cursor: default');
+            .attr('style', 'position: fixed; left: 10px; top: 10px; z-index: 58; cursor: default');
 
         d3.select("#BackSVG").append("svg:image")
             .attr("id", "jvoLogo")
