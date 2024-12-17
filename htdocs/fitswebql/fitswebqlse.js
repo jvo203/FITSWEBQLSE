@@ -4002,6 +4002,47 @@ function ResizeLanczos(srcI, srcA, sw, sh, dw, lobes) {
 function process_polarisation(pol_width, pol_height, intensity, angle, mask) {
     console.log("process_polarisation pol_width:", pol_width, "pol_height:", pol_height);
 
+    //do we have all the inputs?
+    var black, white, median, multiplier, flux;
+
+    var flux_elem = d3.select("#flux_path" + va_count);
+
+    try {
+        flux = document.getElementById('flux' + va_count).value
+    }
+    catch (e) {
+        console.log('flux not available yet');
+        return;
+    };
+
+    try {
+        black = parseFloat(flux_elem.attr("black"));
+    }
+    catch (e) {
+        console.log('black not available yet');
+        return;
+    };
+
+    try {
+        white = parseFloat(flux_elem.attr("white"));
+    }
+    catch (e) {
+        console.log('white not available yet');
+        return;
+    };
+
+    try {
+        median = parseFloat(flux_elem.attr("median"));
+    }
+    catch (e) {
+        console.log('median not available yet');
+        return;
+    };
+
+    multiplier = get_noise_sensitivity(noise_sensitivity);
+
+    console.log("black:", black, "white:", white, "median:", median, "multiplier:", multiplier, "flux:", flux);
+
     // get the image rectangle
     var rect_elem = d3.select("#image_rectangle");
     var width = parseFloat(rect_elem.attr("width"));
@@ -4032,11 +4073,11 @@ function process_polarisation(pol_width, pol_height, intensity, angle, mask) {
         }
     }
 
-    const resized = ResizeLanczos(intensity, angle, pol_width, pol_height, vec_x, 3);
+    /*const resized = ResizeLanczos(intensity, angle, pol_width, pol_height, vec_x, 3);
     console.log("resized:", resized);
 
     // for width and height
-    /*const vec_width = resized.width;
+    const vec_width = resized.width;
     const vec_height = resized.height;
 
     // for intensity and angle
@@ -4056,7 +4097,7 @@ function process_polarisation(pol_width, pol_height, intensity, angle, mask) {
 
     const xScale = d3.scaleLinear().domain([0, vec_width]).range([x, x + width]);
     const yScale = d3.scaleLinear().domain([0, vec_height]).range([y + height, y]);
-    const grid_spacing = 10.0;
+    const grid_spacing = 2.5;
 
     // skip the borders
     for (let j = 1; j < vec_height - 1; j++) {
@@ -4066,28 +4107,18 @@ function process_polarisation(pol_width, pol_height, intensity, angle, mask) {
             // console.log(i, j, "index:", index, "intensity:", vec_intensity[index], "angle:", vec_angle[index]);
 
             let angle = vec_angle[index];
-            let mag = Math.abs(vec_intensity[index]);
+            let mag = vec_intensity[index];
+            let r = grid_spacing * get_tone_mapping(mag, flux, black, white, median, multiplier, va_count) / 255.0; // between 0 and 1
 
-            // skip the zero vectors
-            if (mag > 1e-16) {
-                let vector = { x: i - 0.0 * Math.cos(angle), y: j - 0.0 * Math.sin(angle), vx: Math.cos(angle), vy: Math.sin(angle), magnitude: mag };
+            // skip the near-zero vectors
+            if (Math.abs(mag) > 1e-16) {
+                let vector = { x: i - 0.0 * Math.cos(angle), y: j - 0.0 * Math.sin(angle), vx: r * Math.cos(angle), vy: r * Math.sin(angle) };
                 vectors.push(vector);
             }
         }
     }
 
     console.log("vectors:", vectors);
-
-    var max_magnitude = vectors.reduce(function (max_, it) {
-        return max_ > it.magnitude ? max_ : it.magnitude;
-    }, 0);
-
-    //max_magnitude = Math.ceil(max_magnitude / grid_spacing) * grid_spacing;
-    // put a ceiling on the magnitude
-    max_magnitude = Math.min(10.0, Math.ceil(max_magnitude / grid_spacing) * grid_spacing);
-    console.log("max_magnitude:", max_magnitude);
-
-    const vscale = d3.scalePow().domain([0, max_magnitude]).range([0, grid_spacing]);
 
     var elem = document.getElementById("PolarisationCanvas");
     if (displayPolarisation) {
@@ -4107,33 +4138,20 @@ function process_polarisation(pol_width, pol_height, intensity, angle, mask) {
     ctx.beginPath();
 
     vectors.forEach(function (p) {
-        // we first scale down to a unit vector
-        p.vx /= p.magnitude;
-        p.vy /= p.magnitude;
-
-        // and now scale it to our own scale
-        p.vx *= vscale(p.magnitude);
-        p.vy *= vscale(p.magnitude);
-
-        // omit the large vectors
-        if (p.magnitude <= max_magnitude) {
-            ctx.moveTo(xScale(p.x), yScale(p.y));
-            ctx.lineTo(xScale(p.x + p.vx), yScale(p.y + p.vy));
-        }
+        // draw the vector
+        ctx.moveTo(xScale(p.x), yScale(p.y));
+        ctx.lineTo(xScale(p.x + p.vx), yScale(p.y + p.vy));
     });
 
-    ctx.strokeStyle = getStrokeStyle();
+    //ctx.strokeStyle = getStrokeStyle();
     // use a blue colour
-    //ctx.strokeStyle = "blue";
-    ctx.lineWidth = 2;
-    ctx.strokeWidth = emStrokeWidth;
+    ctx.strokeStyle = "rgba(0,0,0,0.5)";
+    ctx.lineWidth = emStrokeWidth;
+    ctx.strokeWidth = 0;
 
     ctx.stroke();
     ctx.closePath();
     ctx.restore();
-
-    // set the canvas opacity
-    ctx.globalAlpha = 0.5;
 }
 
 function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index) {
@@ -15764,10 +15782,6 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
 
                                     process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index);
 
-                                    if (angle_length > 0 && va_count == 1) {
-                                        process_polarisation(img_width, img_height, pixels, angle, alpha);
-                                    }
-
                                     if (has_json) {
                                         display_histogram(index);
 
@@ -15786,6 +15800,10 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                             display_rgb_legend();
                                     } else {
                                         display_legend();
+                                    }
+
+                                    if (angle_length > 0 && va_count == 1) {
+                                        process_polarisation(img_width, img_height, pixels, angle, alpha);
                                     }
                                 } else {
                                     console.log("spectrum_view with dimensions: ", img_width, img_height);
