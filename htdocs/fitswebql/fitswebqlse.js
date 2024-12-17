@@ -4118,6 +4118,20 @@ function process_polarisation(pol_width, pol_height, intensity, angle, mask) {
 
     // set the SVG opacity
     svg.attr("opacity", 1.0);*/
+
+    var elem = document.getElementById("PolarisationCanvas");
+    if (displaySpectrum) {
+        elem.style.display = "block";
+    }
+    else {
+        elem.style.display = "none";
+    }
+
+    var canvas = document.getElementById("PolarisationCanvas");
+    var ctx = canvas.getContext('2d');
+    var width = canvas.width;
+    var height = canvas.height;
+    ctx.clearRect(0, 0, width, height);
 }
 
 function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index) {
