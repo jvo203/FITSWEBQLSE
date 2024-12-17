@@ -4090,7 +4090,7 @@ function process_polarisation(pol_width, pol_height, intensity, angle, mask) {
     const vscale = d3.scalePow().domain([0, max_magnitude]).range([0, grid_spacing]);
 
     var elem = document.getElementById("PolarisationCanvas");
-    if (displaySpectrum) {
+    if (displayPolarisation) {
         elem.style.display = "block";
     }
     else {
@@ -4125,7 +4125,7 @@ function process_polarisation(pol_width, pol_height, intensity, angle, mask) {
     ctx.strokeStyle = getStrokeStyle();
     // use a blue colour
     //ctx.strokeStyle = "blue";
-    ctx.lineWidth = 1;
+    ctx.lineWidth = 2;
     ctx.strokeWidth = emStrokeWidth;
 
     ctx.stroke();
@@ -8018,6 +8018,7 @@ function display_dataset_info() {
     // remove the polarisation SVG when not needed
     try {
         if (!fitsData.is_stokes || fitsData.polarisation < 3) {
+            d3.select("#displayPolarisation").remove();
             d3.select("#PolarisationCanvas").remove();
         }
     }
@@ -18377,6 +18378,26 @@ function display_menu() {
             .html(htmlStr);
     }
 
+    htmlStr = displayPolarisation ? '<span class="fas fa-check-square"></span> polarisation' : '<span class="far fa-square"></span> polarisation';
+    viewDropdown.append("li")
+        .append("a")
+        .attr("id", "displayPolarisation")
+        .style('cursor', 'pointer')
+        .on("click", function () {
+            displayPolarisation = !displayPolarisation;
+            localStorage_write_boolean("displayPolarisation", displayPolarisation);
+            var htmlStr = displayPolarisation ? '<span class="fas fa-check-square"></span> polarisation' : '<span class="far fa-square"></span> polarisation';
+            d3.select(this).html(htmlStr);
+
+            if (displayPolarisation) {
+                document.getElementById('PolarisationCanvas').style.display = "block";
+            }
+            else {
+                document.getElementById('PolarisationCanvas').style.display = "none";
+            }
+        })
+        .html(htmlStr);
+
     if (!optical_view) {
         htmlStr = displayMolecules ? '<span class="fas fa-check-square"></span> spectral lines' : '<span class="far fa-square"></span> spectral lines';
         viewDropdown.append("li")
@@ -20913,6 +20934,7 @@ async function mainRenderer() {
         displayPVContours = localStorage_read_boolean("displayPVContours", true);
         displayLegend = localStorage_read_boolean("displayLegend", true);
         displayMolecules = localStorage_read_boolean("displayMolecules", true);
+        displayPolarisation = localStorage_read_boolean("displayPolarisation", true);
         displaySpectrum = localStorage_read_boolean("displaySpectrum", true);
         displayGridlines = localStorage_read_boolean("displayGridlines", false);
         displayBeam = false;
