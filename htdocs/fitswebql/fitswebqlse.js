@@ -4097,22 +4097,20 @@ function process_polarisation(pol_width, pol_height, intensity, angle, mask) {
 
     const xScale = d3.scaleLinear().domain([0, vec_width]).range([x, x + width]);
     const yScale = d3.scaleLinear().domain([0, vec_height]).range([y + height, y]);
-    const grid_spacing = 2.5;
+    const grid_spacing = 2.0;
 
     // skip the borders
     for (let j = 1; j < vec_height - 1; j++) {
         for (let i = 1; i < vec_width - 1; i++) {
-            let index = j * vec_width + i;
-            //let index = i * vec_height + j; // inverted indexing (column-major Fortran order)
-            // console.log(i, j, "index:", index, "intensity:", vec_intensity[index], "angle:", vec_angle[index]);
+            //let index = j * vec_width + i;
+            let index = i * vec_height + j; // inverted indexing (column-major Fortran order)            
 
             let angle = vec_angle[index];
             let mag = vec_intensity[index];
             let r = grid_spacing * get_tone_mapping(mag, flux, black, white, median, multiplier, va_count) / 255.0; // between 0 and 1
 
-            // skip the near-zero vectors
-            if (Math.abs(mag) > 1e-16) {
-                let vector = { x: i - 0.0 * Math.cos(angle), y: j - 0.0 * Math.sin(angle), vx: r * Math.cos(angle), vy: r * Math.sin(angle) };
+            if (mask[index] > 0) {
+                let vector = { x: i - 0.0 * r * Math.cos(angle), y: j - 0.0 * r * Math.sin(angle), vx: r * Math.cos(angle), vy: r * Math.sin(angle) };
                 vectors.push(vector);
             }
         }
