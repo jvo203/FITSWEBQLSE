@@ -4643,11 +4643,11 @@ contains
             ! ending bounds
             lpixels = (/naxes(1), naxes(2), 1, naxes(4)/)
 
-            ! local pixels
+            ! local intensity pixels
             allocate (local_buffer(npixels*int(naxes(4), kind=8)))
 
-            ! allocate the angle too
-            if(naxes(4) .eq. 4) allocate (local_angle(npixels))
+            ! local polarisation angle
+            allocate (local_angle(npixels))
          else
             ! ending bounds
             lpixels = (/naxes(1), naxes(2), 1, 1/)
@@ -4672,9 +4672,9 @@ contains
          if (status .ne. 0) go to 200
 
          if(item%is_stokes .and. naxes(4) .gt. 2) then
-            ! I,Q,U, no angle
+            ! I,Q,U and a derived angle
             if(naxes(4) .eq. 3) then
-               ! calculate the linear intensity and its min/max values
+               ! calculate the linear intensity, polarisation angle and intensity min/max values
                do j = 1, npixels
 
                   tmpI = local_buffer(j)
@@ -4687,15 +4687,24 @@ contains
                      tmp = sqrt(tmpQ**2 + tmpU**2) / tmpI ! linear intensity
                   end if
 
-                  ! print *, 'j:', j, 'I:', tmpI, 'Q:', tmpQ, 'U:', tmpU, 'mL:', tmp
+                  if (tmpQ .eq. 0.0 .and. tmpU .eq. 0.0) then
+                     tmpA = ieee_value(0.0, ieee_quiet_nan)
+                  else
+                     tmpA = 0.5 * atan2(tmpU, tmpQ) ! polarisation angle
+                  end if
+
+                  ! print *, 'j:', j, 'I:', tmpI, 'Q:', tmpQ, 'U:', tmpU, 'mL:', tmp, 'A:', tmpA, 0.5 * atan2d(tmpU, tmpQ)
 
                   if ((.not. ieee_is_nan(tmp)) .and. (tmp .ge. item%datamin) .and. (tmp .le. item%datamax)) then
                      dmin = min(dmin, tmp)
                      dmax = max(dmax, tmp)
+
                      local_buffer(j) = tmp
+                     local_angle(j) = tmpA
                      local_mask(j) = .true.
                   else
                      local_buffer(j) = 0.0
+                     local_angle(j) = 0.0
                      local_mask(j) = .false.
                   end if
 
