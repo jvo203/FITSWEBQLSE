@@ -4100,8 +4100,8 @@ function process_polarisation(pol_width, pol_height, intensity, angle, mask) {
     const grid_spacing = 2.0;
 
     // skip the borders
-    for (let j = 1; j < vec_height - 1; j++) {
-        for (let i = 1; i < vec_width - 1; i++) {
+    for (let j = 0; j < vec_height - 0; j++) {
+        for (let i = 0; i < vec_width - 0; i++) {
             let index = j * vec_width + i;
 
             let angle = vec_angle[index];
@@ -4109,7 +4109,7 @@ function process_polarisation(pol_width, pol_height, intensity, angle, mask) {
             let r = grid_spacing * get_tone_mapping(mag, flux, black, white, median, multiplier, va_count) / 255.0; // between 0 and 1
 
             if (mask[index] > 0) {
-                let vector = { x: i - 0.5 * r * Math.cos(angle), y: j - 0.5 * r * Math.sin(angle), vx: r * Math.cos(angle), vy: r * Math.sin(angle) };
+                let vector = { x: i - 0.0 * r * Math.cos(angle), y: j - 0.0 * r * Math.sin(angle), vx: r * Math.cos(angle), vy: r * Math.sin(angle) };
                 vectors.push(vector);
             }
         }
