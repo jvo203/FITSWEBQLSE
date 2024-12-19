@@ -4415,7 +4415,7 @@ contains
       logical :: anynull
 
       ! local buffers
-      real(kind=4), allocatable :: local_buffer(:), local_angle(:)
+      real(kind=4), allocatable :: local_buffer(:)
       logical(kind=1), allocatable :: local_mask(:)
 
       ! shared variables
@@ -4611,15 +4611,12 @@ contains
          ! starting bounds
          fpixels = (/1, 1, 1, 1/)
 
-         if(item%is_stokes .and. naxes(4) .gt. 2) then
+         if(item%is_stokes) then
             ! ending bounds
             lpixels = (/naxes(1), naxes(2), 1, naxes(4)/)
 
             ! local intensity pixels
             allocate (local_buffer(npixels*int(naxes(4), kind=8)))
-
-            ! local polarisation angle
-            allocate (local_angle(npixels))
          else
             ! ending bounds
             lpixels = (/naxes(1), naxes(2), 1, 1/)
@@ -4672,11 +4669,9 @@ contains
                      dmax = max(dmax, tmp)
 
                      local_buffer(j) = tmp
-                     local_angle(j) = tmpA
                      local_mask(j) = .true.
                   else
                      local_buffer(j) = 0.0
-                     local_angle(j) = 0.0
                      local_mask(j) = .false.
                   end if
 
@@ -4713,11 +4708,9 @@ contains
                      dmax = max(dmax, tmp)
 
                      local_buffer(j) = tmp
-                     local_angle(j) = tmpA
                      local_mask(j) = .true.
                   else
                      local_buffer(j) = 0.0
-                     local_angle(j) = 0.0
                      local_mask(j) = .false.
                   end if
 
