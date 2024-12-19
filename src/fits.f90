@@ -400,7 +400,7 @@ module fits
 
       ! derived values
       character(len=:), allocatable :: flux
-      real(kind=c_float) dmin, dmax, dmedian
+      real(kind=c_float) dmin(4), dmax(4), dmedian
       real(kind=c_float) dmad, dmadN, dmadP
       real(kind=4), allocatable :: frame_min(:), frame_max(:), frame_median(:)
       real(kind=c_float), allocatable :: pixels(:, :)
@@ -5652,7 +5652,7 @@ contains
 
    end subroutine get_velocity_bounds
 
-   subroutine make_image_statistics(item, width, height, pixels, mask, hist, tone)
+   subroutine make_image_statistics(item, width, height, pixels, mask, hist, tone, plane)
       use, intrinsic :: iso_c_binding
       implicit none
 
@@ -5662,6 +5662,7 @@ contains
       logical(kind=c_bool), dimension(width, height), intent(in) :: mask
       integer, allocatable, intent(out) :: hist(:)
       type(image_tone_mapping), intent(inout) :: tone ! this needs to be *INOUT* (tone%flux!!!)
+      integer, optional :: plane
 
       real, dimension(:), allocatable :: data
       real pmin, pmax, pmedian
@@ -5672,6 +5673,8 @@ contains
       real u, v
       real black, white, sensitivity, ratio_sensitivity
 
+      if (.not. present(plane)) plane = 1
+
       tone%pmin = 0.0
       tone%pmax = 0.0
       tone%pmedian = 0.0
@@ -5681,8 +5684,8 @@ contains
       tone%ratio_sensitivity = 0.0
 
       if (item%naxis .eq. 2 .or. item%naxes(3) .eq. 1) then
-         pmin = item%dmin
-         pmax = item%dmax
+         pmin = item%dmin(plane)
+         pmax = item%dmax(plane)
       else
          pmin = 1.0E30
          pmax = -1.0E30
@@ -9649,13 +9652,14 @@ contains
 
    end subroutine send_ws_composite_video
 
-   subroutine fill_global_statistics(ptr, dmin, dmax, dmedian, dmadN, dmadP) BIND(C, name='fill_global_statistics')
+   subroutine fill_global_statistics(ptr, dmin, dmax, dmedian, dmadN, dmadP, plane) BIND(C, name='fill_global_statistics')
       use, intrinsic :: iso_c_binding
       implicit none
 
       type(C_PTR), intent(in), value :: ptr
       real(kind=c_float), intent(out) :: dmin, dmax, dmedian
       real(kind=c_float), intent(out) :: dmadN, dmadP
+      integer(kind=c_int), intent(in), value :: plane
 
       type(dataset), pointer :: item
 
@@ -9663,8 +9667,8 @@ contains
 
       call c_f_pointer(ptr, item)
 
-      dmin = item%dmin
-      dmax = item%dmax
+      dmin = item%dmin(plane)
+      dmax = item%dmax(plane)
       dmedian = item%dmedian
       dmadN = item%dmadN
       dmadP = item%dmadP
