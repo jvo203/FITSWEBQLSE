@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-12-18.0";
+    return "JS2024-12-19.0";
 }
 
 function uuidv4() {
@@ -15461,16 +15461,6 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                             var frame_pixels = new Uint8Array(received_msg, offset, pixels_length);
                             offset += pixels_length;
 
-                            var angle_length = dv.getUint32(offset, endianness);
-                            offset += 4;
-
-                            //console.log('angle length:', angle_length);
-
-                            if (angle_length > 0) {
-                                var frame_angle = new Uint8Array(received_msg, offset, angle_length);
-                                offset += angle_length;
-                            }
-
                             var mask_length = dv.getUint32(offset, endianness);
                             offset += 4;
 
@@ -15753,19 +15743,10 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                 // console.log("processing an HDR image");
                                 let start = performance.now();
 
-                                var res, angle;
-
                                 // decompressZFP returns std::vector<float>
                                 // decompressZFPimage returns Float32Array but emscripten::typed_memory_view is buggy
-                                res = Module.decompressZFPimage(img_width, img_height, frame_pixels);
+                                var res = Module.decompressZFPimage(img_width, img_height, frame_pixels);
                                 const pixels = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
-
-                                // an optional polarisation angle map
-                                if (angle_length > 0) {
-                                    res = Module.decompressZFPimage(img_width, img_height, frame_angle);
-                                    angle = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
-                                    // console.log("polarisation angles [radians]:", angle);
-                                }
 
                                 res = Module.decompressLZ4mask(img_width, img_height, frame_mask);
                                 const alpha = Module.HEAPU8.slice(res[0], res[0] + res[1]);
@@ -15799,9 +15780,9 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                         display_legend();
                                     }
 
-                                    if (angle_length > 0 && va_count == 1) {
+                                    /*if (angle_length > 0 && va_count == 1) {
                                         process_polarisation(img_width, img_height, pixels, angle, alpha);
-                                    }
+                                    }*/
                                 } else {
                                     console.log("spectrum_view with dimensions: ", img_width, img_height);
 
