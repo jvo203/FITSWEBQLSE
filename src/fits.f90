@@ -5662,7 +5662,7 @@ contains
       logical(kind=c_bool), dimension(width, height), intent(in) :: mask
       integer, allocatable, intent(out) :: hist(:)
       type(image_tone_mapping), intent(inout) :: tone ! this needs to be *INOUT* (tone%flux!!!)
-      integer, optional :: plane
+      integer, value, optional :: plane
 
       real, dimension(:), allocatable :: data
       real pmin, pmax, pmedian
