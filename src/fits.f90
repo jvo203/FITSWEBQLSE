@@ -4664,6 +4664,9 @@ contains
 
                   ! print *, 'j:', j, 'I:', tmpI, 'Q:', tmpQ, 'U:', tmpU, 'mL:', tmp, 'A:', tmpA, 0.5 * atan2d(tmpU, tmpQ)
 
+                  ! an override
+                  tmp = tmpI
+
                   if ((.not. ieee_is_nan(tmp)) .and. (tmp .ge. item%datamin) .and. (tmp .le. item%datamax)) then
                      dmin = min(dmin, tmp)
                      dmax = max(dmax, tmp)
@@ -4701,6 +4704,9 @@ contains
                   end if
 
                   ! print *, 'I:', tmpI, 'Q:', tmpQ, 'U:', tmpU, 'V:', tmpV, 'mT:', tmp, 'A:', tmpA, 0.5 * atan2d(tmpU, tmpQ)
+
+                  ! an override
+                  tmp = tmpI
 
                   if ((.not. ieee_is_nan(tmpA)) .and. (.not. ieee_is_nan(tmp)) .and. (tmp .ge. item%datamin)&
                   & .and. (tmp .le. item%datamax)) then
@@ -5753,50 +5759,45 @@ contains
       end if
 
       if (.not. allocated(tone%flux)) then
-         ! a flux override for the polarisation intensity
-         if(item%is_stokes .and. item%naxes(4) .gt. 2) then
-            tone%flux = 'logistic'
-         else
-            ! histogram classifier
-            block
-               use classifier
+         ! histogram classifier
+         block
+            use classifier
 
-               integer(kind=8), dimension(NBINS) :: cdf
-               real(c_float), dimension(NBINS), target :: Slot
-               integer(c_int) tone_mapping
+            integer(kind=8), dimension(NBINS) :: cdf
+            real(c_float), dimension(NBINS), target :: Slot
+            integer(c_int) tone_mapping
 
-               integer(kind=8) total
+            integer(kind=8) total
 
-               ! the first histogram item
-               total = hist(1)
-               cdf(1) = hist(1)
+            ! the first histogram item
+            total = hist(1)
+            cdf(1) = hist(1)
 
-               ! the remaining items
-               do i = 2, NBINS
-                  cdf(i) = cdf(i - 1) + hist(i)
-                  total = total + hist(i)
-               end do
+            ! the remaining items
+            do i = 2, NBINS
+               cdf(i) = cdf(i - 1) + hist(i)
+               total = total + hist(i)
+            end do
 
-               Slot = real(cdf)/real(total)
+            Slot = real(cdf)/real(total)
 
-               tone_mapping = histogram_classifier(c_loc(Slot))
+            tone_mapping = histogram_classifier(c_loc(Slot))
 
-               select case (tone_mapping)
-                case (0)
-                  tone%flux = 'legacy'
-                case (1)
-                  tone%flux = 'linear'
-                case (2)
-                  tone%flux = 'logistic'
-                case (3)
-                  tone%flux = 'ratio'
-                case (4)
-                  tone%flux = 'square'
-                case default
-                  tone%flux = 'legacy'
-               end select
-            end block
-         end if
+            select case (tone_mapping)
+             case (0)
+               tone%flux = 'legacy'
+             case (1)
+               tone%flux = 'linear'
+             case (2)
+               tone%flux = 'logistic'
+             case (3)
+               tone%flux = 'ratio'
+             case (4)
+               tone%flux = 'square'
+             case default
+               tone%flux = 'legacy'
+            end select
+         end block
       end if
 
       print *, 'black = ', black, ', white = ', white, ', sensitivity = ', sensitivity, ',&
