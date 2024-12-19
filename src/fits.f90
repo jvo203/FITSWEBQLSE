@@ -404,7 +404,6 @@ module fits
       real(kind=c_float) dmad, dmadN, dmadP
       real(kind=4), allocatable :: frame_min(:), frame_max(:), frame_median(:)
       real(kind=c_float), allocatable :: pixels(:, :)
-      real(kind=c_float), allocatable :: angle(:, :)
       logical(kind=c_bool), allocatable :: mask(:, :)
 
       ! arrays holding pointers to compressed 2D intensity channels
@@ -1193,7 +1192,7 @@ module fits
          pmin, pmax, pmedian, &
       &black, white, sensitivity, ratio_sensitivity,&
       &width, height, precision,&
-      &pixels, angle, mask)&
+      &pixels, mask)&
       &BIND(C, name='write_image_spectrum')
          use, intrinsic :: ISO_C_BINDING
          implicit none
@@ -1203,7 +1202,7 @@ module fits
          real(kind=c_float), value, intent(in) :: pmin, pmax, pmedian
          real(kind=c_float), value, intent(in) :: black, white
          real(kind=c_float), value, intent(in) :: sensitivity, ratio_sensitivity
-         type(C_PTR), value :: pixels, angle, mask
+         type(C_PTR), value :: pixels, mask
       end subroutine write_image_spectrum
 
       ! void write_pv_diagram(int fd, int width, int height, int precision, const float *restrict pv, const float pmean, const float pstd, const float pmin, const float pmax, const int xmin, const int xmax, const double vmin, const double vmax, const int x1, const int y1, const int x2, const int y2);
@@ -2253,20 +2252,6 @@ contains
          if (ios .ne. 0) bSuccess = bSuccess .and. .false.
       end if
 
-      ! item%angle
-      if (allocated(item%angle) .and. bSuccess) then
-         write (unit=fileunit, IOSTAT=ios) size(item%angle)
-         if (ios .ne. 0) bSuccess = bSuccess .and. .false.
-
-         ! write (unit=fileunit, IOSTAT=ios) item%angle(:, :)
-         array_size = int(sizeof(item%angle), kind=c_size_t)
-         ios = write_array(cache//'/'//'angle'//c_null_char, c_loc(item%angle), array_size)
-         if (ios .ne. 0) bSuccess = bSuccess .and. .false.
-      else
-         write (unit=fileunit, IOSTAT=ios) 0
-         if (ios .ne. 0) bSuccess = bSuccess .and. .false.
-      end if
-
       ! item%mask
       if (allocated(item%mask) .and. bSuccess) then
          write (unit=fileunit, IOSTAT=ios) size(item%mask)
@@ -2703,19 +2688,6 @@ contains
          ! read (unit=fileunit, IOSTAT=ios) item%pixels(:, :)
          array_size = int(sizeof(item%pixels), kind=c_size_t)
          ios = read_array(cache//'/'//'pixels'//c_null_char, c_loc(item%pixels), array_size)
-         if (ios .ne. 0) go to 300
-      end if
-
-      ! item%angle
-      read (unit=fileunit, IOSTAT=ios) N
-      if (ios .ne. 0) go to 300
-
-      if ((dims(1)*dims(2) .eq. N) .and. (N .gt. 0)) then
-         if (allocated(item%angle)) deallocate (item%angle)
-         allocate (item%angle(dims(1), dims(2)))
-         ! read (unit=fileunit, IOSTAT=ios) item%angle(:, :)
-         array_size = int(sizeof(item%angle), kind=c_size_t)
-         ios = read_array(cache//'/'//'angle'//c_null_char, c_loc(item%angle), array_size)
          if (ios .ne. 0) go to 300
       end if
 
@@ -4786,9 +4758,6 @@ contains
          item%pixels = reshape(local_buffer(1:npixels), naxes(1:2))
          item%mask = reshape(local_mask(1:npixels), naxes(1:2))
 
-         ! an optional polarisation angle
-         if(allocated(local_angle)) item%angle = reshape(local_angle(1:npixels), naxes(1:2))
-
          call set_image_status(item, .true.)
       else
          ! read a range of 2D planes in parallel on each cluster node
@@ -6600,7 +6569,7 @@ contains
       type(dataset), pointer :: item
       integer(kind=c_int), intent(in), value :: width, height, precision, fetch_data, fd
 
-      real(kind=c_float), dimension(:, :), allocatable, target :: pixels, angle
+      real(kind=c_float), dimension(:, :), allocatable, target :: pixels
       logical(kind=c_bool), dimension(:, :), allocatable, target :: mask
 
       ! image histogram
@@ -6620,8 +6589,8 @@ contains
       integer img_width, img_height
       real scale
 
-      type(resize_task_t), target :: pixels_task, angle_task
-      type(c_ptr) :: pixels_pid, angle_pid
+      type(resize_task_t), target :: pixels_task
+      type(c_ptr) :: pixels_pid
 
       ! timing
       real(8) :: t1, t2 ! OpenMP TIME
@@ -6708,30 +6677,6 @@ contains
          ! launch a pthread to resize pixels
          pixels_pid = my_pthread_create(start_routine=c_funloc(launch_resize_task), arg=c_loc(pixels_task), rc=pixels_rc)
 
-         ! an optional polarisation angle map
-         if (allocated(item%angle)) then
-            allocate (angle(img_width, img_height))
-
-            angle_task%pSrc = c_loc(item%angle)
-            angle_task%srcWidth = item%naxes(1)
-            angle_task%srcHeight = item%naxes(2)
-
-            angle_task%pDest = c_loc(angle)
-            angle_task%dstWidth = img_width
-            angle_task%dstHeight = img_height
-
-            if (scale .gt. 0.2) then
-               angle_task%numLobes = 3
-               ! call resizeLanczos(c_loc(item%angle), item%naxes(1), item%naxes(2), c_loc(angle), img_width, img_height, 3)
-            else
-               angle_task%numLobes = 0
-               ! call resizeSuper(c_loc(item%angle), item%naxes(1), item%naxes(2), c_loc(angle), img_width, img_height)
-            end if
-
-            ! launch a pthread to resize angle
-            angle_pid = my_pthread_create(start_routine=c_funloc(launch_resize_task), arg=c_loc(angle_task), rc=angle_rc)
-         end if
-
          ! Boolean mask: the naive Nearest-Neighbour method
          call resizeNearest(c_loc(item%mask), item%naxes(1), item%naxes(2), c_loc(mask), img_width, img_height)
          ! call resizeMask(item%mask, item%naxes(1), item%naxes(2), mask, img_width, img_height)
@@ -6739,12 +6684,9 @@ contains
          ! join a pixels thread
          rc = my_pthread_join(pixels_pid)
 
-         ! join an angle thread
-         if (allocated(item%angle)) rc = my_pthread_join(angle_pid)
-
          t2 = omp_get_wtime()
 
-         print *, 'resize pixels/(angle)/mask elapsed time:', 1000*(t2 - t1), '[ms]'
+         print *, 'resize pixels/mask elapsed time:', 1000*(t2 - t1), '[ms]'
 
       else
          img_width = item%naxes(1)
@@ -6753,10 +6695,6 @@ contains
          ! make a copy of item%pixels / item%mask
          allocate (pixels(img_width, img_height), source=item%pixels)
          allocate (mask(img_width, img_height), source=item%mask)
-
-         ! an optional polarisation angle map
-         if(allocated(item%angle)) allocate (angle(img_width, img_height), source=item%angle)
-
       end if
 
       print *, 'scale = ', scale, 'image dimensions:', img_width, 'x', img_height
@@ -6787,22 +6725,13 @@ contains
       ! make an image histogram, decide on the flux etc.
       call make_image_statistics(item, img_width, img_height, pixels, mask, hist, tone)
 
-      if (.not. allocated(angle)) then
-         call write_image_spectrum(fd, trim(tone%flux)//c_null_char,&
-         &tone%pmin, tone%pmax, tone%pmedian,&
-         &tone%black, tone%white, tone%sensitivity, tone%ratio_sensitivity,&
-         & img_width, img_height, precision, c_loc(pixels), c_null_ptr, c_loc(mask))
-      else
-         call write_image_spectrum(fd, trim(tone%flux)//c_null_char,&
-         &tone%pmin, tone%pmax, tone%pmedian,&
-         &tone%black, tone%white, tone%sensitivity, tone%ratio_sensitivity,&
-         & img_width, img_height, precision, c_loc(pixels), c_loc(angle), c_loc(mask))
-      end if
+      call write_image_spectrum(fd, trim(tone%flux)//c_null_char,&
+      &tone%pmin, tone%pmax, tone%pmedian,&
+      &tone%black, tone%white, tone%sensitivity, tone%ratio_sensitivity,&
+      & img_width, img_height, precision, c_loc(pixels), c_loc(mask))
 
       deallocate (pixels)
       deallocate (mask)
-
-      if (allocated(angle)) deallocate (angle)
 
       if (fetch_data .eq. 1) then
 
@@ -11208,7 +11137,7 @@ contains
          call write_image_spectrum(req%fd, trim(tone%flux)//c_null_char,&
          &tone%pmin, tone%pmax, tone%pmedian,&
          &tone%black, tone%white, tone%sensitivity, tone%ratio_sensitivity,&
-         & img_width, img_height, precision, c_loc(view_pixels), c_null_ptr, c_loc(view_mask))
+         & img_width, img_height, precision, c_loc(view_pixels), c_loc(view_mask))
 
          deallocate (view_pixels)
          deallocate (view_mask)

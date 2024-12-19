@@ -160,7 +160,7 @@ void write_statistics(int fd, float *dmin, float *dmax, float *dmedian, float *d
 void write_spectrum(int fd, const float *spectrum, int n, int precision);
 void write_histogram(int fd, const int *hist, int n);
 void write_viewport(int fd, int width, int height, const float *restrict pixels, const bool *restrict mask, int precision);
-void write_image_spectrum(int fd, const char *flux, float pmin, float pmax, float pmedian, float black, float white, float sensitivity, float ratio_sensitivity, int width, int height, int precision, const float *restrict pixels, const bool *restrict mask);
+void write_image_spectrum(int fd, const char *flux, float pmin, float pmax, float pmedian, float black, float white, float sensitivity, float ratio_sensitivity, int width, int height, int precision, const float *restrict pixels, const float *restrict angle, const bool *restrict mask);
 void write_pv_diagram(int fd, int width, int height, int precision, const float *restrict pv, const float pmean, const float pstd, const float pmin, const float pmax, const int xmin, const int xmax, const double vmin, const double vmax, const int x1, const int y1, const int x2, const int y2);
 void write_composite_pv_diagram(int fd, int width, int height, int precision, const float *restrict pv, const float *restrict pmean, const float *restrict pstd, const float *restrict pmin, const float *restrict pmax, const int xmin, const int xmax, const double vmin, const double vmax, const int x1, const int y1, const int x2, const int y2, int va_count);
 
@@ -6958,9 +6958,10 @@ static void rpad(char *dst, const char *src, const char pad, const size_t sz)
     memcpy(dst, src, strlen(src));
 }
 
-void write_image_spectrum(int fd, const char *flux, float pmin, float pmax, float pmedian, float black, float white, float sensitivity, float ratio_sensitivity, int width, int height, int precision, const float *restrict pixels, const bool *restrict mask)
+void write_image_spectrum(int fd, const char *flux, float pmin, float pmax, float pmedian, float black, float white, float sensitivity, float ratio_sensitivity, int width, int height, int precision, const float *restrict pixels, const float *restrict angle, const bool *restrict mask)
 {
     uchar *restrict compressed_pixels = NULL;
+    uchar *restrict compressed_angle = NULL;
     char *restrict compressed_mask = NULL;
 
     // ZFP variables
@@ -6970,6 +6971,7 @@ void write_image_spectrum(int fd, const char *flux, float pmin, float pmax, floa
     size_t bufsize = 0;
     bitstream *stream = NULL;
     size_t pixels_zfpsize = 0;
+    size_t angle_zfpsize = 0;
     uint nx = width;
     uint ny = height;
 
@@ -7037,6 +7039,54 @@ void write_image_spectrum(int fd, const char *flux, float pmin, float pmax, floa
     zfp_field_free(field);
     zfp_stream_close(zfp);
 
+    // (optional) compress angle with ZFP if not NULL
+    if (angle != NULL)
+    {
+        field = zfp_field_2d((void *)angle, data_type, nx, ny);
+
+        // allocate metadata for a compressed stream
+        zfp = zfp_stream_open(NULL);
+
+        // zfp_stream_set_rate(zfp, 8.0, data_type, 2, 0);
+        zfp_stream_set_precision(zfp, precision);
+
+        // allocate buffer for compressed data
+        bufsize = zfp_stream_maximum_size(zfp, field);
+
+        compressed_angle = (uchar *)malloc(bufsize);
+
+        if (compressed_angle != NULL)
+        {
+            // associate bit stream with allocated buffer
+            stream = bitstream_open((void *)compressed_angle, bufsize);
+
+            if (stream != NULL)
+            {
+                zfp_stream_set_bit_stream(zfp, stream);
+
+                zfp_write_header(zfp, field, ZFP_HEADER_FULL);
+
+                // compress entire array
+                angle_zfpsize = zfp_compress(zfp, field);
+
+                if (angle_zfpsize == 0)
+                    printf("[C] ZFP compression of angles failed!\n");
+                else
+                    printf("[C] polarisation angle compressed size: %zu bytes\n", angle_zfpsize);
+
+                bitstream_close(stream);
+
+                // the compressed part is available at compressed_angle[0..angle_zfpsize-1]
+            }
+        }
+        else
+            printf("[C] a NULL compressed_angle buffer!\n");
+
+        // clean up
+        zfp_field_free(field);
+        zfp_stream_close(zfp);
+    }
+
     // compress mask with LZ4-HC
     mask_size = width * height;
 
@@ -7068,6 +7118,7 @@ void write_image_spectrum(int fd, const char *flux, float pmin, float pmax, floa
     uint32_t img_width = width;
     uint32_t img_height = height;
     uint32_t pixels_len = pixels_zfpsize;
+    uint32_t angle_len = angle_zfpsize;
     uint32_t mask_len = compressed_size;
 
     // the flux length
@@ -7113,6 +7164,11 @@ void write_image_spectrum(int fd, const char *flux, float pmin, float pmax, floa
     if (compressed_pixels != NULL)
         chunked_write(fd, (char *)compressed_pixels, pixels_len);
 
+    // angle (use a chunked version for larger tranfers)
+    chunked_write(fd, (const char *)&angle_len, sizeof(angle_len));
+    if (compressed_angle != NULL)
+        chunked_write(fd, (char *)compressed_angle, angle_len);
+
     // mask (use a chunked version for larger tranfers)
     chunked_write(fd, (const char *)&mask_len, sizeof(mask_len));
     if (compressed_mask != NULL)
@@ -7121,6 +7177,9 @@ void write_image_spectrum(int fd, const char *flux, float pmin, float pmax, floa
     // release the memory
     if (compressed_pixels != NULL)
         free(compressed_pixels);
+
+    if (compressed_angle != NULL)
+        free(compressed_angle);
 
     if (compressed_mask != NULL)
         free(compressed_mask);
