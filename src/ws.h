@@ -141,7 +141,7 @@ void *spectrum_response(void *ptr);
 void *ws_image_spectrum_response(void *ptr);
 extern void get_inner_dimensions(void *ptr, int width, int height, int *fits_width, int *fits_height, int *inner_width, int *inner_height, float *scale);
 extern void get_spectrum_range_C(void *ptr, double frame_start, double frame_end, double ref_freq, int *first, int *last);
-extern void fill_global_statistics(void *ptr, float *dmin, float *dmax, float *dmedian, float *dmadN, float *dmadP);
+extern void fill_global_statistics(void *ptr, float *dmin, float *dmax, float *dmedian, float *dmadN, float *dmadP, int plane);
 extern void update_timestamp(void *ptr);
 
 // now used in microws.c too

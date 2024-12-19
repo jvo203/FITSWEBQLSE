@@ -1600,7 +1600,7 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                 if (isnan(session->dmin) || isnan(session->dmax) || isnan(session->dmedian) || isnan(session->dmadN) || isnan(session->dmadP))
                 {
                     printf("[C] calling 'fill_global_statistics(...)'\n");
-                    fill_global_statistics(item, &(session->dmin), &(session->dmax), &(session->dmedian), &(session->dmadN), &(session->dmadP));
+                    fill_global_statistics(item, &(session->dmin), &(session->dmax), &(session->dmedian), &(session->dmadN), &(session->dmadP), 1);
                 }
 
                 struct video_request *req = (struct video_request *)malloc(sizeof(struct video_request));
@@ -1859,7 +1859,7 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                     if (isnan(_session->dmin) || isnan(_session->dmax) || isnan(_session->dmedian) || isnan(_session->dmadN) || isnan(_session->dmadP))
                     {
                         printf("[C] calling 'fill_global_statistics(...)'\n");
-                        fill_global_statistics(item, &(_session->dmin), &(_session->dmax), &(_session->dmedian), &(_session->dmadN), &(_session->dmadP));
+                        fill_global_statistics(item, &(_session->dmin), &(_session->dmax), &(_session->dmedian), &(_session->dmadN), &(_session->dmadP), 1);
                     }
 
                     // get the video frame index
