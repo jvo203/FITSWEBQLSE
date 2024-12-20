@@ -403,7 +403,7 @@ module fits
       real(kind=c_float) dmin(4), dmax(4), dmedian
       real(kind=c_float) dmad, dmadN, dmadP
       real(kind=4), allocatable :: frame_min(:), frame_max(:), frame_median(:)
-      real(kind=c_float), allocatable :: pixels(:, :)
+      real(kind=c_float), allocatable :: pixels(:, :, :)
       logical(kind=c_bool), allocatable :: mask(:, :)
 
       ! arrays holding pointers to compressed 2D intensity channels
@@ -2179,11 +2179,11 @@ contains
       end if
 
       ! item%dmin
-      write (unit=fileunit, IOSTAT=ios) item%dmin
+      write (unit=fileunit, IOSTAT=ios) item%dmin(:)
       if (ios .ne. 0) bSuccess = bSuccess .and. .false.
 
       ! item%dmax
-      write (unit=fileunit, IOSTAT=ios) item%dmax
+      write (unit=fileunit, IOSTAT=ios) item%dmax(:)
       if (ios .ne. 0) bSuccess = bSuccess .and. .false.
 
       ! item%dmedian
@@ -2238,6 +2238,10 @@ contains
          if (ios .ne. 0) bSuccess = bSuccess .and. .false.
       end if
 
+      ! item%is_stokes
+      write (unit=fileunit, IOSTAT=ios) item%is_stokes
+      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
+
       ! item%pixels
       if (allocated(item%pixels) .and. bSuccess) then
          write (unit=fileunit, IOSTAT=ios) size(item%pixels)
@@ -2266,10 +2270,6 @@ contains
          write (unit=fileunit, IOSTAT=ios) 0
          if (ios .ne. 0) bSuccess = bSuccess .and. .false.
       end if
-
-      ! item%is_stokes
-      write (unit=fileunit, IOSTAT=ios) item%is_stokes
-      if (ios .ne. 0) bSuccess = bSuccess .and. .false.
 
       ! item%is_optical
       write (unit=fileunit, IOSTAT=ios) item%is_optical
@@ -2339,7 +2339,7 @@ contains
       integer(kind=4) :: magic
       integer(kind=c_int) :: ios
       integer(kind=c_size_t) :: array_size
-      integer :: dims(2)
+      integer :: dims(2), max_planes
       character(256) :: iomsg
 
       bSuccess = .false.
@@ -2620,11 +2620,11 @@ contains
       if (allocated(item%hdr)) call set_header_status(item, .true.)
 
       ! item%dmin
-      read (unit=fileunit, IOSTAT=ios) item%dmin
+      read (unit=fileunit, IOSTAT=ios) item%dmin(:)
       if (ios .ne. 0) go to 300
 
       ! item%dmax
-      read (unit=fileunit, IOSTAT=ios) item%dmax
+      read (unit=fileunit, IOSTAT=ios) item%dmax(:)
       if (ios .ne. 0) go to 300
 
       ! item%dmedian
@@ -2676,6 +2676,17 @@ contains
          if (ios .ne. 0) go to 300
       end if
 
+      ! item%is_stokes
+      read (unit=fileunit, IOSTAT=ios) item%is_stokes
+      if (ios .ne. 0) go to 300
+
+      if(item%is_stokes) then
+         ! up to 4 planes: Stokes I, Q, U and V
+         max_planes = min(4, item%naxes(4))
+      else
+         max_planes = 1
+      end if
+
       dims = item%naxes(1:2)
 
       ! item%pixels
@@ -2684,7 +2695,7 @@ contains
 
       if ((dims(1)*dims(2) .eq. N) .and. (N .gt. 0)) then
          if (allocated(item%pixels)) deallocate (item%pixels)
-         allocate (item%pixels(dims(1), dims(2)))
+         allocate (item%pixels(dims(1), dims(2), max_planes))
          ! read (unit=fileunit, IOSTAT=ios) item%pixels(:, :)
          array_size = int(sizeof(item%pixels), kind=c_size_t)
          ios = read_array(cache//'/'//'pixels'//c_null_char, c_loc(item%pixels), array_size)
@@ -2703,10 +2714,6 @@ contains
          ios = read_array(cache//'/'//'mask'//c_null_char, c_loc(item%mask), array_size)
          if (ios .ne. 0) go to 300
       end if
-
-      ! item%is_stokes
-      read (unit=fileunit, IOSTAT=ios) item%is_stokes
-      if (ios .ne. 0) go to 300
 
       ! item%is_optical
       read (unit=fileunit, IOSTAT=ios) item%is_optical
@@ -4399,10 +4406,10 @@ contains
       type(c_ptr), intent(in) :: root
       logical, intent(out) ::  bSuccess
 
-      integer status, group, unit, readwrite, blocksize, i, k ! k goes over the polarisation planes (up to 4)
+      integer status, group, unit, readwrite, blocksize, i, k, max_planes ! k goes over the polarisation planes (up to 4)
       integer naxis, bitpix
       integer cn, cm
-      integer(kind=8) :: npixels, j, plane_offset, max_planes
+      integer(kind=8) :: npixels, j, plane_offset
       integer naxes(4)
       integer cluster_size, max_threads, tid, frame
       integer(c_int) :: start, end, num_per_node
@@ -4650,7 +4657,7 @@ contains
 
          ! go through all planes
          do k = 1 , max_planes
-            plane_offset = (k - 1)*npixels
+            plane_offset = int(k - 1, kind=8)*npixels
 
             ! calculate the min/max values
             do j = 1, npixels
@@ -4682,8 +4689,10 @@ contains
 
          call update_progress(item, 1)
 
-         item%pixels = reshape(local_buffer(1:npixels), naxes(1:2))
-         item%mask = reshape(local_mask(1:npixels), naxes(1:2))
+         ! pixels: naxes(1) x naxes(2) x max_planes
+         item%pixels = reshape(local_buffer, (/naxes(1), naxes(2), max_planes/))
+         ! mask: naxes(1) x naxes(2)
+         item%mask = reshape(local_mask, naxes(1:2))
 
          call set_image_status(item, .true.)
       else
@@ -4968,7 +4977,7 @@ contains
 
          !$omp END PARALLEL
 
-         item%pixels = reshape(pixels, naxes(1:2))
+         item%pixels = reshape(pixels, (/naxes(1), naxes(2), 1/))
          item%mask = reshape(mask, naxes(1:2))
 
          call set_image_status(item, .true.)
@@ -5106,7 +5115,7 @@ contains
          item%dmin = frame_min
          item%dmax = frame_max
 
-         item%pixels = reshape(cpixels, item%naxes(1:2))
+         item%pixels = reshape(cpixels, (/item%naxes(1), item%naxes(2), 1/))
          item%mask = reshape(cmask, item%naxes(1:2))
 
          call set_image_status(item, .true.)
@@ -5146,7 +5155,7 @@ contains
 
       ! check if it's the last frame
       if (frame .eq. item%naxes(3)) then
-         item%pixels = reshape(cpixels, item%naxes(1:2))
+         item%pixels = reshape(cpixels, (/item%naxes(1), item%naxes(2), 1/))
          item%mask = reshape(cmask, item%naxes(1:2))
 
          call set_image_status(item, .true.)
@@ -6618,7 +6627,7 @@ contains
          img_height = item%naxes(2)
 
          ! make a copy of item%pixels / item%mask
-         allocate (pixels(img_width, img_height), source=item%pixels)
+         allocate (pixels(img_width, img_height), source=item%pixels(:,:,1))
          allocate (mask(img_width, img_height), source=item%mask)
       end if
 
@@ -8371,24 +8380,24 @@ contains
       print *, 'realtime_hds_spectrum for ', item%datasetid, ', x:', x, ', y:', y
 
       ! the viewport
-      view_pixels = item%pixels(x1:x2, y1:y2)
+      view_pixels = item%pixels(x1:x2, y1:y2, 1)
       view_mask = item%mask(x1:x2, y1:y2)
 
       ! pack the viewport for further re-use
       viewport = pack(view_pixels, view_mask)
 
       ! spectra & masks along the X and Y axes
-      xspec = item%pixels(:, y)
+      xspec = item%pixels(:, y, 1)
       xmask = item%mask(:, y)
 
-      yspec = item%pixels(x, :)
+      yspec = item%pixels(x, :, 1)
       ymask = item%mask(x, :)
 
       print *, 'xspec:', size(xspec), 'yspec:', size(yspec)
       print *, 'xmask:', size(xmask), 'ymask:', size(ymask)
 
       ! viewport centre row
-      row = item%pixels(x1:x2, y)
+      row = item%pixels(x1:x2, y, 1)
       mask = item%mask(x1:x2, y)
 
       print *, 'row:', size(row), 'mask:', size(mask)
@@ -8447,7 +8456,7 @@ contains
             if (allocated(xmask)) deallocate(xmask)
             !call trace_hds_spectrum(real(x1), real(y1), real(x2), real(y2), real(x), real(y),&
             !& 4*len, -theta, item%pixels, item%mask, xspec, xmask)
-            call rotate_hds_image_spectrum_x(item%pixels, item%mask, real(x), real(y), -theta, gamma, xspec, xmask)
+            call rotate_hds_image_spectrum_x(item%pixels(:,:,1), item%mask, real(x), real(y), -theta, gamma, xspec, xmask)
             !$omp end task
             !$omp end single
 
@@ -8464,7 +8473,7 @@ contains
             if (allocated(ymask)) deallocate(ymask)
             !call trace_hds_spectrum(real(x1), real(y1), real(x2), real(y2), real(x), real(y),&
             !& 4*len, -theta, item%pixels, item%mask, yspec, ymask)
-            call rotate_hds_image_spectrum_y(item%pixels, item%mask, real(x), real(y), -theta, gamma, yspec, ymask)
+            call rotate_hds_image_spectrum_y(item%pixels(:,:,1), item%mask, real(x), real(y), -theta, gamma, yspec, ymask)
             !$omp end task
             !$omp end single
             !$omp end parallel
@@ -8536,7 +8545,7 @@ contains
       y2 = min(item%naxes(2), req%y2)
 
       ! only copy valid parts from within item%pixels&item%mask
-      pixels(x1:x2, y1:y2) = item%pixels(x1:x2, y1:y2)
+      pixels(x1:x2, y1:y2) = item%pixels(x1:x2, y1:y2, 1)
       mask(x1:x2, y1:y2) = item%mask(x1:x2, y1:y2)
 
       select case (req%quality)
