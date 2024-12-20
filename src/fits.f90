@@ -4402,7 +4402,7 @@ contains
       integer status, group, unit, readwrite, blocksize, i, k ! k goes over the polarisation planes (up to 4)
       integer naxis, bitpix
       integer cn, cm
-      integer(kind=8) :: npixels, j, plane_offset, no_planes
+      integer(kind=8) :: npixels, j, plane_offset, max_planes
       integer naxes(4)
       integer cluster_size, max_threads, tid, frame
       integer(c_int) :: start, end, num_per_node
@@ -4643,13 +4643,13 @@ contains
 
          if(item%is_stokes) then
             ! up to 4 planes: Stokes I, Q, U and V
-            no_planes = min(4, naxes(4))
+            max_planes = min(4, naxes(4))
          else
-            no_planes = 1
+            max_planes = 1
          end if
 
          ! go through all planes
-         do k = 1 , no_planes
+         do k = 1 , max_planes
             plane_offset = (k - 1)*npixels
 
             ! calculate the min/max values
