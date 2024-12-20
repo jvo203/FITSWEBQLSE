@@ -6519,8 +6519,9 @@ contains
       type(c_ptr) :: pid
       integer(kind=c_int) :: rc, pixels_rc, angle_rc
 
-      integer inner_width, inner_height
-      integer img_width, img_height
+      integer :: inner_width, inner_height
+      integer :: img_width, img_height
+      integer :: max_planes
       real scale
 
       type(resize_task_t), target :: pixels_task
@@ -6537,6 +6538,10 @@ contains
 
       if (.not. allocated(item%pixels)) return
       if (.not. allocated(item%mask)) return
+
+      ! obtain max_planes from the third dimension of item%pixels
+      max_planes = size(item%pixels, 3)
+      print *, 'image_spectrum_request: max_planes = ', max_planes
 
       if (allocated(item%flux)) allocate (tone%flux, source=item%flux)
 
