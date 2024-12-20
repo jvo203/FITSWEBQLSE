@@ -4399,10 +4399,10 @@ contains
       type(c_ptr), intent(in) :: root
       logical, intent(out) ::  bSuccess
 
-      integer status, group, unit, readwrite, blocksize, i
+      integer status, group, unit, readwrite, blocksize, i, k ! k goes over the polarisation planes (up to 4)
       integer naxis, bitpix
       integer cn, cm
-      integer(kind=8) :: npixels, j
+      integer(kind=8) :: npixels, j, plane_offset, no_planes
       integer naxes(4)
       integer cluster_size, max_threads, tid, frame
       integer(c_int) :: start, end, num_per_node
@@ -4410,7 +4410,7 @@ contains
       integer, dimension(4) :: fpixels, lpixels, incs
       logical test_ignrval
 
-      real :: nullval, tmp, tmpA, tmpI, tmpQ, tmpU, tmpV
+      real :: nullval, tmp
       character :: record*80, key*10, value*70, comment*70
       logical :: anynull
 
@@ -4437,7 +4437,7 @@ contains
       real frame_min, frame_max, frame_median
 
       ! local statistics
-      real(kind=4) :: dmin, dmax
+      real(kind=4) :: dmin(4), dmax(4)
 
       ! OpenMP multi-threading
       integer, dimension(:), allocatable :: thread_units
@@ -4627,6 +4627,7 @@ contains
 
          ! local mask
          allocate (local_mask(npixels))
+         local_mask = .true.
 
          ! do not skip over any pixels
          incs = 1
@@ -4640,114 +4641,41 @@ contains
          ! abort upon an error
          if (status .ne. 0) go to 200
 
-         if(item%is_stokes .and. naxes(4) .gt. 2) then
-            ! I,Q,U and a derived angle
-            if(naxes(4) .eq. 3) then
-               ! calculate the linear intensity, polarisation angle and intensity min/max values
-               do j = 1, npixels
-
-                  tmpI = local_buffer(j)
-                  tmpQ = local_buffer(j + npixels)
-                  tmpU = local_buffer(j + 2*npixels)
-
-                  if(tmpI .eq. 0.0) then
-                     tmp = ieee_value(0.0, ieee_quiet_nan)
-                  else
-                     tmp = sqrt(tmpQ**2 + tmpU**2) / tmpI ! linear intensity
-                  end if
-
-                  if (tmpQ .eq. 0.0 .and. tmpU .eq. 0.0) then
-                     tmpA = ieee_value(0.0, ieee_quiet_nan)
-                  else
-                     tmpA = 0.5 * atan2(tmpU, tmpQ) ! polarisation angle
-                  end if
-
-                  ! print *, 'j:', j, 'I:', tmpI, 'Q:', tmpQ, 'U:', tmpU, 'mL:', tmp, 'A:', tmpA, 0.5 * atan2d(tmpU, tmpQ)
-
-                  ! an override
-                  tmp = tmpI
-
-                  if ((.not. ieee_is_nan(tmp)) .and. (tmp .ge. item%datamin) .and. (tmp .le. item%datamax)) then
-                     dmin = min(dmin, tmp)
-                     dmax = max(dmax, tmp)
-
-                     local_buffer(j) = tmp
-                     local_mask(j) = .true.
-                  else
-                     local_buffer(j) = 0.0
-                     local_mask(j) = .false.
-                  end if
-
-               end do
-            end if
-
-            ! I,Q,U,V and a derived angle
-            if(naxes(4) .eq. 4) then
-               ! calculate the total intensity, polarisation angle and intensity min/max values
-               do j = 1, npixels
-
-                  tmpI = local_buffer(j)
-                  tmpQ = local_buffer(j + npixels)
-                  tmpU = local_buffer(j + 2*npixels)
-                  tmpV = local_buffer(j + 3*npixels)
-
-                  if(tmpI .eq. 0.0) then
-                     tmp = ieee_value(0.0, ieee_quiet_nan)
-                  else
-                     tmp = sqrt(tmpQ**2 + tmpU**2 + tmpV**2) / tmpI ! total intensity
-                  end if
-
-                  if (tmpQ .eq. 0.0 .and. tmpU .eq. 0.0) then
-                     tmpA = ieee_value(0.0, ieee_quiet_nan)
-                  else
-                     tmpA = 0.5 * atan2(tmpU, tmpQ) ! polarisation angle
-                  end if
-
-                  ! print *, 'I:', tmpI, 'Q:', tmpQ, 'U:', tmpU, 'V:', tmpV, 'mT:', tmp, 'A:', tmpA, 0.5 * atan2d(tmpU, tmpQ)
-
-                  ! an override
-                  tmp = tmpI
-
-                  if ((.not. ieee_is_nan(tmpA)) .and. (.not. ieee_is_nan(tmp)) .and. (tmp .ge. item%datamin)&
-                  & .and. (tmp .le. item%datamax)) then
-                     dmin = min(dmin, tmp)
-                     dmax = max(dmax, tmp)
-
-                     local_buffer(j) = tmp
-                     local_mask(j) = .true.
-                  else
-                     local_buffer(j) = 0.0
-                     local_mask(j) = .false.
-                  end if
-
-               end do
-            end if
+         if(item%is_stokes) then
+            ! up to 4 planes: Stokes I, Q, U and V
+            no_planes = min(4, naxes(4))
          else
+            no_planes = 1
+         end if
+
+         ! go through all planes
+         do k = 1 , no_planes
+            plane_offset = (k - 1)*npixels
+
             ! calculate the min/max values
             do j = 1, npixels
 
-               tmp = local_buffer(j)
+               tmp = local_buffer(j + plane_offset)
 
                if ((.not. ieee_is_nan(tmp)) .and. (tmp .ge. item%datamin) .and. (tmp .le. item%datamax)) then
                   if (test_ignrval) then
                      if (abs(tmp - item%ignrval) .le. epsilon(tmp)) then
                         ! skip the IGNRVAL pixels
-                        local_buffer(j) = 0.0
+                        local_buffer(j + plane_offset) = 0.0
                         local_mask(j) = .false.
                         cycle
                      end if
                   end if
 
-                  dmin = min(dmin, tmp)
-                  dmax = max(dmax, tmp)
-                  local_mask(j) = .true.
+                  dmin(k) = min(dmin(k), tmp)
+                  dmax(k) = max(dmax(k), tmp)
                else
-                  local_buffer(j) = 0.0
+                  local_buffer(j + plane_offset) = 0.0
                   local_mask(j) = .false.
                end if
 
             end do
-         end if
+         end do
 
          call update_progress(item, 1)
 
