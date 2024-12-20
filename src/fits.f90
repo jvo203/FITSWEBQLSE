@@ -4677,10 +4677,10 @@ contains
             end do
          end do
 
-         call update_progress(item, 1)
-
          item%dmin = dmin
          item%dmax = dmax
+
+         call update_progress(item, 1)
 
          item%pixels = reshape(local_buffer(1:npixels), naxes(1:2))
          item%mask = reshape(local_mask(1:npixels), naxes(1:2))
