@@ -3375,11 +3375,18 @@ void write_ws_video(websocket_session *session, const int *seq_id, const float *
     x265_picture *pic_out = NULL;
     int ret = 0;
 
+    printf("[C] write_ws_video::x265_version_str: %s\n", x265_version_str);
+
     // detect if x_version_str contains "3." (before an API change introduced in 4.0)
     if (strstr(x265_version_str, "3.") != NULL)
         ret = x265_encoder_encode(session->encoder, &pNals, &iNal, session->picture, NULL);
     else
-        ret = x265_encoder_encode(session->encoder, &pNals, &iNal, session->picture, &pic_out);
+    {
+        if (strstr(x265_version_str, "4.0") != NULL) // the API change was short lived
+            ret = x265_encoder_encode(session->encoder, &pNals, &iNal, session->picture, &pic_out);
+        else
+            ret = x265_encoder_encode(session->encoder, &pNals, &iNal, session->picture, NULL); // 4.1 and later versions
+    }
 
     printf("[C] x265_encode::ret = %d, #frames = %d\n", ret, iNal);
 
@@ -3507,11 +3514,18 @@ void write_ws_composite_video(websocket_session *session, const int *seq_id, con
     x265_picture *pic_out = NULL;
     int ret = 0;
 
+    printf("[C] write_ws_composite_video::x265_version_str: %s\n", x265_version_str);
+
     // detect if x_version_str contains "3." (before an API change introduced in 4.0)
     if (strstr(x265_version_str, "3.") != NULL)
         ret = x265_encoder_encode(session->encoder, &pNals, &iNal, session->picture, NULL);
     else
-        ret = x265_encoder_encode(session->encoder, &pNals, &iNal, session->picture, &pic_out);
+    {
+        if (strstr(x265_version_str, "4.0") != NULL) // the API change was short lived
+            ret = x265_encoder_encode(session->encoder, &pNals, &iNal, session->picture, &pic_out);
+        else
+            ret = x265_encoder_encode(session->encoder, &pNals, &iNal, session->picture, NULL); // 4.1 and later versions
+    }
 
     printf("[C] x265_encode::ret = %d, #frames = %d\n", ret, iNal);
 
