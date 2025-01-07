@@ -287,6 +287,7 @@ module fits
 
    type image_tone_mapping
       character(len=:), allocatable :: flux
+      ! character(kind=c_char) :: flux(10)
       real(kind=c_float) :: pmin, pmax, pmedian
       real(kind=c_float) :: sensitivity, ratio_sensitivity
       real(kind=c_float) :: white, black
