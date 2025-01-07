@@ -6510,7 +6510,7 @@ contains
       integer, allocatable :: hist(:)
 
       ! image tone mapping
-      type(image_tone_mapping) :: tone
+      type(image_tone_mapping) :: tone(4) ! up to 4 planes
 
       type(C_PTR) :: json
 
@@ -6521,7 +6521,7 @@ contains
 
       integer :: inner_width, inner_height
       integer :: img_width, img_height
-      integer :: max_planes
+      integer :: max_planes, i
       real scale
 
       type(resize_task_t), target :: pixels_task
@@ -6543,7 +6543,9 @@ contains
       max_planes = size(item%pixels, 3)
       print *, 'image_spectrum_request: max_planes = ', max_planes
 
-      if (allocated(item%flux)) allocate (tone%flux, source=item%flux)
+      do i = 1, max_planes
+         if (allocated(item%flux)) allocate (tone(i)%flux, source=item%flux)
+      end do
 
       ! init pid to null
       pid = c_null_ptr
@@ -6661,12 +6663,18 @@ contains
          print *, "image_spectrum_request::flux is not allocated"
       end if
 
-      ! make an image histogram, decide on the flux etc.
-      call make_image_statistics(item, img_width, img_height, pixels(:,:,1), mask, hist, tone)
+      ! make image histograms, decide on the flux etc.
+      ! use OpenMP to parallelise the loop
+      !$omp parallel do default(shared) private(i)
+      do i = 1, max_planes
+         call make_image_statistics(item, img_width, img_height, pixels(:,:,i), mask, hist, tone(i))
+      end do
+      !$omp end parallel do
 
-      call write_image_spectrum(fd, trim(tone%flux)//c_null_char,&
-      &tone%pmin, tone%pmax, tone%pmedian,&
-      &tone%black, tone%white, tone%sensitivity, tone%ratio_sensitivity,&
+      ! a special case for the Stokes I-only image
+      call write_image_spectrum(fd, trim(tone(1)%flux)//c_null_char,&
+      &tone(1)%pmin, tone(1)%pmax, tone(1)%pmedian,&
+      &tone(1)%black, tone(1)%white, tone(1)%sensitivity, tone(1)%ratio_sensitivity,&
       & img_width, img_height, precision, c_loc(pixels), c_loc(mask))
 
       deallocate (pixels)
