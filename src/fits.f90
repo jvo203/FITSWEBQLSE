@@ -6503,7 +6503,7 @@ contains
       type(dataset), pointer :: item
       integer(kind=c_int), intent(in), value :: width, height, precision, fetch_data, fd
 
-      real(kind=c_float), dimension(:, :), allocatable, target :: pixels
+      real(kind=c_float), dimension(:, :, :), allocatable, target :: pixels
       logical(kind=c_bool), dimension(:, :), allocatable, target :: mask
 
       ! image histogram
@@ -6590,7 +6590,7 @@ contains
          img_width = nint(scale*item%naxes(1))
          img_height = nint(scale*item%naxes(2))
 
-         allocate (pixels(img_width, img_height))
+         allocate (pixels(img_width, img_height, max_planes))
          allocate (mask(img_width, img_height))
 
          ! downscale item%pixels and item%mask into pixels, mask
@@ -6632,7 +6632,7 @@ contains
          img_height = item%naxes(2)
 
          ! make a copy of item%pixels / item%mask
-         allocate (pixels(img_width, img_height), source=item%pixels(:,:,1))
+         allocate (pixels(img_width, img_height, max_planes), source=item%pixels(:,:,:))
          allocate (mask(img_width, img_height), source=item%mask)
       end if
 
@@ -6662,7 +6662,7 @@ contains
       end if
 
       ! make an image histogram, decide on the flux etc.
-      call make_image_statistics(item, img_width, img_height, pixels, mask, hist, tone)
+      call make_image_statistics(item, img_width, img_height, pixels(:,:,1), mask, hist, tone)
 
       call write_image_spectrum(fd, trim(tone%flux)//c_null_char,&
       &tone%pmin, tone%pmax, tone%pmedian,&
