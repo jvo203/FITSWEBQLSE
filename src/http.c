@@ -160,7 +160,7 @@ void write_statistics(int fd, float *dmin, float *dmax, float *dmedian, float *d
 void write_spectrum(int fd, const float *spectrum, int n, int precision);
 void write_histogram(int fd, const int *hist, int n);
 void write_viewport(int fd, int width, int height, const float *restrict pixels, const bool *restrict mask, int precision);
-void write_image_spectrum(int fd, const char *flux, float pmin, float pmax, float pmedian, float black, float white, float sensitivity, float ratio_sensitivity, int width, int height, int precision, const float *restrict pixels, const bool *restrict mask);
+void write_image_spectrum(int fd, int no_planes, const char *flux, float pmin, float pmax, float pmedian, float black, float white, float sensitivity, float ratio_sensitivity, int width, int height, int precision, const float *restrict pixels, const bool *restrict mask);
 void write_pv_diagram(int fd, int width, int height, int precision, const float *restrict pv, const float pmean, const float pstd, const float pmin, const float pmax, const int xmin, const int xmax, const double vmin, const double vmax, const int x1, const int y1, const int x2, const int y2);
 void write_composite_pv_diagram(int fd, int width, int height, int precision, const float *restrict pv, const float *restrict pmean, const float *restrict pstd, const float *restrict pmin, const float *restrict pmax, const int xmin, const int xmax, const double vmin, const double vmax, const int x1, const int y1, const int x2, const int y2, int va_count);
 
@@ -6958,7 +6958,7 @@ static void rpad(char *dst, const char *src, const char pad, const size_t sz)
     memcpy(dst, src, strlen(src));
 }
 
-void write_image_spectrum(int fd, const char *flux, float pmin, float pmax, float pmedian, float black, float white, float sensitivity, float ratio_sensitivity, int width, int height, int precision, const float *restrict pixels, const bool *restrict mask)
+void write_image_spectrum(int fd, int no_planes, const char *flux, float pmin, float pmax, float pmedian, float black, float white, float sensitivity, float ratio_sensitivity, int width, int height, int precision, const float *restrict pixels, const bool *restrict mask)
 {
     uchar *restrict compressed_pixels = NULL;
     char *restrict compressed_mask = NULL;
@@ -7063,12 +7063,15 @@ void write_image_spectrum(int fd, const char *flux, float pmin, float pmax, floa
 
     // transmit the data
     float tmp;
+    uint32_t max_planes = no_planes;
     uint32_t flux_len = strlen(padded_flux);
-
     uint32_t img_width = width;
     uint32_t img_height = height;
     uint32_t pixels_len = pixels_zfpsize;
     uint32_t mask_len = compressed_size;
+
+    // max_planes
+    chunked_write(fd, (const char *)&max_planes, sizeof(max_planes));
 
     // the flux length
     chunked_write(fd, (const char *)&flux_len, sizeof(flux_len));

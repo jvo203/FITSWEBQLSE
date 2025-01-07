@@ -1188,7 +1188,7 @@ module fits
          character(kind=c_char), intent(in) :: json_str(*)
       end subroutine write_header
 
-      subroutine write_image_spectrum(fd, flux, &
+      subroutine write_image_spectrum(fd, no_planes, flux, &
          pmin, pmax, pmedian, &
       &black, white, sensitivity, ratio_sensitivity,&
       &width, height, precision,&
@@ -1198,7 +1198,7 @@ module fits
          implicit none
 
          character(kind=c_char), intent(in) :: flux(*)
-         integer(c_int), value, intent(in) :: fd, width, height, precision
+         integer(c_int), value, intent(in) :: fd, no_planes, width, height, precision
          real(kind=c_float), value, intent(in) :: pmin, pmax, pmedian
          real(kind=c_float), value, intent(in) :: black, white
          real(kind=c_float), value, intent(in) :: sensitivity, ratio_sensitivity
@@ -6672,7 +6672,7 @@ contains
       !$omp end parallel do
 
       ! a special case for the Stokes I-only image
-      call write_image_spectrum(fd, trim(tone(1)%flux)//c_null_char,&
+      call write_image_spectrum(fd, 1, trim(tone(1)%flux)//c_null_char,&
       &tone(1)%pmin, tone(1)%pmax, tone(1)%pmedian,&
       &tone(1)%black, tone(1)%white, tone(1)%sensitivity, tone(1)%ratio_sensitivity,&
       & img_width, img_height, precision, c_loc(pixels), c_loc(mask))
@@ -11082,7 +11082,7 @@ contains
             precision = ZFP_MEDIUM_PRECISION
          end select
 
-         call write_image_spectrum(req%fd, trim(tone%flux)//c_null_char,&
+         call write_image_spectrum(req%fd, 1, trim(tone%flux)//c_null_char,&
          &tone%pmin, tone%pmax, tone%pmedian,&
          &tone%black, tone%white, tone%sensitivity, tone%ratio_sensitivity,&
          & img_width, img_height, precision, c_loc(view_pixels), c_loc(view_mask))
