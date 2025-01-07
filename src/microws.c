@@ -3891,6 +3891,7 @@ void *ws_image_spectrum_response(void *ptr)
     size_t msg_len = 0;
 
     // image + histogram
+    uint32_t max_planes = 0;
     uint32_t flux_len = 0;
     uint32_t pixels_len = 0;
     uint32_t mask_len = 0;
@@ -3900,9 +3901,13 @@ void *ws_image_spectrum_response(void *ptr)
     uint32_t spectrum_len = 0;
     uint32_t compressed_size = 0;
 
-    memcpy(&flux_len, buf + read_offset, sizeof(uint32_t));
+    memcpy(&max_planes, buf + read_offset, sizeof(uint32_t));
+    read_offset += sizeof(uint32_t);
 
-    read_offset += sizeof(uint32_t) + flux_len + 7 * sizeof(float) + 2 * sizeof(uint32_t);
+    memcpy(&flux_len, buf + read_offset, sizeof(uint32_t));
+    read_offset += sizeof(uint32_t);
+
+    read_offset += flux_len + 7 * sizeof(float) + 2 * sizeof(uint32_t);
 
     if (offset < read_offset + sizeof(uint32_t))
         goto free_image_spectrum_session;
@@ -3958,7 +3963,7 @@ void *ws_image_spectrum_response(void *ptr)
         ws_offset += sizeof(uint32_t);
 
         // fill-in the content up to pixels/mask
-        write_offset = sizeof(uint32_t) + flux_len + 7 * sizeof(float) + 2 * sizeof(uint32_t) + sizeof(uint32_t) + pixels_len + sizeof(uint32_t) + mask_len;
+        write_offset = 2 * sizeof(uint32_t) + flux_len + 7 * sizeof(float) + 2 * sizeof(uint32_t) + sizeof(uint32_t) + pixels_len + sizeof(uint32_t) + mask_len;
         memcpy((char *)image_payload + ws_offset, buf, write_offset);
         ws_offset += write_offset;
 
@@ -3980,7 +3985,7 @@ void *ws_image_spectrum_response(void *ptr)
         write_offset += sizeof(uint32_t) + hist_len * sizeof(int);
 
         if (ws_offset != msg_len)
-            printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
+            printf("[C] 'image' size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
 
 #ifdef DIRECT
         if (!session->disconnect)
@@ -4059,7 +4064,7 @@ void *ws_image_spectrum_response(void *ptr)
         ws_offset += compressed_size;
 
         if (ws_offset != msg_len)
-            printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
+            printf("[C] 'spectrum' size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
 
 #ifdef DIRECT
         if (!session->disconnect)

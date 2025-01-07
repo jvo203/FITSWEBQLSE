@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2024-12-19.0";
+    return "JS2025-01-07.0";
 }
 
 function uuidv4() {
@@ -5923,12 +5923,17 @@ async function open_websocket_connection(_datasetId, index) {
 
                     //image
                     if (type == 2) {
+                        var offset = 12;
+
+                        var no_planes = dv.getUint32(offset, endianness);
+                        offset += 4;
+                        console.log("type: image, no_planes:", no_planes);
+
                         var tone_mapping = new Object();
                         let p = 0.5;
                         tone_mapping.lmin = Math.log(p);
                         tone_mapping.lmax = Math.log(p + 1.0);
 
-                        var offset = 12;
                         var str_length = dv.getUint32(offset, endianness);
                         offset += 4;
 
@@ -15409,12 +15414,15 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                             var dv = new DataView(received_msg);
                             //console.log("FITSImage dataview byte length: ", dv.byteLength);
 
+                            var offset = 0;
+                            var no_planes = dv.getUint32(offset, endianness);
+                            offset += 4;
+
                             var tone_mapping = new Object();
                             let p = 0.5;
                             tone_mapping.lmin = Math.log(p);
                             tone_mapping.lmax = Math.log(p + 1.0);
 
-                            var offset = 0;
                             var str_length = dv.getUint32(offset, endianness);
                             offset += 4;
 
