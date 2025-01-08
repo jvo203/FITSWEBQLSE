@@ -5583,7 +5583,7 @@ contains
 
    end subroutine get_velocity_bounds
 
-   subroutine make_image_statistics(item, width, height, pixels, mask, hist, tone, plane)
+   subroutine make_image_statistics(item, width, height, pixels, mask, outhist, tone, plane)
       use, intrinsic :: iso_c_binding
       implicit none
 
@@ -5591,11 +5591,12 @@ contains
       integer, intent(in) :: width, height
       real(kind=c_float), dimension(width, height), intent(in) :: pixels
       logical(kind=c_bool), dimension(width, height), intent(in) :: mask
-      integer, intent(out) :: hist(:)
+      integer, intent(out) :: outhist(:)
       type(image_tone_mapping), intent(inout) :: tone ! this needs to be *INOUT* (tone%flux!!!)
       integer, value, optional :: plane
 
       real, dimension(:), allocatable :: data
+      integer, allocatable :: hist(:)
       character(len=:), allocatable :: flux
       real pmin, pmax, pmedian
       real mad, madP, madN
@@ -5753,6 +5754,8 @@ contains
       tone%sensitivity = sensitivity
       tone%ratio_sensitivity = ratio_sensitivity
 
+      outhist = hist
+
    end subroutine make_image_statistics
 
    function auto_brightness(data, black, sensitivity) result(ratio_sensitivity)
@@ -5870,11 +5873,13 @@ contains
    end function calculate_brightness
 
    subroutine make_histogram(hist, data, pmin, pmax)
-      integer, intent(out) :: hist(:)
+      integer, allocatable, intent(out) :: hist(:)
       real, dimension(:), intent(in) :: data
       real, intent(in) :: pmin, pmax
       integer i, index, n
       real value
+
+      if (.not. allocated(hist)) allocate (hist(NBINS))
 
       ! reset the histogram
       hist = 0
