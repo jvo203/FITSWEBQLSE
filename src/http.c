@@ -160,7 +160,7 @@ void write_statistics(int fd, float *dmin, float *dmax, float *dmedian, float *d
 void write_spectrum(int fd, const float *spectrum, int n, int precision);
 void write_histogram(int fd, const int *hist, int n);
 void write_viewport(int fd, int width, int height, const float *restrict pixels, const bool *restrict mask, int precision);
-void write_image_spectrum(int fd, int no_planes, struct image_tone_mapping_type *tone, const char *flux, float pmin, float pmax, float pmedian, float black, float white, float sensitivity, float ratio_sensitivity, int width, int height, int precision, const float *restrict pixels, const bool *restrict mask);
+void write_image_spectrum(int fd, int no_planes, struct image_tone_mapping_type *tone, int width, int height, int precision, const float *restrict pixels, const bool *restrict mask);
 void write_pv_diagram(int fd, int width, int height, int precision, const float *restrict pv, const float pmean, const float pstd, const float pmin, const float pmax, const int xmin, const int xmax, const double vmin, const double vmax, const int x1, const int y1, const int x2, const int y2);
 void write_composite_pv_diagram(int fd, int width, int height, int precision, const float *restrict pv, const float *restrict pmean, const float *restrict pstd, const float *restrict pmin, const float *restrict pmax, const int xmin, const int xmax, const double vmin, const double vmax, const int x1, const int y1, const int x2, const int y2, int va_count);
 
@@ -6958,7 +6958,7 @@ static void rpad(char *dst, const char *src, const char pad, const size_t sz)
     memcpy(dst, src, strlen(src));
 }
 
-void write_image_spectrum(int fd, int no_planes, struct image_tone_mapping_type *tone, const char *flux, float pmin, float pmax, float pmedian, float black, float white, float sensitivity, float ratio_sensitivity, int width, int height, int precision, const float *restrict pixels, const bool *restrict mask)
+void write_image_spectrum(int fd, int no_planes, struct image_tone_mapping_type *tone, int width, int height, int precision, const float *restrict pixels, const bool *restrict mask)
 {
     uchar *restrict compressed_pixels = NULL;
     char *restrict compressed_mask = NULL;
@@ -6972,17 +6972,21 @@ void write_image_spectrum(int fd, int no_planes, struct image_tone_mapping_type 
     size_t pixels_zfpsize = 0;
     uint nx = width;
     uint ny = height;
+    uint nz = no_planes;
 
     int mask_size, worst_size;
     int compressed_size = 0;
 
-    if (flux == NULL || pixels == NULL || mask == NULL)
+    if (pixels == NULL || mask == NULL)
         return;
 
     if (width <= 0 || height <= 0)
         return;
 
-    printf("[C] fd: %d, flux: %s, pmin: %f, pmax: %f, pmedian: %f, black: %f, white: %f, sensitivity: %f, ratio_sensitivity: %f, width: %d, height: %d\n", fd, flux, pmin, pmax, pmedian, black, white, sensitivity, ratio_sensitivity, width, height);
+    printf("[C] write_image_spectrum fd: %d, width: %d, height: %d\n", fd, width, height);
+
+    for (int i = 0; i < no_planes; i++)
+        printf("[C] write_image_spectrum plane %d tone mapping flux: %s, pmin: %f, pmax: %f, pmedian: %f, black: %f, white: %f, sensitivity: %f, ratio_sensitivity: %f\n", (i + 1), tone[i].flux, tone[i].pmin, tone[i].pmax, tone[i].pmedian, tone[i].black, tone[i].white, tone[i].sensitivity, tone[i].ratio_sensitivity);
 
     /*for (i = 0; i < width; i++)
         printf("|%f,%d", pixels[i], mask[i]);
@@ -7052,60 +7056,75 @@ void write_image_spectrum(int fd, int no_planes, struct image_tone_mapping_type 
         printf("[C] image mask raw size: %d; compressed: %d bytes\n", mask_size, compressed_size);
     }
 
-    // pad the flux with spaces so that the length is a multiple of 4 (JavaScript needs it ...)
-    int padded_len = 4 * (strlen(flux) / 4 + 1);
-
-    // memory for a new padded flux
-    char padded_flux[padded_len + 1];
-
-    // right-pad the flux with spaces
-    rpad(padded_flux, flux, ' ', padded_len);
-
     // transmit the data
     float tmp;
     uint32_t max_planes = no_planes;
-    uint32_t flux_len = strlen(padded_flux);
-    uint32_t img_width = width;
-    uint32_t img_height = height;
-    uint32_t pixels_len = pixels_zfpsize;
-    uint32_t mask_len = compressed_size;
 
     // max_planes
     chunked_write(fd, (const char *)&max_planes, sizeof(max_planes));
 
-    // the flux length
-    chunked_write(fd, (const char *)&flux_len, sizeof(flux_len));
+    // send potentially multiple tone mappings
+    for (int i = 0; i < max_planes; i++)
+    {
+        char *flux = tone[i].flux;
+        float pmin = tone[i].pmin;
+        float pmax = tone[i].pmax;
+        float pmedian = tone[i].pmedian;
+        float sensitivity = tone[i].sensitivity;
+        float ratio_sensitivity = tone[i].ratio_sensitivity;
+        float white = tone[i].white;
+        float black = tone[i].black;
 
-    // flux
-    chunked_write(fd, padded_flux, flux_len);
+        // pad the flux with spaces so that the length is a multiple of 4 (JavaScript needs it ...)
+        int padded_len = 4 * (strlen(flux) / 4 + 1);
 
-    // pmin
-    tmp = pmin;
-    chunked_write(fd, (const char *)&tmp, sizeof(tmp));
+        // memory for a new padded flux
+        char padded_flux[padded_len + 1];
 
-    // pmax
-    tmp = pmax;
-    chunked_write(fd, (const char *)&tmp, sizeof(tmp));
+        // right-pad the flux with spaces
+        rpad(padded_flux, flux, ' ', padded_len);
 
-    // pmedian
-    tmp = pmedian;
-    chunked_write(fd, (const char *)&tmp, sizeof(tmp));
+        uint32_t flux_len = strlen(padded_flux);
 
-    // sensitivity
-    tmp = sensitivity;
-    chunked_write(fd, (const char *)&tmp, sizeof(tmp));
+        // the flux length
+        chunked_write(fd, (const char *)&flux_len, sizeof(flux_len));
 
-    // ratio_sensitivity
-    tmp = ratio_sensitivity;
-    chunked_write(fd, (const char *)&tmp, sizeof(tmp));
+        // flux
+        chunked_write(fd, padded_flux, flux_len);
 
-    // white
-    tmp = white;
-    chunked_write(fd, (const char *)&tmp, sizeof(tmp));
+        // pmin
+        tmp = pmin;
+        chunked_write(fd, (const char *)&tmp, sizeof(tmp));
 
-    // black
-    tmp = black;
-    chunked_write(fd, (const char *)&tmp, sizeof(tmp));
+        // pmax
+        tmp = pmax;
+        chunked_write(fd, (const char *)&tmp, sizeof(tmp));
+
+        // pmedian
+        tmp = pmedian;
+        chunked_write(fd, (const char *)&tmp, sizeof(tmp));
+
+        // sensitivity
+        tmp = sensitivity;
+        chunked_write(fd, (const char *)&tmp, sizeof(tmp));
+
+        // ratio_sensitivity
+        tmp = ratio_sensitivity;
+        chunked_write(fd, (const char *)&tmp, sizeof(tmp));
+
+        // white
+        tmp = white;
+        chunked_write(fd, (const char *)&tmp, sizeof(tmp));
+
+        // black
+        tmp = black;
+        chunked_write(fd, (const char *)&tmp, sizeof(tmp));
+    }
+
+    uint32_t img_width = width;
+    uint32_t img_height = height;
+    uint32_t pixels_len = pixels_zfpsize;
+    uint32_t mask_len = compressed_size;
 
     // the image + (optional) polarisation angle + mask
     chunked_write(fd, (const char *)&img_width, sizeof(img_width));
