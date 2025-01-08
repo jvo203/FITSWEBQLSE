@@ -6984,7 +6984,7 @@ void write_image_spectrum(int fd, int no_planes, struct image_tone_mapping_type 
         return;
 
     for (int i = 0; i < no_planes; i++)
-        printf("[C] write_image_spectrum fd: %d, width: %d, height: %d; plane %d tone mapping flux: %s, pmin: %f, pmax: %f, pmedian: %f, black: %f, white: %f, sensitivity: %f, ratio_sensitivity: %f\n", fd, width, height, (i + 1), tone[i].flux, tone[i].pmin, tone[i].pmax, tone[i].pmedian, tone[i].black, tone[i].white, tone[i].sensitivity, tone[i].ratio_sensitivity);
+        printf("[C] write_image_spectrum fd: %d, width: %d, height: %d; plane %d tone mapping flux: %s, pmin: %.10f, pmax: %.10f, pmedian: %.10f, black: %f, white: %f, sensitivity: %f, ratio_sensitivity: %f\n", fd, width, height, (i + 1), tone[i].flux, tone[i].pmin, tone[i].pmax, tone[i].pmedian, tone[i].black, tone[i].white, tone[i].sensitivity, tone[i].ratio_sensitivity);
 
     /*for (i = 0; i < width; i++)
         printf("|%f,%d", pixels[i], mask[i]);
