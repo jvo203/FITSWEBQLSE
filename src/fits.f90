@@ -1189,7 +1189,7 @@ module fits
          character(kind=c_char), intent(in) :: json_str(*)
       end subroutine write_header
 
-      subroutine write_image_spectrum(fd, no_planes, flux, &
+      subroutine write_image_spectrum(fd, no_planes, tone, flux, &
          pmin, pmax, pmedian, &
       &black, white, sensitivity, ratio_sensitivity,&
       &width, height, precision,&
@@ -1203,7 +1203,7 @@ module fits
          real(kind=c_float), value, intent(in) :: pmin, pmax, pmedian
          real(kind=c_float), value, intent(in) :: black, white
          real(kind=c_float), value, intent(in) :: sensitivity, ratio_sensitivity
-         type(C_PTR), value :: pixels, mask
+         type(C_PTR), value :: pixels, mask, tone
       end subroutine write_image_spectrum
 
       ! void write_pv_diagram(int fd, int width, int height, int precision, const float *restrict pv, const float pmean, const float pstd, const float pmin, const float pmax, const int xmin, const int xmax, const double vmin, const double vmax, const int x1, const int y1, const int x2, const int y2);
@@ -6519,7 +6519,7 @@ contains
       integer, allocatable :: hist(:)
 
       ! image tone mapping
-      type(image_tone_mapping) :: tone(4) ! up to 4 planes
+      type(image_tone_mapping), target :: tone(4) ! up to 4 planes
 
       type(C_PTR) :: json
 
@@ -6689,7 +6689,7 @@ contains
 
       ! a special case for the Stokes I-only image
       ! trim(tone(1)%flux)//c_null_char
-      call write_image_spectrum(fd, 1, tone(1)%flux,&
+      call write_image_spectrum(fd, 1, c_loc(tone), tone(1)%flux,&
       &tone(1)%pmin, tone(1)%pmax, tone(1)%pmedian,&
       &tone(1)%black, tone(1)%white, tone(1)%sensitivity, tone(1)%ratio_sensitivity,&
       & img_width, img_height, precision, c_loc(pixels), c_loc(mask))
@@ -10830,7 +10830,7 @@ contains
       integer(c_int), allocatable, target :: hist(:)
 
       ! image tone mapping
-      type(image_tone_mapping) :: tone
+      type(image_tone_mapping), target :: tone
 
       ! regenerate the video tone mapping global statistics
       real(c_float) :: dmin, dmax, dmedian
@@ -11106,7 +11106,7 @@ contains
          end select
 
          ! trim(tone%flux)//c_null_char
-         call write_image_spectrum(req%fd, 1, tone%flux,&
+         call write_image_spectrum(req%fd, 1, c_loc(tone), tone%flux,&
          &tone%pmin, tone%pmax, tone%pmedian,&
          &tone%black, tone%white, tone%sensitivity, tone%ratio_sensitivity,&
          & img_width, img_height, precision, c_loc(view_pixels), c_loc(view_mask))
