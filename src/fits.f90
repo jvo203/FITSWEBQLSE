@@ -5646,7 +5646,7 @@ contains
       call make_histogram(hist, data, pmin, pmax)
 
       pmedian = hist_median(data, pmin, pmax, 2) ! a two-pass median estimation
-      print *, 'hist. median = ', pmedian
+      print *, 'pmin =', pmin, 'pmax =', pmax, 'hist. median =', pmedian
 
       ! pmedian = median(data)
       ! print *, '50th quantile (median) = ', pmedian
@@ -6682,7 +6682,7 @@ contains
       ! use OpenMP to parallelise the loop
       !$omp parallel do default(shared) private(i)
       do i = 1, max_planes
-         call make_image_statistics(item, img_width, img_height, pixels(:,:,i), mask, hist(:,i), tone(i))
+         call make_image_statistics(item, img_width, img_height, pixels(:,:,i), mask, hist(:,i), tone(i), i)
       end do
       !$omp end parallel do
 
