@@ -266,6 +266,7 @@ struct data_buf
     size_t len;
 };
 
+// mapped from FORTRAN
 struct image_tone_mapping_type
 {
     char flux[16];
