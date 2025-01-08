@@ -265,3 +265,11 @@ struct data_buf
     char *buf;
     size_t len;
 };
+
+struct image_tone_mapping_type
+{
+    char flux[16];
+    float pmin, pmax, pmedian;
+    float sensitivity, ratio_sensitivity;
+    float white, black;
+};
