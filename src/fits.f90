@@ -6680,9 +6680,7 @@ contains
       end do
       !$omp end parallel do
 
-      ! a special case for the Stokes I-only image
-      ! trim(tone(1)%flux)//c_null_char
-      call write_image_spectrum(fd, 1, c_loc(tone), img_width, img_height, precision, c_loc(pixels), c_loc(mask))
+      call write_image_spectrum(fd, max_planes, c_loc(tone), img_width, img_height, precision, c_loc(pixels), c_loc(mask))
 
       deallocate (pixels)
       deallocate (mask)
