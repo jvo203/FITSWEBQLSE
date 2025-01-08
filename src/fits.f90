@@ -285,9 +285,9 @@ module fits
       type(fixed_block), dimension(:, :), pointer :: ptr
    end type array_ptr
 
-   type image_tone_mapping
-      character(len=:), allocatable :: flux
-      ! character(kind=c_char) :: flux(10)
+   type, bind(c) :: image_tone_mapping
+      ! character(len=:), allocatable :: flux ! incompatible with bind(C)
+      character(kind=c_char) :: flux(16)
       real(kind=c_float) :: pmin, pmax, pmedian
       real(kind=c_float) :: sensitivity, ratio_sensitivity
       real(kind=c_float) :: white, black
@@ -5603,6 +5603,7 @@ contains
       integer, value, optional :: plane
 
       real, dimension(:), allocatable :: data
+      character(len=:), allocatable :: flux
       real pmin, pmax, pmedian
       real mad, madP, madN
       integer countP, countN
@@ -5699,7 +5700,8 @@ contains
          ratio_sensitivity = auto_brightness(data, black, sensitivity)
       end if
 
-      if (.not. allocated(tone%flux)) then
+      !if (.not. allocated(tone%flux)) then
+      if (tone%flux(1) .eq. c_null_char) then
          ! histogram classifier
          block
             use classifier
@@ -5726,22 +5728,28 @@ contains
 
             select case (tone_mapping)
              case (0)
-               tone%flux = 'legacy'
+               flux = 'legacy'
              case (1)
-               tone%flux = 'linear'
+               flux = 'linear'
              case (2)
-               tone%flux = 'logistic'
+               flux = 'logistic'
              case (3)
-               tone%flux = 'ratio'
+               flux = 'ratio'
              case (4)
-               tone%flux = 'square'
+               flux = 'square'
              case default
-               tone%flux = 'legacy'
+               flux = 'legacy'
             end select
+
+            if (allocated(flux)) then
+               do i = 1, min(len(flux), size(tone%flux)-1)
+                  tone%flux(i) = flux(i:i)
+               end do
+            end if
          end block
       end if
 
-      print *, 'black = ', black, ', white = ', white, ', sensitivity = ', sensitivity, ',&
+      print *, 'flux: ', tone%flux, ', black = ', black, ', white = ', white, ', sensitivity = ', sensitivity, ',&
       & ratio sensitivity = ', ratio_sensitivity
 
       tone%pmin = pmin
@@ -6522,7 +6530,7 @@ contains
 
       integer :: inner_width, inner_height
       integer :: img_width, img_height
-      integer :: max_planes, i
+      integer :: max_planes, i, j
       real scale
 
       type(resize_task_t), target :: pixels_task
@@ -6545,7 +6553,14 @@ contains
       print *, 'image_spectrum_request: max_planes = ', max_planes
 
       do i = 1, max_planes
-         if (allocated(item%flux)) allocate (tone(i)%flux, source=item%flux)
+         tone(i)%flux = c_null_char ! a C-style null-terminated string
+
+         if (allocated(item%flux)) then
+            ! allocate (tone(i)%flux, source=item%flux)
+            do j = 1, min(len(item%flux), size(tone(i)%flux)-1)
+               tone(i)%flux(j) = item%flux(j:j)
+            end do
+         end if
       end do
 
       ! init pid to null
@@ -6664,7 +6679,7 @@ contains
          print *, "image_spectrum_request::flux is not allocated"
       end if
 
-      ! make image histograms, decide on the flux etc.
+      ! make image histograms, decide on the tone mapping type (flux) etc.
       ! use OpenMP to parallelise the loop
       !$omp parallel do default(shared) private(i)
       do i = 1, max_planes
@@ -6673,7 +6688,8 @@ contains
       !$omp end parallel do
 
       ! a special case for the Stokes I-only image
-      call write_image_spectrum(fd, 1, trim(tone(1)%flux)//c_null_char,&
+      ! trim(tone(1)%flux)//c_null_char
+      call write_image_spectrum(fd, 1, tone(1)%flux,&
       &tone(1)%pmin, tone(1)%pmax, tone(1)%pmedian,&
       &tone(1)%black, tone(1)%white, tone(1)%sensitivity, tone(1)%ratio_sensitivity,&
       & img_width, img_height, precision, c_loc(pixels), c_loc(mask))
@@ -10801,7 +10817,7 @@ contains
       real(kind=c_float), allocatable, target :: thread_pixels(:, :)
       logical(kind=c_bool), allocatable, target :: thread_mask(:, :)
 
-      integer :: dimx, dimy
+      integer :: dimx, dimy, i, j
       integer :: inner_width, inner_height
       integer :: img_width, img_height
       integer(c_int) :: precision
@@ -11062,7 +11078,13 @@ contains
          view_mask = reshape(mask, item%naxes(1:2))
       end if
 
-      if (allocated(item%flux)) allocate (tone%flux, source=item%flux)
+      tone%flux = c_null_char
+      if (allocated(item%flux)) then
+         ! allocate (tone%flux, source=item%flux)
+         do j = 1, min(len_trim(item%flux), size(tone%flux)-1)
+            tone%flux(j) = item%flux(j:j)
+         end do
+      end if
 
       if (allocated(item%flux)) then
          print *, "ws_image_spectrum_request::flux=", item%flux
@@ -11083,7 +11105,8 @@ contains
             precision = ZFP_MEDIUM_PRECISION
          end select
 
-         call write_image_spectrum(req%fd, 1, trim(tone%flux)//c_null_char,&
+         ! trim(tone%flux)//c_null_char
+         call write_image_spectrum(req%fd, 1, tone%flux,&
          &tone%pmin, tone%pmax, tone%pmedian,&
          &tone%black, tone%white, tone%sensitivity, tone%ratio_sensitivity,&
          & img_width, img_height, precision, c_loc(view_pixels), c_loc(view_mask))
