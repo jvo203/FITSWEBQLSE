@@ -5591,7 +5591,7 @@ contains
       integer, intent(in) :: width, height
       real(kind=c_float), dimension(width, height), intent(in) :: pixels
       logical(kind=c_bool), dimension(width, height), intent(in) :: mask
-      integer, allocatable, intent(out) :: hist(:)
+      integer, intent(out) :: hist(:)
       type(image_tone_mapping), intent(inout) :: tone ! this needs to be *INOUT* (tone%flux!!!)
       integer, value, optional :: plane
 
@@ -5870,13 +5870,11 @@ contains
    end function calculate_brightness
 
    subroutine make_histogram(hist, data, pmin, pmax)
-      integer, allocatable, intent(out) :: hist(:)
+      integer, intent(out) :: hist(:)
       real, dimension(:), intent(in) :: data
       real, intent(in) :: pmin, pmax
       integer i, index, n
       real value
-
-      if (.not. allocated(hist)) allocate (hist(NBINS))
 
       ! reset the histogram
       hist = 0
@@ -6355,11 +6353,13 @@ contains
       return
    end function get_pv_image_scale
 
-   type(C_PTR) function get_json(item, hist)
+   type(C_PTR) function get_json(item, hist, no_planes)
       implicit none
 
       type(dataset), pointer, intent(in) :: item
-      integer, allocatable, target, intent(in) :: hist(:)
+      integer, target, intent(in) :: hist(NBINS, 4)
+      integer, intent(in) :: no_planes
+
       type(C_PTR) :: json
       integer(kind=8) :: headersize, filesize
       integer :: i
@@ -6440,9 +6440,10 @@ contains
       call add_json_string(json, 'LINE'//c_null_char, trim(item%line)//c_null_char)
       call add_json_string(json, 'FILTER'//c_null_char, trim(item%filter)//c_null_char)
 
-      if (allocated(hist)) then
-         call add_json_integer_array(json, 'histogram'//c_null_char, c_loc(hist), size(hist))
-      end if
+      ! specify the histogram dimensions
+      call add_json_integer(json, 'histogram_width'//c_null_char, size(hist, 1))
+      call add_json_integer(json, 'histogram_height'//c_null_char, no_planes)
+      call add_json_integer_array(json, 'histogram_array'//c_null_char, c_loc(hist), size(hist,1)*no_planes)
 
       call end_json(json)
 
@@ -6509,7 +6510,7 @@ contains
       logical(kind=c_bool), dimension(:, :), allocatable, target :: mask
 
       ! image histogram
-      integer, allocatable :: hist(:)
+      integer :: hist(NBINS, 4) ! up to 4 planes
 
       ! image tone mapping
       type(image_tone_mapping), target :: tone(4) ! up to 4 planes
@@ -6676,7 +6677,7 @@ contains
       ! use OpenMP to parallelise the loop
       !$omp parallel do default(shared) private(i)
       do i = 1, max_planes
-         call make_image_statistics(item, img_width, img_height, pixels(:,:,i), mask, hist, tone(i))
+         call make_image_statistics(item, img_width, img_height, pixels(:,:,i), mask, hist(:,i), tone(i))
       end do
       !$omp end parallel do
 
@@ -6688,7 +6689,7 @@ contains
       if (fetch_data .eq. 1) then
 
          ! JSON string
-         json = get_json(item, hist)
+         json = get_json(item, hist, max_planes)
          call write_json(fd, json)
          call delete_json(json)
 
