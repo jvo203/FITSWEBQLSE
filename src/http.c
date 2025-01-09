@@ -6994,8 +6994,11 @@ void write_image_spectrum(int fd, int no_planes, struct image_tone_mapping_type 
         printf("|%f,%d", pixels[i], mask[i]);
     printf("\n");*/
 
-    // compress pixels with ZFP
-    field = zfp_field_2d((void *)pixels, data_type, nx, ny);
+    // compress 2D or 3D pixels with ZFP
+    if (no_planes > 1)
+        field = zfp_field_3d((void *)pixels, data_type, nx, ny, nz);
+    else
+        field = zfp_field_2d((void *)pixels, data_type, nx, ny);
 
     // allocate metadata for a compressed stream
     zfp = zfp_stream_open(NULL);
