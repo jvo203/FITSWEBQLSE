@@ -15780,7 +15780,7 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
 
                                 let elapsed = Math.round(performance.now() - start);
 
-                                console.log("image width: ", img_width, "height: ", img_height, "elapsed: ", elapsed, "[ms]");
+                                console.log("image width: ", img_width, "height: ", img_height, "no. intensity planes:", plane_count, "elapsed: ", elapsed, "[ms]");
 
                                 if (!spectrum_view) {
                                     d3.select("#peak_tracking").remove();
