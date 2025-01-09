@@ -5934,7 +5934,7 @@ async function open_websocket_connection(_datasetId, index) {
                         tone_mapping.lmin = Math.log(p);
                         tone_mapping.lmax = Math.log(p + 1.0);
 
-                        var str_length = dv.getUint32(offset, endianness);
+                        let str_length = dv.getUint32(offset, endianness);
                         offset += 4;
 
                         let flux = new Uint8Array(received_msg, offset, str_length);
@@ -15439,7 +15439,7 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                 tone_mapping.lmin = Math.log(p);
                                 tone_mapping.lmax = Math.log(p + 1.0);
 
-                                var str_length = dv.getUint32(offset, endianness);
+                                let str_length = dv.getUint32(offset, endianness);
                                 offset += 4;
 
                                 let flux = new Uint8Array(received_msg, offset, str_length);
@@ -15466,6 +15466,13 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
 
                                 tone_mapping.black = dv.getFloat32(offset, endianness);
                                 offset += 4;
+
+                                if (tone_mapping.flux == "legacy") {
+                                    tone_mapping.black = tone_mapping.min;
+                                    tone_mapping.white = tone_mapping.max;
+                                }
+
+                                console.log(tone_mapping);
 
                                 tone_array[i] = tone_mapping;
                             }
@@ -15495,13 +15502,6 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
 
                             var frame_mask = new Uint8Array(received_msg, offset, mask_length);
                             offset += mask_length;
-
-                            if (tone_mapping.flux == "legacy") {
-                                tone_mapping.black = tone_mapping.min;
-                                tone_mapping.white = tone_mapping.max;
-                            }
-
-                            console.log(tone_mapping);
 
                             var has_json = true;
 
