@@ -15788,7 +15788,7 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                     for (let i = 0; i < plane_count; i++) {
                                         // extract each plane from pixels
                                         let pixels_i = pixels.slice(i * img_width * img_height, (i + 1) * img_width * img_height);
-                                        process_hdr_image(img_width, img_height, pixels_i, alpha, tone_array[i], index);
+                                        process_hdr_image(img_width, img_height, pixels_i, alpha, tone_array[i], i + 1);
                                     }
 
                                     if (has_json) {
