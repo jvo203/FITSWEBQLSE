@@ -15785,10 +15785,15 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                 if (!spectrum_view) {
                                     d3.select("#peak_tracking").remove();
 
-                                    for (let i = 0; i < plane_count; i++) {
-                                        // extract each plane from pixels
-                                        let pixels_i = pixels.slice(i * img_width * img_height, (i + 1) * img_width * img_height);
-                                        process_hdr_image(img_width, img_height, pixels_i, alpha, tone_array[i], i + 1);
+                                    if (plane_count > 1) {
+                                        for (let i = 0; i < plane_count; i++) {
+                                            // extract each plane from pixels
+                                            let pixels_i = pixels.slice(i * img_width * img_height, (i + 1) * img_width * img_height);
+                                            process_hdr_image(img_width, img_height, pixels_i, alpha, tone_array[i], i + 1);
+                                        }
+                                    } else {
+                                        // no need to slice a single pixels array
+                                        process_hdr_image(img_width, img_height, pixels, alpha, tone_array[0], index);
                                     }
 
                                     if (has_json) {
