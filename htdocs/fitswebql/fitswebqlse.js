@@ -5903,7 +5903,7 @@ async function open_websocket_connection(_datasetId, index) {
 
                             // decompressZFP returns std::vector<float>
                             // decompressZFPimage returns Float32Array but emscripten::typed_memory_view is buggy
-                            var res = Module.decompressZFPimage(view_width, view_height, frame_pixels);
+                            var res = Module.decompressZFPimage(view_width, view_height, plane_count, frame_pixels);
                             const pixels = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
 
                             var res = Module.decompressLZ4mask(view_width, view_height, frame_mask);
@@ -6021,7 +6021,7 @@ async function open_websocket_connection(_datasetId, index) {
 
                             // decompressZFP returns std::vector<float>
                             // decompressZFPimage returns Float32Array but emscripten::typed_memory_view is buggy
-                            var res = Module.decompressZFPimage(img_width, img_height, frame_pixels);
+                            var res = Module.decompressZFPimage(img_width, img_height, plane_count, frame_pixels);
                             const pixels = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
 
                             var res = Module.decompressLZ4mask(img_width, img_height, frame_mask);
@@ -15772,7 +15772,7 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
 
                                 // decompressZFP returns std::vector<float>
                                 // decompressZFPimage returns Float32Array but emscripten::typed_memory_view is buggy
-                                var res = Module.decompressZFPimage(img_width, img_height, frame_pixels);
+                                var res = Module.decompressZFPimage(img_width, img_height, plane_count, frame_pixels);
                                 const pixels = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
 
                                 res = Module.decompressLZ4mask(img_width, img_height, frame_mask);
@@ -15780,7 +15780,7 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
 
                                 let elapsed = Math.round(performance.now() - start);
 
-                                // console.log("image width: ", img_width, "height: ", img_height, "elapsed: ", elapsed, "[ms]");
+                                console.log("image width: ", img_width, "height: ", img_height, "elapsed: ", elapsed, "[ms]");
 
                                 if (!spectrum_view) {
                                     d3.select("#peak_tracking").remove();
