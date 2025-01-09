@@ -85,13 +85,13 @@ struct buffer
     unsigned int size;
 };
 
-/*val*/ buffer decompressZFPimage(int img_width, int img_height, std::string const &bytes)
+/*val*/ buffer decompressZFPimage(int img_width, int img_height, int plane_count, std::string const &bytes)
 {
     buffer wasmBuffer = {0, 0};
 
     // std::cout << "[decompressZFP2D] " << bytes.size() << " bytes." << std::endl;
 
-    size_t img_size = size_t(img_width) * size_t(img_height);
+    size_t img_size = size_t(img_width) * size_t(img_height) * size_t(plane_count);
 
     if (pixelBuffer != NULL && pixelLength != img_size)
     {
@@ -123,9 +123,13 @@ struct buffer
     size_t zfpsize = 0;
     uint nx = img_width;
     uint ny = img_height;
+    uint nz = plane_count;
 
-    // decompress pixels with ZFP
-    field = zfp_field_2d((void *)pixelBuffer, data_type, nx, ny);
+    // decompress 2D or 3D pixels with ZFP
+    if (plane_count > 1)
+        field = zfp_field_3d((void *)pixelBuffer, data_type, nx, ny, nz);
+    else
+        field = zfp_field_2d((void *)pixelBuffer, data_type, nx, ny);
 
     // allocate metadata for a compressed stream
     zfp = zfp_stream_open(NULL);
