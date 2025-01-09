@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-01-07.0";
+    return "JS2025-01-09.0";
 }
 
 function uuidv4() {
@@ -15482,7 +15482,7 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                 tone_mapping.white = tone_mapping.max;
                             }
 
-                            //console.log(tone_mapping);
+                            console.log(tone_mapping);
 
                             var has_json = true;
 
