@@ -5981,13 +5981,14 @@ async function open_websocket_connection(_datasetId, index) {
                         }
 
                         // update the tone mapping
-                        fitsContainer[index - 1].min = tone_mapping.min;
+                        // not in use anymore?
+                        /*fitsContainer[index - 1].min = tone_mapping.min;
                         fitsContainer[index - 1].max = tone_mapping.max;
                         fitsContainer[index - 1].median = tone_mapping.median;
                         fitsContainer[index - 1].sensitivity = tone_mapping.sensitivity;
                         fitsContainer[index - 1].ratio_sensitivity = tone_mapping.ratio_sensitivity;
                         fitsContainer[index - 1].black = tone_mapping.black;
-                        fitsContainer[index - 1].white = tone_mapping.white;
+                        fitsContainer[index - 1].white = tone_mapping.white;*/
 
                         // next receive/process the 32-bit floating-point image frame
                         var img_width = dv.getUint32(offset, endianness);
@@ -6151,7 +6152,7 @@ async function open_websocket_connection(_datasetId, index) {
 
                         //console.log("histogram refresh", min, max, median, sensitivity, ratio_sensitivity, black, white);
 
-                        let fitsData = fitsContainer[index - 1];
+                        let fitsData = fitsContainer[index - 1]; // imageContainer[index - 1].tone_mapping?
                         //console.log("min: ", fitsData.min, "-->", min);
                         //console.log("max: ", fitsData.max, "-->", max);
                         //console.log("median: ", fitsData.median, "-->", median);
@@ -6160,13 +6161,14 @@ async function open_websocket_connection(_datasetId, index) {
                         //console.log("black: ", fitsData.black, "-->", black);
                         //console.log("white: ", fitsData.white, "-->", white);
 
-                        fitsContainer[index - 1].min = min;
+                        // not in use anymore?
+                        /*fitsContainer[index - 1].min = min;
                         fitsContainer[index - 1].max = max;
                         fitsContainer[index - 1].median = median;
                         fitsContainer[index - 1].sensitivity = sensitivity;
                         fitsContainer[index - 1].ratio_sensitivity = ratio_sensitivity;
                         fitsContainer[index - 1].black = black;
-                        fitsContainer[index - 1].white = white;
+                        fitsContainer[index - 1].white = white;*/
 
                         var nbins = dv.getUint32(40, endianness);
                         var histogram = new Int32Array(received_msg, 44, nbins);
@@ -15415,43 +15417,60 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                             //console.log("FITSImage dataview byte length: ", dv.byteLength);
 
                             var offset = 0;
-                            var no_planes = dv.getUint32(offset, endianness);
+                            plane_count = dv.getUint32(offset, endianness);
                             offset += 4;
 
-                            var tone_mapping = new Object();
-                            let p = 0.5;
-                            tone_mapping.lmin = Math.log(p);
-                            tone_mapping.lmax = Math.log(p + 1.0);
+                            // re-allocate the container arrays
+                            if (plane_count > 1) {
+                                fitsContainer = new Array(plane_count);
+                                imageContainer = new Array(plane_count);
 
-                            var str_length = dv.getUint32(offset, endianness);
-                            offset += 4;
+                                for (let i = 0; i < plane_count; i++) {
+                                    fitsContainer[i] = null;
+                                    imageContainer[i] = null;
+                                }
+                            }
 
-                            let flux = new Uint8Array(received_msg, offset, str_length);
-                            tone_mapping.flux = (new TextDecoder("utf-8").decode(flux)).trim();
-                            offset += str_length;
+                            var tone_array = new Array(plane_count);
 
-                            tone_mapping.min = dv.getFloat32(offset, endianness);
-                            offset += 4;
+                            for (let i = 0; i < plane_count; i++) {
+                                let tone_mapping = new Object();
+                                let p = 0.5;
+                                tone_mapping.lmin = Math.log(p);
+                                tone_mapping.lmax = Math.log(p + 1.0);
 
-                            tone_mapping.max = dv.getFloat32(offset, endianness);
-                            offset += 4;
+                                var str_length = dv.getUint32(offset, endianness);
+                                offset += 4;
 
-                            tone_mapping.median = dv.getFloat32(offset, endianness);
-                            offset += 4;
+                                let flux = new Uint8Array(received_msg, offset, str_length);
+                                tone_mapping.flux = (new TextDecoder("utf-8").decode(flux)).trim();
+                                offset += str_length;
 
-                            tone_mapping.sensitivity = dv.getFloat32(offset, endianness);
-                            offset += 4;
+                                tone_mapping.min = dv.getFloat32(offset, endianness);
+                                offset += 4;
 
-                            tone_mapping.ratio_sensitivity = dv.getFloat32(offset, endianness);
-                            offset += 4;
+                                tone_mapping.max = dv.getFloat32(offset, endianness);
+                                offset += 4;
 
-                            tone_mapping.white = dv.getFloat32(offset, endianness);
-                            offset += 4;
+                                tone_mapping.median = dv.getFloat32(offset, endianness);
+                                offset += 4;
 
-                            tone_mapping.black = dv.getFloat32(offset, endianness);
-                            offset += 4;
+                                tone_mapping.sensitivity = dv.getFloat32(offset, endianness);
+                                offset += 4;
 
-                            //console.log(tone_mapping);
+                                tone_mapping.ratio_sensitivity = dv.getFloat32(offset, endianness);
+                                offset += 4;
+
+                                tone_mapping.white = dv.getFloat32(offset, endianness);
+                                offset += 4;
+
+                                tone_mapping.black = dv.getFloat32(offset, endianness);
+                                offset += 4;
+
+                                tone_array[i] = tone_mapping;
+                            }
+
+                            console.log(tone_array);
 
                             var img_width = dv.getUint32(offset, endianness);
                             offset += 4;
@@ -15459,7 +15478,7 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                             var img_height = dv.getUint32(offset, endianness);
                             offset += 4;
 
-                            //console.log('img_width:', img_width, 'img_height:', img_height);
+                            // console.log('img_width:', img_width, 'img_height:', img_height);
 
                             var pixels_length = dv.getUint32(offset, endianness);
                             offset += 4;
@@ -20999,6 +21018,7 @@ async function mainRenderer() {
             ]);
         }
 
+        plane_count = 1; // by default there is only one intensity plane
         va_count = parseInt(votable.getAttribute('data-va_count'));
         datasetId = votable.getAttribute('data-datasetId');//make it a global variable
 
