@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-01-09.0";
+    return "JS2025-01-10.0";
 }
 
 function uuidv4() {
@@ -4183,23 +4183,25 @@ function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, i
 
     //next display the image
     if (va_count == 1) {
-        if (!streaming) {
-            init_webgl_image_buffers(va_count);
+        if (index == 1) { // plane_count could be > 1, by default we display the first intensity plane (i.e. Stokes I), and let a user select the other planes from the menu
+            if (!streaming) {
+                init_webgl_image_buffers(va_count);
+            }
+
+            setup_image_selection();
+
+            try {
+                display_scale_info();
+            }
+            catch (err) {
+            };
+
+            has_image = true;
+
+            setup_viewports();
+
+            hide_hourglass();
         }
-
-        setup_image_selection();
-
-        try {
-            display_scale_info();
-        }
-        catch (err) {
-        };
-
-        has_image = true;
-
-        setup_viewports();
-
-        hide_hourglass();
     } else {
         if (composite_view) {
             // create a composite image texture
