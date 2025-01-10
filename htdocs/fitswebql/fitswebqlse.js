@@ -6141,7 +6141,7 @@ async function open_websocket_connection(_datasetId, index) {
                         return;
                     }
 
-                    //histogram refresh
+                    //histogram refresh (deprecated, not in use anymore, to be removed)
                     if (type == 4) {
                         hide_cursor();
                         var min = dv.getFloat32(12, endianness);
@@ -15696,12 +15696,12 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                 }
 
                                 if (plane_count > 1) {
-                                    let histogram_width = fitsData.histogram_width;
-                                    let histogram_height = fitsData.histogram_height;
+                                    let nbins = fitsData.histogram_width;
+                                    let nplanes = fitsData.histogram_height;
                                     let histogram_array = fitsData.histogram_array;
 
                                     // cross-check histogram_height and plane_count, throw an error if they are not equal
-                                    if (histogram_height != plane_count) {
+                                    if (nplanes != plane_count) {
                                         throw new Error("histogram_height != plane_count");
                                     }
 
@@ -15710,7 +15710,7 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                         fitsContainer[i] = JSON.parse(JSON.stringify(fitsData));
 
                                         // extract the histogram_array for each plane
-                                        fitsContainer[i].histogram = histogram_array.slice(i * histogram_width, (i + 1) * histogram_width);
+                                        fitsContainer[i].histogram = histogram_array.slice(i * nbins, (i + 1) * nbins);
                                         fitsContainer[i].histogram_array = null;
                                     }
                                 } else {
