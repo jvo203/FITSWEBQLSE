@@ -4183,7 +4183,7 @@ function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, i
 
     //next display the image
     if (va_count == 1) {
-        if (index == 1) { // plane_count could be > 1, by default we display the first intensity plane (i.e. Stokes I), and let a user select the other planes from the menu
+        if (index == previous_plane) { // plane_count could be > 1, by default we display the first intensity plane (i.e. Stokes I), and let a user select the other planes from the menu
             if (!streaming) {
                 init_webgl_image_buffers(va_count);
             }
@@ -5374,8 +5374,9 @@ function webgl_image_renderer(index, gl, width, height) {
         // console.log("xmin:", xmin, "ymin:", ymin, "_width:", _width, "_height:", _height);
         gl.uniform4fv(locationOfBox, [xmin, ymin, _width, _height]);
 
-        // get the multiplier
+        // get the multiplier     
         var noise_sensitivity = document.getElementById('sensitivity' + index).value;
+
         var multiplier = get_noise_sensitivity(noise_sensitivity);
 
         if (image.tone_mapping.flux == "legacy") {
@@ -10409,6 +10410,37 @@ function display_preferences(index) {
     has_preferences = true;
 }
 
+function change_intensity_plane() {
+    var index = parseInt(document.getElementById('intensity_plane').value);
+    console.log("change_intensity_plane: index = ", index);
+
+    // clear the existing image WebGL buffers
+    clear_webgl_image_buffers(previous_plane);
+
+    try {
+        d3.select("#interaction" + previous_plane).remove();
+    }
+    catch (e) { };
+
+    // change the id attribute of HistogramCanvas and HistogramSVG
+    d3.select("#HistogramCanvas" + previous_plane)
+        .attr("id", "HistogramCanvas" + index);
+
+    d3.select("#HistogramSVG" + previous_plane)
+        .attr("id", "HistogramSVG" + index);
+
+    // clear anything below the Stokes Parameters dropdown
+
+    //refresh the histogram
+    // redraw_histogram(index);
+    //display_histogram(index, false);
+
+    // set the new WebGL buffers
+    init_webgl_image_buffers(index);
+
+    previous_plane = index;
+}
+
 function display_histogram(index) {
     let fitsData = fitsContainer[index - 1];
     let imageData = imageContainer[index - 1];
@@ -10483,7 +10515,7 @@ function display_histogram(index) {
 
     let Stokes = ["I", "Q", "U", "V"];
 
-    if (plane_count > 1) {
+    if (!composite_view && plane_count > 1) {
         var tmpA = imageDropdown.append("li")
             .append("a")
             .attr("class", "form-group")
@@ -10506,7 +10538,7 @@ function display_histogram(index) {
 
         tmpA.append("select")
             .attr("id", "intensity_plane")
-            .attr("onchange", "javascript:change_plane_intensity();")
+            .attr("onchange", "javascript:change_intensity_plane();")
             .html(intensity_string);
 
         document.getElementById('intensity_plane').value = index;
@@ -13389,6 +13421,9 @@ function get_diagonal_image_position_7(index, width, height) {
 }
 
 function get_image_position(index, width, height) {
+    if (va_count == 1)
+        return get_diagonal_image_position(va_count, width, height);
+
     if (va_count <= 4)
         return get_diagonal_image_position(index, width, height);
 
@@ -21084,6 +21119,8 @@ async function mainRenderer() {
         }
 
         plane_count = 1; // by default there is only one intensity plane
+        previous_plane = 1;
+
         va_count = parseInt(votable.getAttribute('data-va_count'));
         datasetId = votable.getAttribute('data-datasetId');//make it a global variable
 
