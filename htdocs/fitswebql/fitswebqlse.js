@@ -15695,6 +15695,29 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                     //console.log("has_freq:", has_frequency_info, "has_vel:", has_velocity_info);
                                 }
 
+                                if (plane_count > 1) {
+                                    let histogram_width = fitsData.histogram_width;
+                                    let histogram_height = fitsData.histogram_height;
+                                    let histogram_array = fitsData.histogram_array;
+
+                                    // cross-check histogram_height and plane_count, throw an error if they are not equal
+                                    if (histogram_height != plane_count) {
+                                        throw new Error("histogram_height != plane_count");
+                                    }
+
+                                    // deep-copy the fitsData object for each plane, adding respective histograms
+                                    for (let i = 0; i < plane_count; i++) {
+                                        fitsContainer[i] = JSON.parse(JSON.stringify(fitsData));
+
+                                        // extract the histogram_array for each plane
+                                        fitsContainer[i].histogram = histogram_array.slice(i * histogram_width, (i + 1) * histogram_width);
+                                        fitsContainer[i].histogram_array = null;
+                                    }
+                                } else {
+                                    fitsData.histogram = fitsData.histogram_array;
+                                    fitsData.histogram_array = null;
+                                }
+
                                 let res = display_FITS_header(index);
 
                                 display_preferences(index);
