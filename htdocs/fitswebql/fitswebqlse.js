@@ -15705,7 +15705,7 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                         throw new Error("histogram_height != plane_count");
                                     }
 
-                                    // deep-copy the fitsData object for each plane, adding respective histograms
+                                    // deep-copy the fitsData object for each plane, adding respective histograms                                    
                                     for (let i = 0; i < plane_count; i++) {
                                         fitsContainer[i] = JSON.parse(JSON.stringify(fitsData));
 
