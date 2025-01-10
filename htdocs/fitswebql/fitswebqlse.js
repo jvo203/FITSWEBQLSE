@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-01-10.0";
+    return "JS2025-01-10.1";
 }
 
 function uuidv4() {
@@ -10481,6 +10481,37 @@ function display_histogram(index) {
             .style("padding-left", "0");
     }
 
+    let Stokes = ["I", "Q", "U", "V"];
+
+    if (plane_count > 1) {
+        var tmpA = imageDropdown.append("li")
+            .append("a")
+            .attr("class", "form-group")
+            .attr("class", "form-horizontal");
+
+        var intensity_string = '';
+
+        for (let i = 0; i < plane_count; i++) {
+            if (fitsData.is_stokes) {
+                intensity_string += "<option value=" + (i + 1) + ">Stokes " + Stokes[i] + "</option>";
+            } else {
+                intensity_string += "<option value=" + (i + 1) + ">Plane " + str(i + 1) + "</option>";
+            }
+        }
+
+        tmpA.append("label")
+            .attr("for", "intensity_plane")
+            .attr("class", "control-label")
+            .html("display intensity:&nbsp; ");
+
+        tmpA.append("select")
+            .attr("id", "intensity_plane")
+            .attr("onchange", "javascript:change_plane_intensity();")
+            .html(intensity_string);
+
+        document.getElementById('intensity_plane').value = index;
+    }
+
     var colourmap_string = "<option>amber</option><option>red</option><option>green</option><option>blue</option><option>greyscale</option><option>negative</option><option disabled>---</option><option>cubehelix</option><option>haxby</option><option>hot</option><option>parula</option><option>rainbow</option><option disabled>---</option><option>inferno</option><option>magma</option><option>plasma</option><option>viridis</option>";
 
     tmpA = imageDropdown.append("li")
@@ -11146,7 +11177,7 @@ function setup_axes() {
              n = d * (fitsData.depth-1) + 1 ;
            else
              n = (1-d) * (fitsData.depth-1) + 1 ;
-
+ 
            var freq = fitsData.CRVAL3+fitsData.CDELT3*(n-fitsData.CRPIX3) ;
            freq /= 1e9 ;//convert from Hz to GHz
            return freq.toPrecision(6) ;
@@ -16781,7 +16812,7 @@ function updateKalman() {
     var velY = (cur_yPos - last_yPos)/dt;
     var accX = (velX - last_velX)/dt;
     var accY = (velY - last_velY)/dt;
-
+ 
     last_xPos = cur_xPos ;
     last_yPos = cur_yPos ;
     last_velX = velX ;
@@ -16818,18 +16849,18 @@ function updateKalman() {
 
     /*mouse_position.x = cur_x.elements[0];
     mouse_position.y = cur_x.elements[1];
-
+ 
     return;
-
+ 
     //extrapolation
     var predX = last_x;
     var count = 5;//how many frames ahead
-
+ 
     for (var i = 0; i < count; i++)
       predX = (A.multiply(predX)).add(B.multiply(control));
-
+ 
     console.log("extrapolation: x=", predX.elements[0], "y=", predX.elements[1]);
-
+ 
     mouse_position.x = predX.elements[0];
     mouse_position.y = predX.elements[1];*/
 }
@@ -16873,7 +16904,7 @@ function change_noise_sensitivity(index) {
     // set image tone mapping
     var image = imageContainer[index - 1];
     /*let fitsData = fitsContainer[index - 1];
-
+ 
     if (image.tone_mapping.flux == "ratio")
       image.tone_mapping.ratio_sensitivity = multiplier * fitsData.ratio_sensitivity;
     else
@@ -18306,17 +18337,17 @@ function display_menu() {
                 //window.location.reload();
 
                 /*var new_loc = window.location.href.replace("&view=", "&dummy=");
-
+ 
                 if (composite_view && optical_view)
                   new_loc += "&view=composite,optical";
                 else {
                   if (composite_view)
                     new_loc += "&view=composite";
-
+ 
                   if (optical_view)
                     new_loc += "&view=optical";
                 }
-
+ 
                 window.location.replace(new_loc);*/
             })
             .html(htmlStr);
@@ -19296,14 +19327,14 @@ async function display_FITS_header(index) {
         /*fitsHeader = new Uint8Array(window.atob(fitsData.HEADER.replace(/\s/g, '')).split("").map(function (c) {
           return c.charCodeAt(0);
         }));
-
+ 
         var Buffer = require('buffer').Buffer;
         var LZ4 = require('lz4');
-
+ 
         var uncompressed = new Buffer(parseInt(fitsData.HEADERSIZE, 10));
         uncompressedSize = LZ4.decodeBlock(new Buffer(fitsHeader), uncompressed);
         uncompressed = uncompressed.slice(0, uncompressedSize);
-
+ 
         try {
           fitsHeader = String.fromCharCode.apply(null, uncompressed);
         }
