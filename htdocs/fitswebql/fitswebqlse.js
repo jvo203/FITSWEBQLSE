@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-01-10.1";
+    return "JS2025-01-11.0";
 }
 
 function uuidv4() {
@@ -5568,7 +5568,7 @@ function poll_heartbeat() {
                 if (ping_latency > 0) {
                     if (realtime_spectrum) {
                         fps = 1000 / ping_latency;
-                        fps = Math.min(30, fps);
+                        fps = Math.min(60, fps); // was 30
                         fps = Math.max(10, fps);
                     }
                     else
@@ -6640,7 +6640,7 @@ async function open_websocket_connection(_datasetId, index) {
                         if (ping_latency > 0) {
                             if (realtime_spectrum) {
                                 fps = 1000 / ping_latency;
-                                fps = Math.min(30, fps);
+                                fps = Math.min(60, fps); // was 30
                                 fps = Math.max(10, fps);
                             }
                             else
