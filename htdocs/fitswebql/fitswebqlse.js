@@ -10418,9 +10418,7 @@ function change_intensity_plane() {
     clear_webgl_image_buffers(previous_plane);
 
     try {
-        d3.select("#interaction" + previous_plane).remove();
-
-        // clear anything below the Stokes Parameters dropdown
+        // clear everything below the Stokes Parameters dropdown
         d3.select("#planeTag" + previous_plane).remove();
     }
     catch (e) { console.log(e); };
