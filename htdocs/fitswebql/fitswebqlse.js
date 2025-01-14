@@ -10428,19 +10428,20 @@ function change_intensity_plane() {
     // set the new WebGL buffers
     init_webgl_image_buffers(index);
 
-    // TODO: update the plot legend
-
-    previous_plane = index;
+    clear_webgl_legend_buffers(previous_plane);
 
     // refresh tone mapping
     change_tone_mapping(index, true);
 
-    /*if (composite_view) {
+    if (composite_view) {
         if (image_count == va_count)
             display_rgb_legend();
     } else {
-        display_legend();
-    }*/
+        display_legend(index);
+    }
+
+    // flip the previous plane to the new plane
+    previous_plane = index;
 }
 
 function display_histogram(index, initPlanes = true) {
@@ -19834,7 +19835,7 @@ function display_rgb_legend() {
     }
 }
 
-function display_legend() {
+function display_legend(index = previous_plane) {
     //console.log("display_legend()");
 
     if (va_count > 1)
@@ -19843,10 +19844,10 @@ function display_legend() {
     //do we have all the inputs?
     var black, white, median, multiplier, flux;
 
-    var flux_elem = d3.select("#flux_path" + va_count);
+    var flux_elem = d3.select("#flux_path" + index);
 
     try {
-        flux = document.getElementById('flux' + va_count).value
+        flux = document.getElementById('flux' + index).value
     }
     catch (e) {
         console.log('flux not available yet');
@@ -19893,7 +19894,7 @@ function display_legend() {
     }
 
     try {
-        clear_webgl_legend_buffers(va_count);
+        clear_webgl_legend_buffers(index);
     }
     catch (e) {
     }
@@ -19916,8 +19917,8 @@ function display_legend() {
         .attr("id", "legend")
         .attr("opacity", 1.0);
 
-    init_webgl_legend_buffers(x, Math.round(0.1 * height), Math.round(rectWidth), Math.round(legendHeight), va_count);
-    clear_webgl_legend_buffers(va_count);
+    init_webgl_legend_buffers(x, Math.round(0.1 * height), Math.round(rectWidth), Math.round(legendHeight), index);
+    clear_webgl_legend_buffers(index);
 
     var upper_range;
 
@@ -19942,7 +19943,7 @@ function display_legend() {
             if (d == 1)
                 prefix = "≥";
 
-            var pixelVal = get_pixel_flux(d, va_count);
+            var pixelVal = get_pixel_flux(d, index);
 
             var number;
 
@@ -19961,7 +19962,7 @@ function display_legend() {
         .attr("transform", "translate(" + ((width - img_width) / 2 - 2.0 * rectWidth) + "," + 0.1 * height + ")")
         .call(colourAxis);
 
-    let fitsData = fitsContainer[va_count - 1];
+    let fitsData = fitsContainer[index - 1];
 
     var bunit = '';
     if (fitsData.BUNIT != '') {
