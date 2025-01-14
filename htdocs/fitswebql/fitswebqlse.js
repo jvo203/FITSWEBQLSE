@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-01-11.0";
+    return "JS2025-01-14.0";
 }
 
 function uuidv4() {
@@ -10419,29 +10419,23 @@ function change_intensity_plane() {
 
     try {
         d3.select("#interaction" + previous_plane).remove();
+
+        // clear anything below the Stokes Parameters dropdown
+        d3.select("#planeTag" + previous_plane).remove();
     }
-    catch (e) { };
+    catch (e) { console.log(e); };
 
-    // change the id attribute of HistogramCanvas and HistogramSVG
-    d3.select("#HistogramCanvas" + previous_plane)
-        .attr("id", "HistogramCanvas" + index);
-
-    d3.select("#HistogramSVG" + previous_plane)
-        .attr("id", "HistogramSVG" + index);
-
-    // clear anything below the Stokes Parameters dropdown
-
-    //refresh the histogram
-    // redraw_histogram(index);
-    //display_histogram(index, false);
+    display_histogram(index, false);
 
     // set the new WebGL buffers
     init_webgl_image_buffers(index);
 
+    // TODO: update the plot legend
+
     previous_plane = index;
 }
 
-function display_histogram(index) {
+function display_histogram(index, initPlanes = true) {
     let fitsData = fitsContainer[index - 1];
     let imageData = imageContainer[index - 1];
 
@@ -10460,6 +10454,43 @@ function display_histogram(index) {
         console.log("[display_histogram] imageData OK.");
 
     var imageDropdown = d3.select("#imageDropdown");
+
+    if (initPlanes) {
+        let Stokes = ["I", "Q", "U", "V"];
+
+        if (!composite_view && plane_count > 1) {
+            var tmpA = imageDropdown.append("li")
+                .append("a")
+                .attr("class", "form-group")
+                .attr("class", "form-horizontal");
+
+            var intensity_string = '';
+
+            for (let i = 0; i < plane_count; i++) {
+                if (fitsData.is_stokes) {
+                    intensity_string += "<option value=" + (i + 1) + ">Stokes " + Stokes[i] + "</option>";
+                } else {
+                    intensity_string += "<option value=" + (i + 1) + ">Plane " + str(i + 1) + "</option>";
+                }
+            }
+
+            tmpA.append("label")
+                .attr("for", "intensity_plane")
+                .attr("class", "control-label")
+                .html("display intensity:&nbsp; ");
+
+            tmpA.append("select")
+                .attr("id", "intensity_plane")
+                .attr("onchange", "javascript:change_intensity_plane();")
+                .html(intensity_string);
+
+            document.getElementById('intensity_plane').value = index;
+        }
+    }
+
+    imageDropdown = imageDropdown
+        .append("div")
+        .attr("id", "planeTag" + index);
 
     //add multiple panes
     if (va_count > 1) {
@@ -10511,37 +10542,6 @@ function display_histogram(index) {
             .style("list-style-image", "none")
             .style("text-align", "left")
             .style("padding-left", "0");
-    }
-
-    let Stokes = ["I", "Q", "U", "V"];
-
-    if (!composite_view && plane_count > 1) {
-        var tmpA = imageDropdown.append("li")
-            .append("a")
-            .attr("class", "form-group")
-            .attr("class", "form-horizontal");
-
-        var intensity_string = '';
-
-        for (let i = 0; i < plane_count; i++) {
-            if (fitsData.is_stokes) {
-                intensity_string += "<option value=" + (i + 1) + ">Stokes " + Stokes[i] + "</option>";
-            } else {
-                intensity_string += "<option value=" + (i + 1) + ">Plane " + str(i + 1) + "</option>";
-            }
-        }
-
-        tmpA.append("label")
-            .attr("for", "intensity_plane")
-            .attr("class", "control-label")
-            .html("display intensity:&nbsp; ");
-
-        tmpA.append("select")
-            .attr("id", "intensity_plane")
-            .attr("onchange", "javascript:change_intensity_plane();")
-            .html(intensity_string);
-
-        document.getElementById('intensity_plane').value = index;
     }
 
     var colourmap_string = "<option>amber</option><option>red</option><option>green</option><option>blue</option><option>greyscale</option><option>negative</option><option disabled>---</option><option>cubehelix</option><option>haxby</option><option>hot</option><option>parula</option><option>rainbow</option><option disabled>---</option><option>inferno</option><option>magma</option><option>plasma</option><option>viridis</option>";
