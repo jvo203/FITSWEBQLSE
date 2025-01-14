@@ -8952,7 +8952,7 @@ function change_tone_mapping(index, recursive) {
     }
 
     if (va_count == 1) {
-        update_legend();
+        update_legend(index);
     } else {
         draw_rbg_legend(index);
     }
@@ -9388,7 +9388,7 @@ function add_histogram_line(g, pos, width, height, offset, info, position, addLi
         image.refresh = true;
 
         if (va_count == 1) {
-            update_legend();
+            update_legend(index);
         } else {
             draw_rbg_legend(index);
         }
@@ -16956,7 +16956,7 @@ function change_noise_sensitivity(index) {
     image.refresh = true;
 
     if (va_count == 1) {
-        update_legend();
+        update_legend(index);
     } else {
         draw_rbg_legend(index);
     }
@@ -19994,10 +19994,9 @@ function display_legend() {
     }
 }
 
-function update_legend() {
+function update_legend(index) {
     try {
-        //var flux = document.getElementById('flux' + va_count).value
-        var flux = document.getElementById('flux' + previous_plane).value
+        var flux = document.getElementById('flux' + index).value;
     }
     catch (e) {
         console.log('flux not available yet');
@@ -20057,7 +20056,7 @@ function update_legend() {
             if (d == 1)
                 prefix = "≥";
 
-            var pixelVal = get_pixel_flux(d, va_count);
+            var pixelVal = get_pixel_flux(d, index);
 
             var number;
 
