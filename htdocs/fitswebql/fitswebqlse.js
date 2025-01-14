@@ -19996,7 +19996,8 @@ function display_legend() {
 
 function update_legend() {
     try {
-        var flux = document.getElementById('flux' + va_count).value
+        //var flux = document.getElementById('flux' + va_count).value
+        var flux = document.getElementById('flux' + previous_plane).value
     }
     catch (e) {
         console.log('flux not available yet');
