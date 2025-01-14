@@ -10428,10 +10428,11 @@ function change_intensity_plane() {
     // set the new WebGL buffers
     init_webgl_image_buffers(index);
 
-    clear_webgl_legend_buffers(previous_plane);
-
     // refresh tone mapping
     change_tone_mapping(index, true);
+
+    // clear the existing legend WebGL buffers
+    clear_webgl_legend_buffers(previous_plane);
 
     if (composite_view) {
         if (image_count == va_count)
