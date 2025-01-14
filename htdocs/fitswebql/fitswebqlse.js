@@ -10431,6 +10431,16 @@ function change_intensity_plane() {
     // TODO: update the plot legend
 
     previous_plane = index;
+
+    // refresh tone mapping
+    change_tone_mapping(index, true);
+
+    /*if (composite_view) {
+        if (image_count == va_count)
+            display_rgb_legend();
+    } else {
+        display_legend();
+    }*/
 }
 
 function display_histogram(index, initPlanes = true) {
