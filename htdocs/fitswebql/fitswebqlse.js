@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-01-14.0";
+    return "JS2025-01-15.0";
 }
 
 function uuidv4() {
@@ -2918,7 +2918,7 @@ function webgl_composite_viewport_renderer(gl, container, height) {
 }
 
 function webgl_zoom_renderer(gl, height) {
-    let image = imageContainer[va_count - 1];
+    let image = imageContainer[previous_plane - 1];// va_count
 
     if (image == null) {
         console.log("webgl_zoom_renderer: null image");
@@ -3025,7 +3025,7 @@ function webgl_zoom_renderer(gl, height) {
         let now = performance.now();
 
         // limit the FPS
-        let _fps = 30;
+        let _fps = 60; // was 30
         if ((now - last_viewport_loop) < (1000 / _fps)) {
             viewport.loopId = requestAnimationFrame(zoom_rendering_loop);
             return;
@@ -3048,7 +3048,7 @@ function webgl_zoom_renderer(gl, height) {
             invalidateViewport = false;
         }
 
-        let index = va_count;
+        let index = previous_plane;//va_count;
 
         //WebGL how to convert from clip space to pixels
         let px = viewport_zoom_settings.px;
@@ -5375,7 +5375,13 @@ function webgl_image_renderer(index, gl, width, height) {
         gl.uniform4fv(locationOfBox, [xmin, ymin, _width, _height]);
 
         // get the multiplier     
-        var noise_sensitivity = document.getElementById('sensitivity' + index).value;
+        try {
+            var noise_sensitivity = document.getElementById('sensitivity' + index).value;
+        } catch (err) {
+            console.log('index=', index, err);
+            // rethrow the error
+            throw err;
+        }
 
         var multiplier = get_noise_sensitivity(noise_sensitivity);
 
@@ -7090,8 +7096,8 @@ function HaversineDistance(ra1, dec1, ra2, dec2) {
     return d;
 }
 
-function display_scale_info() {
-    let fitsData = fitsContainer[va_count - 1];
+function display_scale_info(index = previous_plane) {
+    let fitsData = fitsContainer[index - 1];
 
     if (fitsData == null)
         return;
@@ -7140,7 +7146,7 @@ function display_scale_info() {
     var img_x = parseFloat(elem.getAttribute("x"));
     var img_y = parseFloat(elem.getAttribute("y"));
 
-    var image = imageContainer[va_count - 1];
+    var image = imageContainer[index - 1];
     var image_bounding_dims = image.image_bounding_dims;
     var scale = image.height / image_bounding_dims.height;
 
@@ -7257,11 +7263,11 @@ function display_scale_info() {
 }
 
 
-function display_gridlines() {
+function display_gridlines(index = previous_plane) {
     if (va_count > 1 && !composite_view)
         return;
 
-    let fitsData = fitsContainer[va_count - 1];
+    let fitsData = fitsContainer[va_count - 1]; // not index - 1, force to use the fitsData with the header wcs info
 
     if (fitsData == null)
         return;
@@ -7317,7 +7323,7 @@ function display_gridlines() {
                 if (d == 0.0 || d == 1.0)
                     return "";
 
-                var image = imageContainer[va_count - 1];
+                var image = imageContainer[index - 1];
                 var image_bounding_dims = image.image_bounding_dims;
 
                 var tmp, orig_x, orig_y;
@@ -7365,7 +7371,7 @@ function display_gridlines() {
                 if (d == 0.0 || d == 1.0)
                     return "";
 
-                var image = imageContainer[va_count - 1];
+                var image = imageContainer[index - 1];
                 var image_bounding_dims = image.image_bounding_dims;
 
                 var tmp = image_bounding_dims.x1 + d * (image_bounding_dims.width - 1);
@@ -7412,7 +7418,7 @@ function display_gridlines() {
                 if (d == 0.0 || d == 1.0)
                     return "";
 
-                var image = imageContainer[va_count - 1];
+                var image = imageContainer[index - 1];
                 var image_bounding_dims = image.image_bounding_dims;
 
                 var tmp, orig_x, orig_y;
@@ -7826,7 +7832,7 @@ function display_beam() {
     }
 }
 
-function zoom_beam() {
+function zoom_beam(index = previous_plane) {
     let fitsData = fitsContainer[va_count - 1];
 
     if (fitsData == null)
@@ -7849,7 +7855,7 @@ function zoom_beam() {
             .attr("id", "zoomBeam")
             .attr("opacity", opacity);
 
-        var image_bounding_dims = imageContainer[va_count - 1].image_bounding_dims;
+        var image_bounding_dims = imageContainer[index - 1].image_bounding_dims;
         var clipSize = Math.min(image_bounding_dims.width - 1, image_bounding_dims.height - 1) / zoom_scale;
 
         var elem = d3.select("#image_rectangle");
@@ -10440,6 +10446,16 @@ function change_intensity_plane() {
     } else {
         display_legend(index);
     }
+
+    setup_image_selection(index);
+
+    try {
+        display_scale_info(index);
+    }
+    catch (err) {
+    };
+
+    setup_viewports();
 
     // flip the previous plane to the new plane
     previous_plane = index;
@@ -14048,7 +14064,7 @@ function hide_cursor() {
         .style('cursor', 'none');
 }
 
-function setup_image_selection() {
+function setup_image_selection(plane_index = previous_plane) {
     //delete previous instances
     try {
         d3.select("#region").remove();
@@ -14062,7 +14078,7 @@ function setup_image_selection() {
     var width = parseFloat(svg.attr("width"));
     var height = parseFloat(svg.attr("height"));
 
-    var image_bounding_dims = imageContainer[va_count - 1].image_bounding_dims;
+    var image_bounding_dims = imageContainer[plane_index - 1].image_bounding_dims;
     var scale = get_image_scale(width, height, image_bounding_dims.width, image_bounding_dims.height);
     var img_width = Math.floor(scale * image_bounding_dims.width);
     var img_height = Math.floor(scale * image_bounding_dims.height);
@@ -14317,7 +14333,7 @@ function setup_image_selection() {
 
             // cancel the image animation loop
             if (va_count == 1) {
-                clear_webgl_image_buffers(va_count);
+                clear_webgl_image_buffers(plane_index);
             } else {
                 if (composite_view) {
                     clear_webgl_composite_image_buffers();
@@ -14325,7 +14341,7 @@ function setup_image_selection() {
             }
 
             try {
-                zoom_beam();
+                zoom_beam(plane_index);
             }
             catch (e) {
                 console.log('NON-CRITICAL:', e);
@@ -14579,8 +14595,8 @@ function setup_image_selection() {
             }
 
             if (va_count == 1) {
-                clear_webgl_image_buffers(va_count);
-                init_webgl_image_buffers(va_count);
+                clear_webgl_image_buffers(plane_index);
+                init_webgl_image_buffers(plane_index);
             } else {
                 if (composite_view) {
                     clear_webgl_composite_image_buffers();
@@ -14591,7 +14607,7 @@ function setup_image_selection() {
         .on("mousemove", (event) => {
             // cancel the image animation loop
             if (va_count == 1) {
-                clear_webgl_image_buffers(va_count);
+                clear_webgl_image_buffers(plane_index);
             } else {
                 if (composite_view) {
                     clear_webgl_composite_image_buffers();
@@ -14732,7 +14748,7 @@ function setup_image_selection() {
 
             // console.log("mouse position:", mouse_position);
 
-            var image_bounding_dims = imageContainer[va_count - 1].image_bounding_dims;
+            var image_bounding_dims = imageContainer[plane_index - 1].image_bounding_dims;
             var scale = get_image_scale(width, height, image_bounding_dims.width, image_bounding_dims.height);
 
             var clipSize = Math.min(image_bounding_dims.width - 1, image_bounding_dims.height - 1) / zoom_scale;
