@@ -15961,7 +15961,7 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                         d3.select("#displayMolecules").remove();
                                         d3.select("#displayBeam").remove();
 
-                                        process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index);
+                                        process_hdr_image(img_width, img_height, pixels, alpha, tone_array[0], index);
 
                                         if (has_json)
                                             display_histogram(index);
