@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := wasm
-VERSION = 25.01.09.0
+VERSION = 25.01.15.0
 
 ZFP = zfp-1.0.0
 ZFP_SRC := $(wildcard $(ZFP)/src/*.c)
