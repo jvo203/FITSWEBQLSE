@@ -3999,8 +3999,8 @@ function ResizeLanczos(srcI, srcA, sw, sh, dw, lobes) {
     return obj.process(obj, 0);
 }
 
-function compute_polarisation(parameters, mask, noplanes) {
-    console.log("compute_polarisation using Stokes", parameters, "mask:", mask, "noplanes:", noplanes);
+function compute_polarisation(parameters, alpha, noplanes) {
+    console.log("compute_polarisation using Stokes", parameters, "alpha:", alpha, "noplanes:", noplanes);
 
     if (parameters.length != noplanes) {
         console.log("compute_polarisation: mismatch between the number of Stokes parameters and the number of intensity planes");
@@ -4012,18 +4012,48 @@ function compute_polarisation(parameters, mask, noplanes) {
         return;
     }
 
-    let len = mask.length | 0;
+    let len = alpha.length | 0;
 
     // pre-allocate the arrays mL, mC, mT and angle
     var mL = new Float32Array(len);
     var mC = new Float32Array(len);
     var mT = new Float32Array(len);
     var angle = new Float32Array(len);
+    var mask = new Uint8Array(len);
 
     if (noplanes == 3) {
-        let I = parameters[0];
-        let Q = parameters[1];
-        let U = parameters[2];
+        let StokesI = parameters[0];
+        let StokesQ = parameters[1];
+        let StokesU = parameters[2];
+
+        for (let i = 0 | 0; i < len; i = (i + 1) | 0) {
+            let tmpI = StokesI[i];
+            let tmpQ = StokesQ[i];
+            let tmpU = StokesU[i];
+
+            let tmpL = Math.sqrt(tmpQ * tmpQ + tmpU * tmpU);
+            let tmpC = NaN; // Stokes V is missing
+            let tmpT = NaN; // Stokes V is missing
+
+            // check if tmpI is not zero
+            if (tmpI != 0) {
+                tmpL /= tmpI;
+                mask[i] = 1;
+            } else {
+                mask[i] = 0;
+            }
+
+            if (tmpU == 0 && tmpQ == 0) {
+                angle[i] = NaN;
+                mask[i] = 0;
+            } else {
+                angle[i] = 0.5 * Math.atan2(tmpU, tmpQ); // radians                
+            }
+
+            mL[i] = tmpL;
+            mC[i] = tmpC;
+            mT[i] = tmpT;
+        }
     }
 }
 
