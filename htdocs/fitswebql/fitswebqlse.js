@@ -4004,12 +4004,12 @@ function compute_polarisation(parameters, alpha, noplanes) {
 
     if (parameters.length != noplanes) {
         console.log("compute_polarisation: mismatch between the number of Stokes parameters and the number of intensity planes");
-        return;
+        return null;
     }
 
     if (noplanes <= 2) {
         console.log("compute_polarisation: not enough Stokes parameters, aborting");
-        return;
+        return null;
     }
 
     let len = alpha.length | 0;
@@ -4050,14 +4050,75 @@ function compute_polarisation(parameters, alpha, noplanes) {
                 angle[i] = 0.5 * Math.atan2(tmpU, tmpQ); // radians                
             }
 
-            mL[i] = tmpL;
-            mC[i] = tmpC;
-            mT[i] = tmpT;
+            if (alpha[i] == 0) {
+                mask[i] = 0;
+                mL[i] = 0;
+                mC[i] = 0;
+                mT[i] = 0;
+                angle[i] = 0;
+            } else {
+                mL[i] = tmpL;
+                mC[i] = tmpC;
+                mT[i] = tmpT;
+            }
         }
+
+        return { intensity: mL, angle: angle, mask: mask };
     }
+
+    if (noplanes == 4) {
+        let StokesI = parameters[0];
+        let StokesQ = parameters[1];
+        let StokesU = parameters[2];
+        let StokesV = parameters[3];
+
+        for (let i = 0 | 0; i < len; i = (i + 1) | 0) {
+            let tmpI = StokesI[i];
+            let tmpQ = StokesQ[i];
+            let tmpU = StokesU[i];
+            let tmpV = StokesV[i];
+
+            let tmpL = Math.sqrt(tmpQ * tmpQ + tmpU * tmpU);
+            let tmpC = tmpV;
+            let tmpT = Math.sqrt(tmpQ * tmpQ + tmpU * tmpU + tmpV * tmpV);
+
+            // check if tmpI is not zero
+            if (tmpI != 0) {
+                tmpL /= tmpI;
+                tmpC /= tmpI;
+                tmpT /= tmpI;
+                mask[i] = 1;
+            } else {
+                mask[i] = 0;
+            }
+
+            if (tmpU == 0 && tmpQ == 0) {
+                angle[i] = NaN;
+                mask[i] = 0;
+            } else {
+                angle[i] = 0.5 * Math.atan2(tmpU, tmpQ); // radians                
+            }
+
+            if (alpha[i] == 0) {
+                mask[i] = 0;
+                mL[i] = 0;
+                mC[i] = 0;
+                mT[i] = 0;
+                angle[i] = 0;
+            } else {
+                mL[i] = tmpL;
+                mC[i] = tmpC;
+                mT[i] = tmpT;
+            }
+        }
+
+        return { intensity: mT, angle: angle, mask: mask };
+    }
+
+    return null;
 }
 
-function process_polarisation(pol_width, pol_height, intensity, angle, mask) {
+function process_polarisation(index, pol_width, pol_height, intensity, angle, mask) {
     console.log("process_polarisation pol_width:", pol_width, "pol_height:", pol_height);
 
     //do we have all the inputs?
@@ -4109,7 +4170,7 @@ function process_polarisation(pol_width, pol_height, intensity, angle, mask) {
     var y = parseFloat(rect_elem.attr("y"));
     console.log("rect. width:", width, "rect. height:", height, "image x:", x, "image y:", y);
 
-    var image_bounding_dims = imageContainer[va_count - 1].image_bounding_dims;
+    var image_bounding_dims = imageContainer[index - 1].image_bounding_dims;
     var scale = get_image_scale(width, height, image_bounding_dims.width, image_bounding_dims.height);
     var img_width = Math.floor(scale * image_bounding_dims.width);
     var img_height = Math.floor(scale * image_bounding_dims.height);
@@ -15995,10 +16056,12 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                     }
 
                                     if (plane_count > 1 && va_count == 1) {
-                                        compute_polarisation(StokesP, alpha, plane_count);
-                                        /*if (angle_length > 0 && va_count == 1) {
-                                            process_polarisation(img_width, img_height, pixels, angle, alpha);
-                                        }*/
+                                        var polarisation = compute_polarisation(StokesP, alpha, plane_count);
+                                        console.log("polarisation:", polarisation);
+
+                                        if (polarisation != null) {
+                                            process_polarisation(index, img_width, img_height, polarisation.intensity, polarisation.angle, polarisation.mask);
+                                        }
                                     }
                                 } else {
                                     console.log("spectrum_view with dimensions: ", img_width, img_height);
