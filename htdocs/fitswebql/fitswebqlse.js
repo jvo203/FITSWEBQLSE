@@ -4002,6 +4002,16 @@ function ResizeLanczos(srcI, srcA, sw, sh, dw, lobes) {
 function compute_polarisation(parameters, mask, noplanes) {
     console.log("compute_polarisation using Stokes", parameters, "mask:", mask, "noplanes:", noplanes);
 
+    if (parameters.length != noplanes) {
+        console.log("compute_polarisation: mismatch between the number of Stokes parameters and the number of intensity planes");
+        return;
+    }
+
+    if (noplanes <= 2) {
+        console.log("compute_polarisation: not enough Stokes parameters, aborting");
+        return;
+    }
+
     let len = mask.length | 0;
 
     // pre-allocate the arrays mL, mC, mT and angle
@@ -4009,6 +4019,12 @@ function compute_polarisation(parameters, mask, noplanes) {
     var mC = new Float32Array(len);
     var mT = new Float32Array(len);
     var angle = new Float32Array(len);
+
+    if (noplanes == 3) {
+        let I = parameters[0];
+        let Q = parameters[1];
+        let U = parameters[2];
+    }
 }
 
 function process_polarisation(pol_width, pol_height, intensity, angle, mask) {
