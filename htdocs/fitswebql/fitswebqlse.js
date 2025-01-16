@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-01-15.0";
+    return "JS2025-01-16.0";
 }
 
 function uuidv4() {
@@ -15902,11 +15902,14 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                 if (!spectrum_view) {
                                     d3.select("#peak_tracking").remove();
 
+                                    var StokesP = new Array(plane_count);
+
                                     if (plane_count > 1) {
                                         for (let i = 0; i < plane_count; i++) {
                                             // extract each plane from pixels
                                             let pixels_i = pixels.slice(i * img_width * img_height, (i + 1) * img_width * img_height);
                                             process_hdr_image(img_width, img_height, pixels_i, alpha, tone_array[i], i + 1);
+                                            StokesP[i] = pixels_i;
                                         }
                                     } else {
                                         // no need to slice a single pixels array
@@ -15933,9 +15936,11 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                         display_legend();
                                     }
 
-                                    /*if (angle_length > 0 && va_count == 1) {
-                                        process_polarisation(img_width, img_height, pixels, angle, alpha);
-                                    }*/
+                                    if (plane_count > 1 && va_count == 1) {
+                                        /*if (angle_length > 0 && va_count == 1) {
+                                            process_polarisation(img_width, img_height, pixels, angle, alpha);
+                                        }*/
+                                    }
                                 } else {
                                     console.log("spectrum_view with dimensions: ", img_width, img_height);
 
