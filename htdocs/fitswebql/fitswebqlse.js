@@ -3999,6 +3999,18 @@ function ResizeLanczos(srcI, srcA, sw, sh, dw, lobes) {
     return obj.process(obj, 0);
 }
 
+function compute_polarisation(parameters, mask, noplanes) {
+    console.log("compute_polarisation using Stokes", parameters, "mask:", mask, "noplanes:", noplanes);
+
+    let len = mask.length | 0;
+
+    // pre-allocate the arrays mL, mC, mT and angle
+    var mL = new Float32Array(len);
+    var mC = new Float32Array(len);
+    var mT = new Float32Array(len);
+    var angle = new Float32Array(len);
+}
+
 function process_polarisation(pol_width, pol_height, intensity, angle, mask) {
     console.log("process_polarisation pol_width:", pol_width, "pol_height:", pol_height);
 
@@ -15937,6 +15949,7 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                     }
 
                                     if (plane_count > 1 && va_count == 1) {
+                                        compute_polarisation(StokesP, alpha, plane_count);
                                         /*if (angle_length > 0 && va_count == 1) {
                                             process_polarisation(img_width, img_height, pixels, angle, alpha);
                                         }*/
