@@ -4182,16 +4182,6 @@ function process_polarisation(index, pol_width, pol_height, intensity, angle, ma
     const vec_y = Math.min(vec_num, pol_height);
     console.log("vec_x:", vec_x, "vec_y:", vec_y);
 
-    // set intensity and angle to zero where the mask is zero
-    let len = mask.length | 0;
-    for (let i = 0 | 0; i < len; i = (i + 1) | 0) {
-        if (mask[i] == 0) {
-            console.log("masking pixel:", i);
-            intensity[i] = 0.0;
-            angle[i] = 0.0;
-        }
-    }
-
     /*const resized = ResizeLanczos(intensity, angle, pol_width, pol_height, vec_x, 3);
     console.log("resized:", resized);
 
@@ -4225,7 +4215,8 @@ function process_polarisation(index, pol_width, pol_height, intensity, angle, ma
 
             let angle = vec_angle[index];
             let mag = vec_intensity[index];
-            let r = grid_spacing * get_tone_mapping(mag, flux, black, white, median, multiplier, va_count) / 255.0; // between 0 and 1
+            //let r = grid_spacing * get_tone_mapping(mag, flux, black, white, median, multiplier, va_count) / 255.0; // between 0 and 1
+            let r = grid_spacing;
 
             if (mask[index] > 0) {
                 let vector = { x: i - 0.0 * r * Math.cos(angle), y: j - 0.0 * r * Math.sin(angle), vx: r * Math.cos(angle), vy: r * Math.sin(angle) };
