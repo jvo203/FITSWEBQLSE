@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-01-16.0";
+    return "JS2025-01-17.0";
 }
 
 function uuidv4() {
@@ -4221,6 +4221,8 @@ function process_polarisation(index, pol_width, pol_height, intensity, angle, ma
             if (mask[index] > 0) {
                 let vector = { x: i - 0.0 * r * Math.cos(angle), y: j - 0.0 * r * Math.sin(angle), vx: r * Math.cos(angle), vy: r * Math.sin(angle) };
                 vectors.push(vector);
+            } else {
+                console.log("mask:", mask[index], "index:", index, "angle:", angle, "mag:", mag, "i:", i, "j:", j);
             }
         }
     }
@@ -4250,11 +4252,10 @@ function process_polarisation(index, pol_width, pol_height, intensity, angle, ma
         ctx.lineTo(xScale(p.x + p.vx), yScale(p.y + p.vy));
     });
 
-    //ctx.strokeStyle = getStrokeStyle();
-    // use a blue colour
-    ctx.strokeStyle = "rgba(0,0,0,0.5)";
-    ctx.lineWidth = emStrokeWidth;
-    ctx.strokeWidth = 0;
+    ctx.strokeStyle = getStrokeStyle();
+    //ctx.strokeStyle = "rgba(255,0,0,1.0)";
+    ctx.lineWidth = 1;
+    ctx.strokeWidth = emStrokeWidth;
 
     ctx.stroke();
     ctx.closePath();
@@ -21350,7 +21351,7 @@ async function mainRenderer() {
             .attr("id", "PolarisationCanvas")
             .attr("width", width)
             .attr("height", height)
-            .attr('style', blend + 'position: fixed; left: 10px; top: 10px; z-index: 52');// mix-blend-mode: difference;
+            .attr('style', 'position: fixed; left: 10px; top: 10px; z-index: 52');// mix-blend-mode: difference;
 
         d3.select("#mainDiv").append("svg")
             .attr("id", "BackgroundSVG")
