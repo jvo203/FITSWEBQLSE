@@ -3383,7 +3383,7 @@ void write_ws_video(websocket_session *session, const int *seq_id, const float *
     else
     {
         if (strstr(x265_version_str, "4.0") != NULL) // the API change was short lived
-            ret = x265_encoder_encode(session->encoder, &pNals, &iNal, session->picture, &pic_out);
+            ;                                        // ret = x265_encoder_encode(session->encoder, &pNals, &iNal, session->picture, &pic_out);
         else
             ret = x265_encoder_encode(session->encoder, &pNals, &iNal, session->picture, NULL); // 4.1 and later versions
     }
@@ -3522,7 +3522,7 @@ void write_ws_composite_video(websocket_session *session, const int *seq_id, con
     else
     {
         if (strstr(x265_version_str, "4.0") != NULL) // the API change was short lived
-            ret = x265_encoder_encode(session->encoder, &pNals, &iNal, session->picture, &pic_out);
+            ;                                        // ret = x265_encoder_encode(session->encoder, &pNals, &iNal, session->picture, &pic_out);
         else
             ret = x265_encoder_encode(session->encoder, &pNals, &iNal, session->picture, NULL); // 4.1 and later versions
     }
