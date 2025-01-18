@@ -183,6 +183,7 @@ connection_add.c:1031:7: error: implicit declaration of function 'accept4'; did 
     tar zxvf x265_4.1.tar.gz
     cd x265_4.1
 
+    !!! Since version 4.1 the manual change is no longer needed. To the contrary, x265_encoder_close() seg. faults with this manual change
     Apply a manual change in "source/encoder/api.cpp / x265_encoder_open()":
 
         x265_print_params(param);
