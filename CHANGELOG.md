@@ -1,3 +1,8 @@
+## [5.1.16] - 2025-01-20
+
+* updated the Rust code to make it work with a changed API in the x265 library version 4.1 and higher
+* re-compiled the WebAssembly with a new Emscripten v4.0.1 (by implication this raises the _*minimum Safari browser version*_ targeted by Emscripten from 14.1 to 15.0)
+
 ## [5.1.15] - 2024-11-25
 
 * improved the _*signal-to-noise*_ ratio in Subaru HDS 2D FITS real-time spectra (Y-axis) by summing over the peak width (estimated with _*genetic algorithms*_)
