@@ -179,15 +179,11 @@ connection_add.c:1031:7: error: implicit declaration of function 'accept4'; did 
 
     visit https://www.linuxfromscratch.org/blfs/view/svn/multimedia/x265.html
 
-    wget https://bitbucket.org/multicoreware/x265_git/downloads/x265_4.0.tar.gz
-    tar zxvf x265_4.0.tar.gz
-    cd x265_4.0
+    wget https://bitbucket.org/multicoreware/x265_git/downloads/x265_4.1.tar.gz
 
-    Apply a manual change in "source/encoder/api.cpp / x265_encoder_open()":
-
-        x265_print_params(param);
-        PARAM_NS::x265_param_free(zoneParam); /* this line needs to be added */
-        return encoder;
+    tar zxvf x265_4.1.tar.gz
+    
+    cd x265_4.1    
 
     mkdir -p build
 
