@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-01-17.0";
+    return "JS2025-01-22.0";
 }
 
 function uuidv4() {
@@ -3939,6 +3939,52 @@ function process_hdr_viewport(img_width, img_height, pixels, alpha, index) {
     }
 }
 
+function DownsizePolarisation(srcI, srcA, mask, sw, sh, range) {
+    console.log("DownsizePolarisation", sw, sh, range);
+
+    let di = range;
+    let dj = range;
+
+    // start with an empty field
+    var field = [];
+
+    for (let i = 0; i < sw; i += di) {
+        for (let j = 0; j < sh; j += dj) {
+            let I = 0.0;
+            let A = 0.0;
+            let count = 0;
+
+            for (let ii = i; ii < i + di; ii++) {
+                for (let jj = j; jj < j + dj; jj++) {
+
+                    if (ii < sw && jj < sh) {
+                        let idx = jj * sw + ii;
+
+                        if (mask[idx] > 0) {
+                            I += srcI[idx];
+                            A += srcA[idx];
+                            count++;
+                        }
+                    }
+
+                }
+            }
+
+            if (count > 0) {
+                I /= count;
+                A /= count;
+
+                let x0 = i + di / 2;
+                let y0 = j + dj / 2;
+
+                field.push({ x: x0, y: y0, I: I, A: A });
+            }
+        }
+    }
+
+    return field;
+}
+
 function ResizeLanczos(srcI, srcA, sw, sh, dw, lobes) {
     const dh = Math.round(sh * dw / sw); // keep the aspect ratio
 
@@ -4184,14 +4230,16 @@ function process_polarisation(index, pol_width, pol_height, intensity, angle, ma
 
     /*const resized = ResizeLanczos(intensity, angle, pol_width, pol_height, vec_x, 3);
     console.log("resized:", resized);
-
+ 
     // for width and height
     const vec_width = resized.width;
     const vec_height = resized.height;
-
+ 
     // for intensity and angle
     const vec_intensity = resized.I;
     const vec_angle = resized.A;*/
+
+    const resized = DownsizePolarisation(intensity, angle, mask, pol_width, pol_height, 4);
 
     // non-resized
     const vec_width = pol_width;
@@ -4209,7 +4257,7 @@ function process_polarisation(index, pol_width, pol_height, intensity, angle, ma
     const grid_spacing = 2.0;
 
     // skip the borders
-    for (let j = 0; j < vec_height - 0; j++) {
+    /*for (let j = 0; j < vec_height - 0; j++) {
         for (let i = 0; i < vec_width - 0; i++) {
             let index = j * vec_width + i;
 
@@ -4225,6 +4273,20 @@ function process_polarisation(index, pol_width, pol_height, intensity, angle, ma
                 console.log("mask:", mask[index], "index:", index, "angle:", angle, "mag:", mag, "i:", i, "j:", j);
             }
         }
+    }*/
+
+    // for each item in resized
+    for (let i = 0; i < resized.length; i++) {
+        let item = resized[i];
+
+        let angle = item.A;
+        let mag = item.I;
+        let x = item.x;
+        let y = item.y;
+        let r = grid_spacing;
+
+        let vector = { x: x - 0.0 * r * Math.cos(angle), y: y - 0.0 * r * Math.sin(angle), vx: r * Math.cos(angle), vy: r * Math.sin(angle) };
+        vectors.push(vector);
     }
 
     console.log("vectors:", vectors);
@@ -4690,21 +4752,21 @@ function insert_atomic_spectra(div, data) {
     /*openRequest.onsuccess = function () {
         const db = openRequest.result;
         console.log("Success", db);
-
+ 
         const lines = db.transaction("lines", "readonly").objectStore("lines");
-
+ 
         // list all atomic spectra
         let cursor = lines.openCursor();
-
+ 
         cursor.onsuccess = function (event) {
             let cursor = event.target.result;
-
+ 
             if (cursor) {
                 console.log("Atomic spectrum:", cursor.value);
                 cursor.continue();
             }
         };
-
+ 
         // close the database
         db.close();
     }*/
@@ -5539,7 +5601,7 @@ function process_hdr_video(index) {
             if (va_count > 1 && !composite_view) {
                 for (let index = 0; index < va_count; index++) {
                     /*var gl = imageContainer[index].gl;
-
+ 
                     if (gl !== undefined && gl != null) {
                         gl.clearColor(0, 0, 0, 0);
                         gl.clear(gl.COLOR_BUFFER_BIT);
@@ -5549,12 +5611,12 @@ function process_hdr_video(index) {
                 }
             } else {
                 /*let gl = null;
-
+ 
                 if (!composite_view)
                     gl = imageContainer[va_count - 1].gl;
                 else
                     gl = compositeImage.gl;
-
+ 
                 if (gl !== undefined && gl != null) {
                     gl.clearColor(0, 0, 0, 0);
                     gl.clear(gl.COLOR_BUFFER_BIT);
@@ -5628,7 +5690,7 @@ function process_progress_event(data, index) {
         }
         /*else {
           notifications_completed++;
-
+ 
           if (notifications_completed == va_count)
             document.getElementById('welcome').style.display = "none";
         }*/
@@ -6188,10 +6250,10 @@ async function open_websocket_connection(_datasetId, index) {
                         //clear the Video Canvas
                         /*var c = document.getElementById('VideoCanvas') ;
                         var ctx = c.getContext("2d");
-
+ 
                         var width = c.width ;
                         var height = c.height ;
-
+ 
                         ctx.clearRect(0, 0, width, height);*/
                     }
 
@@ -8211,7 +8273,7 @@ function display_dataset_info() {
     /*if(va_count == 1)
     {
     line = fitsData.LINE.trim() ;
-
+ 
     if(line != "")
       line = ' (' + line + ')' ;
     }*/
@@ -9195,13 +9257,13 @@ function display_scale_range_ui(called_from_menu = false) {
     /*var svg = d3.select("#FrontSVG") ;
     var width = parseFloat(svg.attr("width"));
     var height = parseFloat(svg.attr("height"));
-
+ 
     d3.select("#yaxis")
     .attr("data-toggle", "popover")
     .attr("data-trigger", "hover")
     .attr("title", "fixed scale")
     .attr("data-content", "hold 's' and move mouse over the Y-Axis, then use mouse drag/scroll-wheel to adjust the Y-Axis scale");
-
+ 
     $(document).ready(function(){
     $('[data-toggle="popover"]').popover();
     });*/
