@@ -4012,8 +4012,10 @@ function DownsizePolarisation(srcI, srcA, mask, sw, sh, range) {
         }
     }
 
-    mag_mean /= mag_count;
-    mag_std = Math.sqrt(mag_std / mag_count - mag_mean * mag_mean);
+    if (mag_count > 0) {
+        mag_mean /= mag_count;
+        mag_std = Math.sqrt(mag_std / mag_count - mag_mean * mag_mean);
+    };
 
     return { field: field, mean: mag_mean, std: mag_std };
 }
