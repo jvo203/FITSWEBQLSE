@@ -4018,66 +4018,6 @@ function DownsizePolarisation(srcI, srcA, mask, sw, sh, range) {
     return { field: field, mean: mag_mean, std: mag_std };
 }
 
-function ResizeLanczos(srcI, srcA, sw, sh, dw, lobes) {
-    const dh = Math.round(sh * dw / sw); // keep the aspect ratio
-
-    var obj = {
-        dstI: new Float32Array(dw * dh), // intensity
-        dstA: new Float32Array(dw * dh), // angle
-        lanczos: function (x) {
-            if (x > lobes) return 0;
-            x *= Math.PI;
-            if (Math.abs(x) < 1e-16) return 1;
-            var xx = x / lobes;
-            return Math.sin(x) * Math.sin(xx) / x / xx;
-        },
-        ratio: sw / dw,
-        rcp_ratio: 2 / (sw / dw),
-        range2: Math.ceil((sw / dw) * lobes / 2),
-        cacheLanc: {},
-        center: {},
-        icenter: {},
-        process: function (self, u) {
-            self.center.x = (u + 0.5) * self.ratio;
-            self.icenter.x = Math.floor(self.center.x);
-
-            for (var v = 0; v < dh; v++) {
-                self.center.y = (v + 0.5) * self.ratio;
-                self.icenter.y = Math.floor(self.center.y);
-                var I = 0, A = 0, z = 0;
-                for (var i = self.icenter.x - self.range2; i <= self.icenter.x + self.range2; i++) {
-                    if (i < 0 || i >= sw) continue;
-
-                    var f_x = Math.floor(1000 * Math.abs(i - self.center.x));
-                    if (!self.cacheLanc[f_x]) self.cacheLanc[f_x] = {};
-
-                    for (var j = self.icenter.y - self.range2; j <= self.icenter.y + self.range2; j++) {
-                        if (j < 0 || j >= sh) continue;
-
-                        var f_y = Math.floor(1000 * Math.abs(j - self.center.y));
-                        if (self.cacheLanc[f_x][f_y] == undefined) self.cacheLanc[f_x][f_y] = self.lanczos(Math.sqrt(Math.pow(f_x * self.rcp_ratio, 2) + Math.pow(f_y * self.rcp_ratio, 2)) / 1000);
-
-                        z += (self.cacheLanc[f_x][f_y] < 0) ? 0 : self.cacheLanc[f_x][f_y];
-                        I += (self.cacheLanc[f_x][f_y] < 0) ? 0 : self.cacheLanc[f_x][f_y] * srcI[j * sw + i];
-                        A += (self.cacheLanc[f_x][f_y] < 0) ? 0 : self.cacheLanc[f_x][f_y] * srcA[j * sw + i];
-                    }
-                }
-                self.dstI[v * sw + u] = I / z;
-                self.dstA[v * sw + u] = A / z;
-            }
-
-            if (++u < dw) {
-                return self.process(self, u);
-            }
-            else {
-                return { width: dw, height: dh, I: self.dstI, A: self.dstA };
-            }
-        }
-    };
-
-    return obj.process(obj, 0);
-}
-
 function compute_polarisation(parameters, alpha, noplanes) {
     console.log("compute_polarisation using Stokes", parameters, "alpha:", alpha, "noplanes:", noplanes);
 
