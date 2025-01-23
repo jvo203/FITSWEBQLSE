@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-01-22.0";
+    return "JS2025-01-23.0";
 }
 
 function uuidv4() {
@@ -78,6 +78,29 @@ function sky2pix(wcs, ra, dec) {
 
     // wcslib uses 1-indexing for pixel coordinates
     return [pixcrd[0] - 0.5, pixcrd[1] - 0.5];
+}
+
+function erf(x) {
+    // constants
+    var a1 = 0.254829592;
+    var a2 = -0.284496736;
+    var a3 = 1.421413741;
+    var a4 = -1.453152027;
+    var a5 = 1.061405429;
+    var p = 0.3275911;
+
+    // Save the sign of x
+    var sign = 1;
+    if (x < 0) {
+        sign = -1;
+    }
+    x = Math.abs(x);
+
+    // A&S formula 7.1.26
+    var t = 1.0 / (1.0 + p * x);
+    var y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+
+    return sign * y;
 }
 
 function round(value, precision, mode) {
@@ -3947,6 +3970,9 @@ function DownsizePolarisation(srcI, srcA, mask, sw, sh, range) {
 
     // start with an empty field
     var field = [];
+    var mag_mean = 0.0;
+    var mag_std = 0.0;
+    var mag_count = 0;
 
     for (let i = 0; i < sw; i += di) {
         for (let j = 0; j < sh; j += dj) {
@@ -3977,12 +4003,19 @@ function DownsizePolarisation(srcI, srcA, mask, sw, sh, range) {
                 let x0 = i + di / 2;
                 let y0 = j + dj / 2;
 
+                mag_mean += I;
+                mag_std += I * I;
+                mag_count++;
+
                 field.push({ x: x0, y: y0, I: I, A: A });
             }
         }
     }
 
-    return field;
+    mag_mean /= mag_count;
+    mag_std = Math.sqrt(mag_std / mag_count - mag_mean * mag_mean);
+
+    return { field: field, mean: mag_mean, std: mag_std };
 }
 
 function ResizeLanczos(srcI, srcA, sw, sh, dw, lobes) {
@@ -4167,47 +4200,6 @@ function compute_polarisation(parameters, alpha, noplanes) {
 function process_polarisation(index, pol_width, pol_height, intensity, angle, mask) {
     console.log("process_polarisation pol_width:", pol_width, "pol_height:", pol_height);
 
-    //do we have all the inputs?
-    var black, white, median, multiplier, flux;
-
-    var flux_elem = d3.select("#flux_path" + va_count);
-
-    try {
-        flux = document.getElementById('flux' + va_count).value
-    }
-    catch (e) {
-        console.log('flux not available yet');
-        return;
-    };
-
-    try {
-        black = parseFloat(flux_elem.attr("black"));
-    }
-    catch (e) {
-        console.log('black not available yet');
-        return;
-    };
-
-    try {
-        white = parseFloat(flux_elem.attr("white"));
-    }
-    catch (e) {
-        console.log('white not available yet');
-        return;
-    };
-
-    try {
-        median = parseFloat(flux_elem.attr("median"));
-    }
-    catch (e) {
-        console.log('median not available yet');
-        return;
-    };
-
-    multiplier = get_noise_sensitivity(noise_sensitivity);
-
-    console.log("black:", black, "white:", white, "median:", median, "multiplier:", multiplier, "flux:", flux);
-
     // get the image rectangle
     var rect_elem = d3.select("#image_rectangle");
     var width = parseFloat(rect_elem.attr("width"));
@@ -4222,72 +4214,31 @@ function process_polarisation(index, pol_width, pol_height, intensity, angle, ma
     var img_height = Math.floor(scale * image_bounding_dims.height);
     console.log("scaling by", scale, "new width:", img_width, "new height:", img_height, "orig. width:", image_bounding_dims.width, "orig. height:", image_bounding_dims.height);
 
-    // first assume a fixed number of vectors
-    const vec_num = 50 + 2; // + 2 for the borders
-    const vec_x = Math.min(vec_num, pol_width);
-    const vec_y = Math.min(vec_num, pol_height);
-    console.log("vec_x:", vec_x, "vec_y:", vec_y);
-
-    /*const resized = ResizeLanczos(intensity, angle, pol_width, pol_height, vec_x, 3);
+    const range = 4;
+    const resized = DownsizePolarisation(intensity, angle, mask, pol_width, pol_height, range);
     console.log("resized:", resized);
- 
-    // for width and height
-    const vec_width = resized.width;
-    const vec_height = resized.height;
- 
-    // for intensity and angle
-    const vec_intensity = resized.I;
-    const vec_angle = resized.A;*/
-
-    const resized = DownsizePolarisation(intensity, angle, mask, pol_width, pol_height, 4);
-
-    // non-resized
-    const vec_width = pol_width;
-    const vec_height = pol_height;
-
-    // non-resized
-    const vec_intensity = intensity;
-    const vec_angle = angle;
+    const field = resized.field;
+    const mean = resized.mean;
+    const std = resized.std;
 
     // create the vectors
     var vectors = [];
 
-    const xScale = d3.scaleLinear().domain([0, vec_width]).range([x, x + width]);
-    const yScale = d3.scaleLinear().domain([0, vec_height]).range([y + height, y]);
-    const grid_spacing = 2.0;
+    const xScale = d3.scaleLinear().domain([0, pol_width]).range([x, x + width]);
+    const yScale = d3.scaleLinear().domain([0, pol_height]).range([y + height, y]);
+    const grid_spacing = range;
 
-    // skip the borders
-    /*for (let j = 0; j < vec_height - 0; j++) {
-        for (let i = 0; i < vec_width - 0; i++) {
-            let index = j * vec_width + i;
-
-            let angle = vec_angle[index];
-            let mag = vec_intensity[index];
-            //let r = grid_spacing * get_tone_mapping(mag, flux, black, white, median, multiplier, va_count) / 255.0; // between 0 and 1
-            let r = grid_spacing;
-
-            if (mask[index] > 0) {
-                let vector = { x: i - 0.0 * r * Math.cos(angle), y: j - 0.0 * r * Math.sin(angle), vx: r * Math.cos(angle), vy: r * Math.sin(angle) };
-                vectors.push(vector);
-            } else {
-                console.log("mask:", mask[index], "index:", index, "angle:", angle, "mag:", mag, "i:", i, "j:", j);
-            }
-        }
-    }*/
-
-    // for each item in resized
-    for (let i = 0; i < resized.length; i++) {
-        let item = resized[i];
-
+    // for each item in the resized field    
+    for (let item of field) {
         let angle = item.A;
-        let mag = item.I;
+        let mag = (item.I - mean) / (std * Math.sqrt(2.0)); // normalise the intensity
         let x = item.x;
         let y = item.y;
-        let r = grid_spacing;
+        let r = grid_spacing * 0.5 * (1.0 + erf(mag)); // between 0 and grid_spacing
 
-        let vector = { x: x - 0.0 * r * Math.cos(angle), y: y - 0.0 * r * Math.sin(angle), vx: r * Math.cos(angle), vy: r * Math.sin(angle) };
+        let vector = { x: x - 0.5 * r * Math.cos(angle), y: y - 0.5 * r * Math.sin(angle), vx: r * Math.cos(angle), vy: r * Math.sin(angle) };
         vectors.push(vector);
-    }
+    };
 
     console.log("vectors:", vectors);
 
