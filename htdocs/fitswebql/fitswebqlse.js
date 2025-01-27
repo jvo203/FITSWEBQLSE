@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-01-23.0";
+    return "JS2025-01-27.0";
 }
 
 function uuidv4() {
@@ -16618,7 +16618,8 @@ function tileTimeout(force = false) {
 }
 
 function imageTimeout() {
-    //console.log("image inactive event");
+    console.log("image inactive event");
+    return; // disable the image timeout whilst adding polarisation support
 
     if ((mousedown && d3.select("#pvline").attr("opacity") < 1.0) || streaming)
         return;
