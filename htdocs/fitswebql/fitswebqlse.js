@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-01-27.0";
+    return "JS2025-01-28.0";
 }
 
 function uuidv4() {
@@ -2591,7 +2591,7 @@ function webgl_video_renderer(index, gl, width, height) {
 }
 
 function webgl_viewport_renderer(gl, container, height) {
-    let image = imageContainer[va_count - 1];
+    let image = imageContainer[previous_plane - 1]; // was va_count
 
     if (image == null) {
         console.log("webgl_viewport_renderer: null image");
@@ -2684,7 +2684,7 @@ function webgl_viewport_renderer(gl, container, height) {
         console.error(status);
     }
 
-    let index = va_count;
+    let index = previous_plane; // was va_count
 
     //WebGL how to convert from clip space to pixels
     let px = viewport_zoom_settings.px;
@@ -15092,6 +15092,7 @@ function setup_image_selection(plane_index = previous_plane) {
                                     dx: dx,
                                     image: false,
                                     quality: image_quality,
+                                    plane: previous_plane,
                                     x1: x1 + 1,
                                     y1: y1 + 1,
                                     x2: x2 + 1,
@@ -16619,7 +16620,6 @@ function tileTimeout(force = false) {
 
 function imageTimeout() {
     console.log("image inactive event");
-    return; // disable the image timeout whilst adding polarisation support
 
     if ((mousedown && d3.select("#pvline").attr("opacity") < 1.0) || streaming)
         return;
@@ -16804,6 +16804,7 @@ function imageTimeout() {
                     dx: dx,
                     image: image_update,
                     quality: image_quality,
+                    plane: previous_plane,
                     x1: x1 + 1,
                     y1: y1 + 1,
                     x2: x2 + 1,
