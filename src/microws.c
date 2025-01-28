@@ -1002,7 +1002,7 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
             // handle CSV spectrum export requests
             if (strcmp(type, "spectrum") == 0)
             {
-                struct spectrum_request *req = (struct spectrum_request *)malloc(sizeof(struct image_spectrum_request));
+                struct spectrum_request *req = (struct spectrum_request *)malloc(sizeof(struct spectrum_request));
 
                 if (req == NULL)
                     goto clean_ws_frame;
@@ -1219,6 +1219,7 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                 req->dy = 0;
                 req->image = false;
                 req->quality = medium;
+                req->plane = 1;
                 req->x1 = -1;
                 req->x2 = -1;
                 req->y1 = -1;
@@ -1272,6 +1273,10 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                         if (strncmp(frame_data + voff, "\"heigh\"", vlen) == 0)
                             req->quality = high;
                     }
+
+                    // 'plane'
+                    if (strncmp(frame_data + koff, "\"plane\"", klen) == 0)
+                        req->plane = atoi2(frame_data + voff, vlen);
 
                     // 'x1'
                     if (strncmp(frame_data + koff, "\"x1\"", klen) == 0)

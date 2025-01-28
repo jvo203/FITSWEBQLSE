@@ -53,6 +53,7 @@ module fits
       integer(kind=c_int) :: dx, dy
       logical(kind=c_bool) :: image
       integer(kind(medium)) :: quality
+      integer(c_int) :: plane
       integer(c_int) :: x1, y1, x2, y2
       integer(c_int) :: width, height
       integer(kind(circle)) :: beam
@@ -8536,7 +8537,7 @@ contains
       integer(8) :: start_t, finish_t, crate, cmax
       real(c_float) :: elapsed
 
-      integer :: x1, x2, y1, y2
+      integer :: x1, x2, y1, y2, plane
       integer :: dimx, dimy, native_size, viewport_size
       real :: scale
       integer(c_int) :: precision
@@ -8552,6 +8553,11 @@ contains
       call system_clock(count=start_t, count_rate=crate, count_max=cmax)
 
       if ((.not. allocated(item%pixels)) .or. (.not. allocated(item%mask))) return
+
+      plane = req%plane
+
+      ! check if the plane is within the bounds
+      if ((plane .lt. 1) .or. (plane .gt. size(item%pixels, 3))) return
 
       ! obtain viewport dimensions (even going beyond the dims of pixels&mask)
       dimx = abs(req%x2 - req%x1) + 1
@@ -8572,7 +8578,7 @@ contains
       y2 = min(item%naxes(2), req%y2)
 
       ! only copy valid parts from within item%pixels&item%mask
-      pixels(x1:x2, y1:y2) = item%pixels(x1:x2, y1:y2, 1)
+      pixels(x1:x2, y1:y2) = item%pixels(x1:x2, y1:y2, plane)
       mask(x1:x2, y1:y2) = item%mask(x1:x2, y1:y2)
 
       select case (req%quality)

@@ -106,6 +106,7 @@ struct image_spectrum_request
     int dy;
     bool image;
     enum image_quality quality;
+    int plane;
     int x1;
     int y1;
     int x2;

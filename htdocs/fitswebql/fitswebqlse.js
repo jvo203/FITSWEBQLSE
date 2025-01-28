@@ -16619,7 +16619,7 @@ function tileTimeout(force = false) {
 }
 
 function imageTimeout() {
-    console.log("image inactive event");
+    //console.log("image inactive event");
 
     if ((mousedown && d3.select("#pvline").attr("opacity") < 1.0) || streaming)
         return;
