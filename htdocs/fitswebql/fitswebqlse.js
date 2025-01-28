@@ -2591,7 +2591,7 @@ function webgl_video_renderer(index, gl, width, height) {
 }
 
 function webgl_viewport_renderer(gl, container, height) {
-    let image = imageContainer[previous_plane - 1]; // was va_count
+    let image = imageContainer[previous_plane - 1];
 
     if (image == null) {
         console.log("webgl_viewport_renderer: null image");
@@ -2684,7 +2684,7 @@ function webgl_viewport_renderer(gl, container, height) {
         console.error(status);
     }
 
-    let index = previous_plane; // was va_count
+    let index = previous_plane;
 
     //WebGL how to convert from clip space to pixels
     let px = viewport_zoom_settings.px;
