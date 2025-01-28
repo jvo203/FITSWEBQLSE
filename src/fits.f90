@@ -6525,15 +6525,15 @@ contains
       type(inner_dims_req_t), target :: inner_dims
       type(image_req_t), target :: image_req
       type(c_ptr) :: pid
-      integer(kind=c_int) :: rc, pixels_rc, angle_rc
+      integer(kind=c_int) :: rc, pixels_rc(4) ! up to 4 planes
 
       integer :: inner_width, inner_height
       integer :: img_width, img_height
       integer :: max_planes, i, j
       real scale
 
-      type(resize_task_t), target :: pixels_task
-      type(c_ptr) :: pixels_pid
+      type(resize_task_t), target :: pixels_task(4) ! up to 4 planes
+      type(c_ptr) :: pixels_pid(4) ! up to 4 planes
 
       ! timing
       real(8) :: t1, t2 ! OpenMP TIME
@@ -6614,31 +6614,36 @@ contains
 
          t1 = omp_get_wtime()
 
-         pixels_task%pSrc = c_loc(item%pixels)
-         pixels_task%srcWidth = item%naxes(1)
-         pixels_task%srcHeight = item%naxes(2)
+         do i = 1, max_planes
+            pixels_task(i)%pSrc = c_loc(item%pixels(:,:,i))
+            pixels_task(i)%srcWidth = item%naxes(1)
+            pixels_task(i)%srcHeight = item%naxes(2)
 
-         pixels_task%pDest = c_loc(pixels)
-         pixels_task%dstWidth = img_width
-         pixels_task%dstHeight = img_height
+            pixels_task(i)%pDest = c_loc(pixels(:,:,i))
+            pixels_task(i)%dstWidth = img_width
+            pixels_task(i)%dstHeight = img_height
 
-         if (scale .gt. 0.2) then
-            pixels_task%numLobes = 3
-            ! call resizeLanczos(c_loc(item%pixels), item%naxes(1), item%naxes(2), c_loc(pixels), img_width, img_height, 3)
-         else
-            pixels_task%numLobes = 0
-            ! call resizeSuper(c_loc(item%pixels), item%naxes(1), item%naxes(2), c_loc(pixels), img_width, img_height)
-         end if
+            if (scale .gt. 0.2) then
+               pixels_task(i)%numLobes = 3
+               ! call resizeLanczos(c_loc(item%pixels), item%naxes(1), item%naxes(2), c_loc(pixels), img_width, img_height, 3)
+            else
+               pixels_task(i)%numLobes = 0
+               ! call resizeSuper(c_loc(item%pixels), item%naxes(1), item%naxes(2), c_loc(pixels), img_width, img_height)
+            end if
 
-         ! launch a pthread to resize pixels
-         pixels_pid = my_pthread_create(start_routine=c_funloc(launch_resize_task), arg=c_loc(pixels_task), rc=pixels_rc)
+            ! launch a pthread to resize pixels
+            pixels_pid(i) = my_pthread_create(start_routine=c_funloc(launch_resize_task), arg=c_loc(pixels_task(i)),&
+            & rc=pixels_rc(i))
+         end do
 
          ! Boolean mask: the naive Nearest-Neighbour method
          call resizeNearest(c_loc(item%mask), item%naxes(1), item%naxes(2), c_loc(mask), img_width, img_height)
          ! call resizeMask(item%mask, item%naxes(1), item%naxes(2), mask, img_width, img_height)
 
-         ! join a pixels thread
-         rc = my_pthread_join(pixels_pid)
+         ! join pixels thread(s)
+         do i = 1, max_planes
+            rc = my_pthread_join(pixels_pid(i))
+         end do
 
          t2 = omp_get_wtime()
 
