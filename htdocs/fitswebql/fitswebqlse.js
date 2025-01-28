@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-01-28.0";
+    return "JS2025-01-28.1";
 }
 
 function uuidv4() {
@@ -4151,6 +4151,7 @@ function process_polarisation(index, pol_width, pol_height, intensity, angle, ma
     console.log("rect. width:", width, "rect. height:", height, "image x:", x, "image y:", y);
 
     var image_bounding_dims = imageContainer[index - 1].image_bounding_dims;
+    console.log("image_bounding_dims:", image_bounding_dims);
     var scale = get_image_scale(width, height, image_bounding_dims.width, image_bounding_dims.height);
     var img_width = Math.floor(scale * image_bounding_dims.width);
     var img_height = Math.floor(scale * image_bounding_dims.height);
