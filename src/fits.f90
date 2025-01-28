@@ -6625,10 +6625,8 @@ contains
 
             if (scale .gt. 0.2) then
                pixels_task(i)%numLobes = 3
-               ! call resizeLanczos(c_loc(item%pixels), item%naxes(1), item%naxes(2), c_loc(pixels), img_width, img_height, 3)
             else
                pixels_task(i)%numLobes = 0
-               ! call resizeSuper(c_loc(item%pixels), item%naxes(1), item%naxes(2), c_loc(pixels), img_width, img_height)
             end if
 
             ! launch a pthread to resize pixels
