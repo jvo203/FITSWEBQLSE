@@ -3974,8 +3974,9 @@ function DownsizePolarisation(srcI, srcA, mask, sw, sh, range) {
     var mag_std = 0.0;
     var mag_count = 0;
 
-    for (let i = 0; i < sw; i += di) {
-        for (let j = 0; j < sh; j += dj) {
+    // skip the data boundaries
+    for (let i = di; i <= sw - di; i += di) {
+        for (let j = dj; j <= sh - dj; j += dj) {
             let I = 0.0;
             let A = 0.0;
             let count = 0;
@@ -4151,13 +4152,18 @@ function process_polarisation(index, pol_width, pol_height, intensity, angle, ma
     console.log("rect. width:", width, "rect. height:", height, "image x:", x, "image y:", y);
 
     var image_bounding_dims = imageContainer[index - 1].image_bounding_dims;
-    console.log("image_bounding_dims:", image_bounding_dims);
     var scale = get_image_scale(width, height, image_bounding_dims.width, image_bounding_dims.height);
     var img_width = Math.floor(scale * image_bounding_dims.width);
     var img_height = Math.floor(scale * image_bounding_dims.height);
     console.log("scaling by", scale, "new width:", img_width, "new height:", img_height, "orig. width:", image_bounding_dims.width, "orig. height:", image_bounding_dims.height);
 
-    const range = 4;
+    // assume a certain vector field density, i.e. 100 vectors per direction
+    const target = 75;
+    const range_x = image_bounding_dims.width / target;
+    const range_y = image_bounding_dims.height / target;
+    const range = Math.floor(Math.max(range_x, range_y));
+    console.log("target field density:", target, "pixel window:", range, "( range_x:", range_x, "range_y:", range_y, ")");
+
     const resized = DownsizePolarisation(intensity, angle, mask, pol_width, pol_height, range);
     console.log("resized:", resized);
     const field = resized.field;
@@ -4169,7 +4175,7 @@ function process_polarisation(index, pol_width, pol_height, intensity, angle, ma
 
     const xScale = d3.scaleLinear().domain([image_bounding_dims.x1, image_bounding_dims.x2]).range([x, x + width]);
     const yScale = d3.scaleLinear().domain([image_bounding_dims.y1, image_bounding_dims.y1 + (image_bounding_dims.height - 1)]).range([y + height, y]);
-    const grid_spacing = range;
+    const grid_spacing = 2 * range;
 
     // for each item in the resized field    
     for (let item of field) {
