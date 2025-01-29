@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-01-28.1";
+    return "JS2025-01-29.0";
 }
 
 function uuidv4() {
@@ -4167,7 +4167,8 @@ function process_polarisation(index, pol_width, pol_height, intensity, angle, ma
     // create the vectors
     var vectors = [];
 
-    const xScale = d3.scaleLinear().domain([0, pol_width]).range([x, x + width]);
+    //const xScale = d3.scaleLinear().domain([0, pol_width]).range([x, x + width]);
+    const xScale = d3.scaleLinear().domain([image_bounding_dims.x1, image_bounding_dims.x2]).range([x, x + width]);
     const yScale = d3.scaleLinear().domain([0, pol_height]).range([y + height, y]);
     const grid_spacing = range;
 
