@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-01-29.0";
+    return "JS2025-02-03.0";
 }
 
 function uuidv4() {
@@ -16011,7 +16011,7 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                     }
 
                                     if (plane_count > 1 && va_count == 1) {
-                                        var polarisation = compute_polarisation(StokesP, alpha, plane_count);
+                                        polarisation = compute_polarisation(StokesP, alpha, plane_count);
                                         console.log("polarisation:", polarisation);
 
                                         if (polarisation != null) {
@@ -21229,6 +21229,7 @@ async function mainRenderer() {
 
         plane_count = 1; // by default there is only one intensity plane
         previous_plane = 1;
+        polarisation = null; // by default there is no polarisation information
 
         va_count = parseInt(votable.getAttribute('data-va_count'));
         datasetId = votable.getAttribute('data-datasetId');//make it a global variable
