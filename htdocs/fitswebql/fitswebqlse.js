@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-02-03.0";
+    return "JS2025-02-04.0";
 }
 
 function uuidv4() {
@@ -3962,11 +3962,12 @@ function process_hdr_viewport(img_width, img_height, pixels, alpha, index) {
     }
 }
 
-function DownsizePolarisation(srcI, srcA, mask, sw, sh, range) {
-    console.log("DownsizePolarisation", sw, sh, range);
+function DownsizePolarisation(srcI, srcA, mask, sw, sh, range, xmin = 0, ymin = 0, xmax = sw - 1, ymax = sh - 1) {
+    console.log("DownsizePolarisation", sw, sh, range, xmin, ymin, xmax, ymax);
 
     let di = range;
     let dj = range;
+    let min_count = 0.75 * di * dj;
 
     // start with an empty field
     var field = [];
@@ -3975,8 +3976,8 @@ function DownsizePolarisation(srcI, srcA, mask, sw, sh, range) {
     var mag_count = 0;
 
     // skip the data boundaries
-    for (let i = di; i <= sw - di; i += di) {
-        for (let j = dj; j <= sh - dj; j += dj) {
+    for (let i = xmin + 0 * di; i <= xmax - 0 * di; i += di) {
+        for (let j = ymin + 0 * dj; j <= ymax - 0 * dj; j += dj) {
             let I = 0.0;
             let A = 0.0;
             let count = 0;
@@ -3997,7 +3998,7 @@ function DownsizePolarisation(srcI, srcA, mask, sw, sh, range) {
                 }
             }
 
-            if (count > 0) {
+            if (count > min_count) {
                 I /= count;
                 A /= count;
 
@@ -4164,7 +4165,7 @@ function process_polarisation(index, pol_width, pol_height, intensity, angle, ma
     const range = Math.floor(Math.max(range_x, range_y));
     console.log("target field density:", target, "pixel window:", range, "( range_x:", range_x, "range_y:", range_y, ")");
 
-    const resized = DownsizePolarisation(intensity, angle, mask, pol_width, pol_height, range);
+    const resized = DownsizePolarisation(intensity, angle, mask, pol_width, pol_height, range, image_bounding_dims.x1, image_bounding_dims.y1, image_bounding_dims.x2, image_bounding_dims.y1 + (image_bounding_dims.height - 1));
     console.log("resized:", resized);
     const field = resized.field;
     const mean = resized.mean;
