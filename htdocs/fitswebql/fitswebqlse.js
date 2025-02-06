@@ -4159,6 +4159,57 @@ function get_polarisation_tone_mapping(magnitude) {
     return 0.5 * (1.0 + erf(10 * magnitude));
 }
 
+function plot_polarisation(field, mean, std, xScale, yScale, spacing, canvasId) {
+    // create the vectors
+    var vectors = [];
+
+    // for each item in the resized field    
+    for (let item of field) {
+        let angle = item.A;
+        let mag = (item.I - mean) / (std * Math.sqrt(2.0)); // normalise the intensity
+        let x = item.x;
+        let y = item.y;
+        let r = spacing * get_polarisation_tone_mapping(mag); // between 0 and grid_spacing
+
+        let vector = { x: x - 0.5 * r * Math.cos(angle), y: y - 0.5 * r * Math.sin(angle), vx: r * Math.cos(angle), vy: r * Math.sin(angle) };
+        vectors.push(vector);
+    };
+
+    console.log("vectors:", vectors);
+
+    var canvas = document.getElementById(canvasId);
+
+    if (displayPolarisation) {
+        canvas.style.display = "block";
+    }
+    else {
+        canvas.style.display = "none";
+    }
+
+    var ctx = canvas.getContext('2d');
+    var width = canvas.width;
+    var height = canvas.height;
+    ctx.clearRect(0, 0, width, height);
+
+    ctx.save();
+    ctx.beginPath();
+
+    vectors.forEach(function (p) {
+        // draw the vector
+        ctx.moveTo(xScale(p.x), yScale(p.y));
+        ctx.lineTo(xScale(p.x + p.vx), yScale(p.y + p.vy));
+    });
+
+    ctx.strokeStyle = getStrokeStyle();
+    //ctx.strokeStyle = "rgba(255,0,0,1.0)";
+    ctx.lineWidth = 1;
+    ctx.strokeWidth = emStrokeWidth;
+
+    ctx.stroke();
+    ctx.closePath();
+    ctx.restore();
+}
+
 function process_polarisation(index, pol_width, pol_height, intensity, angle, mask) {
     console.log("process_polarisation pol_width:", pol_width, "pol_height:", pol_height);
 
@@ -4186,62 +4237,16 @@ function process_polarisation(index, pol_width, pol_height, intensity, angle, ma
 
     const resized = DownsizePolarisation(intensity, angle, mask, pol_width, pol_height, range, image_bounding_dims.x1, image_bounding_dims.y1, image_bounding_dims.x2, image_bounding_dims.y1 + (image_bounding_dims.height - 1));
     console.log("resized:", resized);
+
     const field = resized.field;
     const mean = resized.mean;
     const std = resized.std;
-
-    // create the vectors
-    var vectors = [];
 
     const xScale = d3.scaleLinear().domain([image_bounding_dims.x1, image_bounding_dims.x2]).range([x, x + width]);
     const yScale = d3.scaleLinear().domain([image_bounding_dims.y1, image_bounding_dims.y1 + (image_bounding_dims.height - 1)]).range([y + height, y]);
     const grid_spacing = 2 * range;
 
-    // for each item in the resized field    
-    for (let item of field) {
-        let angle = item.A;
-        let mag = (item.I - mean) / (std * Math.sqrt(2.0)); // normalise the intensity
-        let x = item.x;
-        let y = item.y;
-        let r = grid_spacing * get_polarisation_tone_mapping(mag); // between 0 and grid_spacing
-
-        let vector = { x: x - 0.5 * r * Math.cos(angle), y: y - 0.5 * r * Math.sin(angle), vx: r * Math.cos(angle), vy: r * Math.sin(angle) };
-        vectors.push(vector);
-    };
-
-    console.log("vectors:", vectors);
-
-    var elem = document.getElementById("PolarisationCanvas");
-    if (displayPolarisation) {
-        elem.style.display = "block";
-    }
-    else {
-        elem.style.display = "none";
-    }
-
-    var canvas = document.getElementById("PolarisationCanvas");
-    var ctx = canvas.getContext('2d');
-    var width = canvas.width;
-    var height = canvas.height;
-    ctx.clearRect(0, 0, width, height);
-
-    ctx.save();
-    ctx.beginPath();
-
-    vectors.forEach(function (p) {
-        // draw the vector
-        ctx.moveTo(xScale(p.x), yScale(p.y));
-        ctx.lineTo(xScale(p.x + p.vx), yScale(p.y + p.vy));
-    });
-
-    ctx.strokeStyle = getStrokeStyle();
-    //ctx.strokeStyle = "rgba(255,0,0,1.0)";
-    ctx.lineWidth = 1;
-    ctx.strokeWidth = emStrokeWidth;
-
-    ctx.stroke();
-    ctx.closePath();
-    ctx.restore();
+    plot_polarisation(field, mean, std, xScale, yScale, grid_spacing, "PolarisationCanvas");
 }
 
 function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index) {
