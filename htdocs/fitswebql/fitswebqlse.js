@@ -8152,6 +8152,7 @@ function display_dataset_info() {
         if (!fitsData.is_stokes || fitsData.polarisation < 3) {
             d3.select("#displayPolarisation").remove();
             d3.select("#PolarisationCanvas").remove();
+            d3.select("#PolarisationViewport").remove();
         }
     }
     catch (e) {
@@ -18653,9 +18654,11 @@ function display_menu() {
 
             if (displayPolarisation) {
                 document.getElementById('PolarisationCanvas').style.display = "block";
+                document.getElementById('PolarisationViewport').style.display = "block";
             }
             else {
                 document.getElementById('PolarisationCanvas').style.display = "none";
+                document.getElementById('PolarisationViewport').style.display = "none";
             }
         })
         .html(htmlStr);
@@ -21366,11 +21369,17 @@ async function mainRenderer() {
             .attr("height", height)
             .attr('style', 'position: fixed; left: 10px; top: 10px; z-index: 55');
 
+        d3.select("#mainDiv").append("canvas")
+            .attr("id", "PolarisationViewport")
+            .attr("width", width)
+            .attr("height", height)
+            .attr('style', 'position: fixed; left: 10px; top: 10px; z-index: 56');
+
         d3.select("#mainDiv").append("svg")
             .attr("id", "BackSVG")
             .attr("width", width)
             .attr("height", height)
-            .attr('style', 'position: fixed; left: 10px; top: 10px; z-index: 56; cursor: default; mix-blend-mode: none');//difference or lighten or screen //other than none causes problems with an older Firefox v45
+            .attr('style', 'position: fixed; left: 10px; top: 10px; z-index: 57; cursor: default; mix-blend-mode: none');//difference or lighten or screen //other than none causes problems with an older Firefox v45
 
         //spectrum
         d3.select("#mainDiv").append("canvas")
