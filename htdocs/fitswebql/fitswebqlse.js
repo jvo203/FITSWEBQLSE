@@ -3131,6 +3131,20 @@ function webgl_zoom_renderer(gl, height) {
         // draw the quad (2 triangles, 6 vertices)
         gl.drawArrays(gl.TRIANGLES, 0, 6);
 
+        // optional polarisation rendering
+        if (polarisation != null) {
+            let pol_xmin = Math.round(viewport_zoom_settings.x - viewport_zoom_settings.clipSize - 1);
+            let pol_ymin = Math.round(viewport_zoom_settings.y - viewport_zoom_settings.clipSize - 1);
+
+            let pol_xmax = Math.round(viewport_zoom_settings.x + viewport_zoom_settings.clipSize + 1);
+            let pol_ymax = Math.round(viewport_zoom_settings.y + viewport_zoom_settings.clipSize + 1);
+
+            // TO-DO: adapt the field averaging range based on the actual zoom viewport area
+
+            const resized = DownsizePolarisation(polarisation.intensity, polarisation.angle, polarisation.mask, polarisation.pol_width, polarisation.pol_height, polarisation.range, pol_xmin, pol_ymin, pol_xmax, pol_ymax);
+            console.log("zoom_rendering_loop polarisation:", resized);
+        }
+
         viewport.loopId = requestAnimationFrame(zoom_rendering_loop);
     };
 
@@ -4167,6 +4181,7 @@ function process_polarisation(index, pol_width, pol_height, intensity, angle, ma
     const range_x = image_bounding_dims.width / target;
     const range_y = image_bounding_dims.height / target;
     const range = Math.floor(Math.max(range_x, range_y));
+    polarisation.range = range;
     console.log("target field density:", target, "pixel window:", range, "( range_x:", range_x, "range_y:", range_y, ")");
 
     const resized = DownsizePolarisation(intensity, angle, mask, pol_width, pol_height, range, image_bounding_dims.x1, image_bounding_dims.y1, image_bounding_dims.x2, image_bounding_dims.y1 + (image_bounding_dims.height - 1));
@@ -16017,6 +16032,8 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
 
                                     if (plane_count > 1 && va_count == 1) {
                                         polarisation = compute_polarisation(StokesP, alpha, plane_count);
+                                        polarisation.pol_width = img_width;
+                                        polarisation.pol_height = img_height;
                                         console.log("polarisation:", polarisation);
 
                                         if (polarisation != null) {
