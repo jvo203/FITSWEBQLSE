@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-02-04.0";
+    return "JS2025-02-06.0";
 }
 
 function uuidv4() {
@@ -4141,6 +4141,10 @@ function compute_polarisation(parameters, alpha, noplanes) {
     return null;
 }
 
+function get_polarisation_tone_mapping(magnitude) {
+    return 0.5 * (1.0 + erf(10 * magnitude));
+}
+
 function process_polarisation(index, pol_width, pol_height, intensity, angle, mask) {
     console.log("process_polarisation pol_width:", pol_width, "pol_height:", pol_height);
 
@@ -4184,7 +4188,7 @@ function process_polarisation(index, pol_width, pol_height, intensity, angle, ma
         let mag = (item.I - mean) / (std * Math.sqrt(2.0)); // normalise the intensity
         let x = item.x;
         let y = item.y;
-        let r = grid_spacing * 0.5 * (1.0 + erf(10 * mag)); // between 0 and grid_spacing
+        let r = grid_spacing * get_polarisation_tone_mapping(mag); // between 0 and grid_spacing
 
         let vector = { x: x - 0.5 * r * Math.cos(angle), y: y - 0.5 * r * Math.sin(angle), vx: r * Math.cos(angle), vy: r * Math.sin(angle) };
         vectors.push(vector);
