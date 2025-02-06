@@ -3139,10 +3139,26 @@ function webgl_zoom_renderer(gl, height) {
             let pol_xmax = Math.round(viewport_zoom_settings.x + viewport_zoom_settings.clipSize + 1);
             let pol_ymax = Math.round(viewport_zoom_settings.y + viewport_zoom_settings.clipSize + 1);
 
-            // TO-DO: adapt the field averaging range based on the actual zoom viewport area
-
-            const resized = DownsizePolarisation(polarisation.intensity, polarisation.angle, polarisation.mask, polarisation.pol_width, polarisation.pol_height, polarisation.range, pol_xmin, pol_ymin, pol_xmax, pol_ymax);
+            // TO-DO: adapt the field averaging range based on the actual zoom viewport area        
+            const range = 4;//polarisation.range;
+            const resized = DownsizePolarisation(polarisation.intensity, polarisation.angle, polarisation.mask, polarisation.pol_width, polarisation.pol_height, range, pol_xmin, pol_ymin, pol_xmax, pol_ymax);
             console.log("zoom_rendering_loop polarisation:", resized);
+
+            // re-use the statistics from the polarisation object
+            const field = resized.field;
+            const mean = polarisation.mean;
+            const std = polarisation.std;
+
+            let pol_px = viewport_zoom_settings.px;
+            let pol_py = viewport_zoom_settings.py;
+
+            //const xScale = d3.scaleLinear().domain([image_bounding_dims.x1, image_bounding_dims.x2]).range([x, x + width]);
+            //const yScale = d3.scaleLinear().domain([image_bounding_dims.y1, image_bounding_dims.y1 + (image_bounding_dims.height - 1)]).range([y + height, y]);
+            const xScale = d3.scaleLinear().domain([pol_xmin, pol_xmax]).range([pol_px, pol_px + viewport_size]);
+            const yScale = d3.scaleLinear().domain([pol_ymax, pol_ymin]).range([pol_py, pol_py + viewport_size]);
+            const grid_spacing = 2 * range;
+
+            plot_polarisation(field, mean, std, xScale, yScale, grid_spacing, "PolarisationViewport");
         }
 
         viewport.loopId = requestAnimationFrame(zoom_rendering_loop);
@@ -14582,6 +14598,15 @@ function setup_image_selection(plane_index = previous_plane) {
 
             // Clear the ZOOMCanvas
             clear_webgl_viewport();
+
+            if (polarisation != null) {
+                // Clear the PolarisationViewport HTML5 Canvas
+                let pol_canvas = document.getElementById("PolarisationViewport");
+                let pol_ctx = pol_canvas.getContext('2d');
+                let pol_width = pol_canvas.width;
+                var pol_height = pol_canvas.height;
+                pol_ctx.clearRect(0, 0, pol_width, pol_height);
+            }
 
             if (!event.shiftKey)
                 windowLeft = true;
