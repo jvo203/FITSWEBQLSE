@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-02-06.0";
+    return "JS2025-02-07.0";
 }
 
 function uuidv4() {
@@ -4249,7 +4249,7 @@ function process_polarisation(index, pol_width, pol_height, intensity, angle, ma
     console.log("scaling by", scale, "new width:", img_width, "new height:", img_height, "orig. width:", image_bounding_dims.width, "orig. height:", image_bounding_dims.height);
 
     // assume a certain vector field density, i.e. 100 vectors per direction
-    const target = 75;
+    const target = 100;
     const range_x = image_bounding_dims.width / target;
     const range_y = image_bounding_dims.height / target;
     const range = Math.floor(Math.max(range_x, range_y));
