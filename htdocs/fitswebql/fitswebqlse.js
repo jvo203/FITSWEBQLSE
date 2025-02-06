@@ -3139,8 +3139,8 @@ function webgl_zoom_renderer(gl, height) {
             let pol_xmax = Math.round(viewport_zoom_settings.x + viewport_zoom_settings.clipSize + 1);
             let pol_ymax = Math.round(viewport_zoom_settings.y + viewport_zoom_settings.clipSize + 1);
 
-            // TO-DO: adapt the field averaging range based on the actual zoom viewport area        
-            const range = 4;//polarisation.range;
+            const target = 25;
+            const range = Math.max(1, Math.floor(2 * viewport_zoom_settings.clipSize / target));
             const resized = DownsizePolarisation(polarisation.intensity, polarisation.angle, polarisation.mask, polarisation.pol_width, polarisation.pol_height, range, pol_xmin, pol_ymin, pol_xmax, pol_ymax);
             console.log("zoom_rendering_loop polarisation:", resized);
 
