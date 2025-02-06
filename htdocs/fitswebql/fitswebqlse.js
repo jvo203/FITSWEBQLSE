@@ -4232,7 +4232,6 @@ function process_polarisation(index, pol_width, pol_height, intensity, angle, ma
     const range_x = image_bounding_dims.width / target;
     const range_y = image_bounding_dims.height / target;
     const range = Math.floor(Math.max(range_x, range_y));
-    polarisation.range = range;
     console.log("target field density:", target, "pixel window:", range, "( range_x:", range_x, "range_y:", range_y, ")");
 
     const resized = DownsizePolarisation(intensity, angle, mask, pol_width, pol_height, range, image_bounding_dims.x1, image_bounding_dims.y1, image_bounding_dims.x2, image_bounding_dims.y1 + (image_bounding_dims.height - 1));
@@ -4247,6 +4246,10 @@ function process_polarisation(index, pol_width, pol_height, intensity, angle, ma
     const grid_spacing = 2 * range;
 
     plot_polarisation(field, mean, std, xScale, yScale, grid_spacing, "PolarisationCanvas");
+
+    polarisation.range = range;
+    polarisation.mean = mean;
+    polarisation.std = std;
 }
 
 function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index) {
