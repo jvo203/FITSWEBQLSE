@@ -3049,6 +3049,11 @@ function webgl_zoom_renderer(gl, height) {
 
         // limit the FPS
         let _fps = 60; // was 30
+
+        // lower the FPS for polarisation rendering
+        if (polarisation != null)
+            _fps = 30;
+
         if ((now - last_viewport_loop) < (1000 / _fps)) {
             viewport.loopId = requestAnimationFrame(zoom_rendering_loop);
             return;
