@@ -3146,7 +3146,8 @@ function webgl_zoom_renderer(gl, height) {
 
             const target = 25;
             const range = Math.max(1, Math.floor(2 * viewport_zoom_settings.clipSize / target));
-            const resized = DownsizePolarisation(polarisation.intensity, polarisation.angle, polarisation.mask, polarisation.pol_width, polarisation.pol_height, range, pol_xmin, pol_ymin, pol_xmax, pol_ymax);
+            const circular = zoom_shape == "circle";
+            const resized = DownsizePolarisation(polarisation.intensity, polarisation.angle, polarisation.mask, polarisation.pol_width, polarisation.pol_height, range, pol_xmin, pol_ymin, pol_xmax, pol_ymax, circular);
             console.log("zoom_rendering_loop polarisation:", resized);
 
             // re-use the statistics from the polarisation object
@@ -3997,8 +3998,8 @@ function process_hdr_viewport(img_width, img_height, pixels, alpha, index) {
     }
 }
 
-function DownsizePolarisation(srcI, srcA, mask, sw, sh, range, xmin = 0, ymin = 0, xmax = sw - 1, ymax = sh - 1) {
-    console.log("DownsizePolarisation", sw, sh, range, xmin, ymin, xmax, ymax);
+function DownsizePolarisation(srcI, srcA, mask, sw, sh, range, xmin = 0, ymin = 0, xmax = sw - 1, ymax = sh - 1, circular = false) {
+    console.log("DownsizePolarisation", sw, sh, range, xmin, ymin, xmax, ymax, circular);
 
     let di = range;
     let dj = range;
@@ -4009,6 +4010,10 @@ function DownsizePolarisation(srcI, srcA, mask, sw, sh, range, xmin = 0, ymin = 
     var mag_mean = 0.0;
     var mag_std = 0.0;
     var mag_count = 0;
+
+    let xr = (xmax + xmin) / 2;
+    let yr = (ymax + ymin) / 2;
+    let radius = Math.min(xr - xmin, yr - ymin);
 
     // skip the data boundaries
     for (let i = xmin + 0 * di; i <= xmax - 0 * di; i += di) {
@@ -4021,6 +4026,16 @@ function DownsizePolarisation(srcI, srcA, mask, sw, sh, range, xmin = 0, ymin = 
                 for (let jj = j; jj < j + dj; jj++) {
 
                     if (ii < sw && jj < sh) {
+                        if (circular) {
+                            let dx = ii - xr;
+                            let dy = jj - yr;
+                            let r = Math.sqrt(dx * dx + dy * dy);
+
+                            if (r >= radius) {
+                                continue;
+                            }
+                        }
+
                         let idx = jj * sw + ii;
 
                         if (mask[idx] > 0) {
