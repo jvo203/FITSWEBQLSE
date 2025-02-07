@@ -3144,7 +3144,7 @@ function webgl_zoom_renderer(gl, height) {
             let pol_xmax = Math.round(viewport_zoom_settings.x + viewport_zoom_settings.clipSize + 1);
             let pol_ymax = Math.round(viewport_zoom_settings.y + viewport_zoom_settings.clipSize + 1);
 
-            const target = 25;
+            const target = 34;
             const range = Math.max(1, Math.floor(2 * viewport_zoom_settings.clipSize / target));
             const circular = zoom_shape == "circle";
             const resized = DownsizePolarisation(polarisation.intensity, polarisation.angle, polarisation.mask, polarisation.pol_width, polarisation.pol_height, range, pol_xmin, pol_ymin, pol_xmax, pol_ymax, circular);
@@ -3155,13 +3155,28 @@ function webgl_zoom_renderer(gl, height) {
             const mean = polarisation.mean;
             const std = polarisation.std;
 
-            let pol_px = viewport_zoom_settings.px;
-            let pol_py = viewport_zoom_settings.py;
+            var elem = d3.select('#' + zoom_location);
 
-            //const xScale = d3.scaleLinear().domain([image_bounding_dims.x1, image_bounding_dims.x2]).range([x, x + width]);
-            //const yScale = d3.scaleLinear().domain([image_bounding_dims.y1, image_bounding_dims.y1 + (image_bounding_dims.height - 1)]).range([y + height, y]);
-            const xScale = d3.scaleLinear().domain([pol_xmin, pol_xmax]).range([pol_px, pol_px + viewport_size]);
-            const yScale = d3.scaleLinear().domain([pol_ymax, pol_ymin]).range([pol_py, pol_py + viewport_size]);
+            if (zoom_shape == "circle") {
+                var zoom_x = parseFloat(elem.attr('cx'));
+                var zoom_y = parseFloat(elem.attr('cy'));
+                var zoom_r = parseFloat(elem.attr('r'));
+            } else {
+                zoom_px = parseFloat(elem.attr('x'));
+                zoom_py = parseFloat(elem.attr('y'));
+                let zoom_width = parseFloat(elem.attr('width'));
+                let zoom_height = parseFloat(elem.attr('height'));
+                var zoom_viewport_size = Math.min(zoom_width, zoom_height);
+            }
+
+            if (zoom_shape == "circle") {
+                var xScale = d3.scaleLinear().domain([pol_xmin, pol_xmax]).range([zoom_x - zoom_r, zoom_x + zoom_r]);
+                var yScale = d3.scaleLinear().domain([pol_ymax, pol_ymin]).range([zoom_y - zoom_r, zoom_y + zoom_r]);
+            } else {
+                var xScale = d3.scaleLinear().domain([pol_xmin, pol_xmax]).range([zoom_px, zoom_px + zoom_viewport_size]);
+                var yScale = d3.scaleLinear().domain([pol_ymax, pol_ymin]).range([zoom_py, zoom_py + zoom_viewport_size]);
+            }
+
             const grid_spacing = 2 * range;
 
             plot_polarisation(field, mean, std, xScale, yScale, grid_spacing, "PolarisationViewport");
@@ -4027,11 +4042,11 @@ function DownsizePolarisation(srcI, srcA, mask, sw, sh, range, xmin = 0, ymin = 
 
                     if (ii < sw && jj < sh) {
                         if (circular) {
-                            let dx = ii - xr;
-                            let dy = jj - yr;
+                            let dx = (ii + di / 2) - xr;
+                            let dy = (jj + dj / 2) - yr;
                             let r = Math.sqrt(dx * dx + dy * dy);
 
-                            if (r >= radius) {
+                            if (r > radius) {
                                 continue;
                             }
                         }
@@ -4049,17 +4064,20 @@ function DownsizePolarisation(srcI, srcA, mask, sw, sh, range, xmin = 0, ymin = 
             }
 
             if (count > min_count) {
-                I /= count;
-                A /= count;
-
                 let x0 = i + di / 2;
                 let y0 = j + dj / 2;
 
-                mag_mean += I;
-                mag_std += I * I;
-                mag_count++;
+                // only add if x0 and y0 are within the image boundaries
+                if (x0 <= xmax && y0 <= ymax && x0 >= xmin && y0 >= ymin) {
+                    I /= count;
+                    A /= count;
 
-                field.push({ x: x0, y: y0, I: I, A: A });
+                    mag_mean += I;
+                    mag_std += I * I;
+                    mag_count++;
+
+                    field.push({ x: x0, y: y0, I: I, A: A });
+                }
             }
         }
     }
@@ -4210,8 +4228,6 @@ function plot_polarisation(field, mean, std, xScale, yScale, spacing, canvasId) 
         let vector = { x: x - 0.5 * r * Math.cos(angle), y: y - 0.5 * r * Math.sin(angle), vx: r * Math.cos(angle), vy: r * Math.sin(angle) };
         vectors.push(vector);
     };
-
-    console.log("vectors:", vectors);
 
     var canvas = document.getElementById(canvasId);
 
