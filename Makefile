@@ -211,13 +211,13 @@ ifeq ($(UNAME_S),Darwin)
 
 	# GCC FORTRAN runtime
 	LIBS += -L${HOMEBREW_PREFIX}/opt/gcc/lib/gcc/14 -lgfortran -lm -framework Accelerate
-
-	# use the built-in macOS Accelerate instead but only on Apple Silicon (OK, Intel macOS too)
+	
+	# disable the use of Intel IPP and MKL on macOS
 	IPP =
 	MKL =
-	ifeq ($(UNAME_M),arm64)
-		IPP =
-		MKL =
+
+	# use the built-in macOS Accelerate instead but only on Apple Silicon (OK, Intel macOS too)
+	ifeq ($(UNAME_M),arm64)		
 		ISPC_TARGET = --target=neon-i32x8
 	else
 		ISPC_TARGET = 
