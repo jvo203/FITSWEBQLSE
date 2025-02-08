@@ -213,10 +213,15 @@ ifeq ($(UNAME_S),Darwin)
 	LIBS += -L${HOMEBREW_PREFIX}/opt/gcc/lib/gcc/14 -lgfortran -lm -framework Accelerate
 
 	# use the built-in macOS Accelerate instead but only on Apple Silicon (OK, Intel macOS too)
-	#ifeq ($(UNAME_M),arm64)
 	IPP =
 	MKL =
-	#endif
+	ifeq ($(UNAME_M),arm64)
+		IPP =
+		MKL =
+		ISPC_TARGET = --target=neon-i32x8
+	else
+		ISPC_TARGET = 
+	endif
 
 	# try clang for a change; force the use of libgomp instead of libomp (FORTRAN has been compiled with gfortran, flang is immature at the moment)
 	CC = ${HOMEBREW_PREFIX}/opt/llvm/bin/clang
@@ -287,7 +292,7 @@ endif
 -include $(DEP)
 
 %.o: %.ispc
-	ispc -g -O3 --pic --opt=fast-math --addressing=64 -o $@ -h $(subst .o,.h,$@) $<
+	ispc -g -O3 $(ISPC_TARGET)  --pic --opt=fast-math --addressing=64 -o $@ -h $(subst .o,.h,$@) $<
 
 %.o: %.c
 	$(CC) $(CFLAGS) $(DEF) $(INC) -MMD -o $@ -c $<
