@@ -8528,43 +8528,48 @@ contains
 
 
    subroutine realtime_viewport_request(item, req)
+      use omp_lib
       implicit none
 
       type(dataset), pointer :: item
       type(image_spectrum_request_f), pointer :: req
 
       ! timing
-      integer(8) :: start_t, finish_t, crate, cmax
+      real(8) :: t1, t2 ! OpenMP TIME
       real(c_float) :: elapsed
 
-      integer :: x1, x2, y1, y2, plane
+      integer :: x1, x2, y1, y2, max_planes, i
       integer :: dimx, dimy, native_size, viewport_size
       real :: scale
       integer(c_int) :: precision
 
-      type(resize_task_t), target :: task
-      type(c_ptr) :: task_pid
-      integer(kind=c_int) :: rc
+      type(resize_task_t), target :: pixels_task(4)
+      type(c_ptr) :: task_pid(4)
+      integer(kind=c_int) :: rc, task_rc(4)
 
-      real(kind=c_float), allocatable, target :: pixels(:, :), view_pixels(:, :)
+      real(kind=c_float), allocatable, target :: pixels(:, :, :), view_pixels(:, :, :)
       logical(kind=c_bool), allocatable, target :: mask(:, :), view_mask(:, :)
 
       ! start the timer
-      call system_clock(count=start_t, count_rate=crate, count_max=cmax)
+      t1 = omp_get_wtime()
 
       if ((.not. allocated(item%pixels)) .or. (.not. allocated(item%mask))) return
 
-      plane = req%plane
+      !plane = req%plane
 
       ! check if the plane is within the bounds
-      if ((plane .lt. 1) .or. (plane .gt. size(item%pixels, 3))) return
+      !if ((plane .lt. 1) .or. (plane .gt. size(item%pixels, 3))) return
+
+      ! obtain max_planes from the third dimension of item%pixels
+      max_planes = size(item%pixels, 3)
+      print *, 'realtime_viewport_request: max_planes = ', max_planes
 
       ! obtain viewport dimensions (even going beyond the dims of pixels&mask)
       dimx = abs(req%x2 - req%x1) + 1
       dimy = abs(req%y2 - req%y1) + 1
 
       ! memory allocation
-      allocate (pixels(req%x1:req%x2, req%y1:req%y2))
+      allocate (pixels(req%x1:req%x2, req%y1:req%y2, 1:max_planes))
       allocate (mask(req%x1:req%x2, req%y1:req%y2))
 
       ! clear the viewport
@@ -8578,7 +8583,7 @@ contains
       y2 = min(item%naxes(2), req%y2)
 
       ! only copy valid parts from within item%pixels&item%mask
-      pixels(x1:x2, y1:y2) = item%pixels(x1:x2, y1:y2, plane)
+      pixels(x1:x2, y1:y2, 1:max_planes) = item%pixels(x1:x2, y1:y2, 1:max_planes)
       mask(x1:x2, y1:y2) = item%mask(x1:x2, y1:y2)
 
       select case (req%quality)
@@ -8599,37 +8604,39 @@ contains
       if (native_size .gt. viewport_size) then
          ! downsize the pixels/mask from {dimx,dimy} to {req%width,req%height}
 
-         allocate (view_pixels(req%width, req%height))
+         allocate (view_pixels(req%width, req%height, max_planes))
          allocate (view_mask(req%width, req%height))
 
-         task%pSrc = c_loc(pixels)
-         task%srcWidth = dimx
-         task%srcHeight = dimy
+         do i = 1, max_planes
+            pixels_task(i)%pSrc = c_loc(pixels(:, :, i))
+            pixels_task(i)%srcWidth = dimx
+            pixels_task(i)%srcHeight = dimy
 
-         task%pDest = c_loc(view_pixels)
-         task%dstWidth = req%width
-         task%dstHeight = req%height
+            pixels_task(i)%pDest = c_loc(view_pixels(:, :, i))
+            pixels_task(i)%dstWidth = req%width
+            pixels_task(i)%dstHeight = req%height
 
-         if (scale .gt. 0.2) then
-            task%numLobes = 3
-            ! call resizeLanczos(c_loc(pixels), dimx, dimy, c_loc(view_pixels), req%width, req%height, 3)
-         else
-            task%numLobes = 0
-            ! call resizeSuper(c_loc(pixels), dimx, dimy, c_loc(view_pixels), req%width, req%height)
-         end if
+            if (scale .gt. 0.2) then
+               pixels_task(i)%numLobes = 3
+            else
+               pixels_task(i)%numLobes = 0
+            end if
 
-         ! launch a pthread to resize pixels
-         task_pid = my_pthread_create(start_routine=c_funloc(launch_resize_task), arg=c_loc(task), rc=rc)
+            ! launch a pthread to resize pixels
+            task_pid(i) = my_pthread_create(start_routine=c_funloc(launch_resize_task), arg=c_loc(pixels_task(i)), rc=task_rc(i))
+         end do
 
          call resizeNearest(c_loc(mask), dimx, dimy, c_loc(view_mask), req%width, req%height)
          ! call resizeMask(mask, dimx, dimy, view_mask, req%width, req%height)
 
-         ! join a thread
-         rc = my_pthread_join(task_pid)
+         ! join thread(s)
+         do i = 1, max_planes
+            rc = my_pthread_join(task_pid(i))
+         end do
 
          ! end the timer
-         call system_clock(finish_t)
-         elapsed = 1000.0*real(finish_t - start_t)/real(crate) ! [ms]
+         t2 = omp_get_wtime()
+         elapsed = 1000.0*(t2 - t1) ! [ms]
 
          call write_ws_viewport(req%session, req%seq_id, req%timestamp, elapsed,&
          &req%width, req%height, c_loc(view_pixels), c_loc(view_mask), precision)
@@ -8637,14 +8644,14 @@ contains
          ! no need for downsizing
 
          ! end the timer
-         call system_clock(finish_t)
-         elapsed = 1000.0*real(finish_t - start_t)/real(crate) ! [ms]
+         t2 = omp_get_wtime()
+         elapsed = 1000.0*(t2 - t1) ! [ms]
 
          call write_ws_viewport(req%session, req%seq_id, req%timestamp, elapsed,&
          &dimx, dimy, c_loc(pixels), c_loc(mask), precision)
       end if
 
-      ! print *, "handle_viewport_request elapsed time:", elapsed, '[ms]'
+      print *, "handle_viewport_request elapsed time:", elapsed, '[ms]'
    end subroutine realtime_viewport_request
 
    recursive subroutine viewport_request(user) BIND(C, name='viewport_request')
