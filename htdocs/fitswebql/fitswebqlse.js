@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-02-07.0";
+    return "JS2025-02-10.0";
 }
 
 function uuidv4() {
@@ -6073,7 +6073,7 @@ async function open_websocket_connection(_datasetId, index) {
 
                             let elapsed = Math.round(performance.now() - start);
 
-                            // console.log("viewport width: ", view_width, "height: ", view_height, "elapsed: ", elapsed, "[ms]");
+                            console.log("viewport width: ", view_width, "height: ", view_height, "previous_plane", previous_plane, "elapsed: ", elapsed, "[ms]");
 
                             process_hdr_viewport(view_width, view_height, pixels, alpha, index);
                         }
