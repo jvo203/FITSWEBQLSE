@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-02-10.0";
+    return "JS2025-02-10.1";
 }
 
 function uuidv4() {
@@ -6065,7 +6065,7 @@ async function open_websocket_connection(_datasetId, index) {
 
                             // decompressZFP returns std::vector<float>
                             // decompressZFPimage returns Float32Array but emscripten::typed_memory_view is buggy
-                            var res = Module.decompressZFPimage(view_width, view_height, plane_count, frame_pixels);
+                            var res = Module.decompressZFPimage(view_width, view_height, 1, frame_pixels);
                             const pixels = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
 
                             var res = Module.decompressLZ4mask(view_width, view_height, frame_mask);
@@ -6075,14 +6075,7 @@ async function open_websocket_connection(_datasetId, index) {
 
                             // console.log("viewport width: ", view_width, "height: ", view_height, "previous_plane", previous_plane, "elapsed: ", elapsed, "[ms]");
 
-                            if (plane_count > 1) {
-                                // extract the <previous_plane> plane
-                                let pixels_i = pixels.slice((previous_plane - 1) * view_width * view_height, previous_plane * view_width * view_height);
-                                process_hdr_viewport(view_width, view_height, pixels_i, alpha, index);
-                            }
-                            else {
-                                process_hdr_viewport(view_width, view_height, pixels, alpha, index);
-                            }
+                            process_hdr_viewport(view_width, view_height, pixels, alpha, index);
                         }
                         /*})
                         .catch(e => console.error(e));*/

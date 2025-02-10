@@ -21,7 +21,7 @@ void *send_cluster_heartbeat(void *arg);
 // combined WebSocket write functions, to be used from FORTRAN
 // image/spectrum
 void write_ws_spectrum(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, const float *spectrum, int n, int precision);
-void write_ws_viewport(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, int width, int height, int no_planes, const float *restrict pixels, const bool *restrict mask, int precision);
+void write_ws_viewport(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, int width, int height, const float *restrict pixels, const bool *restrict mask, int precision);
 void write_ws_hds_spectra(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, const float *restrict xspec, const bool *restrict xmask, int xlen, const float *restrict yspec, const bool *restrict ymask, int ylen, const int *x, const int *y, const float *theta, int precision);
 
 // video
@@ -3147,7 +3147,7 @@ void write_ws_hds_spectra(websocket_session *session, const int *seq_id, const f
     free(ycomp_mask);
 }
 
-void write_ws_viewport(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, int width, int height, int no_planes, const float *restrict pixels, const bool *restrict mask, int precision)
+void write_ws_viewport(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, int width, int height, const float *restrict pixels, const bool *restrict mask, int precision)
 {
     uchar *restrict compressed_pixels = NULL;
     char *restrict compressed_mask = NULL;
@@ -3161,7 +3161,6 @@ void write_ws_viewport(websocket_session *session, const int *seq_id, const floa
     size_t zfpsize = 0;
     uint nx = width;
     uint ny = height;
-    uint nz = no_planes;
 
     int mask_size, worst_size;
     int compressed_size = 0;
@@ -3184,11 +3183,8 @@ void write_ws_viewport(websocket_session *session, const int *seq_id, const floa
         return;
     }
 
-    // compress 2D or 3D pixels with ZFP
-    if (no_planes > 1)
-        field = zfp_field_3d((void *)pixels, data_type, nx, ny, nz);
-    else
-        field = zfp_field_2d((void *)pixels, data_type, nx, ny);
+    // compress 2D pixels with ZFP
+    field = zfp_field_2d((void *)pixels, data_type, nx, ny);
 
     // allocate metadata for a compressed stream
     zfp = zfp_stream_open(NULL);
