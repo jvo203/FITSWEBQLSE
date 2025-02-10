@@ -6073,9 +6073,16 @@ async function open_websocket_connection(_datasetId, index) {
 
                             let elapsed = Math.round(performance.now() - start);
 
-                            console.log("viewport width: ", view_width, "height: ", view_height, "previous_plane", previous_plane, "elapsed: ", elapsed, "[ms]");
+                            // console.log("viewport width: ", view_width, "height: ", view_height, "previous_plane", previous_plane, "elapsed: ", elapsed, "[ms]");
 
-                            process_hdr_viewport(view_width, view_height, pixels, alpha, index);
+                            if (plane_count > 1) {
+                                // extract the <previous_plane> plane
+                                let pixels_i = pixels.slice((previous_plane - 1) * view_width * view_height, previous_plane * view_width * view_height);
+                                process_hdr_viewport(view_width, view_height, pixels_i, alpha, index);
+                            }
+                            else {
+                                process_hdr_viewport(view_width, view_height, pixels, alpha, index);
+                            }
                         }
                         /*})
                         .catch(e => console.error(e));*/
