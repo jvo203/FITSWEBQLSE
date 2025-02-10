@@ -1349,8 +1349,8 @@ module fits
 
       end subroutine write_viewport
 
-      ! void write_ws_viewport(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, int width, int height, const float *restrict pixels, const bool *restrict mask, int precision)
-      subroutine write_ws_viewport(session, seq_id, timestamp, elapsed, width, height, pixels, mask, precision)&
+      ! void write_ws_viewport(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, int width, int height, int no_planes, const float *restrict pixels, const bool *restrict mask, int precision)
+      subroutine write_ws_viewport(session, seq_id, timestamp, elapsed, width, height, no_planes, pixels, mask, precision)&
       & BIND(C, name='write_ws_viewport')
          use, intrinsic :: ISO_C_BINDING
          implicit none
@@ -1358,7 +1358,7 @@ module fits
          type(C_PTR), value :: session
          integer(c_int), intent(in) :: seq_id
          real(c_float), intent(in) :: timestamp, elapsed
-         integer(c_int), value, intent(in) :: width, height, precision
+         integer(c_int), value, intent(in) :: width, height, no_planes, precision
          type(C_PTR), value :: pixels, mask
       end subroutine write_ws_viewport
 
@@ -7625,11 +7625,11 @@ contains
             rc = my_pthread_join(task_pid)
 
             call write_ws_viewport(req%session, req%seq_id, req%timestamp, elapsed,&
-            &req%width, req%height, c_loc(view_pixels), c_loc(view_mask), precision)
+            &req%width, req%height, 1, c_loc(view_pixels), c_loc(view_mask), precision)
          else
             ! no need for downsizing
             call write_ws_viewport(req%session, req%seq_id, req%timestamp, elapsed,&
-            &dimx, dimy, c_loc(pixels), c_loc(mask), precision)
+            &dimx, dimy, 1, c_loc(pixels), c_loc(mask), precision)
          end if
       end if
 
@@ -8639,7 +8639,7 @@ contains
          elapsed = 1000.0*(t2 - t1) ! [ms]
 
          call write_ws_viewport(req%session, req%seq_id, req%timestamp, elapsed,&
-         &req%width, req%height, c_loc(view_pixels), c_loc(view_mask), precision)
+         &req%width, req%height, max_planes, c_loc(view_pixels), c_loc(view_mask), precision)
       else
          ! no need for downsizing
 
@@ -8648,7 +8648,7 @@ contains
          elapsed = 1000.0*(t2 - t1) ! [ms]
 
          call write_ws_viewport(req%session, req%seq_id, req%timestamp, elapsed,&
-         &dimx, dimy, c_loc(pixels), c_loc(mask), precision)
+         &dimx, dimy, max_planes, c_loc(pixels), c_loc(mask), precision)
       end if
 
       print *, "handle_viewport_request elapsed time:", elapsed, '[ms]'
