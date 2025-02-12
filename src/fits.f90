@@ -8670,7 +8670,7 @@ contains
       integer, parameter :: target = 34;
       integer :: range, count, min_count
 
-      real :: tmpI, tmpQ, tmpU, tmpV
+      real :: tmp, tmpA, tmpI, tmpQ, tmpU, tmpV
       real :: intensity, angle
 
 
@@ -8710,12 +8710,44 @@ contains
                      tmpQ = pixels(ii, jj, 2)
                      tmpU = pixels(ii, jj, 3)
 
+                     if (tmpQ .eq. 0.0 .and. tmpU .eq. 0.0) then
+                        tmpA = ieee_value(0.0, ieee_quiet_nan)
+                     else
+                        tmpA = 0.5 * atan2(tmpU, tmpQ) ! polarisation angle
+                     end if
+
                      if (max_planes .gt. 3) then
                         tmpV = pixels(ii, jj, 4)
+
+                        if(tmpI .eq. 0.0) then
+                           tmp = ieee_value(0.0, ieee_quiet_nan)
+                        else
+                           tmp = sqrt(tmpQ**2 + tmpU**2 + tmpV**2) / tmpI ! total intensity
+                        end if
+                     else
+                        if(tmpI .eq. 0.0) then
+                           tmp = ieee_value(0.0, ieee_quiet_nan)
+                        else
+                           tmp = sqrt(tmpQ**2 + tmpU**2) / tmpI ! linear intensity
+                        end if
+                     end if
+
+                     if ((.not. ieee_is_nan(tmpA)) .and. (.not. ieee_is_nan(tmp))) then
+                        intensity = intensity + tmp
+                        angle = angle + tmpA
+                        count = count + 1
                      end if
                   end if
                end do
             end do
+
+            if (count .ge. min_count) then
+               intensity = intensity / real(count)
+               angle = angle / real(count)
+
+               ! print *, 'DownsizePolarization: i:', i, 'j:', j, 'intensity:', intensity, 'angle:', angle
+            end if
+
          end do
       end do
 
