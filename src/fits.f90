@@ -8634,6 +8634,8 @@ contains
             rc = my_pthread_join(task_pid(i))
          end do
 
+         call DownsizePolarization(view_pixels, view_mask, req%width, req%height, req%beam)
+
          ! end the timer
          t2 = omp_get_wtime()
          elapsed = 1000.0*(t2 - t1) ! [ms]
@@ -8642,7 +8644,7 @@ contains
          &req%width, req%height, c_loc(view_pixels(:,:,plane)), c_loc(view_mask), precision)
       else
          ! no need for downsizing
-
+         call DownsizePolarization(pixels, mask, dimx, dimy, req%beam)
          ! end the timer
          t2 = omp_get_wtime()
          elapsed = 1000.0*(t2 - t1) ! [ms]
@@ -8653,6 +8655,63 @@ contains
 
       print *, "handle_viewport_request elapsed time:", elapsed, '[ms]'
    end subroutine realtime_viewport_request
+
+   subroutine DownsizePolarization(pixels, mask, width, height, beam)
+      implicit none
+
+      real(c_float), dimension(:,:,:), intent(in) :: pixels
+      logical(kind=c_bool), dimension(:,:), intent(in) :: mask
+      integer, intent(in) :: width, height
+      integer(kind(circle)), intent(in) :: beam
+
+      integer :: xmin, xmax, ymin, ymax, max_planes, i, j, ii, jj
+      real :: xr, yr, radius
+
+      integer, parameter :: target = 34;
+      integer :: range, count, min_count
+
+      real :: tmpI, tmpQ, tmpU, tmpV
+      real :: intensity, angle
+
+      range = max(1, floor( 0.5*(real(width)+real(height)) / real(target)))
+      min_count = nint(0.75*range**2)
+
+      ! print the width X height of the input pixels and mask
+      print *, 'DownsizePolarization: width:', width, 'height:', height, 'range:', range, 'min_count:', min_count
+
+      xmin = lbound(pixels, 1)
+      xmax = ubound(pixels, 1)
+      ymin = lbound(pixels, 2)
+      ymax = ubound(pixels, 2)
+      max_planes = size(pixels, 3)
+
+      xr = real(xmax + xmin) / 2.0
+      yr = real(ymax + ymin) / 2.0
+      radius = min(xr - real(xmin), yr - real(ymin))
+
+      print *, 'DownsizePolarization: xmin:', xmin, 'xmax:', xmax, 'ymin:', ymin, 'ymax:', ymax, 'max_planes:', max_planes
+
+      ! loop over the pixels and mask
+      do j=ymin, ymax, range
+         do i=xmin, xmax, range
+            ! print *, 'DownsizePolarization: i:', i, 'j:', j
+
+            intensity = 0.0
+            angle = 0.0
+            count = 0
+
+            do jj=j, min(j+range-1, ymax)
+               do ii=i, min(i+range-1, xmax)
+                  if (mask(ii, jj)) then
+                     !I = I + pixels(ii, jj, beam)
+                     !A = A + 1.0
+                  end if
+               end do
+            end do
+         end do
+      end do
+
+   end subroutine DownsizePolarization
 
    recursive subroutine viewport_request(user) BIND(C, name='viewport_request')
       use omp_lib
