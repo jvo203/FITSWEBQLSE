@@ -8673,6 +8673,10 @@ contains
       real :: tmpI, tmpQ, tmpU, tmpV
       real :: intensity, angle
 
+
+      max_planes = size(pixels, 3)
+      if(max_planes .lt. 3) return
+
       range = max(1, floor( 0.5*(real(width)+real(height)) / real(target)))
       min_count = nint(0.75*range**2)
 
@@ -8683,7 +8687,6 @@ contains
       xmax = ubound(pixels, 1)
       ymin = lbound(pixels, 2)
       ymax = ubound(pixels, 2)
-      max_planes = size(pixels, 3)
 
       xr = real(xmax + xmin) / 2.0
       yr = real(ymax + ymin) / 2.0
@@ -8703,8 +8706,13 @@ contains
             do jj=j, min(j+range-1, ymax)
                do ii=i, min(i+range-1, xmax)
                   if (mask(ii, jj)) then
-                     !I = I + pixels(ii, jj, beam)
-                     !A = A + 1.0
+                     tmpI = pixels(ii, jj, 1)
+                     tmpQ = pixels(ii, jj, 2)
+                     tmpU = pixels(ii, jj, 3)
+
+                     if (max_planes .gt. 3) then
+                        tmpV = pixels(ii, jj, 4)
+                     end if
                   end if
                end do
             end do
