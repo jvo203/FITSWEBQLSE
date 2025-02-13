@@ -8668,10 +8668,10 @@ contains
       real :: xr, yr, radius
 
       integer, parameter :: target = 34;
-      integer :: range, count, min_count
+      integer :: range, count, min_count, total_count
 
       real :: tmp, tmpA, tmpI, tmpQ, tmpU, tmpV
-      real :: intensity, angle
+      real :: intensity, angle, x0, y0
 
 
       max_planes = size(pixels, 3)
@@ -8693,6 +8693,8 @@ contains
       radius = min(xr - real(xmin), yr - real(ymin))
 
       print *, 'DownsizePolarization: xmin:', xmin, 'xmax:', xmax, 'ymin:', ymin, 'ymax:', ymax, 'max_planes:', max_planes
+
+      total_count = 0
 
       ! loop over the pixels and mask
       do j=ymin, ymax, range
@@ -8745,11 +8747,18 @@ contains
                intensity = intensity / real(count)
                angle = angle / real(count)
 
-               ! print *, 'DownsizePolarization: i:', i, 'j:', j, 'intensity:', intensity, 'angle:', angle
+               x0 = real(i) + 0.5*real(range) - xmin ! 0-based indexing
+               y0 = real(j) + 0.5*real(range) - ymin ! 0-based indexing
+
+               total_count = total_count + 1
+
+               print *, 'DownsizePolarization: x:', x0, 'y:', y0, 'intensity:', intensity, 'angle:', angle
             end if
 
          end do
       end do
+
+      print *, 'DownsizePolarization: total_count:', total_count
 
    end subroutine DownsizePolarization
 
