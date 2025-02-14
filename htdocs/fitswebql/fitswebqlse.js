@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-02-10.1";
+    return "JS2025-02-14.0";
 }
 
 function uuidv4() {
@@ -6301,45 +6301,31 @@ async function open_websocket_connection(_datasetId, index) {
                         return;
                     }
 
-                    //histogram refresh (deprecated, not in use anymore, to be removed)
+                    // polarisation
                     if (type == 4) {
-                        hide_cursor();
-                        var min = dv.getFloat32(12, endianness);
-                        var max = dv.getFloat32(16, endianness);
-                        var black = dv.getFloat32(20, endianness);
-                        var white = dv.getFloat32(24, endianness);
-                        var median = dv.getFloat32(28, endianness);
-                        var sensitivity = dv.getFloat32(32, endianness);
-                        var ratio_sensitivity = dv.getFloat32(36, endianness);
+                        hide_hourglass();
 
-                        //console.log("histogram refresh", min, max, median, sensitivity, ratio_sensitivity, black, white);
+                        var offset = 16;
+                        var json_len = dv.getUint32(offset, endianness);
+                        offset += 4;
 
-                        let fitsData = fitsContainer[index - 1]; // imageContainer[index - 1].tone_mapping?
-                        //console.log("min: ", fitsData.min, "-->", min);
-                        //console.log("max: ", fitsData.max, "-->", max);
-                        //console.log("median: ", fitsData.median, "-->", median);
-                        //console.log("sensitivity: ", fitsData.sensitivity, "-->", sensitivity);
-                        //console.log("ratio sensitivity: ", fitsData.ratio_sensitivity, "-->", ratio_sensitivity);
-                        //console.log("black: ", fitsData.black, "-->", black);
-                        //console.log("white: ", fitsData.white, "-->", white);
+                        var json_frame = new Uint8Array(received_msg, offset);
+                        console.log("compressed_json length:", json_frame.length, "json_len:", json_len);
 
-                        // not in use anymore?
-                        /*fitsContainer[index - 1].min = min;
-                        fitsContainer[index - 1].max = max;
-                        fitsContainer[index - 1].median = median;
-                        fitsContainer[index - 1].sensitivity = sensitivity;
-                        fitsContainer[index - 1].ratio_sensitivity = ratio_sensitivity;
-                        fitsContainer[index - 1].black = black;
-                        fitsContainer[index - 1].white = white;*/
+                        // decompress JSON
+                        var LZ4 = require('lz4');
 
-                        var nbins = dv.getUint32(40, endianness);
-                        var histogram = new Int32Array(received_msg, 44, nbins);
-                        fitsContainer[index - 1].histogram = histogram;
+                        var uncompressed = new Uint8Array(json_len);
+                        uncompressedSize = LZ4.decodeBlock(json_frame, uncompressed);
+                        uncompressed = uncompressed.slice(0, uncompressedSize);
 
-                        //console.log("NBINS:", nbins, histogram);
-
-                        //refresh the histogram
-                        redraw_histogram(index);
+                        try {
+                            var json = new TextDecoder().decode(uncompressed);
+                            var jsonData = JSON.parse(json);
+                            console.log("json:", jsonData);
+                        } catch (e) {
+                            console.log(e);
+                        };
 
                         return;
                     }
