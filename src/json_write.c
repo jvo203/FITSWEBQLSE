@@ -154,5 +154,5 @@ extern void add_json_polarisation_entry(GString *json, float x, float y, float i
     if (json == NULL)
         return;
 
-    g_string_append_printf(json, "{\"x\" : %.2g, \"y\" : %.2g, \"I\" : %.16g, \"A\" : %.16g},", x, y, intensity, angle);
+    g_string_append_printf(json, "{\"x\" : %.4g, \"y\" : %.4g, \"I\" : %.4g, \"A\" : %.4g},", x, y, intensity, angle);
 }

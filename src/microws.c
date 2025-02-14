@@ -3342,6 +3342,49 @@ void write_ws_viewport(websocket_session *session, const int *seq_id, const floa
         free(compressed_mask);
 }
 
+void write_ws_polarisation(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, GString *json)
+{
+    if (session == NULL)
+    {
+        printf("[C] <write_ws_polarisation> NULL session pointer!\n");
+        return;
+    }
+
+    if (json == NULL)
+    {
+        printf("[C] <write_ws_polarisation> NULL json!\n");
+        return;
+    }
+
+    // first print the JSON string
+    printf("[C] <write_ws_polarisation> :: %s\n", json->str);
+
+    // compress JSON with LZ4-HC
+    int json_size = json->len;
+    int worst_size = LZ4_compressBound(json_size);
+    int compressed_size = 0;
+
+    char *compressed_json = (char *)malloc(worst_size);
+
+    if (compressed_json != NULL)
+    {
+        // compress the JSON as much as possible
+        compressed_size = LZ4_compress_HC(json->str, compressed_json, json_size, worst_size, LZ4HC_CLEVEL_MAX);
+
+        printf("[C] JSON raw size: %d; compressed: %d bytes\n", json_size, compressed_size);
+    }
+
+    if (compressed_size > 0)
+    {
+        // ... directly prepare and queue the WebSocket message
+        size_t msg_len = sizeof(float) + sizeof(uint32_t) + sizeof(uint32_t) + sizeof(float) + sizeof(uint32_t) + compressed_size;
+    }
+
+    // release the memory
+    if (compressed_json != NULL)
+        free(compressed_json);
+}
+
 void write_ws_video(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, const uint8_t *restrict pixels, const uint8_t *restrict mask)
 {
     if (session == NULL)
