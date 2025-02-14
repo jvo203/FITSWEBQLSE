@@ -31,6 +31,14 @@ extern void end_json(GString *json)
     }
 }
 
+extern void begin_array(GString *json, char *key)
+{
+    if (json == NULL)
+        return;
+
+    g_string_append_printf(json, "\"%s\" : [", key);
+}
+
 extern void add_json_string(GString *json, char *key, char *val)
 {
     if (json == NULL)

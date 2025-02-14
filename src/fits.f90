@@ -1412,6 +1412,15 @@ module fits
          type(c_ptr), value :: json
       end subroutine end_json
 
+      ! begin_array(GString *json, char *key)
+      subroutine begin_array(json, key) BIND(C, name='begin_array')
+         use, intrinsic :: ISO_C_BINDING
+         implicit none
+
+         type(c_ptr), value :: json
+         character(kind=c_char), intent(in) :: key(*)
+      end subroutine begin_array
+
       ! void add_json_integer(GString *json, char *key, int val)
       subroutine add_json_integer(json, key, val) BIND(C, name='add_json_integer')
          use, intrinsic :: ISO_C_BINDING
@@ -8672,7 +8681,7 @@ contains
 
       real :: tmp, tmpA, tmpI, tmpQ, tmpU, tmpV
       real :: intensity, angle, x0, y0
-
+      type(C_PTR) :: json
 
       max_planes = size(pixels, 3)
       if(max_planes .lt. 3) return
@@ -8695,6 +8704,13 @@ contains
       print *, 'DownsizePolarization: xmin:', xmin, 'xmax:', xmax, 'ymin:', ymin, 'ymax:', ymax, 'max_planes:', max_planes
 
       total_count = 0
+
+      json = begin_json()
+
+      call add_json_integer(json, 'width'//c_null_char, width)
+      call add_json_integer(json, 'height'//c_null_char, height)
+
+      call begin_array(json, 'polarisation'//c_null_char)
 
       ! loop over the pixels and mask
       do j=ymin, ymax, range
@@ -8757,6 +8773,8 @@ contains
 
          end do
       end do
+
+      call end_json(json)
 
       print *, 'DownsizePolarization: total_count:', total_count
 
