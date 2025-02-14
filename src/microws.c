@@ -3356,8 +3356,10 @@ void write_ws_polarisation(websocket_session *session, const int *seq_id, const 
         return;
     }
 
+#ifdef DEBUG
     // first print the JSON string
     printf("[C] <write_ws_polarisation> :: %s\n", json->str);
+#endif
 
     // compress JSON with LZ4-HC
     int json_size = json->len;
