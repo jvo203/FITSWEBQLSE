@@ -3376,8 +3376,70 @@ void write_ws_polarisation(websocket_session *session, const int *seq_id, const 
 
     if (compressed_size > 0)
     {
-        // ... directly prepare and queue the WebSocket message
-        size_t msg_len = sizeof(float) + sizeof(uint32_t) + sizeof(uint32_t) + sizeof(float) + sizeof(uint32_t) + compressed_size;
+        uint32_t json_len = json_size;
+
+        // header
+        size_t msg_len = sizeof(float) + sizeof(uint32_t) + sizeof(uint32_t) + sizeof(float);
+        // body
+        msg_len += sizeof(uint32_t) + (size_t)compressed_size;
+
+        char *payload = NULL;
+        size_t ws_len = preamble_ws_frame(&payload, msg_len, WS_FRAME_BINARY);
+        msg_len += ws_len;
+
+        if (payload != NULL)
+        {
+            uint32_t id = (unsigned int)(*seq_id);
+            uint32_t msg_type = 4;
+            // 0 - spectrum, 1 - viewport,
+            // 2 - image, 3 - full spectrum refresh,
+            // 4 - polarisation
+
+            size_t ws_offset = ws_len;
+
+            memcpy((char *)payload + ws_offset, timestamp, sizeof(float));
+            ws_offset += sizeof(float);
+
+            memcpy((char *)payload + ws_offset, &id, sizeof(uint32_t));
+            ws_offset += sizeof(uint32_t);
+
+            memcpy((char *)payload + ws_offset, &msg_type, sizeof(uint32_t));
+            ws_offset += sizeof(uint32_t);
+
+            memcpy((char *)payload + ws_offset, elapsed, sizeof(float));
+            ws_offset += sizeof(float);
+
+            // json_len
+            memcpy((char *)payload + ws_offset, &json_len, sizeof(uint32_t));
+            ws_offset += sizeof(uint32_t);
+
+            // compressed_json
+            memcpy((char *)payload + ws_offset, compressed_json, (size_t)compressed_size);
+            ws_offset += (size_t)compressed_size;
+
+            if (ws_offset != msg_len)
+                printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
+
+#ifdef DIRECT
+            if (!session->disconnect)
+                send_all(session, payload, msg_len);
+            free(payload);
+#else
+            // queue a message
+            struct data_buf *msg = (struct data_buf *)malloc(sizeof(struct data_buf));
+
+            if (msg != NULL)
+            {
+                msg->buf = payload;
+                msg->len = msg_len;
+
+                // push the message into the queue
+                g_async_queue_push(session->send_queue, msg);
+            }
+            else
+                free(payload);
+#endif
+        }
     }
 
     // release the memory
