@@ -31,12 +31,27 @@ extern void end_json(GString *json)
     }
 }
 
-extern void begin_array(GString *json, char *key)
+extern void begin_json_array(GString *json, char *key)
 {
     if (json == NULL)
         return;
 
     g_string_append_printf(json, "\"%s\" : [", key);
+}
+
+extern void end_json_array(GString *json, int count)
+{
+    if (json == NULL)
+        return;
+
+    if (count > 0)
+    {
+        // remove the final ","
+        g_string_truncate(json, json->len - 1);
+    }
+
+    // end array
+    g_string_append_printf(json, "],");
 }
 
 extern void add_json_string(GString *json, char *key, char *val)
@@ -132,4 +147,12 @@ extern void add_json_logical(GString *json, char *key, bool val)
         return;
 
     g_string_append_printf(json, "\"%s\" : %s,", key, val ? "true" : "false");
+}
+
+extern void add_json_polarisation_entry(GString *json, float x, float y, float intensity, float angle)
+{
+    if (json == NULL)
+        return;
+
+    g_string_append_printf(json, "{\"x\" : %.2g, \"y\" : %.2g, \"I\" : %.16g, \"A\" : %.16g},", x, y, intensity, angle);
 }

@@ -1412,14 +1412,32 @@ module fits
          type(c_ptr), value :: json
       end subroutine end_json
 
-      ! begin_array(GString *json, char *key)
-      subroutine begin_array(json, key) BIND(C, name='begin_array')
+      ! begin_json_array(GString *json, char *key)
+      subroutine begin_json_array(json, key) BIND(C, name='begin_json_array')
          use, intrinsic :: ISO_C_BINDING
          implicit none
 
          type(c_ptr), value :: json
          character(kind=c_char), intent(in) :: key(*)
-      end subroutine begin_array
+      end subroutine begin_json_array
+
+      ! void end_json_array(GString *json, int count)
+      subroutine end_json_array(json, count) BIND(C, name='end_json_array')
+         use, intrinsic :: ISO_C_BINDING
+         implicit none
+
+         type(c_ptr), value :: json
+         integer(c_int), value, intent(in) :: count
+      end subroutine end_json_array
+
+      ! add_json_polarisation_entry(GString *json, float x, float y, float intensity, float angle)
+      subroutine add_json_polarisation_entry(json, x, y, intensity, angle) BIND(C, name='add_json_polarisation_entry')
+         use, intrinsic :: ISO_C_BINDING
+         implicit none
+
+         type(c_ptr), value :: json
+         real(kind=c_float), value, intent(in) :: x, y, intensity, angle
+      end subroutine add_json_polarisation_entry
 
       ! void add_json_integer(GString *json, char *key, int val)
       subroutine add_json_integer(json, key, val) BIND(C, name='add_json_integer')
@@ -8559,6 +8577,8 @@ contains
       real(kind=c_float), allocatable, target :: pixels(:, :, :), view_pixels(:, :, :)
       logical(kind=c_bool), allocatable, target :: mask(:, :), view_mask(:, :)
 
+      type(C_PTR) :: json
+
       ! start the timer
       t1 = omp_get_wtime()
 
@@ -8643,7 +8663,7 @@ contains
             rc = my_pthread_join(task_pid(i))
          end do
 
-         call DownsizePolarization(view_pixels, view_mask, req%width, req%height, req%beam)
+         json = DownsizePolarization(view_pixels, view_mask, req%width, req%height, req%beam)
 
          ! end the timer
          t2 = omp_get_wtime()
@@ -8653,7 +8673,7 @@ contains
          &req%width, req%height, c_loc(view_pixels(:,:,plane)), c_loc(view_mask), precision)
       else
          ! no need for downsizing
-         call DownsizePolarization(pixels, mask, dimx, dimy, req%beam)
+         json = DownsizePolarization(pixels, mask, dimx, dimy, req%beam)
          ! end the timer
          t2 = omp_get_wtime()
          elapsed = 1000.0*(t2 - t1) ! [ms]
@@ -8662,10 +8682,13 @@ contains
          &dimx, dimy, c_loc(pixels(:,:,plane)), c_loc(mask), precision)
       end if
 
+      ! deallocate the memory
+      call delete_json(json)
+
       print *, "handle_viewport_request elapsed time:", elapsed, '[ms]'
    end subroutine realtime_viewport_request
 
-   subroutine DownsizePolarization(pixels, mask, width, height, beam)
+   type(C_PTR) function DownsizePolarization(pixels, mask, width, height, beam)
       implicit none
 
       real(c_float), dimension(:,:,:), intent(in) :: pixels
@@ -8682,6 +8705,9 @@ contains
       real :: tmp, tmpA, tmpI, tmpQ, tmpU, tmpV
       real :: intensity, angle, x0, y0
       type(C_PTR) :: json
+
+      ! a default return value
+      DownsizePolarization = c_null_ptr
 
       max_planes = size(pixels, 3)
       if(max_planes .lt. 3) return
@@ -8710,7 +8736,7 @@ contains
       call add_json_integer(json, 'width'//c_null_char, width)
       call add_json_integer(json, 'height'//c_null_char, height)
 
-      call begin_array(json, 'polarisation'//c_null_char)
+      call begin_json_array(json, 'polarisation'//c_null_char)
 
       ! loop over the pixels and mask
       do j=ymin, ymax, range
@@ -8768,17 +8794,22 @@ contains
 
                total_count = total_count + 1
 
+               call add_json_polarisation_entry(json, x0, y0, intensity, angle)
+
                print *, 'DownsizePolarization: x:', x0, 'y:', y0, 'intensity:', intensity, 'angle:', angle
             end if
 
          end do
       end do
 
+      call end_json_array(json, total_count)
       call end_json(json)
+
+      DownsizePolarization = json
 
       print *, 'DownsizePolarization: total_count:', total_count
 
-   end subroutine DownsizePolarization
+   end function DownsizePolarization
 
    recursive subroutine viewport_request(user) BIND(C, name='viewport_request')
       use omp_lib
