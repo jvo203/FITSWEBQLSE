@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-02-14.0";
+    return "JS2025-02-17.0";
 }
 
 function uuidv4() {
@@ -6313,10 +6313,10 @@ async function open_websocket_connection(_datasetId, index) {
                         console.log("compressed_json length:", json_frame.length, "json_len:", json_len);
 
                         // decompress JSON
-                        var LZ4 = require('lz4');
+                        let LZ4 = require('lz4');
 
-                        var uncompressed = new Uint8Array(json_len);
-                        uncompressedSize = LZ4.decodeBlock(json_frame, uncompressed);
+                        let uncompressed = new Uint8Array(json_len);
+                        let uncompressedSize = LZ4.decodeBlock(json_frame, uncompressed);
                         uncompressed = uncompressed.slice(0, uncompressedSize);
 
                         try {
@@ -6441,10 +6441,10 @@ async function open_websocket_connection(_datasetId, index) {
                         var csv_frame = new Uint8Array(received_msg, 16);
 
                         // decompress CSV
-                        var LZ4 = require('lz4');
+                        let LZ4 = require('lz4');
 
-                        var uncompressed = new Uint8Array(csv_len);
-                        uncompressedSize = LZ4.decodeBlock(csv_frame, uncompressed);
+                        let uncompressed = new Uint8Array(csv_len);
+                        let uncompressedSize = LZ4.decodeBlock(csv_frame, uncompressed);
                         uncompressed = uncompressed.slice(0, uncompressedSize);
 
                         try {
@@ -15847,10 +15847,10 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
 
                             if (has_header) {
                                 // decompress the FITS data etc.
-                                var LZ4 = require('lz4');
+                                let LZ4 = require('lz4');
 
-                                var uncompressed = new Uint8Array(header_len);
-                                uncompressedSize = LZ4.decodeBlock(header, uncompressed);
+                                let uncompressed = new Uint8Array(header_len);
+                                let uncompressedSize = LZ4.decodeBlock(header, uncompressed);
                                 uncompressed = uncompressed.slice(0, uncompressedSize);
 
                                 try {
@@ -15867,10 +15867,10 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
 
                             if (has_json) {
                                 // decompress the FITS data etc.
-                                var LZ4 = require('lz4');
+                                let LZ4 = require('lz4');
 
-                                var uncompressed = new Uint8Array(json_len);
-                                uncompressedSize = LZ4.decodeBlock(json, uncompressed);
+                                let uncompressed = new Uint8Array(json_len);
+                                let uncompressedSize = LZ4.decodeBlock(json, uncompressed);
                                 uncompressed = uncompressed.slice(0, uncompressedSize);
 
                                 var fitsData;
@@ -19553,10 +19553,10 @@ async function display_FITS_header(index) {
         }));
  
         var Buffer = require('buffer').Buffer;
-        var LZ4 = require('lz4');
+        let LZ4 = require('lz4');
  
-        var uncompressed = new Buffer(parseInt(fitsData.HEADERSIZE, 10));
-        uncompressedSize = LZ4.decodeBlock(new Buffer(fitsHeader), uncompressed);
+        let uncompressed = new Buffer(parseInt(fitsData.HEADERSIZE, 10));
+        let uncompressedSize = LZ4.decodeBlock(new Buffer(fitsHeader), uncompressed);
         uncompressed = uncompressed.slice(0, uncompressedSize);
  
         try {
