@@ -4304,6 +4304,46 @@ function process_polarisation(index, pol_width, pol_height, intensity, angle, ma
     polarisation.std = std;
 }
 
+function process_polarisation_viewport(field) {
+    const range = field.range;
+
+    // polarisation viewport dimensions
+    let pol_xmin = 0;
+    let pol_ymin = 0;
+    let pol_xmax = field.width - 1;
+    let pol_ymax = field.height - 1;
+
+    // re-use the statistics from the polarisation object                
+    const mean = polarisation.mean;
+    const std = polarisation.std;
+
+    var elem = d3.select('#' + zoom_location);
+
+    if (zoom_shape == "circle") {
+        var zoom_x = parseFloat(elem.attr('cx'));
+        var zoom_y = parseFloat(elem.attr('cy'));
+        var zoom_r = parseFloat(elem.attr('r'));
+    } else {
+        zoom_px = parseFloat(elem.attr('x'));
+        zoom_py = parseFloat(elem.attr('y'));
+        let zoom_width = parseFloat(elem.attr('width'));
+        let zoom_height = parseFloat(elem.attr('height'));
+        var zoom_viewport_size = Math.min(zoom_width, zoom_height);
+    }
+
+    if (zoom_shape == "circle") {
+        var xScale = d3.scaleLinear().domain([pol_xmin, pol_xmax]).range([zoom_x - zoom_r, zoom_x + zoom_r]);
+        var yScale = d3.scaleLinear().domain([pol_ymax, pol_ymin]).range([zoom_y - zoom_r, zoom_y + zoom_r]);
+    } else {
+        var xScale = d3.scaleLinear().domain([pol_xmin, pol_xmax]).range([zoom_px, zoom_px + zoom_viewport_size]);
+        var yScale = d3.scaleLinear().domain([pol_ymax, pol_ymin]).range([zoom_py, zoom_py + zoom_viewport_size]);
+    }
+
+    const grid_spacing = 2 * range;
+
+    plot_polarisation(field, mean, std, xScale, yScale, grid_spacing, "PolarisationViewport");
+}
+
 function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index) {
     // console.log("process_hdr_image: #" + index);
     var image_bounding_dims = true_image_dimensions(alpha, img_width, img_height);
@@ -6323,6 +6363,10 @@ async function open_websocket_connection(_datasetId, index) {
                             var json = new TextDecoder().decode(uncompressed);
                             var jsonData = JSON.parse(json);
                             console.log("json:", jsonData);
+
+                            if (polarisation != null) {
+                                process_polarisation_viewport(jsonData);
+                            }
                         } catch (e) {
                             console.log(e);
                         };
