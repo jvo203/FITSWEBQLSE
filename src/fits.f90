@@ -8709,7 +8709,7 @@ contains
         integer(kind(circle)), intent(in) :: beam
 
         integer :: xmin, xmax, ymin, ymax, max_planes, i, j, ii, jj
-        real :: xr, yr, radius
+        real :: xr, yr, radius, dx, dy
 
         integer, parameter :: target = 34; 
         integer :: range, count, min_count, total_count
@@ -8737,9 +8737,10 @@ contains
 
         xr = real(xmax + xmin)/2.0
         yr = real(ymax + ymin)/2.0
-        radius = min(xr - real(xmin), yr - real(ymin))
+        radius = min(xr - real(xmin), yr - real(ymin)) - 1.0
 
-        print *, 'DownsizePolarization: xmin:', xmin, 'xmax:', xmax, 'ymin:', ymin, 'ymax:', ymax, 'max_planes:', max_planes
+        print *, 'DownsizePolarization: xmin:', xmin, 'xmax:', xmax, 'ymin:', ymin, 'ymax:', ymax,&
+        & 'max_planes:', max_planes, 'range:', range, 'min_count:', min_count, 'radius:', radius
 
         total_count = 0
 
@@ -8760,8 +8761,16 @@ contains
                 angle = 0.0
                 count = 0
 
-                do jj = j, min(j + range - 1, ymax)
-                    do ii = i, min(i + range - 1, xmax)
+                do jj = j, min(j + range - 0, ymax)
+                    do ii = i, min(i + range - 0, xmax)
+                        ! check if the beam shape is a circle
+                        if (beam .eq. circle) then
+                            dx = real(ii) - xr !+ 0.5*real(range)
+                            dy = real(jj) - yr !+ 0.5*real(range)/2
+
+                            if (dx**2 + dy**2 .gt. radius**2) cycle
+                        end if
+
                         if (mask(ii, jj)) then
                             tmpI = pixels(ii, jj, 1)
                             tmpQ = pixels(ii, jj, 2)
@@ -8805,11 +8814,12 @@ contains
                     x0 = real(i) + 0.5*real(range) - xmin ! 0-based indexing
                     y0 = real(j) + 0.5*real(range) - ymin ! 0-based indexing
 
-                    total_count = total_count + 1
+                    if (x0 .ge. 0.0 .and. x0 .le. real(width - 1) .and. y0 .ge. 0.0 .and. y0 .le. real(height - 1)) then
+                        total_count = total_count + 1
+                        call add_json_polarisation_entry(json, x0, y0, intensity, angle)
 
-                    call add_json_polarisation_entry(json, x0, y0, intensity, angle)
-
-                    ! print *, 'DownsizePolarization: x:', x0, 'y:', y0, 'intensity:', intensity, 'angle:', angle
+                        ! print *, 'DownsizePolarization: x:', x0, 'y:', y0, 'intensity:', intensity, 'angle:', angle
+                    end if
                 end if
 
             end do
