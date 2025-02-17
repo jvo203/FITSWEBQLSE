@@ -4304,14 +4304,15 @@ function process_polarisation(index, pol_width, pol_height, intensity, angle, ma
     polarisation.std = std;
 }
 
-function process_polarisation_viewport(field) {
-    const range = field.range;
+function process_polarisation_viewport(json) {
+    const field = json.polarisation;
+    const range = json.range;
 
     // polarisation viewport dimensions
     let pol_xmin = 0;
     let pol_ymin = 0;
-    let pol_xmax = field.width - 1;
-    let pol_ymax = field.height - 1;
+    let pol_xmax = json.width - 1;
+    let pol_ymax = json.height - 1;
 
     // re-use the statistics from the polarisation object                
     const mean = polarisation.mean;
