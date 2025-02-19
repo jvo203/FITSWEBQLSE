@@ -3,8 +3,10 @@ using FITSIO
 using Plots
 
 basedir = homedir() * "/NAO/POLARISATION/ALMA"
-band = "band3"
-name = "concat.ms.cal.mfs.impbcor"
+target = "VYCMa"
+band = "Band5"
+image = "FullPol_ReferenceImages"
+name = ".spw3"
 
 Stokes = ["I", "Q", "U", "V"]
 #Stokes = ["I", "Q", "U", "I"] # for testing
@@ -22,7 +24,7 @@ planes = []
 for stokes in Stokes
     local data
 
-    fn = basedir * "/OrionKL/" * band * "/" * name * "." * stokes * ".fits"
+    fn = basedir * "/" * target * "_" * band * "_" * image * "/" * target * name * "." * stokes * ".pbcorr.fits"
 
     try
         data = read_data(fn)
@@ -34,6 +36,8 @@ for stokes in Stokes
 end
 println(size(planes))
 println(planes[1][1:10])
+
+exit()
 
 # create a 4D cube from the planes
 cube = cat(planes..., dims=4)
