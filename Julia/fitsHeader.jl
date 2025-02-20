@@ -1,9 +1,8 @@
-using AstroImages
 using FITSIO
-using Plots
 
 basedir = homedir() * "/NAO/POLARISATION/ALMA"
-band = "band3"
+target = "OrionKL"
+band = "band6"
 name = "concat.ms.cal.mfs.impbcor"
 
 Stokes = ["I", "Q", "U", "V"]
@@ -22,7 +21,7 @@ planes = []
 for stokes in Stokes
     local data
 
-    fn = basedir * "/OrionKL/" * band * "/" * name * "." * stokes * ".fits"
+    fn = basedir * "/" * target * "/" * band * "/" * name * "." * stokes * ".fits"
 
     try
         data = read_data(fn)
@@ -41,16 +40,14 @@ println("cube:", size(cube))
 println(cube[1:10])
 
 # read FITS header from the first Stokes parameter FITS file (I)
-filename = basedir * "/OrionKL/" * band * "/" * name * "." * Stokes[1] * ".fits"
+filename = basedir * "/" * target * "/" * band * "/" * name * "." * Stokes[1] * ".fits"
 header = FITSIO.read_header(filename)
 
 # modify the header to have the same cube dimensions as the data
 header["NAXIS4"] = size(cube, 4)
 
 # write the modified header with new data to a new FITS file
-filename = basedir * "/OrionKL/" * band * "/" * name * ".StokesIQU.fits"
+filename = basedir * "/" * target * "." * band * "." * name * ".StokesIQU.fits"
 FITS(filename, "w") do f
-    write(f, cube; header=header)    
+    write(f, cube; header=header)
 end
-
-#implot(planes[1][:,:,1,1])
