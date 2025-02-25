@@ -409,8 +409,7 @@ module fits
       logical(kind=c_bool), allocatable :: mask(:, :)
 
       ! arrays holding pointers to compressed 2D intensity channels
-      type(array_ptr), dimension(:), allocatable :: compressed ! non-Stokes intensity
-      type(array_ptr), dimension(:, :), allocatable :: Stokes ! IQUV Stokes parameters (depth, polarization), up to 4 channels
+      type(array_ptr), dimension(:, :), allocatable :: compressed ! IQUV Stokes parameters (depth, polarization), up to 4 channels
 
       logical :: is_stokes = .false.
       logical :: is_optical = .true.
@@ -1708,28 +1707,17 @@ contains
 
          ! deallocate compressed memory regions
          if (allocated(item%compressed)) then
-            do i = 1, size(item%compressed)
-
-               if (associated(item%compressed(i)%ptr)) then
-                  deallocate (item%compressed(i)%ptr)
-                  nullify (item%compressed(i)%ptr)
-               end if
-            end do
-
-            deallocate (item%compressed)
-         end if
-
-         ! deallocate compressed Stokes parameters
-         if (allocated(item%Stokes)) then
             ! go through all IQUV channels
-            do j = 1, size(item%Stokes, 2)
-               do i = 1, size(item%Stokes, 1)
-                  if (associated(item%Stokes(i, j)%ptr)) then
-                     deallocate (item%Stokes(i, j)%ptr)
-                     nullify (item%Stokes(i, j)%ptr)
+            do j = 1, size(item%compressed, 2)
+               do i = 1, size(item%compressed, 1)
+                  if (associated(item%compressed(i, j)%ptr)) then
+                     deallocate (item%compressed(i, j)%ptr)
+                     nullify (item%compressed(i, j)%ptr)
                   end if
                end do
             end do
+
+            deallocate (item%compressed)
          end if
 
          ! unlock & destroy the mutex
@@ -4439,7 +4427,7 @@ contains
       type(c_ptr), intent(in) :: root
       logical, intent(out) ::  bSuccess
 
-      integer status, group, unit, readwrite, blocksize, i, k, max_planes ! k goes over the polarisation planes (up to 4)
+      integer status, group, unit, readwrite, blocksize, i, k, max_planes, plane ! k goes over the polarisation planes (up to 4)
       integer naxis, bitpix
       integer cn, cm
       integer(kind=8) :: npixels, j, plane_offset
@@ -4794,10 +4782,12 @@ contains
          end = naxes(3)
 
          if (allocated(item%compressed)) deallocate (item%compressed)
-         allocate (item%compressed(start:end))
+         allocate (item%compressed(start:end, max_planes))
 
-         do i = start, end
-            nullify (item%compressed(i)%ptr)
+         do j = 1, max_planes
+            do i = start, end
+               nullify (item%compressed(i, j)%ptr)
+            end do
          end do
 
          if (allocated(item%frame_min)) deallocate (item%frame_min)
@@ -4834,6 +4824,8 @@ contains
          item%frame_median = ieee_value(0.0, ieee_quiet_nan)
 
          total_per_node = 0
+
+         plane = 1 ! temporary
 
          !$omp PARALLEL DEFAULT(SHARED) SHARED(item)&
          !$omp& SHARED(thread_units, group, naxis, naxes, nullval)&
@@ -4988,7 +4980,7 @@ contains
                         datamax = real(item%datamax, kind=4)
 
                         thread_arr(:, :) = reshape(thread_buffer, item%naxes(1:2))
-                        item%compressed(frame)%ptr => to_fixed(thread_arr(:, :),&
+                        item%compressed(frame, plane)%ptr => to_fixed(thread_arr(:, :),&
                         & frame_min, frame_max, ignrval, datamin, datamax)
                      end block
                   end if
