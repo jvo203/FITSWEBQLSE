@@ -4427,7 +4427,7 @@ contains
       type(c_ptr), intent(in) :: root
       logical, intent(out) ::  bSuccess
 
-      integer status, group, unit, readwrite, blocksize, i, k, max_planes, plane ! k goes over the polarisation planes (up to 4)
+      integer status, group, unit, readwrite, blocksize, i, k, max_planes ! k goes over the polarisation planes (up to 4)
       integer naxis, bitpix
       integer cn, cm
       integer(kind=8) :: npixels, j, plane_offset
@@ -4825,12 +4825,10 @@ contains
 
          total_per_node = 0
 
-         plane = 1 ! temporary
-
          !$omp PARALLEL DEFAULT(SHARED) SHARED(item)&
          !$omp& SHARED(thread_units, group, naxis, naxes, nullval)&
          !$omp& PRIVATE(tid, start, end, num_per_node, anynull, status)&
-         !$omp& PRIVATE(j, fpixels, lpixels, incs, tmp, frame_min, frame_max, frame_median)&
+         !$omp& PRIVATE(j, k, plane_offset, fpixels, lpixels, incs, tmp, frame_min, frame_max, frame_median)&
          !$omp& PRIVATE(mean_spec_val, int_spec_val)&
          !$omp& PRIVATE(thread_buffer, thread_pixels, thread_mask, thread_arr)&
          !$omp& PRIVATE(thread_data, data_mask, res)&
@@ -4844,6 +4842,7 @@ contains
          ! reset the private variables
          start = 0
          end = 0
+         k = 1
          num_per_node = 0
          total_per_node = 0
 
@@ -4980,7 +4979,7 @@ contains
                         datamax = real(item%datamax, kind=4)
 
                         thread_arr(:, :) = reshape(thread_buffer, item%naxes(1:2))
-                        item%compressed(frame, plane)%ptr => to_fixed(thread_arr(:, :),&
+                        item%compressed(frame, k)%ptr => to_fixed(thread_arr(:, :),&
                         & frame_min, frame_max, ignrval, datamin, datamax)
                      end block
                   end if
