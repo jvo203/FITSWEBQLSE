@@ -4448,7 +4448,7 @@ contains
         integer cn, cm
         integer(kind=8) :: npixels, j, plane_offset
         integer naxes(4)
-        integer cluster_size, max_threads, tid, frame
+        integer cluster_size, max_threads, tid, frame, plane
         integer(c_int) :: start, end, num_per_node
         integer :: total_per_node
         integer, dimension(4) :: fpixels, lpixels, incs
@@ -4641,6 +4641,13 @@ contains
             test_ignrval = .true.
         end if
 
+        if (item%is_stokes) then
+            ! up to 4 planes: Stokes I, Q, U and V
+            max_planes = min(4, naxes(4))
+        else
+            max_planes = 1
+        end if
+
         ! calculate the range for each image
         if (naxis .eq. 1 .or. naxis .eq. 2 .or. naxes(3) .eq. 1) then
             ! read a 2D image on the root node only
@@ -4685,13 +4692,6 @@ contains
             ! abort upon an error
             if (status .ne. 0) go to 200
 
-            if (item%is_stokes) then
-                ! up to 4 planes: Stokes I, Q, U and V
-                max_planes = min(4, naxes(4))
-            else
-                max_planes = 1
-            end if
-
             ! go through all planes
             do k = 1, max_planes
                 plane_offset = int(k - 1, kind=8)*npixels
@@ -4734,12 +4734,6 @@ contains
             call set_image_status(item, .true.)
         else
             ! read a range of 2D planes in parallel on each cluster node
-            if (item%is_stokes) then
-                ! up to 4 planes: Stokes I, Q, U and V
-                max_planes = min(4, naxes(4))
-            else
-                max_planes = 1
-            end if
 
             ! get the number of extra nodes in a cluster (0 for a single node)
             cluster_size = get_cluster_size()
@@ -4822,7 +4816,12 @@ contains
             if (allocated(item%integrated_spectrum)) deallocate (item%integrated_spectrum)
             allocate (item%integrated_spectrum(naxes(3)))
 
-            allocate (pixels(npixels))
+            if (item%is_stokes) then
+                allocate (pixels(npixels*max_planes))
+            else
+                allocate (pixels(npixels))
+            end if
+
             allocate (mask(npixels))
 
             pixels = 0.0
@@ -4843,8 +4842,8 @@ contains
 
             !$omp PARALLEL DEFAULT(SHARED) SHARED(item)&
             !$omp& SHARED(thread_units, group, naxis, naxes, nullval)&
-            !$omp& PRIVATE(tid, start, end, num_per_node, anynull, status)&
-            !$omp& PRIVATE(j, k, plane_offset, fpixels, lpixels, incs, tmp, frame_min, frame_max, frame_median)&
+            !$omp& PRIVATE(tid, start, end, frame, num_per_node, anynull, status)&
+            !$omp& PRIVATE(j, plane, plane_offset, fpixels, lpixels, incs, tmp, frame_min, frame_max, frame_median)&
             !$omp& PRIVATE(mean_spec_val, int_spec_val)&
             !$omp& PRIVATE(thread_buffer, thread_pixels, thread_mask, thread_arr)&
             !$omp& PRIVATE(thread_data, data_mask, res)&
@@ -4858,7 +4857,6 @@ contains
             ! reset the private variables
             start = 0
             end = 0
-            k = 1
             num_per_node = 0
             total_per_node = 0
 
@@ -4868,7 +4866,12 @@ contains
             allocate (thread_data(npixels))
             allocate (data_mask(npixels))
 
-            allocate (thread_pixels(npixels))
+            if (item%is_stokes) then
+                allocate (thread_pixels(npixels*max_planes))
+            else
+                allocate (thread_pixels(npixels))
+            end if
+
             allocate (thread_mask(npixels))
 
             thread_pixels = 0.0
@@ -4918,87 +4921,90 @@ contains
                     do frame = start, end
                         total_per_node = total_per_node + 1
 
-                        ! starting bounds
-                        fpixels = (/1, 1, frame, 1/)
+                        do plane = 1, max_planes
 
-                        ! ending bounds
-                        lpixels = (/naxes(1), naxes(2), frame, 1/)
+                            ! starting bounds
+                            fpixels = (/1, 1, frame, plane/)
 
-                        ! do not skip over any pixels
-                        incs = 1
+                            ! ending bounds
+                            lpixels = (/naxes(1), naxes(2), frame, plane/)
 
-                        ! reset the status
-                        status = 0
+                            ! do not skip over any pixels
+                            incs = 1
 
-                        if (thread_units(tid) .ne. -1) then
-                            call ftgsve(thread_units(tid), group, naxis, naxes,&
-                            & fpixels, lpixels, incs, nullval, thread_buffer(:), anynull, status)
-                        else
-                            thread_bSuccess = .false.
-                            cycle
-                        end if
+                            ! reset the status
+                            status = 0
 
-                        ! abort upon errors
-                        if (status .ne. 0) then
-                            print *, 'error reading frame', frame
-                            thread_bSuccess = .false.
-
-                            if (status .gt. 0) then
-                                call printerror(status)
+                            if (thread_units(tid) .ne. -1) then
+                                call ftgsve(thread_units(tid), group, naxis, naxes,&
+                                & fpixels, lpixels, incs, nullval, thread_buffer(:), anynull, status)
+                            else
+                                thread_bSuccess = .false.
+                                cycle
                             end if
 
-                            cycle
-                        else
-                            thread_bSuccess = thread_bSuccess .and. .true.
-                        end if
+                            ! abort upon errors
+                            if (status .ne. 0) then
+                                print *, 'error reading frame', frame
+                                thread_bSuccess = .false.
 
-                        frame_min = 1.0E30
-                        frame_max = -1.0E30
-
-                        res = (/frame_min, frame_max, 0.0, 0.0/)
-
-                        ! the 'infamous' AVX-512 slowdown on the Apple Mac Pro ... a shame ...
-                        call make_image_spectrumF32(c_loc(thread_buffer), c_loc(thread_pixels), c_loc(thread_mask), &
-                        &c_loc(data_mask), item%ignrval, item%datamin, item%datamax, cdelt3, c_loc(res), npixels)
-
-                        frame_min = res(1)
-                        frame_max = res(2)
-                        mean_spec_val = res(3)
-                        int_spec_val = res(4)
-
-                        ! print *, 'frame', frame, 'min', frame_min, 'max', frame_max,&
-                        ! & 'mean_spec_val', mean_spec_val, 'int_spec_val', int_spec_val
-
-                        item%frame_min(frame) = frame_min
-                        item%frame_max(frame) = frame_max
-                        ! item%frame_median(frame) = median(pack(thread_buffer, data_mask))
-                        item%frame_median(frame) = hist_median(pack(thread_buffer, data_mask), frame_min, frame_max)
-
-                        dmin = min(dmin, frame_min)
-                        dmax = max(dmax, frame_max)
-
-                        item%mean_spectrum(frame) = mean_spec_val
-                        item%integrated_spectrum(frame) = int_spec_val
-
-                        ! compress the pixels
-                        if (allocated(item%compressed) .and. allocated(thread_arr)) then
-                            block
-                                real :: ignrval, datamin, datamax
-
-                                if (ieee_is_nan(item%ignrval)) then
-                                    ignrval = -1.0E30
-                                else
-                                    ignrval = real(item%ignrval, kind=4)
+                                if (status .gt. 0) then
+                                    call printerror(status)
                                 end if
 
-                                datamin = real(item%datamin, kind=4)
-                                datamax = real(item%datamax, kind=4)
+                                cycle
+                            else
+                                thread_bSuccess = thread_bSuccess .and. .true.
+                            end if
 
-                                thread_arr(:, :) = reshape(thread_buffer, item%naxes(1:2))
-                                item%compressed(frame, k)%ptr => to_fixed(thread_arr(:, :),&
-                                & frame_min, frame_max, ignrval, datamin, datamax)
-                            end block
-                        end if
+                            frame_min = 1.0E30
+                            frame_max = -1.0E30
+
+                            res = (/frame_min, frame_max, 0.0, 0.0/)
+
+                            ! the 'infamous' AVX-512 slowdown on the Apple Mac Pro ... a shame ...
+                            call make_image_spectrumF32(c_loc(thread_buffer), c_loc(thread_pixels), c_loc(thread_mask), &
+                            &c_loc(data_mask), item%ignrval, item%datamin, item%datamax, cdelt3, c_loc(res), npixels)
+
+                            frame_min = res(1)
+                            frame_max = res(2)
+                            mean_spec_val = res(3)
+                            int_spec_val = res(4)
+
+                            ! print *, 'frame', frame, 'min', frame_min, 'max', frame_max,&
+                            ! & 'mean_spec_val', mean_spec_val, 'int_spec_val', int_spec_val
+
+                            item%frame_min(frame) = frame_min
+                            item%frame_max(frame) = frame_max
+                            ! item%frame_median(frame) = median(pack(thread_buffer, data_mask))
+                            item%frame_median(frame) = hist_median(pack(thread_buffer, data_mask), frame_min, frame_max)
+
+                            dmin = min(dmin, frame_min)
+                            dmax = max(dmax, frame_max)
+
+                            item%mean_spectrum(frame) = mean_spec_val
+                            item%integrated_spectrum(frame) = int_spec_val
+
+                            ! compress the pixels
+                            if (allocated(item%compressed) .and. allocated(thread_arr)) then
+                                block
+                                    real :: ignrval, datamin, datamax
+
+                                    if (ieee_is_nan(item%ignrval)) then
+                                        ignrval = -1.0E30
+                                    else
+                                        ignrval = real(item%ignrval, kind=4)
+                                    end if
+
+                                    datamin = real(item%datamin, kind=4)
+                                    datamax = real(item%datamax, kind=4)
+
+                                    thread_arr(:, :) = reshape(thread_buffer, item%naxes(1:2))
+                                    item%compressed(frame, plane)%ptr => to_fixed(thread_arr(:, :),&
+                                    & frame_min, frame_max, ignrval, datamin, datamax)
+                                end block
+                            end if
+                        end do
                     end do
                 else
                     ! no work done at this step
@@ -5023,7 +5029,7 @@ contains
 
             !$omp END PARALLEL
 
-            item%pixels = reshape(pixels, (/naxes(1), naxes(2), 1/))
+            item%pixels = reshape(pixels, (/naxes(1), naxes(2), max_planes/))
             item%mask = reshape(mask, naxes(1:2))
 
             call set_image_status(item, .true.)
