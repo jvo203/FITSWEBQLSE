@@ -2810,7 +2810,7 @@ contains
         integer(kind=c_int) :: data_unit
         character(256) :: iomsg
 
-        integer :: tid, i, depth, frame, max_planes
+        integer :: tid, i, k, depth, frame, max_planes
         integer, allocatable :: indices(:)
 
         ! OpenMP
@@ -2856,8 +2856,10 @@ contains
 
         print *, "max_threads:", max_threads, "depth:", depth
 
-        do i = 1, depth ! was do concurrent
-            nullify (item%compressed(i)%ptr)
+        do k = 1, max_planes
+            do i = 1, depth
+                nullify (item%compressed(i, k)%ptr)
+            end do
         end do
 
         counter = 0
@@ -2907,7 +2909,7 @@ contains
         thread_bSuccess = .true.
 
         !$omp PARALLEL DEFAULT(SHARED) SHARED(item, indices)&
-        !$omp& PRIVATE(tid, i, file, frame, ios, array_size)&
+        !$omp& PRIVATE(tid, i, k, file, frame, ios, array_size)&
         !$omp& REDUCTION(.and.:thread_bSuccess)&
         !$omp& REDUCTION(+:counter)&
         !$omp& NUM_THREADS(max_threads)
@@ -2916,25 +2918,27 @@ contains
             ! tid = 1 + OMP_GET_THREAD_NUM()
             frame = indices(i)
 
-            ! allocate space for compressed data
-            allocate (item%compressed(frame)%ptr(cn, cm))
+            do k = 1, max_planes
+                ! allocate space for compressed data
+                allocate (item%compressed(frame, k)%ptr(cn, cm))
 
-            array_size = int(sizeof(item%compressed(frame)%ptr(:, :)), kind=c_size_t)
-            ! print *, 'sizeof(compressed_frame) = ', array_size, 'bytes'
+                array_size = int(sizeof(item%compressed(frame, k)%ptr(:, :)), kind=c_size_t)
+                ! print *, 'sizeof(compressed_frame) = ', array_size, 'bytes'
 
-            ! read the compressed data
-            ios = read_frame(data_unit, c_loc(item%compressed(frame)%ptr(:, :)), i - 1, array_size)
+                ! read the compressed data
+                ios = read_frame(data_unit, c_loc(item%compressed(frame, k)%ptr(:, :)), i - 1, array_size)
 
-            ! abort upon a read error
-            if (ios .ne. 0) then
-                print *, "error deserialising channel", frame, 'from a data file ', trim(file), ' : ', trim(iomsg)
+                ! abort upon a read error
+                if (ios .ne. 0) then
+                    print *, "error deserialising channel", frame, "plane", k, 'from a data file ', trim(file), ' : ', trim(iomsg)
 
-                deallocate (item%compressed(frame)%ptr)
-                nullify (item%compressed(frame)%ptr)
+                    deallocate (item%compressed(frame, k)%ptr)
+                    nullify (item%compressed(frame, k)%ptr)
 
-                thread_bSuccess = .false.
-                cycle
-            end if
+                    thread_bSuccess = .false.
+                    cycle
+                end if
+            end do
 
             ! increment the thread progress counter
             counter = counter + 1
