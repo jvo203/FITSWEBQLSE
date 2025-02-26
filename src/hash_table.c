@@ -231,9 +231,9 @@ int wropen(const char *file)
     return open(file, O_WRONLY | O_APPEND | O_CREAT, (mode_t)0600);
 }
 
-int read_frame(int fd, void *dst, int pos, size_t frame_size)
+int read_frame(int fd, void *dst, int frame, int plane, size_t frame_size)
 {
-    ssize_t bytes_read = pread(fd, dst, frame_size, pos * frame_size);
+    ssize_t bytes_read = pread(fd, dst, frame_size, (size_t)frame * (size_t)plane * frame_size);
 
     if (bytes_read != (ssize_t)frame_size)
         return -1; // signal an error
@@ -278,7 +278,7 @@ int read_array(const char *file, void *dst, size_t frame_size)
     if (fd < 0)
         return -1; // signal an error
 
-    int stat = read_frame(fd, dst, 0, frame_size);
+    int stat = read_frame(fd, dst, 0, 0, frame_size);
 
     // switch to a chunked mode upon failure
     if (stat != 0)
