@@ -1881,9 +1881,10 @@ contains
                 end if
             end if
 
-            do i = 1, size(item%compressed)
+            do i = 1, size(item%compressed, 1)
 
-                if (associated(item%compressed(i)%ptr)) then
+                ! test if the first plane is allocated (the remaining IQUV channels are probably OK)
+                if (associated(item%compressed(i, 1)%ptr)) then
 
                     if (index_unit .ne. -1 .and. data_unit .ne. -1) then
                         ! add an index entry
@@ -1894,19 +1895,23 @@ contains
                             bSuccess = .false.
                         end if
 
-                        array_size = int(sizeof(item%compressed(i)%ptr(:, :)), kind=c_size_t)
+                        do j = 1, size(item%compressed, 2)
+                            array_size = int(sizeof(item%compressed(i, j)%ptr(:, :)), kind=c_size_t)
 
-                        ! dump the compressed data
-                        ios = write_frame(data_unit, c_loc(item%compressed(i)%ptr(:, :)), array_size)
+                            ! dump the compressed data
+                            ios = write_frame(data_unit, c_loc(item%compressed(i, j)%ptr(:, :)), array_size)
 
-                        if (ios .ne. 0) then
-                            print *, "error serialising channel", i, 'to a binary data file ', trim(file)
-                            bSuccess = .false.
-                        end if
+                            if (ios .ne. 0) then
+                                print *, "error serialising channel", i, "plane", j, 'to a binary data file ', trim(file)
+                                bSuccess = .false.
+                            end if
+                        end do
                     end if
 
-                    deallocate (item%compressed(i)%ptr)
-                    nullify (item%compressed(i)%ptr)
+                    do j = 1, size(item%compressed, 2)
+                        deallocate (item%compressed(i, j)%ptr)
+                        nullify (item%compressed(i, j)%ptr)
+                    end do
                 end if
             end do
 
@@ -2805,7 +2810,7 @@ contains
         integer(kind=c_int) :: data_unit
         character(256) :: iomsg
 
-        integer :: tid, i, depth, frame
+        integer :: tid, i, depth, frame, max_planes
         integer, allocatable :: indices(:)
 
         ! OpenMP
@@ -2828,6 +2833,13 @@ contains
         m = item%naxes(2)
         depth = item%naxes(3)
 
+        if (item%is_stokes) then
+            ! up to 4 planes: Stokes I, Q, U and V
+            max_planes = min(4, item%naxes(4))
+        else
+            max_planes = 1
+        end if
+
         ! by default compressed is dimension(n/DIM, m/DIM)
         cn = n/DIM
         cm = m/DIM
@@ -2837,7 +2849,7 @@ contains
         if (mod(m, DIM) .ne. 0) cm = cm + 1
 
         if (allocated(item%compressed)) deallocate (item%compressed)
-        allocate (item%compressed(1:depth))
+        allocate (item%compressed(1:depth, max_planes))
 
         ! get #physical cores (ignore HT)
         max_threads = get_max_threads()
@@ -5178,7 +5190,7 @@ contains
                 datamin = real(item%datamin, kind=4)
                 datamax = real(item%datamax, kind=4)
 
-                item%compressed(frame)%ptr => to_fixed_concurrent(reshape(data, item%naxes(1:2)),&
+                item%compressed(frame, 1)%ptr => to_fixed_concurrent(reshape(data, item%naxes(1:2)),&
                 & frame_min, frame_max, ignrval, datamin, datamax)
             end block
         end if
@@ -8674,7 +8686,7 @@ contains
 
             ! end the timer
             t2 = omp_get_wtime()
-            elapsed = 1000.0*(t2 - t1) ! [ms]
+            elapsed = 1000.0*real(t2 - t1) ! [ms]
 
             call write_ws_viewport(req%session, req%seq_id, req%timestamp, elapsed,&
             &req%width, req%height, c_loc(view_pixels(:, :, plane)), c_loc(view_mask), precision)
@@ -8683,7 +8695,7 @@ contains
             json = DownsizePolarization(pixels, mask, dimx, dimy, req%beam)
             ! end the timer
             t2 = omp_get_wtime()
-            elapsed = 1000.0*(t2 - t1) ! [ms]
+            elapsed = 1000.0*real(t2 - t1) ! [ms]
 
             call write_ws_viewport(req%session, req%seq_id, req%timestamp, elapsed,&
             &dimx, dimy, c_loc(pixels(:, :, plane)), c_loc(mask), precision)
@@ -8773,7 +8785,7 @@ contains
                             tmpQ = pixels(ii, jj, 2)
                             tmpU = pixels(ii, jj, 3)
 
-                            if (tmpQ .eq. 0.0 .and. tmpU .eq. 0.0) then
+                            if (abs(tmpQ) .le. epsilon(tmpQ) .and. abs(tmpU) .le. epsilon(tmpU)) then
                                 tmpA = ieee_value(0.0, ieee_quiet_nan)
                             else
                                 tmpA = 0.5*atan2(tmpU, tmpQ) ! polarisation angle
@@ -8782,13 +8794,13 @@ contains
                             if (max_planes .gt. 3) then
                                 tmpV = pixels(ii, jj, 4)
 
-                                if (tmpI .eq. 0.0) then
+                                if (abs(tmpI) .le. epsilon(tmpI)) then
                                     tmp = ieee_value(0.0, ieee_quiet_nan)
                                 else
                                     tmp = sqrt(tmpQ**2 + tmpU**2 + tmpV**2)/tmpI ! total intensity
                                 end if
                             else
-                                if (tmpI .eq. 0.0) then
+                                if (abs(tmpI) .le. epsilon(tmpI)) then
                                     tmp = ieee_value(0.0, ieee_quiet_nan)
                                 else
                                     tmp = sqrt(tmpQ**2 + tmpU**2)/tmpI ! linear intensity
