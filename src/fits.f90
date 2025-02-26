@@ -404,7 +404,7 @@ module fits
         character(len=:), allocatable :: flux
         real(kind=c_float) dmin(4), dmax(4), dmedian
         real(kind=c_float) dmad, dmadN, dmadP
-        real(kind=4), allocatable :: frame_min(:), frame_max(:), frame_median(:)
+        real(kind=4), allocatable :: frame_min(:, :), frame_max(:, :), frame_median(:, :)
         real(kind=c_float), allocatable :: pixels(:, :, :)
         logical(kind=c_bool), allocatable :: mask(:, :)
 
@@ -435,8 +435,8 @@ module fits
         real :: elapsed = 0
 
         ! spectra
-        real(kind=c_float), allocatable :: mean_spectrum(:)
-        real(kind=c_float), allocatable :: integrated_spectrum(:)
+        real(kind=c_float), allocatable :: mean_spectrum(:, :)
+        real(kind=c_float), allocatable :: integrated_spectrum(:, :)
 
         ! datasets opened from a URL will not be cached
         logical :: cache = .true. ! if true, the dataset will be cached
@@ -4801,20 +4801,20 @@ contains
             end do
 
             if (allocated(item%frame_min)) deallocate (item%frame_min)
-            allocate (item%frame_min(start:end))
+            allocate (item%frame_min(start:end, max_planes))
 
             if (allocated(item%frame_max)) deallocate (item%frame_max)
-            allocate (item%frame_max(start:end))
+            allocate (item%frame_max(start:end, max_planes))
 
             if (allocated(item%frame_median)) deallocate (item%frame_median)
-            allocate (item%frame_median(start:end))
+            allocate (item%frame_median(start:end, max_planes))
 
             ! spectra
             if (allocated(item%mean_spectrum)) deallocate (item%mean_spectrum)
-            allocate (item%mean_spectrum(naxes(3)))
+            allocate (item%mean_spectrum(naxes(3), max_planes))
 
             if (allocated(item%integrated_spectrum)) deallocate (item%integrated_spectrum)
-            allocate (item%integrated_spectrum(naxes(3)))
+            allocate (item%integrated_spectrum(naxes(3), max_planes))
 
             allocate (pixels(npixels, max_planes))
             allocate (mask(npixels))
@@ -4962,19 +4962,19 @@ contains
                             mean_spec_val = res(3)
                             int_spec_val = res(4)
 
-                            ! print *, 'frame', frame, 'min', frame_min, 'max', frame_max,&
+                            ! print *, 'frame', frame, 'plane', plane, 'min', frame_min, 'max', frame_max,&
                             ! & 'mean_spec_val', mean_spec_val, 'int_spec_val', int_spec_val
 
-                            item%frame_min(frame) = frame_min
-                            item%frame_max(frame) = frame_max
+                            item%frame_min(frame, plane) = frame_min
+                            item%frame_max(frame, plane) = frame_max
                             ! item%frame_median(frame) = median(pack(thread_buffer, data_mask))
-                            item%frame_median(frame) = hist_median(pack(thread_buffer, data_mask), frame_min, frame_max)
+                            item%frame_median(frame, plane) = hist_median(pack(thread_buffer, data_mask), frame_min, frame_max)
 
-                            dmin = min(dmin, frame_min)
-                            dmax = max(dmax, frame_max)
+                            dmin(plane) = min(dmin(plane), frame_min)
+                            dmax(plane) = max(dmax(plane), frame_max)
 
-                            item%mean_spectrum(frame) = mean_spec_val
-                            item%integrated_spectrum(frame) = int_spec_val
+                            item%mean_spectrum(frame, plane) = mean_spec_val
+                            item%integrated_spectrum(frame, plane) = int_spec_val
 
                             ! compress the pixels
                             if (allocated(item%compressed) .and. allocated(thread_arr)) then
