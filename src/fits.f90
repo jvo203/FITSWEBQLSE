@@ -4463,12 +4463,12 @@ contains
         logical(kind=1), allocatable :: local_mask(:)
 
         ! shared variables
-        real(kind=4), allocatable :: pixels(:)
+        real(kind=4), allocatable :: pixels(:, :)
         logical(kind=1), allocatable :: mask(:)
 
         ! thread-local variables
         real(kind=c_float), allocatable, target :: thread_buffer(:)
-        real(kind=c_float), allocatable, target :: thread_pixels(:)
+        real(kind=c_float), allocatable, target :: thread_pixels(:, :)
         logical(kind=c_bool), allocatable, target :: thread_mask(:)
         real(kind=c_float), allocatable :: thread_arr(:, :)
         real(kind=c_float), allocatable :: thread_data(:)
@@ -4816,12 +4816,7 @@ contains
             if (allocated(item%integrated_spectrum)) deallocate (item%integrated_spectrum)
             allocate (item%integrated_spectrum(naxes(3)))
 
-            if (item%is_stokes) then
-                allocate (pixels(npixels*max_planes))
-            else
-                allocate (pixels(npixels))
-            end if
-
+            allocate (pixels(npixels, max_planes))
             allocate (mask(npixels))
 
             pixels = 0.0
@@ -4866,12 +4861,7 @@ contains
             allocate (thread_data(npixels))
             allocate (data_mask(npixels))
 
-            if (item%is_stokes) then
-                allocate (thread_pixels(npixels*max_planes))
-            else
-                allocate (thread_pixels(npixels))
-            end if
-
+            allocate (thread_pixels(npixels, max_planes))
             allocate (thread_mask(npixels))
 
             thread_pixels = 0.0
@@ -4963,7 +4953,8 @@ contains
                             res = (/frame_min, frame_max, 0.0, 0.0/)
 
                             ! the 'infamous' AVX-512 slowdown on the Apple Mac Pro ... a shame ...
-                            call make_image_spectrumF32(c_loc(thread_buffer), c_loc(thread_pixels), c_loc(thread_mask), &
+                            call make_image_spectrumF32(c_loc(thread_buffer),&
+                            & c_loc(thread_pixels(:, plane)), c_loc(thread_mask),&
                             &c_loc(data_mask), item%ignrval, item%datamin, item%datamax, cdelt3, c_loc(res), npixels)
 
                             frame_min = res(1)
