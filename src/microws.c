@@ -1015,6 +1015,7 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                 req->x2 = -1;
                 req->y1 = -1;
                 req->y2 = -1;
+                req->plane = 1;
                 req->beam = square; // by default assume a rectangular (square) viewport
                 req->intensity = integrated;
                 req->frame_start = 0.0;
@@ -1054,6 +1055,10 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                     // 'y2'
                     if (strncmp(frame_data + koff, "\"y2\"", klen) == 0)
                         req->y2 = atoi2(frame_data + voff, vlen);
+
+                    // 'plane'
+                    if (strncmp(frame_data + koff, "\"plane\"", klen) == 0)
+                        req->plane = atoi2(frame_data + voff, vlen);
 
                     // 'beam'
                     if (strncmp(frame_data + koff, "\"beam\"", klen) == 0)
@@ -1220,11 +1225,11 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                 req->dy = 0;
                 req->image = false;
                 req->quality = medium;
-                req->plane = 1;
                 req->x1 = -1;
                 req->x2 = -1;
                 req->y1 = -1;
                 req->y2 = -1;
+                req->plane = 1;
                 req->width = 0;
                 req->height = 0;
                 req->beam = circle;
@@ -1275,10 +1280,6 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                             req->quality = high;
                     }
 
-                    // 'plane'
-                    if (strncmp(frame_data + koff, "\"plane\"", klen) == 0)
-                        req->plane = atoi2(frame_data + voff, vlen);
-
                     // 'x1'
                     if (strncmp(frame_data + koff, "\"x1\"", klen) == 0)
                         req->x1 = atoi2(frame_data + voff, vlen);
@@ -1294,6 +1295,10 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                     // 'y2'
                     if (strncmp(frame_data + koff, "\"y2\"", klen) == 0)
                         req->y2 = atoi2(frame_data + voff, vlen);
+
+                    // 'plane'
+                    if (strncmp(frame_data + koff, "\"plane\"", klen) == 0)
+                        req->plane = atoi2(frame_data + voff, vlen);
 
                     // 'width'
                     if (strncmp(frame_data + koff, "\"width\"", klen) == 0)

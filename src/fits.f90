@@ -79,7 +79,7 @@ module fits
    type, bind(c) :: spectrum_request_f
       ! input
       type(C_PTR) :: ra, dec
-      integer(c_int) :: x1, y1, x2, y2
+      integer(c_int) :: x1, y1, x2, y2, plane
       integer(kind(circle)) :: beam
       integer(kind(medium)) :: intensity
       real(c_double) :: frame_start, frame_end, ref_freq, deltaV
@@ -341,7 +341,7 @@ module fits
       integer(c_int) :: len
       ! input parameters
       logical(kind=c_bool) :: image
-      integer(c_int) :: x1, y1, x2, y2
+      integer(c_int) :: x1, y1, x2, y2, plane
       integer(kind(circle)) :: beam
       integer(kind(medium)) :: intensity
       real(c_double) :: frame_start, frame_end, ref_freq
@@ -7120,7 +7120,7 @@ contains
       ! output variables
       real(kind=c_float), dimension(:), allocatable, target :: spectrum, cluster_spectrum
 
-      integer :: first, last, length
+      integer :: first, last, length, plane, max_planes
       integer :: dimx, dimy
       integer :: max_threads, frame, tid
       integer(c_int) :: x1, x2, y1, y2, width, height, average
@@ -7151,7 +7151,7 @@ contains
       call c_f_pointer(req%ptr, item)
 
       print *, 'CSV spectrum for ', item%datasetid,&
-      &', x1:', req%x1, ', y1:', req%y1, ', x2:', req%x2, ', y2:', req%y2,&
+      &', x1:', req%x1, ', y1:', req%y1, ', x2:', req%x2, ', y2:', req%y2, ', plane:', plane,&
       &', beam:', req%beam, ', intensity:', req%intensity, ', frame_start:', req%frame_start,&
       & ', frame_end:', req%frame_end, ', ref_freq:', req%ref_freq, ', deltaV:', req%deltaV,&
       &', rest:', req%rest, ', seq_id:', req%seq_id, ', timestamp:', req%timestamp, ', fd:', req%fd
@@ -7159,12 +7159,18 @@ contains
       ! only applicable to FITS data cubes
       if (.not. allocated(item%compressed)) goto 8000
 
+      ! get max_planes
+      max_planes = size(item%compressed, 2)
+
+      plane = max(req%plane, 1)
+      plane = min(plane, max_planes)
+
       ! get the range of the cube planes
       call get_spectrum_range(item, req%frame_start, req%frame_end, req%ref_freq, first, last)
 
       length = last - first + 1
 
-      print *, 'first:', first, 'last:', last, 'length:', length, 'depth:', item%naxes(3)
+      print *, 'first:', first, 'last:', last, 'length:', length, 'depth:', item%naxes(3), 'plane:', plane
 
       ! manually override image dimensions if they are not available
       if (req%x1 .eq. -1) req%x1 = 1
@@ -7214,6 +7220,7 @@ contains
       cluster_req%y1 = y1
       cluster_req%x2 = x2
       cluster_req%y2 = y2
+      cluster_req%plane = plane
       cluster_req%beam = req%beam
       cluster_req%intensity = req%intensity
       cluster_req%frame_start = req%frame_start
@@ -7255,20 +7262,20 @@ contains
       do frame = first, last
 
          ! skip frames for which there is no data on this node
-         if (.not. associated(item%compressed(frame)%ptr)) cycle
+         if (.not. associated(item%compressed(frame, plane)%ptr)) cycle
 
          ! get a current OpenMP thread (starting from 0 as in C)
          tid = 1 + OMP_GET_THREAD_NUM()
 
          if (req%beam .eq. square) then
-            spectrum(frame) = viewport_spectrum_rect(c_loc(item%compressed(frame)%ptr),&
-            &width, height, item%frame_min(frame), item%frame_max(frame),&
+            spectrum(frame) = viewport_spectrum_rect(c_loc(item%compressed(frame, plane)%ptr),&
+            &width, height, item%frame_min(frame, plane), item%frame_max(frame, plane),&
             &x1 - 1, x2 - 1, y1 - 1, y2 - 1, average, cdelt3)
          end if
 
          if (req%beam .eq. circle) then
-            spectrum(frame) = viewport_spectrum_circle(c_loc(item%compressed(frame)%ptr),&
-            &width, height, item%frame_min(frame), item%frame_max(frame), &
+            spectrum(frame) = viewport_spectrum_circle(c_loc(item%compressed(frame, plane)%ptr),&
+            &width, height, item%frame_min(frame, plane), item%frame_max(frame, plane), &
             &x1 - 1, x2 - 1, y1 - 1, y2 - 1, cx - 1, cy - 1, r2, average, cdelt3)
          end if
 

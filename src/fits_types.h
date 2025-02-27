@@ -107,11 +107,11 @@ struct image_spectrum_request
     int dy;
     bool image;
     enum image_quality quality;
-    int plane;
     int x1;
     int y1;
     int x2;
     int y2;
+    int plane;
     int width;
     int height;
     enum zoom_shape beam;
@@ -145,6 +145,7 @@ struct spectrum_request
     int y1;
     int x2;
     int y2;
+    int plane;
     enum zoom_shape beam;
     enum intensity_mode intensity;
     double frame_start;
