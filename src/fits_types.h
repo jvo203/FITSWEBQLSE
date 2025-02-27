@@ -48,6 +48,7 @@ struct FITSDownloadStream
     size_t pixels_per_frame;
     size_t processed;
     int frame;
+    int plane;
 };
 
 enum video_request_type

@@ -7390,7 +7390,7 @@ contains
       logical(kind=c_bool), allocatable, target :: mask(:), view_mask(:, :)
       real(kind=c_float), dimension(:), allocatable, target :: spectrum, reduced_spectrum, cluster_spectrum
 
-      integer :: first, last, length, threshold
+      integer :: first, last, plane, length, threshold
       integer :: max_threads, frame, tid
       integer(kind=8) :: npixels
       integer(c_int) :: x1, x2, y1, y2, width, height, average
@@ -7457,11 +7457,13 @@ contains
          return
       end if
 
+      plane = req%plane
+
       ! get the range of the cube planes
       call get_spectrum_range(item, req%frame_start, req%frame_end, req%ref_freq, first, last)
 
       length = last - first + 1
-      ! print *, 'first:', first, 'last:', last, 'length:', length, 'depth:', item%naxes(3) ! ifort
+      ! print *, 'first:', first, 'last:', last, 'length:', length, 'depth:', item%naxes(3), 'plane:', plane ! ifort
 
       ! obtain viewport dimensions (even going beyond the dims of pixels&mask)
       dimx = abs(req%x2 - req%x1) + 1

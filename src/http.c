@@ -131,7 +131,7 @@ char *get_jvo_path(PGconn *jvo_db, char *db, char *table, char *data_id);
 extern void load_fits_header(char *datasetid, size_t datasetid_len, char *filepath, size_t filepath_len, char *flux, size_t flux_len);
 extern void read_fits_header(void *item, int unit, size_t filesize);
 extern void load_fits_file(char *datasetid, size_t datasetid_len, char *filepath, size_t filepath_len, char *flux, size_t flux_len, char *root, char *dir, size_t len);
-extern void process_frame(void *item, int frame, float *data, float *pixels, bool *mask, int64_t npixels);
+extern void process_frame(void *item, int frame, int plane, float *data, float *pixels, bool *mask, int64_t npixels);
 extern void notify_root(void *item, char *root);
 extern void set_error_status_C(void *item, bool status);
 extern void image_spectrum_request(void *item, int width, int height, int precision, int fetch_data, int fd);
@@ -873,7 +873,7 @@ void scan_fits_data(struct FITSDownloadStream *stream)
         void *item = get_dataset(stream->datasetid);
 
         if (item != NULL)
-            process_frame(item, stream->frame, stream->data, stream->pixels, stream->mask, (int64_t)stream->pixels_per_frame);
+            process_frame(item, stream->frame, stream->plane, stream->data, stream->pixels, stream->mask, (int64_t)stream->pixels_per_frame);
 
         // reset the frame data
         for (size_t i = 0; i < stream->pixels_per_frame; i++)
@@ -1468,6 +1468,7 @@ static void *handle_url_download(void *arg)
             stream.pixels_per_frame = 0;
             stream.processed = 0;
             stream.frame = 0;
+            stream.plane = 1;
 
             // create a new FITS dataset
             char flux[] = "NULL";
