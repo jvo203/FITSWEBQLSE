@@ -3472,18 +3472,22 @@ contains
       real(kind=c_float), dimension(*), intent(in) :: mean_spectrum, integrated_spectrum
 
       type(dataset), pointer :: item
+      integer :: plane
 
       if (idx .lt. 1) return
 
       if (.not. c_associated(ptr)) return
       call c_f_pointer(ptr, item)
 
+      ! fix the plane index before deciding how to proceed
+      plane = 1
+
       ! no need for a mutex as no other thread will be accessing this array range (unless a dataset is being deleted ...)
-      item%frame_min(idx:idx + N - 1) = frame_min(1:N)
-      item%frame_max(idx:idx + N - 1) = frame_max(1:N)
-      item%frame_median(idx:idx + N - 1) = frame_median(1:N)
-      item%mean_spectrum(idx:idx + N - 1) = mean_spectrum(1:N)
-      item%integrated_spectrum(idx:idx + N - 1) = integrated_spectrum(1:N)
+      item%frame_min(idx:idx + N - 1, plane) = frame_min(1:N)
+      item%frame_max(idx:idx + N - 1, plane) = frame_max(1:N)
+      item%frame_median(idx:idx + N - 1, plane) = frame_median(1:N)
+      item%mean_spectrum(idx:idx + N - 1, plane) = mean_spectrum(1:N)
+      item%integrated_spectrum(idx:idx + N - 1, plane) = integrated_spectrum(1:N)
 
    end subroutine submit_channel_range
 
@@ -3546,7 +3550,7 @@ contains
       counter = 0
 
       do i = 1, item%naxes(3)
-         if (associated(item%compressed(i)%ptr)) counter = counter + 1
+         if (associated(item%compressed(i,1)%ptr)) counter = counter + 1
       end do
 
       ! submit a progress report to the root node
@@ -5107,10 +5111,10 @@ contains
       end do
    end subroutine printerror
 
-   ! extern void process_frame(void *item, int frame, float *data, float *pixels, bool *mask, int64_t npixels);
-   subroutine process_frame(ptr, frame, data, cpixels, cmask, npixels) BIND(C, name='process_frame')
+   ! extern void process_frame(void *item, int frame, int plane, float *data, float *pixels, bool *mask, int64_t npixels);
+   subroutine process_frame(ptr, frame, plane, data, cpixels, cmask, npixels) BIND(C, name='process_frame')
       type(C_PTR), intent(in), value :: ptr
-      integer(kind=c_int), intent(in), value :: frame
+      integer(kind=c_int), intent(in), value :: frame, plane
       integer(kind=c_int64_t), intent(in), value :: npixels
       real(kind=c_float), intent(in), target :: data(npixels)
       real(kind=c_float), intent(inout), target :: cpixels(npixels)
@@ -5120,6 +5124,7 @@ contains
       logical(kind=c_bool), target :: data_mask(npixels)
       real(kind=c_float), target :: res(4)
 
+      integer :: max_planes
       real mean_spec_val, int_spec_val
       real(kind=8) :: cdelt3
       real frame_min, frame_max
@@ -5142,7 +5147,14 @@ contains
          return
       end if
 
-      print *, item%datasetid, "::process_frame:", frame, npixels
+      ! get max_planes
+      if (item%is_stokes) then
+         max_planes = min(4, item%naxes(4))
+      else
+         max_planes = 1
+      end if
+
+      print *, item%datasetid, "::process_frame:", frame, plane, npixels, max_planes
 
       ! first process the frame irrespective whether or not it is 2D or 3D
 
@@ -5166,13 +5178,15 @@ contains
 
       ! a 2D image only
       if (item%naxis .eq. 2 .or. item%naxes(3) .eq. 1) then
-         item%dmin = frame_min
-         item%dmax = frame_max
+         item%dmin(plane) = frame_min
+         item%dmax(plane) = frame_max
 
-         item%pixels = reshape(cpixels, (/item%naxes(1), item%naxes(2), 1/))
-         item%mask = reshape(cmask, item%naxes(1:2))
+         if (plane .eq. max_planes) then
+            item%pixels = reshape(cpixels, (/item%naxes(1), item%naxes(2), max_planes/))
+            item%mask = reshape(cmask, item%naxes(1:2))
 
-         call set_image_status(item, .true.)
+            call set_image_status(item, .true.)
+         end if
 
          ! unlock the loading mutex
          rc = c_pthread_mutex_unlock(item%loading_mtx)
@@ -5181,12 +5195,12 @@ contains
 
       ! a data cube
 
-      item%frame_min(frame) = frame_min
-      item%frame_max(frame) = frame_max
-      item%frame_median(frame) = hist_median(pack(data, data_mask), frame_min, frame_max)
+      item%frame_min(frame, plane) = frame_min
+      item%frame_max(frame, plane) = frame_max
+      item%frame_median(frame, plane) = hist_median(pack(data, data_mask), frame_min, frame_max)
 
-      item%mean_spectrum(frame) = mean_spec_val
-      item%integrated_spectrum(frame) = int_spec_val
+      item%mean_spectrum(frame, plane) = mean_spec_val
+      item%integrated_spectrum(frame, plane) = int_spec_val
 
       ! compress the pixels
       if (allocated(item%compressed)) then
@@ -5202,14 +5216,14 @@ contains
             datamin = real(item%datamin, kind=4)
             datamax = real(item%datamax, kind=4)
 
-            item%compressed(frame, 1)%ptr => to_fixed_concurrent(reshape(data, item%naxes(1:2)),&
+            item%compressed(frame, plane)%ptr => to_fixed_concurrent(reshape(data, item%naxes(1:2)),&
             & frame_min, frame_max, ignrval, datamin, datamax)
          end block
       end if
 
       ! check if it's the last frame
       if (frame .eq. item%naxes(3)) then
-         item%pixels = reshape(cpixels, (/item%naxes(1), item%naxes(2), 1/))
+         item%pixels = reshape(cpixels, (/item%naxes(1), item%naxes(2), max_planes/))
          item%mask = reshape(cmask, item%naxes(1:2))
 
          call set_image_status(item, .true.)
