@@ -7571,35 +7571,35 @@ contains
       do frame = first, last
 
          ! skip frames for which there is no data on this node
-         if (.not. associated(item%compressed(frame)%ptr)) cycle
+         if (.not. associated(item%compressed(frame, plane)%ptr)) cycle
 
          ! get a current OpenMP thread (starting from 0 as in C)
          tid = 1 + OMP_GET_THREAD_NUM()
 
          if (.not. req%image) then
             if (req%beam .eq. square) then
-               spectrum(frame) = viewport_spectrum_rect(c_loc(item%compressed(frame)%ptr),&
-               &width, height, item%frame_min(frame), item%frame_max(frame),&
+               spectrum(frame) = viewport_spectrum_rect(c_loc(item%compressed(frame, plane)%ptr),&
+               &width, height, item%frame_min(frame, plane), item%frame_max(frame, plane),&
                &x1 - 1, x2 - 1, y1 - 1, y2 - 1, average, cdelt3)
             end if
 
             if (req%beam .eq. circle) then
-               spectrum(frame) = viewport_spectrum_circle(c_loc(item%compressed(frame)%ptr),&
-               &width, height, item%frame_min(frame), item%frame_max(frame), &
+               spectrum(frame) = viewport_spectrum_circle(c_loc(item%compressed(frame, plane)%ptr),&
+               &width, height, item%frame_min(frame, plane), item%frame_max(frame, plane), &
                &x1 - 1, x2 - 1, y1 - 1, y2 - 1, cx - 1, cy - 1, r2, average, cdelt3)
             end if
          else
             if (req%beam .eq. square) then
-               spectrum(frame) = viewport_image_spectrum_rect(c_loc(item%compressed(frame)%ptr),&
-               &width, height, item%frame_min(frame), item%frame_max(frame),&
+               spectrum(frame) = viewport_image_spectrum_rect(c_loc(item%compressed(frame, plane)%ptr),&
+               &width, height, item%frame_min(frame, plane), item%frame_max(frame, plane),&
                &c_loc(thread_pixels(:, tid)), c_loc(thread_mask(:, tid)), dimx, &
                &x1 - 1, x2 - 1, y1 - 1, y2 - 1, x1 - req%x1, y1 - req%y1, average, cdelt3, req%median,&
                &thread_sumP, thread_countP, thread_sumN, thread_countN)
             end if
 
             if (req%beam .eq. circle) then
-               spectrum(frame) = viewport_image_spectrum_circle(c_loc(item%compressed(frame)%ptr),&
-               &width, height, item%frame_min(frame), item%frame_max(frame), c_loc(thread_pixels(:, tid)),&
+               spectrum(frame) = viewport_image_spectrum_circle(c_loc(item%compressed(frame, plane)%ptr),&
+               &width, height, item%frame_min(frame, plane), item%frame_max(frame, plane), c_loc(thread_pixels(:, tid)),&
                & c_loc(thread_mask(:, tid)), dimx, x1 - 1, x2 - 1, y1 - 1, y2 - 1,&
                & x1 - req%x1, y1 - req%y1, cx - 1, cy - 1, r2, average, cdelt3)
             end if
