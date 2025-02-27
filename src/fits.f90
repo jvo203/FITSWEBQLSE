@@ -4322,7 +4322,7 @@ contains
       integer naxes(4)
       integer(kind=8) :: npixels
 
-      integer :: i, start, end
+      integer :: i, j, start, end, max_planes
       integer(kind=c_int) :: rc
       logical :: bSuccess
 
@@ -4370,10 +4370,17 @@ contains
       ! start the timer
       call system_clock(count=item%start_time, count_rate=item%crate, count_max=item%cmax)
 
+      if (item%is_stokes) then
+         ! up to 4 planes: Stokes I, Q, U and V
+         max_planes = min(4, naxes(4))
+      else
+         max_planes = 1
+      end if
+
       ! reset the progress
       ! progress is being handled differently for URL-based datasets
-      ! the total is now given by the number of pixels in the FITS file
-      npixels = naxes(1)*naxes(2)
+      ! the total is now given by the number of pixels in the FITS file (including polarisation planes)
+      npixels = naxes(1)*naxes(2)*max_planes
 
       if (naxis .eq. 2 .or. naxes(3) .eq. 1) then
          ! do nothing
@@ -4395,27 +4402,29 @@ contains
          end = naxes(3)
 
          if (allocated(item%compressed)) deallocate (item%compressed)
-         allocate (item%compressed(start:end))
+         allocate (item%compressed(start:end, max_planes))
 
-         do i = start, end
-            nullify (item%compressed(i)%ptr)
+         do j = 1, max_planes
+            do i = start, end
+               nullify (item%compressed(i, j)%ptr)
+            end do
          end do
 
          if (allocated(item%frame_min)) deallocate (item%frame_min)
-         allocate (item%frame_min(start:end))
+         allocate (item%frame_min(start:end, max_planes))
 
          if (allocated(item%frame_max)) deallocate (item%frame_max)
-         allocate (item%frame_max(start:end))
+         allocate (item%frame_max(start:end, max_planes))
 
          if (allocated(item%frame_median)) deallocate (item%frame_median)
-         allocate (item%frame_median(start:end))
+         allocate (item%frame_median(start:end, max_planes))
 
          ! spectra
          if (allocated(item%mean_spectrum)) deallocate (item%mean_spectrum)
-         allocate (item%mean_spectrum(naxes(3)))
+         allocate (item%mean_spectrum(naxes(3), max_planes))
 
          if (allocated(item%integrated_spectrum)) deallocate (item%integrated_spectrum)
-         allocate (item%integrated_spectrum(naxes(3)))
+         allocate (item%integrated_spectrum(naxes(3), max_planes))
 
          ! zero-out the spectra
          item%mean_spectrum = 0.0
