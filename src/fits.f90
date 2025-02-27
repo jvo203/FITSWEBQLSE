@@ -11035,7 +11035,7 @@ contains
       real(kind=c_float), dimension(:), allocatable, target :: spectrum, reduced_spectrum, cluster_spectrum
 
       integer :: first, last, length, threshold
-      integer :: max_threads, frame, tid
+      integer :: max_threads, frame, plane, tid
       integer(kind=8) :: npixels
       integer(c_int) :: width, height, average
       real(kind=8) :: cdelt3
@@ -11081,6 +11081,8 @@ contains
       if (.not. c_associated(req%ptr)) return
       call c_f_pointer(req%ptr, item)
 
+      plane = req%plane
+
       print *, 'ws_image_spectrum for ', item%datasetid,&
       &', dx:', req%dx, ', quality:', req%quality, ', width:', req%width, &
       &', height', req%height, ', beam:', req%beam, ', intensity:', req%intensity,&
@@ -11104,13 +11106,13 @@ contains
       ! get the range of the cube planes
       call get_spectrum_range(item, req%frame_start, req%frame_end, req%ref_freq, first, last)
 
-      dmin = minval(item%frame_min(first:last))
-      dmax = maxval(item%frame_max(first:last))
+      dmin = minval(item%frame_min(first:last, plane))
+      dmax = maxval(item%frame_max(first:last, plane))
       dmedian = &
-      &median(pack(item%frame_median(first:last),.not. ieee_is_nan(item%frame_median(first:last)))) ! extract non-NaN values
+      &median(pack(item%frame_median(first:last, plane),.not. ieee_is_nan(item%frame_median(first:last, plane)))) ! extract non-NaN values
 
       length = last - first + 1
-      print *, 'first:', first, 'last:', last, 'length:', length, 'depth:', item%naxes(3)
+      print *, 'first:', first, 'last:', last, 'length:', length, 'depth:', item%naxes(3), 'plane:', plane
 
       if (req%intensity .eq. mean) then
          average = 1
@@ -11204,14 +11206,14 @@ contains
       do frame = first, last
 
          ! skip frames for which there is no data on this node
-         if (.not. associated(item%compressed(frame)%ptr)) cycle
+         if (.not. associated(item%compressed(frame, plane)%ptr)) cycle
 
          ! get a current OpenMP thread (starting from 0 as in C)
          tid = 1 + OMP_GET_THREAD_NUM()
 
          ! the image is square (rectangular)
-         spectrum(frame) = viewport_image_spectrum_rect(c_loc(item%compressed(frame)%ptr),&
-         &width, height, item%frame_min(frame), item%frame_max(frame),&
+         spectrum(frame) = viewport_image_spectrum_rect(c_loc(item%compressed(frame, plane)%ptr),&
+         &width, height, item%frame_min(frame, plane), item%frame_max(frame, plane),&
          &c_loc(thread_pixels(:, tid)), c_loc(thread_mask(:, tid)), dimx, &
          &req%x1 - 1, req%x2 - 1, req%y1 - 1, req%y2 - 1, 0, 0, average, cdelt3,&
          &dmedian, thread_sumP, thread_countP, thread_sumN, thread_countN)
