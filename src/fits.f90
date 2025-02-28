@@ -10325,28 +10325,6 @@ contains
         line(2) = nint(y1 + t*(y2 - y1))
     end function line
 
-    function get_spectrum(item, x, y, frame, cdelt3) result(spectrum)
-        type(dataset), pointer :: item
-        integer, intent(in) :: x, y, frame
-        real(kind=8), intent(in) :: cdelt3
-        real(c_float) :: spectrum
-
-        integer(c_int) :: width, height
-
-        ! skip frames for which there is no data on this node
-        if (.not. associated(item%compressed(frame)%ptr)) then
-            spectrum = 0.0
-            return
-        end if
-
-        width = item%naxes(1)
-        height = item%naxes(2)
-
-        spectrum = viewport_spectrum_rect(c_loc(item%compressed(frame)%ptr),&
-        &width, height, item%frame_min(frame), item%frame_max(frame),&
-        &x - 1, x - 1, y - 1, y - 1, 0, cdelt3)
-    end function get_spectrum
-
     recursive subroutine ws_pv_request(user) BIND(C, name='ws_pv_request')
         use omp_lib
         use :: unix_pthread
@@ -10364,7 +10342,7 @@ contains
         type(c_ptr) :: pid
         integer(kind=c_int) :: rc
 
-        integer :: frame, first, last, length, capacity, npoints, i, j, max_threads
+        integer :: frame, first, last, length, capacity, npoints, i, j, max_threads, plane, max_planes
         real :: dx, dy, dp, t, dt
         integer(c_int) :: x1, x2, y1, y2
         integer :: prev_x, prev_y, cur_x, cur_y
@@ -10412,12 +10390,18 @@ contains
             return
         end if
 
+        ! get max_planes
+        max_planes = size(item%compressed, 2)
+
+        plane = max(req%plane, 1)
+        plane = min(plane, max_planes)
+
         ! get the range of the cube planes
         call get_spectrum_range(item, req%frame_start, req%frame_end, req%ref_freq, first, last)
 
         length = last - first + 1
 
-        print *, 'first:', first, 'last:', last, 'length:', length, 'depth:', item%naxes(3)
+        print *, 'first:', first, 'last:', last, 'length:', length, 'depth:', item%naxes(3), 'plane:', plane
 
         call get_frame2freq_vel(item, first, req%ref_freq, req%deltaV, req%rest, f, v1)
         call get_frame2freq_vel(item, last, req%ref_freq, req%deltaV, req%rest, f, v2)
@@ -10491,6 +10475,7 @@ contains
         cluster_req%y1 = y1
         cluster_req%x2 = x2
         cluster_req%y2 = y2
+        cluster_req%plane = plane
         cluster_req%first = first
         cluster_req%last = last
 
@@ -10535,10 +10520,10 @@ contains
                 !$omp DO
                 do frame = first, last
                     ! skip frames for which there is no data on this node
-                    if (.not. associated(item%compressed(frame)%ptr)) cycle
+                    if (.not. associated(item%compressed(frame, plane)%ptr)) cycle
 
-                    max_exp = int(item%compressed(frame)%ptr(cur_x, cur_y)%common_exp)
-                    x(1:DIM, 1:DIM, frame) = dequantize(item%compressed(frame)%ptr(cur_x, cur_y)%mantissa,&
+                    max_exp = int(item%compressed(frame, plane)%ptr(cur_x, cur_y)%common_exp)
+                    x(1:DIM, 1:DIM, frame) = dequantize(item%compressed(frame, plane)%ptr(cur_x, cur_y)%mantissa,&
                     & max_exp, significant_bits)
                 end do
                 !$omp END DO
@@ -10548,12 +10533,9 @@ contains
             ! get the spectrum for each frame
             do frame = first, last
                 ! skip frames for which there is no data on this node
-                if (.not. associated(item%compressed(frame)%ptr)) cycle
+                if (.not. associated(item%compressed(frame, plane)%ptr)) cycle
 
-                ! an inefficient implementation, it decompresses the same fixed blocks over and over again
-                ! pv(frame, i) = get_spectrum(item, pos(1), pos(2), frame, cdelt3)
-
-                ! this faster implementation uses a decompression cache
+                ! a fast implementation uses a decompression cache
                 pv(i, frame) = real(x(pos(1) - (cur_x - 1)*DIM, pos(2) - (cur_y - 1)*DIM, frame)*cdelt3, kind=4)
             end do
         end do
@@ -10827,6 +10809,7 @@ contains
         cluster_req%y1 = y1
         cluster_req%x2 = x2
         cluster_req%y2 = y2
+        cluster_req%plane = plane
         cluster_req%first = first
         cluster_req%last = last
 
