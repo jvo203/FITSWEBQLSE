@@ -12231,6 +12231,7 @@ function x_axis_move(offset) {
                     var request = {
                         type: "composite_video",
                         frame: freq,
+                        plane: previous_plane,
                         key: false,
                         fill: fill,
                         ref_freq: RESTFRQ,
@@ -12246,6 +12247,7 @@ function x_axis_move(offset) {
                     var request = {
                         type: "video",
                         frame: freq,
+                        plane: previous_plane,
                         key: false,
                         fill: fill,
                         ref_freq: RESTFRQ,
@@ -16578,6 +16580,7 @@ function videoTimeout(freq) {
         var request = {
             type: "composite_video",
             frame: freq,
+            plane: previous_plane,
             key: true,
             fill: fill,
             ref_freq: RESTFRQ,
@@ -16593,6 +16596,7 @@ function videoTimeout(freq) {
         var request = {
             type: "video",
             frame: freq,
+            plane: previous_plane,
             key: true,
             fill: fill,
             ref_freq: RESTFRQ,
@@ -17497,6 +17501,7 @@ function send_pv_request(x1, y1, x2, y2) {
         y1: Math.round(y1),
         x2: Math.round(x2),
         y2: Math.round(y2),
+        plane: previous_plane,
         width: width,
         height: height,
         frame_start: data_band_lo,
