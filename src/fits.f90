@@ -9123,7 +9123,7 @@ contains
         type(cluster_pv_request_f), pointer :: req
 
         integer(c_int) :: x1, x2, y1, y2
-        integer :: frame, first, last, length, npoints, max_threads
+        integer :: frame, plane, first, last, length, npoints, max_threads, max_planes
         real :: dx, dy, t, dt
 
         integer :: prev_x, prev_y, cur_x, cur_y
@@ -9163,11 +9163,17 @@ contains
             return
         end if
 
+        ! get max_planes
+        max_planes = size(item%compressed, 2)
+
+        plane = max(req%plane, 1)
+        plane = min(plane, max_planes)
+
         first = req%first
         last = req%last
         length = last - first + 1
 
-        print *, 'first:', first, 'last:', last, 'length:', length, 'depth:', item%naxes(3)
+        print *, 'first:', first, 'last:', last, 'length:', length, 'depth:', item%naxes(3), 'plane:', plane
 
         call get_cdelt3(item, cdelt3)
 
@@ -9228,10 +9234,10 @@ contains
                     !$omp DO
                     do frame = first, last
                         ! skip frames for which there is no data on this node
-                        if (.not. associated(item%compressed(frame)%ptr)) cycle
+                        if (.not. associated(item%compressed(frame, plane)%ptr)) cycle
 
-                        max_exp = int(item%compressed(frame)%ptr(cur_x, cur_y)%common_exp)
-                        x(1:DIM, 1:DIM, frame) = dequantize(item%compressed(frame)%ptr(cur_x, cur_y)%mantissa,&
+                        max_exp = int(item%compressed(frame, plane)%ptr(cur_x, cur_y)%common_exp)
+                        x(1:DIM, 1:DIM, frame) = dequantize(item%compressed(frame, plane)%ptr(cur_x, cur_y)%mantissa,&
                         & max_exp, significant_bits)
                     end do
                     !$omp END DO
