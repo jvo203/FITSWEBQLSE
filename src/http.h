@@ -169,8 +169,7 @@ struct video_fetch
     char *datasetid;
     int len;
     bool keyframe;
-    int frame;
-    int fill;
+    int frame, plane, fill;
 
     char *flux;
     float dmin, dmax, dmedian;
@@ -189,8 +188,7 @@ struct video_fetch
 struct video_req
 {
     bool keyframe;
-    int frame;
-    int fill;
+    int frame, plane, fill;
 
     char *flux;
     int len;

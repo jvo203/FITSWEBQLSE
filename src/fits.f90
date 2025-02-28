@@ -235,8 +235,7 @@ module fits
       type(c_ptr) :: datasetid
       integer(c_int) :: len
       logical(kind=c_bool) :: keyframe
-      integer(c_int) :: frame
-      integer(c_int) :: fill
+      integer(c_int) :: frame, plane, fill
 
       ! tone mapping
       type(C_PTR) :: flux
@@ -6215,7 +6214,7 @@ contains
 
    end subroutine calculate_global_statistics_C
 
-   subroutine calculate_global_statistics(item, dmedian, sumP, countP, sumN, countN, first, last)
+   subroutine calculate_global_statistics(item, dmedian, sumP, countP, sumN, countN, first, last, plane)
       use omp_lib
       use, intrinsic :: iso_c_binding
       implicit none
@@ -6225,11 +6224,14 @@ contains
       real(c_float), intent(out) :: sumP, sumN
       integer(c_int64_t), intent(out) :: countP, countN
       integer, intent(in) :: first, last ! FITS data cube frame range
+      integer, value, optional :: plane
 
       integer :: max_threads, frame
       integer(c_int) :: width, height
       real(c_float) :: thread_sumP, thread_sumN
       integer(c_int64_t) :: thread_countP, thread_countN
+
+      if (.not. present(plane)) plane = 1
 
       sumP = 0.0
       countP = 0
@@ -6263,10 +6265,10 @@ contains
       do frame = first, last
 
          ! skip frames for which there is no data on this node
-         if (.not. associated(item%compressed(frame)%ptr)) cycle
+         if (.not. associated(item%compressed(frame, plane)%ptr)) cycle
 
          ! call Intel SPMD C
-         call make_global_statistics(c_loc(item%compressed(frame)%ptr), width, height,&
+         call make_global_statistics(c_loc(item%compressed(frame, plane)%ptr), width, height,&
          &dmedian, thread_sumP, thread_countP, thread_sumN, thread_countN)
 
       end do
@@ -9245,7 +9247,7 @@ contains
             ! get the spectrum for each frame
             do frame = first, last
                ! skip frames for which there is no data on this node
-               if (.not. associated(item%compressed(frame)%ptr)) cycle
+               if (.not. associated(item%compressed(frame, plane)%ptr)) cycle
 
                ! this faster implementation uses a decompression cache
                pv(npoints, frame) = real(x(pos(1) - (cur_x - 1)*DIM, pos(2) - (cur_y - 1)*DIM, frame)*cdelt3, kind=4)
@@ -9441,7 +9443,7 @@ contains
 
    end subroutine global_statistics
 
-   recursive subroutine video_request_deprecated(user) BIND(C, name='video_request_deprecated')
+   recursive subroutine video_request(user) BIND(C, name='video_request')
       use :: unix_pthread
       use, intrinsic :: iso_c_binding
       implicit none
@@ -9467,7 +9469,7 @@ contains
       call c_f_pointer(req%flux, flux, [req%len])
 
       if (.not. allocated(item%compressed)) goto 6000
-      if (.not. associated(item%compressed(req%frame)%ptr)) goto 6000
+      if (.not. associated(item%compressed(req%frame, req%plane)%ptr)) goto 6000
       ! OK, we've got the frame in question
 
       ! set the video tone mapping
@@ -9513,7 +9515,7 @@ contains
       nullify (req) ! disassociate the FORTRAN pointer from the C memory region
       call free(user) ! release C memory
 
-   end subroutine video_request_deprecated
+   end subroutine video_request
 
    recursive subroutine video_request_simd(user) BIND(C, name='video_request_simd')
       use :: unix_pthread
@@ -9588,6 +9590,7 @@ contains
 
          fetch_req%keyframe = req%keyframe
          fetch_req%frame = req%frame
+         fetch_req%plane = req%plane
          fetch_req%fill = req%fill
 
          fetch_req%flux = req%flux

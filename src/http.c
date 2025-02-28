@@ -3545,7 +3545,7 @@ static enum MHD_Result on_http_connection(void *cls,
 
     if (strstr(url, "/video/") != NULL)
     {
-        int frame, fill, width, height;
+        int frame, plane, fill, width, height;
         bool downsize, keyframe, mask;
         char *flux;
         float dmin, dmax, dmedian;
@@ -3567,6 +3567,12 @@ static enum MHD_Result on_http_connection(void *cls,
             return http_bad_request(connection);
 
         frame = atoi(frameStr);
+
+        char *planeStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "plane");
+        if (planeStr == NULL)
+            return http_bad_request(connection);
+
+        plane = atoi(planeStr);
 
         char *fillStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "fill");
         if (fillStr == NULL)
@@ -3702,6 +3708,7 @@ static enum MHD_Result on_http_connection(void *cls,
         {
             req->keyframe = keyframe;
             req->frame = frame;
+            req->plane = plane;
             req->fill = fill;
             req->flux = strdup(flux);
             req->len = strlen(req->flux);
@@ -7778,7 +7785,7 @@ void *fetch_video_frame(void *ptr)
 
     struct video_fetch *req = (struct video_fetch *)ptr;
 
-    printf("[C] calling fetch_video_frame across the cluster for '%.*s', frame %d\n", req->len, req->datasetid, req->frame);
+    printf("[C] calling fetch_video_frame across the cluster for '%.*s', frame %d, plane %d\n", req->len, req->datasetid, req->frame, req->plane);
 
     int i;
     GSList *iterator = NULL;
@@ -7826,7 +7833,7 @@ void *fetch_video_frame(void *ptr)
         GString *url = g_string_new("http://");
         g_string_append_printf(url, "%s:", (char *)iterator->data);
         g_string_append_printf(url, "%" PRIu16 "/video/%.*s", options.http_port, (int)len, datasetid);
-        g_string_append_printf(url, "?frame=%d&fill=%d&keyframe=%d&width=%d&height=%d&downsize=%d", req->frame, req->fill, req->keyframe, req->width, req->height, req->downsize);
+        g_string_append_printf(url, "?frame=%d&plane=%d&fill=%d&keyframe=%d&width=%d&height=%d&downsize=%d", req->frame, req->plane, req->fill, req->keyframe, req->width, req->height, req->downsize);
         g_string_append_printf(url, "&mask=%d", (req->mask != NULL ? 1 : 0));
         g_string_append_printf(url, "&flux=%s&dmin=%f&dmax=%f&dmedian=%f", req->flux, req->dmin, req->dmax, req->dmedian);
         g_string_append_printf(url, "&sensitivity=%f&slope=%f", req->sensitivity, req->slope);
