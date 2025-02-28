@@ -9580,7 +9580,7 @@ contains
       allocate (mask(req%width, req%height))
 
       ! if a frame has not been found it needs to be fetched from the cluster
-      if (.not. associated(item%compressed(req%frame)%ptr)) then
+      if (.not. associated(item%compressed(req%frame, req%plane)%ptr)) then
          allocate (fetch_req)
 
          fetch_req%datasetid = c_loc(item%datasetid)
@@ -9764,7 +9764,7 @@ contains
             ! print *, 'composite_video_request_simd [', item%datasetid, ']::frame:', req%frame(tid)
 
             ! if a frame has not been found it needs to be fetched from the cluster
-            if (.not. associated(item%compressed(req%frame(tid))%ptr)) then
+            if (.not. associated(item%compressed(req%frame(tid), req%plane(tid))%ptr)) then
                allocate (fetch_req)
 
                fetch_req%datasetid = c_loc(item%datasetid)
