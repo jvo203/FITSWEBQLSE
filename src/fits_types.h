@@ -227,6 +227,7 @@ struct pv_request
     int y1;
     int x2;
     int y2;
+    int plane;
     int width;
     int height;
     double frame_start;

@@ -595,6 +595,7 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                 req->y1 = -1;
                 req->x2 = -1;
                 req->y2 = -1;
+                req->plane = 1;
                 req->width = 0;
                 req->height = 0;
                 req->frame_start = 0.0;
@@ -629,6 +630,10 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                     // 'y2'
                     if (strncmp(frame_data + koff, "\"y2\"", klen) == 0)
                         req->y2 = atoi2(frame_data + voff, vlen);
+
+                    // 'plane'
+                    if (strncmp(frame_data + koff, "\"plane\"", klen) == 0)
+                        req->plane = atoi2(frame_data + voff, vlen);
 
                     // 'width'
                     if (strncmp(frame_data + koff, "\"width\"", klen) == 0)
@@ -732,6 +737,7 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                 req->y1 = -1;
                 req->x2 = -1;
                 req->y2 = -1;
+                req->plane = 1;
                 req->width = 0;
                 req->height = 0;
                 req->frame_start = 0.0;
@@ -764,6 +770,10 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                     // 'y2'
                     if (strncmp(frame_data + koff, "\"y2\"", klen) == 0)
                         req->y2 = atoi2(frame_data + voff, vlen);
+
+                    // 'plane'
+                    if (strncmp(frame_data + koff, "\"plane\"", klen) == 0)
+                        req->plane = atoi2(frame_data + voff, vlen);
 
                     // 'width'
                     if (strncmp(frame_data + koff, "\"width\"", klen) == 0)
