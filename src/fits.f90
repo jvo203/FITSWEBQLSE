@@ -257,8 +257,7 @@ module fits
    type, bind(c) :: video_req_f
       ! input
       logical(kind=c_bool) :: keyframe
-      integer(c_int) :: frame
-      integer(c_int) :: fill
+      integer(c_int) :: frame, plane, fill
 
       ! tone mapping
       type(C_PTR) :: flux
@@ -9442,7 +9441,7 @@ contains
 
    end subroutine global_statistics
 
-   recursive subroutine video_request(user) BIND(C, name='video_request')
+   recursive subroutine video_request_deprecated(user) BIND(C, name='video_request_deprecated')
       use :: unix_pthread
       use, intrinsic :: iso_c_binding
       implicit none
@@ -9494,7 +9493,7 @@ contains
          allocate (mask(req%width, req%height))
          call get_video_frame(item, req%frame, req%fill, tone, pixels, mask, req%width, req%height, req%downsize)
       else
-         call get_composite_video_frame(item, req%frame, req%fill, tone, pixels, req%width, req%height, req%downsize, 1)
+         call get_composite_video_frame(item, req%frame, req%plane, req%fill, tone, pixels, req%width, req%height, req%downsize, 1)
       end if
 
       if (req%fd .ne. -1) then
@@ -9514,7 +9513,7 @@ contains
       nullify (req) ! disassociate the FORTRAN pointer from the C memory region
       call free(user) ! release C memory
 
-   end subroutine video_request
+   end subroutine video_request_deprecated
 
    recursive subroutine video_request_simd(user) BIND(C, name='video_request_simd')
       use :: unix_pthread
@@ -9803,7 +9802,7 @@ contains
                   pixels(:, :, tid) = int(req%fill, kind=1)
                end if
             else
-               call get_composite_video_frame(item, req%frame(tid), req%fill, tone, pixels(:, :, tid),&
+               call get_composite_video_frame(item, req%frame(tid), req%plane(tid), req%fill, tone, pixels(:, :, tid),&
                &req%width, req%height, req%downsize, req%va_count)
             end if
 
