@@ -193,7 +193,7 @@ module fits
 
     type, bind(c) :: cluster_pv_request_f
         ! input
-        integer(c_int) :: x1, y1, x2, y2, first, last
+        integer(c_int) :: x1, y1, x2, y2, first, last, plane
         integer(c_int) :: npoints
 
         ! output
@@ -209,7 +209,7 @@ module fits
 
         ! input parameters
         integer(c_int) :: x1, y1, x2, y2
-        integer(c_int) :: first, last
+        integer(c_int) :: first, last, plane
 
         ! output
         type(c_ptr) :: pv

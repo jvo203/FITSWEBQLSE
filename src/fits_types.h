@@ -255,6 +255,7 @@ struct cluster_pv_request
     int y2;
     int first;
     int last;
+    int plane;
     int npoints;
 
     // output (the 'write' end of a Unix pipe)

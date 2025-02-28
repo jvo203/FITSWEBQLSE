@@ -1638,6 +1638,7 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                 req->seq_id = -1;
 
                 req->frame = 0;
+                req->plane = 1;
                 req->timestamp = 0.0;
 
                 req->flux = NULL;
@@ -1697,6 +1698,10 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                     // 'frame'
                     if (strncmp(frame_data + koff, "\"frame\"", klen) == 0)
                         frame = atof2(frame_data + voff, vlen);
+
+                    // 'plane'
+                    if (strncmp(frame_data + koff, "\"plane\"", klen) == 0)
+                        req->plane = atoi2(frame_data + voff, vlen);
 
                     // 'ref_freq'
                     if (strncmp(frame_data + koff, "\"ref_freq\"", klen) == 0)
