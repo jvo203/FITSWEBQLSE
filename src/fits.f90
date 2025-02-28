@@ -9491,7 +9491,7 @@ contains
       if (req%mask) then
          ! allocate the optional mask
          allocate (mask(req%width, req%height))
-         call get_video_frame(item, req%frame, req%fill, tone, pixels, mask, req%width, req%height, req%downsize)
+         call get_video_frame(item, req%frame, req%plane, req%fill, tone, pixels, mask, req%width, req%height, req%downsize)
       else
          call get_composite_video_frame(item, req%frame, req%plane, req%fill, tone, pixels, req%width, req%height, req%downsize, 1)
       end if
@@ -9616,7 +9616,7 @@ contains
          ! skip invalid frames (not found on other cluster nodes)
          if (.not. fetch_req%valid) goto 5000
       else
-         call get_video_frame(item, req%frame, req%fill, tone, pixels, mask, req%width, req%height, req%downsize)
+         call get_video_frame(item, req%frame, req%plane, req%fill, tone, pixels, mask, req%width, req%height, req%downsize)
       end if
 
       ! end the timer
@@ -9896,13 +9896,13 @@ contains
       return
    end subroutine fill_global_statistics
 
-   subroutine get_video_frame(item, frame, fill, tone, dst_pixels, dst_mask, dst_width, dst_height, downsize)
+   subroutine get_video_frame(item, frame, plane, fill, tone, dst_pixels, dst_mask, dst_width, dst_height, downsize)
       use, intrinsic :: iso_c_binding
       implicit none
 
       type(dataset), intent(in), pointer :: item
       type(video_tone_mapping), intent(in) :: tone
-      integer, intent(in) :: frame, fill, dst_width, dst_height
+      integer, intent(in) :: frame, plane, fill, dst_width, dst_height
       logical(kind=c_bool) :: downsize
       integer(kind=1), intent(out), target :: dst_pixels(dst_width, dst_height)
       integer(kind=1), intent(out), target :: dst_mask(dst_width, dst_height)
@@ -9960,7 +9960,7 @@ contains
                if (tid .eq. num_threads) work_size = cm - start
 
                if (work_size .gt. 0) then
-                  call make_video_frame_fixed_linear_threaded(c_loc(item%compressed(frame)%ptr), width, height,&
+                  call make_video_frame_fixed_linear_threaded(c_loc(item%compressed(frame, plane)%ptr), width, height,&
                   &c_loc(pixels), c_loc(mask), width, tone%black, tone%slope, fill, start, work_size)
                end if
             end do
@@ -9982,7 +9982,7 @@ contains
                if (tid .eq. num_threads) work_size = cm - start
 
                if (work_size .gt. 0) then
-                  call make_video_frame_fixed_logistic_threaded(c_loc(item%compressed(frame)%ptr), width, height,&
+                  call make_video_frame_fixed_logistic_threaded(c_loc(item%compressed(frame, plane)%ptr), width, height,&
                   &c_loc(pixels), c_loc(mask), width, tone%dmedian, tone%sensitivity, fill, start, work_size)
                end if
             end do
@@ -10004,7 +10004,7 @@ contains
                if (tid .eq. num_threads) work_size = cm - start
 
                if (work_size .gt. 0) then
-                  call make_video_frame_fixed_ratio_threaded(c_loc(item%compressed(frame)%ptr), width, height,&
+                  call make_video_frame_fixed_ratio_threaded(c_loc(item%compressed(frame, plane)%ptr), width, height,&
                   &c_loc(pixels), c_loc(mask), width, tone%black, tone%sensitivity, fill, start, work_size)
                end if
             end do
@@ -10026,7 +10026,7 @@ contains
                if (tid .eq. num_threads) work_size = cm - start
 
                if (work_size .gt. 0) then
-                  call make_video_frame_fixed_square_threaded(c_loc(item%compressed(frame)%ptr), width, height,&
+                  call make_video_frame_fixed_square_threaded(c_loc(item%compressed(frame, plane)%ptr), width, height,&
                   &c_loc(pixels), c_loc(mask), width, tone%black, tone%sensitivity, fill, start, work_size)
                end if
             end do
@@ -10051,7 +10051,7 @@ contains
                if (tid .eq. num_threads) work_size = cm - start
 
                if (work_size .gt. 0) then
-                  call make_video_frame_fixed_legacy_threaded(c_loc(item%compressed(frame)%ptr), width, height,&
+                  call make_video_frame_fixed_legacy_threaded(c_loc(item%compressed(frame, plane)%ptr), width, height,&
                   &c_loc(pixels), c_loc(mask), width, tone%dmin, tone%dmax, lmin, lmax, fill, start, work_size)
                end if
             end do
@@ -10081,25 +10081,25 @@ contains
 
          if (tone%flux .eq. "linear") then
             ! print *, "calling make_video_frame_fixed_linear"
-            call make_video_frame_fixed_linear(c_loc(item%compressed(frame)%ptr), width, height,&
+            call make_video_frame_fixed_linear(c_loc(item%compressed(frame, plane)%ptr), width, height,&
             &c_loc(dst_pixels), c_loc(dst_mask), width, tone%black, tone%slope, fill)
          end if
 
          if (tone%flux .eq. "logistic") then
             ! print *, "calling make_video_frame_fixed_logistic"
-            call make_video_frame_fixed_logistic(c_loc(item%compressed(frame)%ptr), width, height,&
+            call make_video_frame_fixed_logistic(c_loc(item%compressed(frame, plane)%ptr), width, height,&
             &c_loc(dst_pixels), c_loc(dst_mask), width, tone%dmedian, tone%sensitivity, fill)
          end if
 
          if (tone%flux .eq. "ratio") then
             ! print *, "calling make_video_frame_fixed_ratio"
-            call make_video_frame_fixed_ratio(c_loc(item%compressed(frame)%ptr), width, height,&
+            call make_video_frame_fixed_ratio(c_loc(item%compressed(frame, plane)%ptr), width, height,&
             &c_loc(dst_pixels), c_loc(dst_mask), width, tone%black, tone%sensitivity, fill)
          end if
 
          if (tone%flux .eq. "square") then
             ! print *, "calling make_video_frame_fixed_square"
-            call make_video_frame_fixed_square(c_loc(item%compressed(frame)%ptr), width, height,&
+            call make_video_frame_fixed_square(c_loc(item%compressed(frame, plane)%ptr), width, height,&
             &c_loc(dst_pixels), c_loc(dst_mask), width, tone%black, tone%sensitivity, fill)
          end if
 
@@ -10108,7 +10108,7 @@ contains
             lmax = log(1.5)
 
             ! print *, "calling make_video_frame_fixed_legacy"
-            call make_video_frame_fixed_legacy(c_loc(item%compressed(frame)%ptr), width, height,&
+            call make_video_frame_fixed_legacy(c_loc(item%compressed(frame, plane)%ptr), width, height,&
             &c_loc(dst_pixels), c_loc(dst_mask), width, tone%dmin, tone%dmax, lmin, lmax, fill)
          end if
       end if
