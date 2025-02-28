@@ -10718,7 +10718,7 @@ contains
         type(c_ptr) :: pid
         integer(kind=c_int) :: rc
 
-        integer :: frame, first, last, length, i, j, max_threads, capacity
+        integer :: frame, first, last, length, i, j, max_threads, capacity, plane, max_planes
         real :: dx, dy, dp, t, dt
         integer(c_int) :: x1, x2, y1, y2
         integer :: prev_x, prev_y, cur_x, cur_y
@@ -10742,12 +10742,18 @@ contains
         ! timing
         real(kind=8) :: t1, t2
 
+        ! get max_planes
+        max_planes = size(item%compressed, 2)
+
+        plane = max(req%plane, 1)
+        plane = min(plane, max_planes)
+
         ! get the range of the cube planes
         call get_spectrum_range(item, req%frame_start, req%frame_end, req%ref_freq, first, last)
 
         length = last - first + 1
 
-        print *, 'first:', first, 'last:', last, 'length:', length, 'depth:', item%naxes(3)
+        print *, 'first:', first, 'last:', last, 'length:', length, 'depth:', item%naxes(3), 'plane:', plane
 
         call get_frame2freq_vel(item, first, req%ref_freq, req%deltaV, req%rest, f, v1)
         call get_frame2freq_vel(item, last, req%ref_freq, req%deltaV, req%rest, f, v2)
@@ -10865,10 +10871,10 @@ contains
                 !$omp DO
                 do frame = first, last
                     ! skip frames for which there is no data on this node
-                    if (.not. associated(item%compressed(frame)%ptr)) cycle
+                    if (.not. associated(item%compressed(frame, plane)%ptr)) cycle
 
-                    max_exp = int(item%compressed(frame)%ptr(cur_x, cur_y)%common_exp)
-                    x(1:DIM, 1:DIM, frame) = dequantize(item%compressed(frame)%ptr(cur_x, cur_y)%mantissa,&
+                    max_exp = int(item%compressed(frame, plane)%ptr(cur_x, cur_y)%common_exp)
+                    x(1:DIM, 1:DIM, frame) = dequantize(item%compressed(frame, plane)%ptr(cur_x, cur_y)%mantissa,&
                     & max_exp, significant_bits)
                 end do
                 !$omp END DO
@@ -10878,7 +10884,7 @@ contains
             ! get the spectrum for each frame
             do frame = first, last
                 ! skip frames for which there is no data on this node
-                if (.not. associated(item%compressed(frame)%ptr)) cycle
+                if (.not. associated(item%compressed(frame, plane)%ptr)) cycle
 
                 ! this faster implementation uses a decompression cache
                 pv(i, frame) = real(x(pos(1) - (cur_x - 1)*DIM, pos(2) - (cur_y - 1)*DIM, frame)*cdelt3, kind=4)
@@ -11057,7 +11063,7 @@ contains
         real(kind=c_float), dimension(:), allocatable, target :: spectrum, reduced_spectrum, cluster_spectrum
 
         integer :: first, last, length, threshold
-        integer :: max_threads, frame, plane, tid
+        integer :: max_threads, frame, plane, max_planes, tid
         integer(kind=8) :: npixels
         integer(c_int) :: width, height, average
         real(kind=8) :: cdelt3
@@ -11103,8 +11109,6 @@ contains
         if (.not. c_associated(req%ptr)) return
         call c_f_pointer(req%ptr, item)
 
-        plane = req%plane
-
         print *, 'ws_image_spectrum for ', item%datasetid,&
         &', dx:', req%dx, ', quality:', req%quality, ', width:', req%width, &
         &', height', req%height, ', beam:', req%beam, ', intensity:', req%intensity,&
@@ -11118,6 +11122,12 @@ contains
             call free(user) ! release C memory
             return
         end if
+
+        ! get max_planes
+        max_planes = size(item%compressed, 2)
+
+        plane = max(req%plane, 1)
+        plane = min(plane, max_planes)
 
         ! set the viewport to the whole image
         req%x1 = 1
