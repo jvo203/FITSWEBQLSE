@@ -121,8 +121,7 @@ module fits
 
         ! input
         logical(kind=c_bool) :: keyframe
-        integer(c_int) :: frame
-        integer(c_int) :: fill
+        integer(c_int) :: frame, plane, fill
 
         real(kind=c_float) dmin, dmax, dmedian
         real(kind=c_float) dmadN, dmadP
@@ -153,7 +152,7 @@ module fits
         ! RGB channels (up to three)
         integer(c_int) :: va_count
         type(C_PTR) :: ptr(3)
-        integer(c_int) :: frame(3)
+        integer(c_int) :: frame(3), plane(3)
         real(kind=c_float) dmin(3), dmax(3), dmedian(3)
         real(kind=c_float) dmadN(3), dmadP(3)
 

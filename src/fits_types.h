@@ -176,8 +176,7 @@ struct video_request
 
     // input
     bool keyframe; // is it a keyframe?
-    int frame;
-    int fill;
+    int frame, plane, fill;
 
     float dmin, dmax, dmedian;
     float dmadN, dmadP;
@@ -211,6 +210,7 @@ struct composite_video_request
     int va_count;
     void *ptr[3]; // item
     int frame[3];
+    int plane[3];
     float dmin[3], dmax[3], dmedian[3];
     float dmadN[3], dmadP[3];
 
