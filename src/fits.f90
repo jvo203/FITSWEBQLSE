@@ -1291,11 +1291,11 @@ module fits
          real(c_float), intent(in) :: dmadN, dmadP
       end subroutine write_statistics
 
-      subroutine write_spectrum(fd, spectrum, n, prec) BIND(C, name='write_spectrum')
+      subroutine write_spectrum(fd, no_planes, spectrum, n, prec) BIND(C, name='write_spectrum')
          use, intrinsic :: ISO_C_BINDING
          implicit none
 
-         integer(c_int), value, intent(in) :: fd, n, prec
+         integer(c_int), value, intent(in) :: fd, no_planes, n, prec
          type(C_PTR), value, intent(in) :: spectrum
       end subroutine write_spectrum
 
@@ -6790,12 +6790,12 @@ contains
 
          ! mean spectrum
          if (allocated(item%mean_spectrum)) then
-            call write_spectrum(fd, c_loc(item%mean_spectrum), size(item%mean_spectrum), ZFP_HIGH_PRECISION)
+            call write_spectrum(fd, max_planes, c_loc(item%mean_spectrum), size(item%mean_spectrum), ZFP_HIGH_PRECISION)
          end if
 
          ! integrated spectrum
          if (allocated(item%integrated_spectrum)) then
-            call write_spectrum(fd, c_loc(item%integrated_spectrum), size(item%integrated_spectrum), ZFP_HIGH_PRECISION)
+            call write_spectrum(fd, max_planes, c_loc(item%integrated_spectrum), size(item%integrated_spectrum), ZFP_HIGH_PRECISION)
          end if
       end if
 
@@ -11369,9 +11369,9 @@ contains
             ! downsize the spectrum
             call LTTB(spectrum, threshold, reduced_spectrum)
 
-            call write_spectrum(req%fd, c_loc(reduced_spectrum), size(reduced_spectrum), ZFP_HIGH_PRECISION)
+            call write_spectrum(req%fd, 1, c_loc(reduced_spectrum), size(reduced_spectrum), ZFP_HIGH_PRECISION)
          else
-            call write_spectrum(req%fd, c_loc(spectrum), size(spectrum), ZFP_HIGH_PRECISION)
+            call write_spectrum(req%fd, 1, c_loc(spectrum), size(spectrum), ZFP_HIGH_PRECISION)
          end if
 
          ! send the revised global statistics too
