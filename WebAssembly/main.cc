@@ -181,7 +181,7 @@ struct buffer
     return js_pixels;*/
 }
 
-/*val*/ buffer decompressZFPspectrum(int length, std::string const &bytes)
+/*val*/ buffer decompressZFPspectrum(int plane_count, int length, std::string const &bytes)
 {
     buffer wasmBuffer = {0, 0};
 
@@ -216,9 +216,13 @@ struct buffer
     bitstream *stream = NULL;
     size_t zfpsize = 0;
     uint nx = length;
+    uint ny = plane_count;
 
-    // decompress spectrum with ZFP
-    field = zfp_field_1d((void *)spectrumBuffer, data_type, nx);
+    // decompress 1D or 2D spectrum with ZFP
+    if (plane_count > 1)
+        field = zfp_field_2d((void *)spectrumBuffer, data_type, nx, ny);
+    else
+        field = zfp_field_1d((void *)spectrumBuffer, data_type, nx);
 
     // allocate metadata for a compressed stream
     zfp = zfp_stream_open(NULL);
