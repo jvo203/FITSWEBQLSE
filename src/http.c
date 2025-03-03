@@ -157,7 +157,7 @@ void write_csv_comments(int fd, const char *ra, const char *dec, double lng, dou
 void write_csv_row(int fd, int channel, double f, double v, float intensity, int intensity_type, bool rest, const char *bunit, bool has_velocity, bool header);
 void write_partial_statistics(int fd, const float *sumP, const int64_t *countP, const float *sumN, const int64_t *countN);
 void write_statistics(int fd, float *dmin, float *dmax, float *dmedian, float *dmadN, float *dmadP);
-void write_spectrum(int fd, const float *spectrum, int n, int precision);
+void write_spectrum(int fd, int no_planes, const float *spectrum, int n, int precision);
 void write_histogram(int fd, const int *hist, int n);
 void write_viewport(int fd, int width, int height, const float *restrict pixels, const bool *restrict mask, int precision);
 void write_image_spectrum(int fd, int no_planes, struct image_tone_mapping_type *tone, int width, int height, int precision, const float *restrict pixels, const bool *restrict mask);
@@ -6765,7 +6765,7 @@ void write_histogram(int fd, const int *hist, int n)
     chunked_write(fd, (const char *)hist, n * sizeof(int));
 }
 
-void write_spectrum(int fd, const float *spectrum, int n, int precision)
+void write_spectrum(int fd, int no_planes, const float *spectrum, int n, int precision)
 {
     uchar *compressed;
     // ZFP variables
@@ -6776,6 +6776,7 @@ void write_spectrum(int fd, const float *spectrum, int n, int precision)
     bitstream *stream = NULL;
     size_t zfpsize = 0;
     uint nx = n;
+    uint ny = no_planes;
 
     uint32_t length = n;
 
@@ -6793,8 +6794,11 @@ void write_spectrum(int fd, const float *spectrum, int n, int precision)
         return;
     }
 
-    // spectrum with ZFP
-    field = zfp_field_1d((void *)spectrum, data_type, nx);
+    // 1D or 2D spectrum with ZFP
+    if (no_planes > 1)
+        field = zfp_field_2d((void *)spectrum, data_type, nx, ny);
+    else
+        field = zfp_field_1d((void *)spectrum, data_type, nx);
 
     // allocate metadata for a compressed stream
     zfp = zfp_stream_open(NULL);
