@@ -6048,7 +6048,6 @@ async function open_websocket_connection(_datasetId, index) {
                             Module.ready
                                 .then(_ => {
                                     let start = performance.now();
-                                    // var spectrum = Module.decompressZFPspectrum(spectrum_len, frame).map((x) => x); // clone an array
                                     var res = Module.decompressZFPspectrum(spectrum_len, frame);
                                     const spectrum = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
                                     let elapsed = Math.round(performance.now() - start);
@@ -6293,7 +6292,6 @@ async function open_websocket_connection(_datasetId, index) {
                             // ZFP decoder part
                             Module.ready
                                 .then(_ => {
-                                    // var spectrum = Module.decompressZFPspectrum(spectrum_len, frame).map((x) => x); // clone an array
                                     var res = Module.decompressZFPspectrum(spectrum_len, frame);
                                     const spectrum = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
 
@@ -6765,7 +6763,7 @@ async function open_websocket_connection(_datasetId, index) {
                                     //console.log("processing HDS X-Y spectra");
                                     let start = performance.now();
 
-                                    var res = Module.decompressZFPspectrum(xlen, xcomp);
+                                    var res = Module.decompressZFPspectrum(1, xlen, xcomp);
                                     const xspectrum = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
 
                                     var res = Module.decompressLZ4mask(xlen, 1, xframe);
@@ -6773,7 +6771,7 @@ async function open_websocket_connection(_datasetId, index) {
 
                                     // console.log("HDS X-Y spectra: xspectrum:", xspectrum, "xmask:", xmask);
 
-                                    var res = Module.decompressZFPspectrum(ylen, ycomp);
+                                    var res = Module.decompressZFPspectrum(1, ylen, ycomp);
                                     const yspectrum = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
 
                                     var res = Module.decompressLZ4mask(ylen, 1, yframe);
@@ -15844,7 +15842,6 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                 /*Module.ready
                                   .then(_ => {*/
                                 let start = performance.now();
-                                // mean_spectrum = Module.decompressZFPspectrum(spectrum_len, buffer).map((x) => x); // clone an array since there is only one underlying wasm memory buffer
                                 var res = Module.decompressZFPspectrum(plane_count, spectrum_len, buffer);
                                 mean_spectrum = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
                                 let elapsed = Math.round(performance.now() - start);
@@ -15877,7 +15874,6 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                 /*Module.ready
                                   .then(_ => {*/
                                 let start = performance.now();
-                                // integrated_spectrum = Module.decompressZFPspectrum(spectrum_len, buffer).map((x) => x); // clone an array since there is only one underlying wasm memory buffer
                                 var res = Module.decompressZFPspectrum(plane_count, spectrum_len, buffer);
                                 integrated_spectrum = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
                                 let elapsed = Math.round(performance.now() - start);
