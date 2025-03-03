@@ -6790,12 +6790,14 @@ contains
 
          ! mean spectrum
          if (allocated(item%mean_spectrum)) then
-            call write_spectrum(fd, max_planes, c_loc(item%mean_spectrum), size(item%mean_spectrum), ZFP_HIGH_PRECISION)
+            call write_spectrum(fd, max_planes, c_loc(item%mean_spectrum), size(item%mean_spectrum) / max_planes,&
+            & ZFP_HIGH_PRECISION)
          end if
 
          ! integrated spectrum
          if (allocated(item%integrated_spectrum)) then
-            call write_spectrum(fd, max_planes, c_loc(item%integrated_spectrum), size(item%integrated_spectrum), ZFP_HIGH_PRECISION)
+            call write_spectrum(fd, max_planes, c_loc(item%integrated_spectrum), size(item%integrated_spectrum) / max_planes,&
+            & ZFP_HIGH_PRECISION)
          end if
       end if
 
