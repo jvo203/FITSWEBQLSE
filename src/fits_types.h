@@ -107,11 +107,7 @@ struct image_spectrum_request
     int dy;
     bool image;
     enum image_quality quality;
-    int x1;
-    int y1;
-    int x2;
-    int y2;
-    int plane;
+    int x1, y1, x2, y2, plane;
     int width;
     int height;
     enum zoom_shape beam;
@@ -141,11 +137,7 @@ struct spectrum_request
     // input
     char *ra;
     char *dec;
-    int x1;
-    int y1;
-    int x2;
-    int y2;
-    int plane;
+    int x1, y1, x2, y2, plane;
     enum zoom_shape beam;
     enum intensity_mode intensity;
     double frame_start;
@@ -223,11 +215,7 @@ struct composite_video_request
 struct pv_request
 {
     // input
-    int x1;
-    int y1;
-    int x2;
-    int y2;
-    int plane;
+    int x1, y1, x2, y2, plane;
     int width;
     int height;
     double frame_start;

@@ -53,8 +53,7 @@ module fits
       integer(kind=c_int) :: dx, dy
       logical(kind=c_bool) :: image
       integer(kind(medium)) :: quality
-      integer(c_int) :: plane
-      integer(c_int) :: x1, y1, x2, y2
+      integer(c_int) :: x1, y1, x2, y2, plane
       integer(c_int) :: width, height
       integer(kind(circle)) :: beam
       integer(kind(medium)) :: intensity
@@ -7441,7 +7440,7 @@ contains
       ! ifort
       ! print *, 'realtime_image_spectrum for ', item%datasetid,&
       ! &', dx:', req%dx, ', image:', req%image, ', quality:', req%quality, ', x1:', req%x1, &
-      ! &', y1:', req%y1, ', x2:', req%x2, ', y2:', req%y2, ', width:', req%width, &
+      ! &', y1:', req%y1, ', x2:', req%x2, ', y2:', req%y2, ', plane:', req%plane, ', width:', req%width, &
       ! &', height', req%height, ', beam:', req%beam, ', intensity:', req%intensity,&
       ! &', frame_start:', req%frame_start, ', frame_end:', req%frame_end, ', ref_freq:', &
       ! & req%ref_freq, ', seq_id:', req%seq_id, ', timestamp:', req%timestamp, ', fd:', req%fd
