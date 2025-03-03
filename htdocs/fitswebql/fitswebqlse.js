@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-02-28.0";
+    return "JS2025-03-03.0";
 }
 
 function uuidv4() {
@@ -15845,7 +15845,7 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                   .then(_ => {*/
                                 let start = performance.now();
                                 // mean_spectrum = Module.decompressZFPspectrum(spectrum_len, buffer).map((x) => x); // clone an array since there is only one underlying wasm memory buffer
-                                var res = Module.decompressZFPspectrum(spectrum_len, buffer);
+                                var res = Module.decompressZFPspectrum(plane_count, spectrum_len, buffer);
                                 mean_spectrum = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
                                 let elapsed = Math.round(performance.now() - start);
 
@@ -15878,7 +15878,7 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                   .then(_ => {*/
                                 let start = performance.now();
                                 // integrated_spectrum = Module.decompressZFPspectrum(spectrum_len, buffer).map((x) => x); // clone an array since there is only one underlying wasm memory buffer
-                                var res = Module.decompressZFPspectrum(spectrum_len, buffer);
+                                var res = Module.decompressZFPspectrum(plane_count, spectrum_len, buffer);
                                 integrated_spectrum = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
                                 let elapsed = Math.round(performance.now() - start);
 
