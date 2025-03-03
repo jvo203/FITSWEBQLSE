@@ -6832,7 +6832,7 @@ void write_spectrum(int fd, int no_planes, const float *spectrum, int n, int pre
             bitstream_close(stream);
 
             // the compressed part is available at compressed_pixels[0..zfpsize-1]
-            printf("[C] float array size: %zu, compressed: %zu bytes\n", length * sizeof(float), zfpsize);
+            printf("[C] float array size: %zu bytes X no. plane(s): %d, compressed: %zu bytes\n", length * sizeof(float), no_planes, zfpsize);
 
             // transmit the data
             uint32_t compressed_size = zfpsize;
