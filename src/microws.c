@@ -1376,7 +1376,7 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                         req->timestamp = atof2(frame_data + voff, vlen);
                 }
 
-                // printf("[C] dx: %d, dy: %d, image: %d, quality: %d, x1: %d, y1: %d, x2: %d, y2: %d, width: %d, height: %d, beam: %d, intensity: %d, frame_start: %f, frame_end: %f, ref_freq: %f, x: %d, y: %d, seq_id: %d, timestamp: %f\n", req->dx, req->dy, req->image, req->quality, req->x1, req->y1, req->x2, req->y2, req->width, req->height, req->beam, req->intensity, req->frame_start, req->frame_end, req->ref_freq, req->x, req->y, req->seq_id, req->timestamp);
+                // printf("[C] dx: %d, dy: %d, image: %d, quality: %d, x1: %d, y1: %d, x2: %d, y2: %d, plane: %d, width: %d, height: %d, beam: %d, intensity: %d, frame_start: %f, frame_end: %f, ref_freq: %f, x: %d, y: %d, seq_id: %d, timestamp: %f\n", req->dx, req->dy, req->image, req->quality, req->x1, req->y1, req->x2, req->y2, req->plane, req->width, req->height, req->beam, req->intensity, req->frame_start, req->frame_end, req->ref_freq, req->x, req->y, req->seq_id, req->timestamp);
 
                 pthread_mutex_lock(&session->ws_mtx);
 

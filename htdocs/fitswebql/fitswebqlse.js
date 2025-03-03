@@ -16798,7 +16798,7 @@ function imageTimeout() {
     else
         image_update = false;
 
-    //console.log('idle', 'x = ', x, 'y = ', y, 'clipSize = ', clipSize, 'fitsX = ', fitsX, 'fitsY = ', fitsY, 'fitsSize = ', fitsSize, 'image_update:', image_update);
+    // console.log('idle', 'x = ', x, 'y = ', y, 'clipSize = ', clipSize, 'fitsX = ', fitsX, 'fitsY = ', fitsY, 'fitsSize = ', fitsSize, 'image_update:', image_update);
 
     //send an image/spectrum request to the server
     var x1 = Math.round(fitsX - fitsSize);
