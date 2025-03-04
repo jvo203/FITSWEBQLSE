@@ -1,0 +1,40 @@
+ ALMA01891485: closing the FITS file unit:         332
+[C] URL root path: /fitswebql_v5/
+htdocs/fitswebql_v5: File exists
+[C] url: http://alma-sp-prod01.mtk.nao.ac.jp:8087/dataPortal/member.uid___A001_X12cc_X26.G14.225N.1_sci.spw19.cube.IQUV.manual.pbcor.fits
+[C] filename: member.uid___A001_X12cc_X26.G14.225N.1_sci.spw19.cube.IQUV.manual.pbcor.fits
+[C] external URL download: 'http://alma-sp-prod01.mtk.nao.ac.jp:8087/dataPortal/member.uid___A001_X12cc_X26.G14.225N.1_sci.spw19.cube.IQUV.manual.pbcor.fits'
+[C] 'member.uid___A001_X12cc_X26.G14.225N.1_sci.spw19.cube.IQUV.manual.pbcor' does not exist.
+[C] insert_if_not_exists(member.uid___A001_X12cc_X26.G14.225N.1_sci.spw19.cube.IQUV.manual.pbcor,(nil))
+[C] 'member.uid___A001_X12cc_X26.G14.225N.1_sci.spw19.cube.IQUV.manual.pbcor' is not in the database, launching a download thread.
+[C] filename: member.uid___A001_X12cc_X26.G14.225N.1_sci.spw19.cube.IQUV.manual.pbcor.fits
+[C] '.cache/member.uid___A001_X12cc_X26.G14.225N.1_sci.spw19.cube.IQUV.manual.pbcor.fits' does not exist, attempting a download.
+ [load_fits_header] datasetid: 'member.uid___A001_X12cc_X26.G14.225N.1_sci.spw19.cube.IQUV.manual.pbcor', flux: 'NULL', filepath: '.cache/member.uid___A001_X12cc_X26.G14.225N.1_sci.spw19.cube.IQUV.manual.pbcor.fits'
+[C] inserted member.uid___A001_X12cc_X26.G14.225N.1_sci.spw19.cube.IQUV.manual.pbcor into the hash table
+ [INFO] load_fits_header: parsing .cache/member.uid___A001_X12cc_X26.G14.225N.1_sci.spw19.cube.IQUV.manual.pbcor.fits; FLUX: NULL
+[C] parse2file(): unknown compression type, aborting the download.
+[C] handle_url_download: curl_easy_perform() failed: http://alma-sp-prod01.mtk.nao.ac.jp:8087/dataPortal/member.uid___A001_X12cc_X26.G14.225N.1_sci.spw19.cube.IQUV.manual.pbcor.fits : Failed writing received data to disk/application
+[C] URL: /fitswebql_v5/websocket/member.uid___A001_X12cc_X26.G14.225N.1_sci.spw19.cube.IQUV.manual.pbcor/b538e45d-68b1-4e67-9147-a4bc056bc27f
+[C] WEBSOCKET SESSIONID: 'b538e45d-68b1-4e67-9147-a4bc056bc27f'
+[C] WEBSOCKET DATASETID: 'member.uid___A001_X12cc_X26.G14.225N.1_sci.spw19.cube.IQUV.manual.pbcor'
+[C] inserted b538e45d-68b1-4e67-9147-a4bc056bc27f into the hash table
+[C] accepting the WebSocket connection for 'member.uid___A001_X12cc_X26.G14.225N.1_sci.spw19.cube.IQUV.manual.pbcor', va_count: 1.
+[C] WebSocket upgrade_handler: b538e45d-68b1-4e67-9147-a4bc056bc27f
+[C] ws_event_loop started.
+[C] video_event_loop started.
+[C] pv_event_loop started.
+[C] WebSocket enabled TCP_NODELAY.
+[C] WebSocket enabled SO_KEEPALIVE.
+[C] ws_send_messages terminated.
+[C] removed b538e45d-68b1-4e67-9147-a4bc056bc27f from the hash table
+[C] deleting a session for member.uid___A001_X12cc_X26.G14.225N.1_sci.spw19.cube.IQUV.manual.pbcor/b538e45d-68b1-4e67-9147-a4bc056bc27f
+[C] ws_event_loop terminated.
+[C] video_event_loop terminated.
+[C] pv_event_loop terminated.
+ member.uid___A001_X12cc_X26.G14.225N.1_sci.spw19.cube.IQUV.manual.pbcor: dataset has            1  reference(s), not deleting it.
+[C] WebSocket receive_messages: exit
+ member.uid___A001_X12cc_X26.G14.225N.1_sci.spw19.cube.IQUV.manual.pbcor: dataset has been in error state for more than 60 seconds. Removing it.
+[C] marking member.uid___A001_X12cc_X26.G14.225N.1_sci.spw19.cube.IQUV.manual.pbcor for garbage collection.
+ member.uid___A001_X12cc_X26.G14.225N.1_sci.spw19.cube.IQUV.manual.pbcor: dataset has been in error state for more than 60 seconds. Removing it.
+ member.uid___A001_X12cc_X26.G14.225N.1_sci.spw19.cube.IQUV.manual.pbcor: dataset cannot be cached, destroying it.
+[C] aborting http_propagate_timeout (no cluster nodes found)
