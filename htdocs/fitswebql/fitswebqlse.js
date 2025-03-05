@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-03-03.0";
+    return "JS2025-03-05.0";
 }
 
 function uuidv4() {
@@ -6048,7 +6048,7 @@ async function open_websocket_connection(_datasetId, index) {
                             Module.ready
                                 .then(_ => {
                                     let start = performance.now();
-                                    var res = Module.decompressZFPspectrum(spectrum_len, frame);
+                                    var res = Module.decompressZFPspectrum(1, spectrum_len, frame);
                                     const spectrum = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
                                     let elapsed = Math.round(performance.now() - start);
 
@@ -6181,16 +6181,6 @@ async function open_websocket_connection(_datasetId, index) {
                             // re-set the existing tone mapping settings
                             imageContainer[index - 1].tone_mapping = tone_mapping;
                         }
-
-                        // update the tone mapping
-                        // not in use anymore?
-                        /*fitsContainer[index - 1].min = tone_mapping.min;
-                        fitsContainer[index - 1].max = tone_mapping.max;
-                        fitsContainer[index - 1].median = tone_mapping.median;
-                        fitsContainer[index - 1].sensitivity = tone_mapping.sensitivity;
-                        fitsContainer[index - 1].ratio_sensitivity = tone_mapping.ratio_sensitivity;
-                        fitsContainer[index - 1].black = tone_mapping.black;
-                        fitsContainer[index - 1].white = tone_mapping.white;*/
 
                         // next receive/process the 32-bit floating-point image frame
                         var img_width = dv.getUint32(offset, endianness);
@@ -11313,8 +11303,9 @@ function setup_csv_export() {
     };
 }
 
-function setup_axes() {
-    let fitsData = fitsContainer[va_count - 1];
+function setup_axes(plane_index = previous_plane) {
+    console.log("setup_axes: plane_index = ", plane_index);
+    let fitsData = fitsContainer[plane_index - 1];
 
     if (fitsData.depth <= 1)
         return;
@@ -15836,22 +15827,14 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
 
                                 var buffer = new Uint8Array(received_msg, offset, buffer_len);
                                 offset += buffer_len;
-                                //console.log("FITS mean spectrum length:", spectrum_len);
+                                console.log("FITS mean spectrum length:", spectrum_len);
 
-                                // ZFP decoder part
-                                /*Module.ready
-                                  .then(_ => {*/
+                                // ZFP decoder part                           
                                 let start = performance.now();
                                 var res = Module.decompressZFPspectrum(plane_count, spectrum_len, buffer);
                                 mean_spectrum = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
                                 let elapsed = Math.round(performance.now() - start);
-
-                                //console.log("vector size: ", vec.size(), "elapsed: ", elapsed, "[ms]");
-                                /*})
-                                .catch(e => {
-                                  console.error(e);
-                                  has_mean_spectrum = false;
-                                });*/
+                                console.log("mean_spectrum: ", mean_spectrum, "elapsed: ", elapsed, "[ms]");
                             } catch (err) {
                                 has_mean_spectrum = false;
                             }
@@ -15868,22 +15851,14 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
 
                                 var buffer = new Uint8Array(received_msg, offset, buffer_len);
                                 offset += buffer_len;
-                                //console.log("FITS integrated spectrum length:", spectrum_len);
+                                console.log("FITS integrated spectrum length:", spectrum_len);
 
-                                // FPZIP decoder part
-                                /*Module.ready
-                                  .then(_ => {*/
+                                // ZFP decoder part                              
                                 let start = performance.now();
                                 var res = Module.decompressZFPspectrum(plane_count, spectrum_len, buffer);
                                 integrated_spectrum = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
                                 let elapsed = Math.round(performance.now() - start);
-
-                                //console.log("vector size: ", vec.size(), "elapsed: ", elapsed, "[ms]");
-                                /*})
-                                .catch(e => {
-                                  console.error(e);
-                                  has_integrated_spectrum = false;
-                                });*/
+                                console.log("integrated_spectrum: ", integrated_spectrum, "elapsed: ", elapsed, "[ms]");
                             } catch (err) {
                                 has_integrated_spectrum = false;
                             }
