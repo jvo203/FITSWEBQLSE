@@ -15912,16 +15912,6 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                     fitsData.HEADER = 'N/A';
                                 };
 
-                                // replace the dummy mean spectrum
-                                if (has_mean_spectrum) {
-                                    fitsData.mean_spectrum = mean_spectrum;
-                                }
-
-                                // replace the dummy integrated spectrum
-                                if (has_integrated_spectrum) {
-                                    fitsData.integrated_spectrum = integrated_spectrum;
-                                }
-
                                 // console.log(fitsData);
 
                                 // handle the fitsData part
@@ -15972,10 +15962,32 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                         // extract the histogram_array for each plane
                                         fitsContainer[i].histogram = histogram_array.slice(i * nbins, (i + 1) * nbins);
                                         fitsContainer[i].histogram_array = null;
+
+                                        // replace the dummy mean spectrum
+                                        if (has_mean_spectrum) {
+                                            // split the spectrum by the plane_count and spectrum_len                                        
+                                            fitsContainer[i].mean_spectrum = mean_spectrum.slice(i * spectrum_len, (i + 1) * spectrum_len);
+                                        }
+
+                                        // replace the dummy integrated spectrum
+                                        if (has_integrated_spectrum) {
+                                            // split the spectrum by the plane_count and spectrum_len  
+                                            fitsContainer[i].integrated_spectrum = integrated_spectrum.slice(i * spectrum_len, (i + 1) * spectrum_len);
+                                        }
                                     }
                                 } else {
                                     fitsData.histogram = fitsData.histogram_array;
                                     fitsData.histogram_array = null;
+
+                                    // replace the dummy mean spectrum
+                                    if (has_mean_spectrum) {
+                                        fitsData.mean_spectrum = mean_spectrum;
+                                    }
+
+                                    // replace the dummy integrated spectrum
+                                    if (has_integrated_spectrum) {
+                                        fitsData.integrated_spectrum = integrated_spectrum;
+                                    }
                                 }
 
                                 let res = display_FITS_header(index);
@@ -16014,10 +16026,10 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                         setup_axes();
 
                                         if (intensity_mode == "mean")
-                                            plot_spectrum([fitsData.mean_spectrum]);
+                                            plot_spectrum([fitsContainer[index - 1].mean_spectrum]);
 
                                         if (intensity_mode == "integrated")
-                                            plot_spectrum([fitsData.integrated_spectrum]);
+                                            plot_spectrum([fitsContainer[index - 1].integrated_spectrum]);
 
                                         if (molecules.length > 0)
                                             display_molecules();
