@@ -197,7 +197,7 @@ struct buffer
 
     if (spectrumBuffer == NULL)
     {
-        spectrumLength = length;
+        spectrumLength = size_t(length) * size_t(plane_count);
         spectrumBuffer = (float *)calloc(spectrumLength, sizeof(float));
     }
 
