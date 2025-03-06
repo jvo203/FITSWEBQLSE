@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-03-05.0";
+    return "JS2025-03-06.0";
 }
 
 function uuidv4() {
@@ -14696,7 +14696,7 @@ function setup_image_selection(plane_index = previous_plane) {
             setup_csv_export();
 
             if (xradec != null && d3.select("#pvline").attr("opacity") < 1.0) {
-                let fitsData = fitsContainer[va_count - 1];
+                let fitsData = fitsContainer[plane_index - 1];
 
                 let raText = 'RA N/A';
                 let decText = 'DEC N/A';
@@ -14740,7 +14740,7 @@ function setup_image_selection(plane_index = previous_plane) {
             if (mousedown)
                 return;
 
-            let fitsData = fitsContainer[va_count - 1];
+            let fitsData = fitsContainer[plane_index - 1];
 
             if (fitsData != null) {
                 // restore the main image spectrum
