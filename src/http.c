@@ -4532,6 +4532,9 @@ static void free_cb(void *cls)
 
 static ssize_t read_cb(void *cls, uint64_t pos, char *mem, size_t size)
 {
+    // get rid of the unused parameter mem, gcc complains about it
+    (void)mem;
+
     printf("[C] read_cb: requesting %zu bytes at %" PRIu64 "\n", size, pos);
 
     struct html_req *req = (struct html_req *)cls;
@@ -7077,7 +7080,7 @@ void write_image_spectrum(int fd, int no_planes, struct image_tone_mapping_type 
     chunked_write(fd, (const char *)&max_planes, sizeof(max_planes));
 
     // send potentially multiple tone mappings
-    for (int i = 0; i < max_planes; i++)
+    for (int i = 0; i < no_planes; i++)
     {
         char *flux = tone[i].flux;
         float pmin = tone[i].pmin;
