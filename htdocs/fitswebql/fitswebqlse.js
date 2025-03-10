@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-03-06.0";
+    return "JS2025-03-10.0";
 }
 
 function uuidv4() {
@@ -11269,7 +11269,7 @@ function composite_data_min_max() {
     }
 }
 
-function setup_csv_export() {
+function setup_csv_export(plane_index = previous_plane) {
     var elem = document.getElementById('exportCSV');
 
     if (elem == null)
@@ -11316,6 +11316,7 @@ function setup_csv_export() {
                 type: "spectrum",
                 ra: d3.select("#ra").text().toString(),
                 dec: d3.select("#dec").text().toString(),
+                plane: plane_index,
                 intensity: intensity_mode,
                 frame_start: data_band_lo,
                 frame_end: data_band_hi,
@@ -11598,7 +11599,7 @@ function setup_axes(plane_index = previous_plane) {
                 .attr("pointer-events", "auto")
                 .html(strCSV);
 
-            setup_csv_export();
+            setup_csv_export(plane_index);
 
             d3.select("#csv").moveToFront();
         };
@@ -14724,7 +14725,7 @@ function setup_image_selection(plane_index = previous_plane) {
             if (event.shiftKey)
                 return;
 
-            setup_csv_export();
+            setup_csv_export(plane_index);
 
             if (xradec != null && d3.select("#pvline").attr("opacity") < 1.0) {
                 let fitsData = fitsContainer[plane_index - 1];
@@ -16894,6 +16895,7 @@ function imageTimeout() {
                         y1: _y1 + 1,
                         x2: _x2 + 1,
                         y2: _y2 + 1,
+                        plane: previous_plane,
                         beam: zoom_shape,
                         intensity: intensity_mode,
                         frame_start: data_band_lo,
