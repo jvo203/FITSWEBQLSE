@@ -7398,7 +7398,7 @@ contains
       logical(kind=c_bool), allocatable, target :: mask(:), view_mask(:, :)
       real(kind=c_float), dimension(:), allocatable, target :: spectrum, reduced_spectrum, cluster_spectrum
 
-      integer :: first, last, plane, length, threshold
+      integer :: first, last, plane, length, threshold, max_planes
       integer :: max_threads, frame, tid
       integer(kind=8) :: npixels
       integer(c_int) :: x1, x2, y1, y2, width, height, average
@@ -7465,7 +7465,11 @@ contains
          return
       end if
 
-      plane = req%plane
+      ! get max_planes
+      max_planes = size(item%compressed, 2)
+
+      plane = max(req%plane, 1)
+      plane = min(plane, max_planes)
 
       ! get the range of the cube planes
       call get_spectrum_range(item, req%frame_start, req%frame_end, req%ref_freq, first, last)
