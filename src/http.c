@@ -153,7 +153,7 @@ size_t chunked_write_with_chunk(int fd, const char *src, size_t n, size_t chunk)
 void write_json(int fd, GString *json);
 void write_header(int fd, const char *header_str, int str_len);
 void write_elapsed(int fd, const float *elapsed);
-void write_csv_comments(int fd, int plane, const char *ra, const char *dec, double lng, double lat, int beam, double beam_width, double beam_height, float cx, float cy, int dimx, int dimy, double deltaV, double ref_freq, const char *specsys);
+void write_csv_comments(int fd, int plane, int no_planes, const char *ra, const char *dec, double lng, double lat, int beam, double beam_width, double beam_height, float cx, float cy, int dimx, int dimy, double deltaV, double ref_freq, const char *specsys);
 void write_csv_row(int fd, int channel, double f, double v, float intensity, int intensity_type, bool rest, const char *bunit, bool has_velocity, bool header);
 void write_partial_statistics(int fd, const float *sumP, const int64_t *countP, const float *sumN, const int64_t *countN);
 void write_statistics(int fd, float *dmin, float *dmax, float *dmedian, float *dmadN, float *dmadP);
@@ -7562,7 +7562,7 @@ void write_csv_row(int fd, int channel, double f, double v, float intensity, int
     }
 }
 
-void write_csv_comments(int fd, int plane, const char *ra, const char *dec, double lng, double lat, int beam, double beam_width, double beam_height, float cx, float cy, int dimx, int dimy, double deltaV, double ref_freq, const char *specsys)
+void write_csv_comments(int fd, int plane, int no_planes, const char *ra, const char *dec, double lng, double lat, int beam, double beam_width, double beam_height, float cx, float cy, int dimx, int dimy, double deltaV, double ref_freq, const char *specsys)
 {
     char line[1024];
     char ra_key[32], ra_value[32];
@@ -7575,6 +7575,10 @@ void write_csv_comments(int fd, int plane, const char *ra, const char *dec, doub
     // printf("[C] RA '%s' : '%s'\n", ra_key, ra_value);
     // printf("[C] DEC '%s' : '%s'\n", dec_key, dec_value);
     // printf("# ra (%s):%s, dec (%s):%s\n", ra_key, ra_value, dec_key, dec_value);
+
+    // polarisation plane
+    snprintf(line, sizeof(line) - 1, "# polarisation index: #%d out of %d\n", plane, no_planes);
+    chunked_write(fd, line, strlen(line));
 
     // ra/dec
     snprintf(line, sizeof(line) - 1, "# ra (%s):%s\n# dec (%s):%s\n", ra_key, ra_value, dec_key, dec_value);

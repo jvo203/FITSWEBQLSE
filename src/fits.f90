@@ -663,12 +663,12 @@ module fits
 
       end subroutine closefd
 
-      subroutine write_csv_comments(fd, plane, ra, dec, lng, lat, beam, beam_width, beam_height,&
+      subroutine write_csv_comments(fd, plane, no_planes, ra, dec, lng, lat, beam, beam_width, beam_height,&
       &cx, cy, dimx, dimy, deltaV, ref_freq, specsys) BIND(C, name='write_csv_comments')
          use, intrinsic :: ISO_C_BINDING
          implicit none
 
-         integer(c_int), value, intent(in) :: fd, plane
+         integer(c_int), value, intent(in) :: fd, plane, no_planes
          type(c_ptr), value :: ra, dec
          real(kind=c_double), value :: lng, lat
          integer(c_int), value :: beam
@@ -7121,10 +7121,10 @@ contains
       ! output variables
       real(kind=c_float), dimension(:), allocatable, target :: spectrum, cluster_spectrum
 
-      integer :: first, last, length, max_planes
+      integer :: first, last, length
       integer :: dimx, dimy
       integer :: max_threads, frame, tid
-      integer(c_int) :: x1, x2, y1, y2, plane, width, height, average
+      integer(c_int) :: x1, x2, y1, y2, plane, max_planes, width, height, average
       real(c_float) :: cx, cy, rx, ry, r, r2
       real(kind=8) :: cdelt3
 
@@ -7351,7 +7351,7 @@ contains
 
       ! write the CSV header lines (prepended by #)
       if (req%fd .ne. -1) then
-         call write_csv_comments(req%fd, plane, req%ra, req%dec, lng, lat, req%beam, beam_width, beam_height,&
+         call write_csv_comments(req%fd, plane, max_planes, req%ra, req%dec, lng, lat, req%beam, beam_width, beam_height,&
          &cx, cy, dimx, dimy, req%deltaV, req%ref_freq, trim(item%specsys)//c_null_char)
       end if
 
