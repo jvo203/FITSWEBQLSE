@@ -159,7 +159,7 @@ void write_partial_statistics(int fd, const float *sumP, const int64_t *countP, 
 void write_statistics(int fd, float *dmin, float *dmax, float *dmedian, float *dmadN, float *dmadP);
 void write_spectrum(int fd, int no_planes, const float *spectrum, int n, int precision);
 void write_histogram(int fd, const int *hist, int n);
-void write_viewport(int fd, int width, int height, const float *restrict pixels, const bool *restrict mask, int precision);
+void write_viewport_deprecated(int fd, int width, int height, const float *restrict pixels, const bool *restrict mask, int precision);
 void write_image_spectrum(int fd, int no_planes, struct image_tone_mapping_type *tone, int width, int height, int precision, const float *restrict pixels, const bool *restrict mask);
 void write_pv_diagram(int fd, int width, int height, int precision, const float *restrict pv, const float pmean, const float pstd, const float pmin, const float pmax, const int xmin, const int xmax, const double vmin, const double vmax, const int x1, const int y1, const int x2, const int y2);
 void write_composite_pv_diagram(int fd, int width, int height, int precision, const float *restrict pv, const float *restrict pmean, const float *restrict pstd, const float *restrict pmin, const float *restrict pmax, const int xmin, const int xmax, const double vmin, const double vmax, const int x1, const int y1, const int x2, const int y2, int va_count);
@@ -6855,7 +6855,7 @@ void write_spectrum(int fd, int no_planes, const float *spectrum, int n, int pre
     zfp_stream_close(zfp);
 }
 
-void write_viewport(int fd, int width, int height, const float *restrict pixels, const bool *restrict mask, int precision)
+void write_viewport_deprecated(int fd, int width, int height, const float *restrict pixels, const bool *restrict mask, int precision)
 {
     uchar *restrict compressed_pixels = NULL;
     char *restrict compressed_mask = NULL;
