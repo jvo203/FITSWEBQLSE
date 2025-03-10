@@ -7576,9 +7576,12 @@ void write_csv_comments(int fd, int plane, int no_planes, const char *ra, const 
     // printf("[C] DEC '%s' : '%s'\n", dec_key, dec_value);
     // printf("# ra (%s):%s, dec (%s):%s\n", ra_key, ra_value, dec_key, dec_value);
 
-    // polarisation plane
-    snprintf(line, sizeof(line) - 1, "# polarisation index: #%d out of 1-%d\n", plane, no_planes);
-    chunked_write(fd, line, strlen(line));
+    // polarisation plane index
+    if (no_planes > 1)
+    {
+        snprintf(line, sizeof(line) - 1, "# polarisation index: #%d out of 1-%d\n", plane, no_planes);
+        chunked_write(fd, line, strlen(line));
+    }
 
     // ra/dec
     snprintf(line, sizeof(line) - 1, "# ra (%s):%s\n# dec (%s):%s\n", ra_key, ra_value, dec_key, dec_value);
