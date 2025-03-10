@@ -7152,7 +7152,7 @@ contains
       call c_f_pointer(req%ptr, item)
 
       print *, 'CSV spectrum for ', item%datasetid,&
-      &', x1:', req%x1, ', y1:', req%y1, ', x2:', req%x2, ', y2:', req%y2, ', plane:', plane,&
+      &', x1:', req%x1, ', y1:', req%y1, ', x2:', req%x2, ', y2:', req%y2, ', plane:', req%plane,&
       &', beam:', req%beam, ', intensity:', req%intensity, ', frame_start:', req%frame_start,&
       & ', frame_end:', req%frame_end, ', ref_freq:', req%ref_freq, ', deltaV:', req%deltaV,&
       &', rest:', req%rest, ', seq_id:', req%seq_id, ', timestamp:', req%timestamp, ', fd:', req%fd
