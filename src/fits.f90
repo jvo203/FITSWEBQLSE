@@ -7413,13 +7413,13 @@ contains
       integer(c_int) :: precision
       real :: scale
 
-      type(resize_task_t), target :: task
-      type(c_ptr) :: task_pid
+      type(resize_task_t), target :: pixels_task(4)
+      type(c_ptr) :: task_pid(4)
 
       ! cluster
       type(image_spectrum_request_t), target :: cluster_req
       type(c_ptr) :: pid
-      integer(kind=c_int) :: rc
+      integer(kind=c_int) :: rc, task_rc(4)
 
       ! OpenMP thread-local variables
       real(c_float) :: thread_sumP, thread_sumN
@@ -7694,30 +7694,32 @@ contains
             allocate (view_pixels(req%width, req%height, max_planes))
             allocate (view_mask(req%width, req%height))
 
-            task%pSrc = c_loc(pixels)
-            task%srcWidth = dimx
-            task%srcHeight = dimy
+            do k = 1, max_planes
+               pixels_task(k)%pSrc = c_loc(pixels(:, k))
+               pixels_task(k)%srcWidth = dimx
+               pixels_task(k)%srcHeight = dimy
 
-            task%pDest = c_loc(view_pixels)
-            task%dstWidth = req%width
-            task%dstHeight = req%height
+               pixels_task(k)%pDest = c_loc(view_pixels(:, :, k))
+               pixels_task(k)%dstWidth = req%width
+               pixels_task(k)%dstHeight = req%height
 
-            if (scale .gt. 0.2) then
-               task%numLobes = 3
-               ! call resizeLanczos(c_loc(pixels), dimx, dimy, c_loc(view_pixels), req%width, req%height, 3)
-            else
-               task%numLobes = 0
-               ! call resizeSuper(c_loc(pixels), dimx, dimy, c_loc(view_pixels), req%width, req%height)
-            end if
+               if (scale .gt. 0.2) then
+                  pixels_task(k)%numLobes = 3
+               else
+                  pixels_task(k)%numLobes = 0
+               end if
 
-            ! launch a pthread to resize pixels
-            task_pid = my_pthread_create(start_routine=c_funloc(launch_resize_task), arg=c_loc(task), rc=rc)
+               ! launch a pthread to resize pixels
+               task_pid(k) = my_pthread_create(start_routine=c_funloc(launch_resize_task), arg=c_loc(pixels_task(k)), rc=task_rc(k))
+            end do
 
             call resizeNearest(c_loc(mask), dimx, dimy, c_loc(view_mask), req%width, req%height)
             ! call resizeMask(mask, dimx, dimy, view_mask, req%width, req%height)
 
-            ! join a thread
-            rc = my_pthread_join(task_pid)
+            ! join a thread(s)
+            do k = 1, max_planes
+               rc = my_pthread_join(task_pid(k))
+            end do
 
             call write_ws_viewport(req%session, req%seq_id, req%timestamp, elapsed,&
             &req%width, req%height, c_loc(view_pixels(:,:,plane)), c_loc(view_mask), precision)
