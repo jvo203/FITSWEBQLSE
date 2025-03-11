@@ -7394,20 +7394,19 @@ contains
       type(image_spectrum_request_f), pointer :: req
 
       ! output variables
-      real(kind=c_float), allocatable, target :: pixels(:, :), view_pixels(:, :, :)
-      logical(kind=c_bool), allocatable, target :: mask(:), view_mask(:, :)
+      real(kind=c_float), allocatable, target :: pixels(:, :, :), view_pixels(:, :, :)
+      logical(kind=c_bool), allocatable, target :: mask(:, :), view_mask(:, :)
       real(kind=c_float), dimension(:), allocatable, target :: spectrum, reduced_spectrum, cluster_spectrum
 
       integer :: first, last, plane, length, threshold, k, max_planes
       integer :: max_threads, frame, tid
-      integer(kind=8) :: npixels
       integer(c_int) :: x1, x2, y1, y2, width, height, average
       real(c_float) :: cx, cy, r, r2
       real(c_float) :: spec
       real(kind=8) :: cdelt3
 
-      real(kind=c_float), allocatable, target :: thread_pixels(:, :, :)
-      logical(kind=c_bool), allocatable, target :: thread_mask(:, :)
+      real(kind=c_float), allocatable, target :: thread_pixels(:, :, :, :)
+      logical(kind=c_bool), allocatable, target :: thread_mask(:, :, :)
 
       integer :: dimx, dimy, native_size, viewport_size
       integer(c_int) :: precision
@@ -7481,7 +7480,6 @@ contains
       ! obtain viewport dimensions (even going beyond the dims of pixels&mask)
       dimx = abs(req%x2 - req%x1) + 1
       dimy = abs(req%y2 - req%y1) + 1
-      npixels = dimx*dimy
 
       ! sanity checks
       x1 = max(1, req%x1)
@@ -7512,14 +7510,14 @@ contains
 
       ! do we need the viewport?
       if (req%image) then
-         allocate (pixels(npixels, max_planes))
-         allocate (mask(npixels))
+         allocate (pixels(dimx, dimy, max_planes))
+         allocate (mask(dimx, dimy))
 
          pixels = 0.0
          mask = .false.
 
-         allocate (thread_pixels(npixels, max_planes, max_threads))
-         allocate (thread_mask(npixels, max_threads))
+         allocate (thread_pixels(dimx, dimy, max_planes, max_threads))
+         allocate (thread_mask(dimx, dimy, max_threads))
 
          thread_pixels = 0.0
          thread_mask = .false.
@@ -7609,15 +7607,15 @@ contains
                if (req%beam .eq. square) then
                   spec = viewport_image_spectrum_rect(c_loc(item%compressed(frame, k)%ptr),&
                   &width, height, item%frame_min(frame, k), item%frame_max(frame, k),&
-                  &c_loc(thread_pixels(:, k, tid)), c_loc(thread_mask(:, tid)), dimx, &
+                  &c_loc(thread_pixels(:, :, k, tid)), c_loc(thread_mask(:, :, tid)), dimx, &
                   &x1 - 1, x2 - 1, y1 - 1, y2 - 1, x1 - req%x1, y1 - req%y1, average, cdelt3, req%median,&
                   &thread_sumP, thread_countP, thread_sumN, thread_countN)
                end if
 
                if (req%beam .eq. circle) then
                   spec = viewport_image_spectrum_circle(c_loc(item%compressed(frame, k)%ptr),&
-                  &width, height, item%frame_min(frame, k), item%frame_max(frame, k), c_loc(thread_pixels(:, k, tid)),&
-                  & c_loc(thread_mask(:, tid)), dimx, x1 - 1, x2 - 1, y1 - 1, y2 - 1,&
+                  &width, height, item%frame_min(frame, k), item%frame_max(frame, k), c_loc(thread_pixels(:, :, k, tid)),&
+                  & c_loc(thread_mask(:, :, tid)), dimx, x1 - 1, x2 - 1, y1 - 1, y2 - 1,&
                   & x1 - req%x1, y1 - req%y1, cx - 1, cy - 1, r2, average, cdelt3)
                end if
 
@@ -7635,8 +7633,8 @@ contains
       ! reduce the pixels/mask locally
       if (req%image) then
          do tid = 1, max_threads
-            pixels(:, :) = pixels(:, :) + thread_pixels(:, :, tid)
-            mask(:) = mask(:) .or. thread_mask(:, tid)
+            pixels(:, :, :) = pixels(:, :, :) + thread_pixels(:, :, :, tid)
+            mask(:, :) = mask(:, :) .or. thread_mask(:, :, tid)
          end do
       end if
 
@@ -7695,7 +7693,7 @@ contains
             allocate (view_mask(req%width, req%height))
 
             do k = 1, max_planes
-               pixels_task(k)%pSrc = c_loc(pixels(:, k))
+               pixels_task(k)%pSrc = c_loc(pixels(:, :, k))
                pixels_task(k)%srcWidth = dimx
                pixels_task(k)%srcHeight = dimy
 
@@ -7726,7 +7724,7 @@ contains
          else
             ! no need for downsizing
             call write_ws_viewport(req%session, req%seq_id, req%timestamp, elapsed,&
-            &dimx, dimy, c_loc(pixels(:,plane)), c_loc(mask), precision)
+            &dimx, dimy, c_loc(pixels(:,:,plane)), c_loc(mask), precision)
          end if
       end if
 
