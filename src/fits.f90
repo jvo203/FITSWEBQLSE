@@ -7394,18 +7394,19 @@ contains
       type(image_spectrum_request_f), pointer :: req
 
       ! output variables
-      real(kind=c_float), allocatable, target :: pixels(:), view_pixels(:, :)
+      real(kind=c_float), allocatable, target :: pixels(:, :), view_pixels(:, :, :)
       logical(kind=c_bool), allocatable, target :: mask(:), view_mask(:, :)
       real(kind=c_float), dimension(:), allocatable, target :: spectrum, reduced_spectrum, cluster_spectrum
 
-      integer :: first, last, plane, length, threshold, max_planes
+      integer :: first, last, plane, length, threshold, k, max_planes
       integer :: max_threads, frame, tid
       integer(kind=8) :: npixels
       integer(c_int) :: x1, x2, y1, y2, width, height, average
       real(c_float) :: cx, cy, r, r2
+      real(c_float) :: spec
       real(kind=8) :: cdelt3
 
-      real(kind=c_float), allocatable, target :: thread_pixels(:, :)
+      real(kind=c_float), allocatable, target :: thread_pixels(:, :, :)
       logical(kind=c_bool), allocatable, target :: thread_mask(:, :)
 
       integer :: dimx, dimy, native_size, viewport_size
@@ -7511,13 +7512,13 @@ contains
 
       ! do we need the viewport?
       if (req%image) then
-         allocate (pixels(npixels))
+         allocate (pixels(npixels, max_planes))
          allocate (mask(npixels))
 
          pixels = 0.0
          mask = .false.
 
-         allocate (thread_pixels(npixels, max_threads))
+         allocate (thread_pixels(npixels, max_planes, max_threads))
          allocate (thread_mask(npixels, max_threads))
 
          thread_pixels = 0.0
@@ -7537,6 +7538,7 @@ contains
       cluster_req%y1 = req%y1
       cluster_req%x2 = req%x2
       cluster_req%y2 = req%y2
+      cluster_req%plane = plane
       cluster_req%beam = req%beam
       cluster_req%intensity = req%intensity
       cluster_req%frame_start = req%frame_start
@@ -7577,7 +7579,7 @@ contains
       thread_countN = 0
 
       !$omp PARALLEL DEFAULT(SHARED) SHARED(item, spectrum)&
-      !$omp& SHARED(thread_pixels, thread_mask) PRIVATE(tid, frame)&
+      !$omp& SHARED(thread_pixels, thread_mask) PRIVATE(tid, frame, k, spec)&
       !$omp& NUM_THREADS(max_threads)
       !$omp DO
       do frame = first, last
@@ -7601,20 +7603,26 @@ contains
                &x1 - 1, x2 - 1, y1 - 1, y2 - 1, cx - 1, cy - 1, r2, average, cdelt3)
             end if
          else
-            if (req%beam .eq. square) then
-               spectrum(frame) = viewport_image_spectrum_rect(c_loc(item%compressed(frame, plane)%ptr),&
-               &width, height, item%frame_min(frame, plane), item%frame_max(frame, plane),&
-               &c_loc(thread_pixels(:, tid)), c_loc(thread_mask(:, tid)), dimx, &
-               &x1 - 1, x2 - 1, y1 - 1, y2 - 1, x1 - req%x1, y1 - req%y1, average, cdelt3, req%median,&
-               &thread_sumP, thread_countP, thread_sumN, thread_countN)
-            end if
+            do k = 1, max_planes
+               spec = 0.0
 
-            if (req%beam .eq. circle) then
-               spectrum(frame) = viewport_image_spectrum_circle(c_loc(item%compressed(frame, plane)%ptr),&
-               &width, height, item%frame_min(frame, plane), item%frame_max(frame, plane), c_loc(thread_pixels(:, tid)),&
-               & c_loc(thread_mask(:, tid)), dimx, x1 - 1, x2 - 1, y1 - 1, y2 - 1,&
-               & x1 - req%x1, y1 - req%y1, cx - 1, cy - 1, r2, average, cdelt3)
-            end if
+               if (req%beam .eq. square) then
+                  spec = viewport_image_spectrum_rect(c_loc(item%compressed(frame, k)%ptr),&
+                  &width, height, item%frame_min(frame, k), item%frame_max(frame, k),&
+                  &c_loc(thread_pixels(:, k, tid)), c_loc(thread_mask(:, tid)), dimx, &
+                  &x1 - 1, x2 - 1, y1 - 1, y2 - 1, x1 - req%x1, y1 - req%y1, average, cdelt3, req%median,&
+                  &thread_sumP, thread_countP, thread_sumN, thread_countN)
+               end if
+
+               if (req%beam .eq. circle) then
+                  spec = viewport_image_spectrum_circle(c_loc(item%compressed(frame, k)%ptr),&
+                  &width, height, item%frame_min(frame, k), item%frame_max(frame, k), c_loc(thread_pixels(:, k, tid)),&
+                  & c_loc(thread_mask(:, tid)), dimx, x1 - 1, x2 - 1, y1 - 1, y2 - 1,&
+                  & x1 - req%x1, y1 - req%y1, cx - 1, cy - 1, r2, average, cdelt3)
+               end if
+
+               if (k .eq. plane) spectrum(frame) = spec
+            end do
          end if
 
       end do
@@ -7627,7 +7635,7 @@ contains
       ! reduce the pixels/mask locally
       if (req%image) then
          do tid = 1, max_threads
-            pixels(:) = pixels(:) + thread_pixels(:, tid)
+            pixels(:, :) = pixels(:, :) + thread_pixels(:, :, tid)
             mask(:) = mask(:) .or. thread_mask(:, tid)
          end do
       end if
@@ -7683,7 +7691,7 @@ contains
          if (native_size .gt. viewport_size) then
             ! downsize the pixels/mask from {dimx,dimy} to {req%width,req%height}
 
-            allocate (view_pixels(req%width, req%height))
+            allocate (view_pixels(req%width, req%height, max_planes))
             allocate (view_mask(req%width, req%height))
 
             task%pSrc = c_loc(pixels)
@@ -7712,11 +7720,11 @@ contains
             rc = my_pthread_join(task_pid)
 
             call write_ws_viewport(req%session, req%seq_id, req%timestamp, elapsed,&
-            &req%width, req%height, c_loc(view_pixels), c_loc(view_mask), precision)
+            &req%width, req%height, c_loc(view_pixels(:,:,plane)), c_loc(view_mask), precision)
          else
             ! no need for downsizing
             call write_ws_viewport(req%session, req%seq_id, req%timestamp, elapsed,&
-            &dimx, dimy, c_loc(pixels), c_loc(mask), precision)
+            &dimx, dimy, c_loc(pixels(:,plane)), c_loc(mask), precision)
          end if
       end if
 
