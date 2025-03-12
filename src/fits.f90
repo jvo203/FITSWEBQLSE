@@ -7424,6 +7424,8 @@ contains
       real(c_float) :: thread_sumP, thread_sumN
       integer(c_int64_t) :: thread_countP, thread_countN
 
+      type(C_PTR) :: json
+
       ! timing
       integer(8) :: start_t, finish_t, crate, cmax
       real(c_float) :: elapsed
@@ -7719,13 +7721,30 @@ contains
                rc = my_pthread_join(task_pid(k))
             end do
 
+            json = DownsizePolarization(view_pixels, view_mask, req%width, req%height, req%beam)
+
+            ! end the timer
+            call system_clock(finish_t)
+            elapsed = 1000.0*real(finish_t - start_t)/real(crate) ! [ms]
+
             call write_ws_viewport(req%session, req%seq_id, req%timestamp, elapsed,&
             &req%width, req%height, c_loc(view_pixels(:,:,plane)), c_loc(view_mask), precision)
          else
             ! no need for downsizing
+            json = DownsizePolarization(pixels, mask, dimx, dimy, req%beam)
+
+            ! end the timer
+            call system_clock(finish_t)
+            elapsed = 1000.0*real(finish_t - start_t)/real(crate) ! [ms]
+
             call write_ws_viewport(req%session, req%seq_id, req%timestamp, elapsed,&
             &dimx, dimy, c_loc(pixels(:,:,plane)), c_loc(mask), precision)
          end if
+
+         call write_ws_polarisation(req%session, req%seq_id, req%timestamp, elapsed, json)
+
+         ! deallocate the memory
+         call delete_json(json)
       end if
 
       nullify (item)
@@ -8741,6 +8760,7 @@ contains
       else
          ! no need for downsizing
          json = DownsizePolarization(pixels, mask, dimx, dimy, req%beam)
+
          ! end the timer
          t2 = omp_get_wtime()
          elapsed = 1000.0*real(t2 - t1) ! [ms]
