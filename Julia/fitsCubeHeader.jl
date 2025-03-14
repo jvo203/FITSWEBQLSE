@@ -1,13 +1,16 @@
 using FITSIO
 
 basedir = homedir() * "/NAO/POLARISATION/ALMA"
-target = "VYCMa"
-band = "Band5"
-image = "FullPol_ReferenceImages"
-name = ".spw3"
+
+#target = "VYCMa"
+#band = "Band5"
+#image = "FullPol_ReferenceImages"
+#name = ".spw3"
+
+target = "OrionI"
+name = "member.uid___A001_X1273_X9e2.Orion_Source_I_sci.spw27.cube.IQUV.pbcor"
 
 Stokes = ["I", "Q", "U", "V"]
-#Stokes = ["I", "Q", "U", "I"] # for testing
 
 function read_data(filename)
     f = FITS(filename)
@@ -22,7 +25,11 @@ planes = []
 for stokes in Stokes
     local data
 
-    fn = basedir * "/" * target * "_" * band * "_" * image * "/" * target * name * "." * stokes * ".pbcorr.fits"
+    #VYCMa
+    #fn = basedir * "/" * target * "_" * band * "_" * image * "/" * target * name * "." * stokes * ".pbcorr.fits"
+
+    #OrionI
+    fn = basedir * "/" * target * "/" * name * ".Stokes" * stokes * ".fits"
 
     try
         data = read_data(fn)
@@ -41,14 +48,19 @@ println("cube:", size(cube))
 println(cube[1:10])
 
 # read FITS header from the first Stokes parameter FITS file (I)
-filename = basedir * "/" * target * "_" * band * "_" * image * "/" * target * name * "." * Stokes[1] * ".pbcorr.fits"
+#VYCMa
+#filename = basedir * "/" * target * "_" * band * "_" * image * "/" * target * name * "." * Stokes[1] * ".pbcorr.fits"
+
+#OrionI
+filename = basedir * "/" * target * "/" * name * ".Stokes" * Stokes[1] * ".fits"
+
 header = FITSIO.read_header(filename)
 
 # modify the header to have the same cube dimensions as the data
 header["NAXIS4"] = size(cube, 4)
 
 # write the modified header with new data to a new FITS file
-filename = basedir * "/" * target * name * ".StokesIQU.fits"
+filename = basedir * "/" * name * ".StokesIQU.fits"
 FITS(filename, "w") do f
-    write(f, cube; header=header)    
+    write(f, cube; header=header)
 end
