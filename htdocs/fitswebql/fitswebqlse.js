@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-03-10.0";
+    return "JS2025-03-14.0";
 }
 
 function uuidv4() {
@@ -4219,8 +4219,10 @@ function plot_polarisation(field, mean, std, xScale, yScale, spacing, canvasId) 
 
     // for each item in the resized field    
     for (let item of field) {
-        let angle = item.A;
+        // add 90 degrees to the angle (polarisation vectors are perpendicular to the magnetic field)
+        let angle = item.A + Math.PI / 2.0;
         let mag = (item.I - mean) / (std * Math.sqrt(2.0)); // normalise the intensity
+
         let x = item.x;
         let y = item.y;
         let r = spacing * get_polarisation_tone_mapping(mag); // between 0 and grid_spacing
