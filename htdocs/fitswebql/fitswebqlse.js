@@ -21521,7 +21521,7 @@ async function mainRenderer() {
 
         var has_fits = votable.getAttribute('data-has-fits');
         var display_progress = 'block';
-        if (has_fits == 'true')
+        if (has_fits == '1')
             display_progress = 'none';
 
         var div = d3.select("body").append("div")
