@@ -17830,12 +17830,6 @@ function load_region() {
 
         console.log("coordinate_system:", coordinate_system);
 
-        // fk5 is unsupported at the moment
-        /*if (coordinate_system == "fk5") {
-            alert("WCS (fk5) coordinate system is not supported at the moment. Use a physical or image coordinate system.");
-            coordinate_system = "unknown";
-        }*/
-
         if (coordinate_system == "unknown") {
             alert("Unknown / unsupported coordinate system. Supported ds9 coordinate systems: physical, image, fk5 and icrs.");
             d3.select("#regionLabel").html(file_name + ": (unsupported coordinate system)" + '<input type="file" accept=".reg, .REG" id="regionFile" style="display:none;" onclick="javascript:hide_navigation_bar();" onchange="javascript:load_region();"/>');
