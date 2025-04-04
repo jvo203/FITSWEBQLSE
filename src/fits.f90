@@ -6677,8 +6677,8 @@ contains
       end if
 
       if (scale .lt. 1.0) then
-         img_width = nint(scale*item%naxes(1))
-         img_height = nint(scale*item%naxes(2))
+         img_width = floor(scale*item%naxes(1))
+         img_height = floor(scale*item%naxes(2))
 
          allocate (pixels(img_width, img_height, max_planes))
          allocate (mask(img_width, img_height))
@@ -11323,8 +11323,8 @@ contains
       scale = get_image_scale(req%width, req%height, inner_width, inner_height)
 
       if (scale .lt. 1.0) then
-         img_width = nint(scale*item%naxes(1))
-         img_height = nint(scale*item%naxes(2))
+         img_width = floor(scale*item%naxes(1))
+         img_height = floor(scale*item%naxes(2))
 
          allocate (view_pixels(img_width, img_height))
          allocate (view_mask(img_width, img_height))
