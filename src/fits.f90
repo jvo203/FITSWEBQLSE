@@ -10936,8 +10936,8 @@ contains
       print *, 'scale:', scale
 
       if (scale .lt. 1.0) then
-         width = nint(scale*npoints)
-         height = nint(scale*length)
+         width = floor(scale*npoints)
+         height = floor(scale*length)
 
          allocate (pixels(width, height))
 
