@@ -12848,8 +12848,8 @@ function pv_event(event) {
                 var dst_height = canvas.height;
 
                 var scale = get_pv_image_scale(dst_width, dst_height, src_width, src_height);
-                var img_width = scale * src_width;
-                var img_height = scale * src_height;
+                var img_width = Math.floor(scale * src_width);
+                var img_height = Math.floor(scale * src_height);
 
                 var context = canvas.getContext('2d');
                 /*context.webkitImageSmoothingEnabled = false;
