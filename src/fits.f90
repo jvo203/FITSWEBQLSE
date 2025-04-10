@@ -11408,7 +11408,7 @@ contains
          deallocate (view_pixels)
          deallocate (view_mask)
 
-         call write_histogram(req%fd, c_loc(hist), size(hist))
+         call write_histogram(req%fd, c_loc(hist), size(hist)) ! there is no need to pass <max_planes> as the receiving side knows it
 
          threshold = req%dx/2
 
