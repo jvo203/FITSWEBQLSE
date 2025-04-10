@@ -853,7 +853,10 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                 req->frame_start = 0.0;
                 req->frame_end = 0.0;
                 req->ref_freq = 0.0;
-                req->median = NAN;
+                req->median[0] = NAN;
+                req->median[1] = NAN;
+                req->median[2] = NAN;
+                req->median[3] = NAN;
                 req->x = -1;
                 req->y = -1;
                 req->seq_id = 0;
@@ -1247,7 +1250,10 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                 req->frame_start = 0.0;
                 req->frame_end = 0.0;
                 req->ref_freq = 0.0;
-                req->median = NAN;
+                req->median[0] = NAN;
+                req->median[1] = NAN;
+                req->median[2] = NAN;
+                req->median[3] = NAN;
                 req->x = -1;
                 req->y = -1;
                 req->tracking = false;

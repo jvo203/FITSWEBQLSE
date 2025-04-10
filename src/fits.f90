@@ -58,7 +58,7 @@ module fits
       integer(kind(circle)) :: beam
       integer(kind(medium)) :: intensity
       real(c_double) :: frame_start, frame_end, ref_freq
-      real(c_float) :: median
+      real(c_float) :: median(4)
       integer(c_int) :: x, y
       logical(kind=c_bool) :: tracking
       integer(c_int) :: seq_id
@@ -341,7 +341,7 @@ module fits
       integer(kind(circle)) :: beam
       integer(kind(medium)) :: intensity
       real(c_double) :: frame_start, frame_end, ref_freq
-      real(c_float) :: median
+      real(c_float) :: median(4)
 
       ! outputs
       type(c_ptr) :: pixels
@@ -9093,7 +9093,7 @@ contains
                spectrum(frame) = viewport_image_spectrum_rect(c_loc(item%compressed(frame, plane)%ptr),&
                &width, height, item%frame_min(frame, plane), item%frame_max(frame, plane),&
                &c_loc(thread_pixels(:, tid)), c_loc(thread_mask(:, tid)), dimx, &
-               &x1 - 1, x2 - 1, y1 - 1, y2 - 1, x1 - req%x1, y1 - req%y1, average, cdelt3, req%median,&
+               &x1 - 1, x2 - 1, y1 - 1, y2 - 1, x1 - req%x1, y1 - req%y1, average, cdelt3, req%median(plane),&
                &thread_sumP, thread_countP, thread_sumN, thread_countN)
             end if
 
@@ -11081,20 +11081,20 @@ contains
       type(image_spectrum_request_f), pointer :: req
 
       ! output variables
-      real(kind=c_float), allocatable, target :: pixels(:), view_pixels(:, :)
+      real(kind=c_float), allocatable, target :: pixels(:, :), view_pixels(:, :, :)
       logical(kind=c_bool), allocatable, target :: mask(:), view_mask(:, :)
-      real(kind=c_float), dimension(:), allocatable, target :: spectrum, reduced_spectrum, cluster_spectrum
+      real(kind=c_float), dimension(:, :), allocatable, target :: spectrum, reduced_spectrum, cluster_spectrum
 
       integer :: first, last, length, threshold
-      integer :: max_threads, frame, plane, max_planes, tid
+      integer :: max_threads, frame, max_planes, tid
       integer(kind=8) :: npixels
       integer(c_int) :: width, height, average
       real(kind=8) :: cdelt3
 
-      real(kind=c_float), allocatable, target :: thread_pixels(:, :)
-      logical(kind=c_bool), allocatable, target :: thread_mask(:, :)
+      real(kind=c_float), allocatable, target :: thread_pixels(:, :, :)
+      logical(kind=c_bool), allocatable, target :: thread_mask(:, :, :)
 
-      integer :: dimx, dimy, i, j
+      integer :: dimx, dimy, i, j, k
       integer :: inner_width, inner_height
       integer :: img_width, img_height
       integer(c_int) :: precision
@@ -11104,13 +11104,13 @@ contains
       type(c_ptr) :: task_pid
 
       ! image histogram
-      integer(c_int), allocatable, target :: hist(:)
+      integer(kind=c_int), target :: hist(NBINS, 4) ! up to 4 planes
 
       ! image tone mapping
-      type(image_tone_mapping), target :: tone
+      type(image_tone_mapping), target :: tone(4) ! up to 4 planes
 
       ! regenerate the video tone mapping global statistics
-      real(c_float) :: dmin, dmax, dmedian
+      real(c_float) :: dmin(4), dmax(4), dmedian(4)
       real(c_float) :: dmad, dmadP, dmadN
 
       ! accumulators, counters
@@ -11149,9 +11149,6 @@ contains
       ! get max_planes
       max_planes = size(item%compressed, 2)
 
-      plane = max(req%plane, 1)
-      plane = min(plane, max_planes)
-
       ! set the viewport to the whole image
       req%x1 = 1
       req%y1 = 1
@@ -11161,13 +11158,15 @@ contains
       ! get the range of the cube planes
       call get_spectrum_range(item, req%frame_start, req%frame_end, req%ref_freq, first, last)
 
-      dmin = minval(item%frame_min(first:last, plane))
-      dmax = maxval(item%frame_max(first:last, plane))
-      dmedian = &
-      &median(pack(item%frame_median(first:last, plane),.not. ieee_is_nan(item%frame_median(first:last, plane)))) ! extract non-NaN values
+      do k = 1, max_planes
+         dmin(k) = minval(item%frame_min(first:last, k))
+         dmax(k) = maxval(item%frame_max(first:last, k))
+         dmedian(k) = &
+         &median(pack(item%frame_median(first:last, k),.not. ieee_is_nan(item%frame_median(first:last, k)))) ! extract non-NaN values
+      end do
 
       length = last - first + 1
-      print *, 'first:', first, 'last:', last, 'length:', length, 'depth:', item%naxes(3), 'plane:', plane
+      print *, 'first:', first, 'last:', last, 'length:', length, 'depth:', item%naxes(3), 'max_planes:', max_planes
 
       if (req%intensity .eq. mean) then
          average = 1
@@ -11183,7 +11182,7 @@ contains
       npixels = dimx*dimy
 
       ! allocate and zero-out the spectrum
-      allocate (spectrum(first:last))
+      allocate (spectrum(first:last, max_planes))
       spectrum = 0.0
 
       call get_cdelt3(item, cdelt3)
@@ -11192,20 +11191,20 @@ contains
       max_threads = get_max_threads()
 
       ! we need the viewport too
-      allocate (pixels(npixels))
+      allocate (pixels(npixels, max_planes))
       allocate (mask(npixels))
 
       pixels = 0.0
       mask = .false.
 
-      allocate (thread_pixels(npixels, max_threads))
-      allocate (thread_mask(npixels, max_threads))
+      allocate (thread_pixels(npixels, max_planes, max_threads))
+      allocate (thread_mask(npixels, max_planes, max_threads))
 
       thread_pixels = 0.0
       thread_mask = .false.
 
       ! launch a cluster thread (check if the number of cluster nodes is .gt. 0)
-      allocate (cluster_spectrum(first:last))
+      allocate (cluster_spectrum(first:last, max_planes))
       cluster_spectrum = 0.0
 
       cluster_req%datasetid = c_loc(item%datasetid)
@@ -11253,26 +11252,26 @@ contains
       thread_countN = 0
 
       !$omp PARALLEL DEFAULT(SHARED) SHARED(item, spectrum)&
-      !$omp& SHARED(thread_pixels, thread_mask) PRIVATE(tid, frame)&
+      !$omp& SHARED(thread_pixels, thread_mask) PRIVATE(tid, frame, k)&
       !$omp& REDUCTION(+:thread_sumP,thread_countP)&
       !$omp& REDUCTION(+:thread_sumN,thread_countN)&
       !$omp& NUM_THREADS(max_threads)
       !$omp DO
       do frame = first, last
+         do k = 1, max_planes
+            ! skip frames for which there is no data on this node
+            if (.not. associated(item%compressed(frame, k)%ptr)) cycle
 
-         ! skip frames for which there is no data on this node
-         if (.not. associated(item%compressed(frame, plane)%ptr)) cycle
+            ! get a current OpenMP thread (starting from 0 as in C)
+            tid = 1 + OMP_GET_THREAD_NUM()
 
-         ! get a current OpenMP thread (starting from 0 as in C)
-         tid = 1 + OMP_GET_THREAD_NUM()
-
-         ! the image is square (rectangular)
-         spectrum(frame) = viewport_image_spectrum_rect(c_loc(item%compressed(frame, plane)%ptr),&
-         &width, height, item%frame_min(frame, plane), item%frame_max(frame, plane),&
-         &c_loc(thread_pixels(:, tid)), c_loc(thread_mask(:, tid)), dimx, &
-         &req%x1 - 1, req%x2 - 1, req%y1 - 1, req%y2 - 1, 0, 0, average, cdelt3,&
-         &dmedian, thread_sumP, thread_countP, thread_sumN, thread_countN)
-
+            ! the image is square (rectangular)
+            spectrum(frame, k) = viewport_image_spectrum_rect(c_loc(item%compressed(frame, k)%ptr),&
+            &width, height, item%frame_min(frame, k), item%frame_max(frame, k),&
+            &c_loc(thread_pixels(:, k, tid)), c_loc(thread_mask(:, k, tid)), dimx, &
+            &req%x1 - 1, req%x2 - 1, req%y1 - 1, req%y2 - 1, 0, 0, average, cdelt3,&
+            &dmedian(k), thread_sumP, thread_countP, thread_sumN, thread_countN)
+         end do
       end do
       !$omp END DO
       !$omp END PARALLEL
@@ -11326,7 +11325,7 @@ contains
          img_width = floor(scale*item%naxes(1))
          img_height = floor(scale*item%naxes(2))
 
-         allocate (view_pixels(img_width, img_height))
+         allocate (view_pixels(img_width, img_height, max_planes))
          allocate (view_mask(img_width, img_height))
 
          task%pSrc = c_loc(pixels)
