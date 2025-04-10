@@ -11408,7 +11408,7 @@ contains
          deallocate (view_pixels)
          deallocate (view_mask)
 
-         call write_histogram(req%fd, max_planes, c_loc(hist), size(hist) / max_planes)
+         call write_histogram(req%fd, c_loc(hist), size(hist))
 
          threshold = req%dx/2
 
