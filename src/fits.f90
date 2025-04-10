@@ -398,7 +398,7 @@ module fits
 
       ! derived values
       character(len=:), allocatable :: flux
-      real(kind=c_float) dmin(4), dmax(4), dmedian
+      real(kind=c_float) dmin(4), dmax(4), dmedian(4)
       real(kind=c_float) dmad, dmadN, dmadP
       real(kind=4), allocatable :: frame_min(:, :), frame_max(:, :), frame_median(:, :)
       real(kind=c_float), allocatable :: pixels(:, :, :)
@@ -3161,6 +3161,7 @@ contains
 
       integer(kind=8) :: current, total
       integer(kind=c_int) :: rc
+      integer :: max_planes, k
 
       ! take a time measurement
       call system_clock(finish)
@@ -3191,10 +3192,15 @@ contains
 
          ! only for data cubes
          if (item%naxis .gt. 2 .and. item%naxes(3) .gt. 1 .and. (.not. item%video)) then
-            if (allocated(item%frame_min)) item%dmin = minval(item%frame_min)
-            if (allocated(item%frame_max)) item%dmax = maxval(item%frame_max)
-            if (allocated(item%frame_median)) item%dmedian = &
-            &median(pack(item%frame_median,.not. ieee_is_nan(item%frame_median))) ! extract non-NaN values
+            ! take max_planes from the item pixels
+            max_planes = size(item%pixels, 3)
+
+            do k = 1, max_planes
+               if (allocated(item%frame_min)) item%dmin(k) = minval(item%frame_min(:, k))
+               if (allocated(item%frame_max)) item%dmax(k) = maxval(item%frame_max(:, k))
+               if (allocated(item%frame_median)) item%dmedian(k) = &
+               &median(pack(item%frame_median(:,k),.not. ieee_is_nan(item%frame_median(:,k)))) ! extract non-NaN values
+            end do
 
             ! launch a pthread, passing the FORTRAN <item> dataset via a C pointer
             ! rc = c_pthread_create(thread=pid, &
@@ -6888,7 +6894,7 @@ contains
 
       real, intent(in) :: data(:)
       integer, intent(in) :: threshold
-      real, intent(out), allocatable :: spectrum(:)
+      real, intent(out) :: spectrum(:)
 
       ! internal variables
       integer i, sampledIndex, a, nextA, dataLength
@@ -6897,7 +6903,6 @@ contains
       ! print *, 'downsizing spectrum with Largest-Triangle-Three-Buckets'
 
       dataLength = size(data)
-      allocate (spectrum(threshold))
 
       ! always add the first point
       spectrum(1) = data(1)
@@ -7610,7 +7615,7 @@ contains
                   spec = viewport_image_spectrum_rect(c_loc(item%compressed(frame, k)%ptr),&
                   &width, height, item%frame_min(frame, k), item%frame_max(frame, k),&
                   &c_loc(thread_pixels(:, :, k, tid)), c_loc(thread_mask(:, :, tid)), dimx, &
-                  &x1 - 1, x2 - 1, y1 - 1, y2 - 1, x1 - req%x1, y1 - req%y1, average, cdelt3, req%median,&
+                  &x1 - 1, x2 - 1, y1 - 1, y2 - 1, x1 - req%x1, y1 - req%y1, average, cdelt3, req%median(k),&
                   &thread_sumP, thread_countP, thread_sumN, thread_countN)
                end if
 
@@ -7653,7 +7658,8 @@ contains
       threshold = req%dx/2
 
       if (size(spectrum) .gt. threshold) then
-         ! downsize the spectrum
+         ! allocate and downsize the spectrum
+         allocate (reduced_spectrum(threshold))
          call LTTB(spectrum, threshold, reduced_spectrum)
 
          ! end the timer
@@ -11092,7 +11098,7 @@ contains
       real(kind=8) :: cdelt3
 
       real(kind=c_float), allocatable, target :: thread_pixels(:, :, :)
-      logical(kind=c_bool), allocatable, target :: thread_mask(:, :, :)
+      logical(kind=c_bool), allocatable, target :: thread_mask(:, :)
 
       integer :: dimx, dimy, i, j, k
       integer :: inner_width, inner_height
@@ -11198,7 +11204,7 @@ contains
       mask = .false.
 
       allocate (thread_pixels(npixels, max_planes, max_threads))
-      allocate (thread_mask(npixels, max_planes, max_threads))
+      allocate (thread_mask(npixels, max_threads))
 
       thread_pixels = 0.0
       thread_mask = .false.
@@ -11268,7 +11274,7 @@ contains
             ! the image is square (rectangular)
             spectrum(frame, k) = viewport_image_spectrum_rect(c_loc(item%compressed(frame, k)%ptr),&
             &width, height, item%frame_min(frame, k), item%frame_max(frame, k),&
-            &c_loc(thread_pixels(:, k, tid)), c_loc(thread_mask(:, k, tid)), dimx, &
+            &c_loc(thread_pixels(:, k, tid)), c_loc(thread_mask(:, tid)), dimx, &
             &req%x1 - 1, req%x2 - 1, req%y1 - 1, req%y2 - 1, 0, 0, average, cdelt3,&
             &dmedian(k), thread_sumP, thread_countP, thread_sumN, thread_countN)
          end do
@@ -11281,7 +11287,7 @@ contains
 
       ! reduce the pixels/mask locally
       do tid = 1, max_threads
-         pixels(:) = pixels(:) + thread_pixels(:, tid)
+         pixels(:, :) = pixels(:, :) + thread_pixels(:, :, tid)
          mask(:) = mask(:) .or. thread_mask(:, tid)
       end do
 
@@ -11356,17 +11362,20 @@ contains
          img_width = item%naxes(1)
          img_height = item%naxes(2)
 
-         view_pixels = reshape(pixels, item%naxes(1:2))
+         view_pixels = reshape(pixels, (/item%naxes(1:2), max_planes/))
          view_mask = reshape(mask, item%naxes(1:2))
       end if
 
-      tone%flux = c_null_char
-      if (allocated(item%flux)) then
-         ! allocate (tone%flux, source=item%flux)
-         do j = 1, min(len_trim(item%flux), size(tone%flux) - 1)
-            tone%flux(j) = item%flux(j:j)
-         end do
-      end if
+      do i=1, max_planes
+         tone(i)%flux = c_null_char ! a C-style null-terminated string
+
+         if (allocated(item%flux)) then
+            ! allocate (tone%flux, source=item%flux)
+            do j = 1, min(len_trim(item%flux), size(tone(i)%flux) - 1)
+               tone(i)%flux(j) = item%flux(j:j)
+            end do
+         end if
+      end do
 
       if (allocated(item%flux)) then
          print *, "ws_image_spectrum_request::flux=", item%flux
@@ -11374,7 +11383,13 @@ contains
          print *, "ws_image_spectrum_request::flux is not allocated"
       end if
 
-      call make_image_statistics(item, img_width, img_height, view_pixels, view_mask, hist, tone)
+      ! make image histograms, decide on the tone mapping type (flux) etc.
+      ! use OpenMP to parallelise the loop
+      !$omp parallel do default(shared) private(k)
+      do k = 1, max_planes
+         call make_image_statistics(item, img_width, img_height, view_pixels(:,:,k), view_mask, hist(:,k), tone(k))
+      end do
+      !$omp end parallel do
 
       if (req%fd .ne. -1) then
 
@@ -11387,7 +11402,7 @@ contains
             precision = ZFP_MEDIUM_PRECISION
          end select
 
-         call write_image_spectrum(req%fd, 1, c_loc(tone), img_width, img_height, precision,&
+         call write_image_spectrum(req%fd, max_planes, c_loc(tone), img_width, img_height, precision,&
          & c_loc(view_pixels), c_loc(view_mask))
 
          deallocate (view_pixels)
@@ -11398,12 +11413,21 @@ contains
          threshold = req%dx/2
 
          if (size(spectrum) .gt. threshold) then
-            ! downsize the spectrum
-            call LTTB(spectrum, threshold, reduced_spectrum)
+            ! allocate the reduced spectrum
+            allocate (reduced_spectrum(threshold, max_planes))
 
-            call write_spectrum(req%fd, 1, c_loc(reduced_spectrum), size(reduced_spectrum), ZFP_HIGH_PRECISION)
+            ! use OpenMP to parallelise the loop
+            !$omp parallel do default(shared) private(k)
+            do k = 1, max_planes
+               ! downsize the spectrum
+               call LTTB(spectrum(:,k), threshold, reduced_spectrum(:,k))
+            end do
+            !$omp end parallel do
+
+            call write_spectrum(req%fd, max_planes, c_loc(reduced_spectrum), size(reduced_spectrum) / max_planes,&
+            & ZFP_HIGH_PRECISION)
          else
-            call write_spectrum(req%fd, 1, c_loc(spectrum), size(spectrum), ZFP_HIGH_PRECISION)
+            call write_spectrum(req%fd, max_planes, c_loc(spectrum), size(spectrum) / max_planes, ZFP_HIGH_PRECISION)
          end if
 
          ! send the revised global statistics too
