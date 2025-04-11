@@ -302,15 +302,15 @@ module fits
       integer(c_int) :: len
 
       ! the all-data median (input)
-      real(c_float) :: dmedian
+      real(c_float) :: dmedian(4)
 
       ! positive
-      real(c_float) :: sumP
-      integer(c_int64_t) :: countP
+      real(c_float) :: sumP(4)
+      integer(c_int64_t) :: countP(4)
 
       ! negative
-      real(c_float) :: sumN
-      integer(c_int64_t) :: countN
+      real(c_float) :: sumN(4)
+      integer(c_int64_t) :: countN(4)
 
       ! FITS cube range
       integer(c_int) :: first, last
@@ -399,7 +399,7 @@ module fits
       ! derived values
       character(len=:), allocatable :: flux
       real(kind=c_float) dmin(4), dmax(4), dmedian(4)
-      real(kind=c_float) dmad, dmadN, dmadP
+      real(kind=c_float) dmad(4), dmadN(4), dmadP(4)
       real(kind=4), allocatable :: frame_min(:, :), frame_max(:, :), frame_median(:, :)
       real(kind=c_float), allocatable :: pixels(:, :, :)
       logical(kind=c_bool), allocatable :: mask(:, :)
@@ -6219,24 +6219,26 @@ contains
 
    end subroutine calculate_global_statistics_C
 
-   subroutine calculate_global_statistics(item, dmedian, sumP, countP, sumN, countN, first, last, plane)
+   subroutine calculate_global_statistics(item, dmedian, sumP, countP, sumN, countN, first, last)
       use omp_lib
       use, intrinsic :: iso_c_binding
       implicit none
 
       type(dataset), pointer, intent(in) :: item
-      real(c_float), intent(in) :: dmedian
-      real(c_float), intent(out) :: sumP, sumN
-      integer(c_int64_t), intent(out) :: countP, countN
+      real(c_float), intent(in) :: dmedian(4)
+      real(c_float), intent(out) :: sumP(4), sumN(4)
+      integer(c_int64_t), intent(out) :: countP(4), countN(4)
       integer, intent(in) :: first, last ! FITS data cube frame range
-      integer, value, optional :: plane
+
+      integer :: k, max_planes
 
       integer :: max_threads, frame
       integer(c_int) :: width, height
-      real(c_float) :: thread_sumP, thread_sumN
-      integer(c_int64_t) :: thread_countP, thread_countN
+      real(c_float) :: thread_sumP(4), thread_sumN(4)
+      integer(c_int64_t) :: thread_countP(4), thread_countN(4)
 
-      if (.not. present(plane)) plane = 1
+      ! take max_planes from the item pixels
+      max_planes = size(item%pixels, 3)
 
       sumP = 0.0
       countP = 0
@@ -6262,20 +6264,20 @@ contains
 
       ! iterate through all the available planes
       !$omp PARALLEL DEFAULT(SHARED) SHARED(item)&
-      !$omp& PRIVATE(frame)&
+      !$omp& PRIVATE(frame, k)&
       !$omp& REDUCTION(+:thread_sumP,thread_countP)&
       !$omp& REDUCTION(+:thread_sumN,thread_countN)&
       !$omp& NUM_THREADS(max_threads)
       !$omp DO
       do frame = first, last
+         do k = 1, max_planes
+            ! skip frames for which there is no data on this node
+            if (.not. associated(item%compressed(frame, k)%ptr)) cycle
 
-         ! skip frames for which there is no data on this node
-         if (.not. associated(item%compressed(frame, plane)%ptr)) cycle
-
-         ! call Intel SPMD C
-         call make_global_statistics(c_loc(item%compressed(frame, plane)%ptr), width, height,&
-         &dmedian, thread_sumP, thread_countP, thread_sumN, thread_countN)
-
+            ! call Intel SPMD C
+            call make_global_statistics(c_loc(item%compressed(frame, k)%ptr), width, height,&
+            &dmedian(k), thread_sumP(k), thread_countP(k), thread_sumN(k), thread_countN(k))
+         end do
       end do
       !$omp END DO
       !$omp END PARALLEL
@@ -9424,8 +9426,8 @@ contains
       type(c_ptr) :: pid
       integer(kind=c_int) :: rc
 
-      real(c_float) :: sumP, sumN
-      integer(c_int64_t) :: countP, countN
+      real(c_float) :: sumP(4), sumN(4)
+      integer(c_int64_t) :: countP(4), countN(4)
 
       if (.not. c_associated(arg)) return
       call c_f_pointer(arg, item)
