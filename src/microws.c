@@ -1650,18 +1650,6 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                 req->flux = NULL;
                 req->len = 0;
 
-                // lock the stat mutex
-                pthread_mutex_lock(&session->stat_mtx);
-
-                req->dmin = session->dmin;
-                req->dmax = session->dmax;
-                req->dmedian = session->dmedian;
-                req->dmadN = session->dmadN;
-                req->dmadP = session->dmadP;
-
-                // unlock the stat mutex
-                pthread_mutex_unlock(&session->stat_mtx);
-
                 req->width = session->image_width;
                 req->height = session->image_height;
                 req->downsize = session->bDownsize;
@@ -1717,6 +1705,18 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                     if (strncmp(frame_data + koff, "\"timestamp\"", klen) == 0)
                         req->timestamp = atof2(frame_data + voff, vlen);
                 }
+
+                // lock the stat mutex
+                pthread_mutex_lock(&session->stat_mtx);
+
+                req->dmin = session->dmin[req->plane - 1];
+                req->dmax = session->dmax[req->plane - 1];
+                req->dmedian = session->dmedian[req->plane - 1];
+                req->dmadN = session->dmadN[req->plane - 1];
+                req->dmadP = session->dmadP[req->plane - 1];
+
+                // unlock the stat mutex
+                pthread_mutex_unlock(&session->stat_mtx);
 
                 // get the video frame index
                 int frame_idx;
@@ -1910,11 +1910,11 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                     // RGB
                     req->ptr[req->va_count] = item;
                     req->frame[req->va_count] = frame_idx;
-                    req->dmin[req->va_count] = _session->dmin;
-                    req->dmax[req->va_count] = _session->dmax;
-                    req->dmedian[req->va_count] = _session->dmedian;
-                    req->dmadN[req->va_count] = _session->dmadN;
-                    req->dmadP[req->va_count] = _session->dmadP;
+                    req->dmin[req->va_count] = _session->dmin[0];
+                    req->dmax[req->va_count] = _session->dmax[0];
+                    req->dmedian[req->va_count] = _session->dmedian[0];
+                    req->dmadN[req->va_count] = _session->dmadN[0];
+                    req->dmadP[req->va_count] = _session->dmadP[0];
                     req->va_count++; // increment the channel count
                 }
 
@@ -2591,11 +2591,11 @@ on_ws_connection(void *cls,
                 session->send_queue = g_async_queue_new_full(free_queue_item);
 
                 session->flux = NULL;
-                session->dmin = NAN;
-                session->dmax = NAN;
-                session->dmedian = NAN;
-                session->dmadN = NAN;
-                session->dmadP = NAN;
+                memcpy(session->dmin, (float[]){NAN, NAN, NAN, NAN}, sizeof(session->dmin));
+                memcpy(session->dmax, (float[]){NAN, NAN, NAN, NAN}, sizeof(session->dmax));
+                memcpy(session->dmedian, (float[]){NAN, NAN, NAN, NAN}, sizeof(session->dmedian));
+                memcpy(session->dmadN, (float[]){NAN, NAN, NAN, NAN}, sizeof(session->dmadN));
+                memcpy(session->dmadP, (float[]){NAN, NAN, NAN, NAN}, sizeof(session->dmadP));
                 pthread_mutex_init(&session->stat_mtx, NULL);
 
                 session->image_width = 0;
@@ -4200,7 +4200,7 @@ void *ws_image_spectrum_response(void *ptr)
 #endif
     }
 
-    if (offset == read_offset + 5 * sizeof(float))
+    if (offset == read_offset + sizeof(session->dmin) + sizeof(session->dmax) + sizeof(session->dmedian) + sizeof(session->dmadN) + sizeof(session->dmadP))
     {
         printf("[C] extra video tone mapping information detected.\n");
 
@@ -4208,20 +4208,20 @@ void *ws_image_spectrum_response(void *ptr)
         pthread_mutex_lock(&session->stat_mtx);
 
         // copy the statistics
-        memcpy(&(session->dmin), buf + read_offset, sizeof(float));
-        read_offset += sizeof(float);
+        memcpy(session->dmin, buf + read_offset, sizeof(session->dmin));
+        read_offset += sizeof(session->dmin);
 
-        memcpy(&(session->dmax), buf + read_offset, sizeof(float));
-        read_offset += sizeof(float);
+        memcpy(session->dmax, buf + read_offset, sizeof(session->dmax));
+        read_offset += sizeof(session->dmax);
 
-        memcpy(&(session->dmedian), buf + read_offset, sizeof(float));
-        read_offset += sizeof(float);
+        memcpy(session->dmedian, buf + read_offset, sizeof(session->dmedian));
+        read_offset += sizeof(session->dmedian);
 
-        memcpy(&(session->dmadN), buf + read_offset, sizeof(float));
-        read_offset += sizeof(float);
+        memcpy(session->dmadN, buf + read_offset, sizeof(session->dmadN));
+        read_offset += sizeof(session->dmadN);
 
-        memcpy(&(session->dmadP), buf + read_offset, sizeof(float));
-        read_offset += sizeof(float);
+        memcpy(session->dmadP, buf + read_offset, sizeof(session->dmadP));
+        read_offset += sizeof(session->dmadP);
 
         // unlock the stat mutex
         pthread_mutex_unlock(&session->stat_mtx);
