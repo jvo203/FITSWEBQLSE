@@ -9916,14 +9916,12 @@ contains
 
    end subroutine send_ws_composite_video
 
-   subroutine fill_global_statistics(ptr, dmin, dmax, dmedian, dmadN, dmadP, plane) BIND(C, name='fill_global_statistics')
+   subroutine fill_global_statistics(ptr, dmin, dmax, dmedian, dmadN, dmadP) BIND(C, name='fill_global_statistics')
       use, intrinsic :: iso_c_binding
       implicit none
 
       type(C_PTR), intent(in), value :: ptr
-      real(kind=c_float), intent(out) :: dmin, dmax, dmedian
-      real(kind=c_float), intent(out) :: dmadN, dmadP
-      integer(kind=c_int), intent(in), value :: plane
+      real(kind=c_float), intent(out) :: dmin(4), dmax(4), dmedian(4), dmadN(4), dmadP(4)
 
       type(dataset), pointer :: item
 
@@ -9931,8 +9929,8 @@ contains
 
       call c_f_pointer(ptr, item)
 
-      dmin = item%dmin(plane)
-      dmax = item%dmax(plane)
+      dmin = item%dmin
+      dmax = item%dmax
       dmedian = item%dmedian
       dmadN = item%dmadN
       dmadP = item%dmadP
