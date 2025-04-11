@@ -1624,10 +1624,10 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
 
                 // check if the session video tone mapping has been filled already
                 // if not, fetch the global data statistics from FORTRAN
-                if (isnan(session->dmin) || isnan(session->dmax) || isnan(session->dmedian) || isnan(session->dmadN) || isnan(session->dmadP))
+                if (isnan(session->dmin[0]) || isnan(session->dmax[0]) || isnan(session->dmedian[0]) || isnan(session->dmadN[0]) || isnan(session->dmadP[0]))
                 {
                     printf("[C] calling 'fill_global_statistics(...)'\n");
-                    fill_global_statistics(item, &(session->dmin), &(session->dmax), &(session->dmedian), &(session->dmadN), &(session->dmadP), 1);
+                    fill_global_statistics(item, session->dmin, session->dmax, session->dmedian, session->dmadN, session->dmadP);
                 }
 
                 struct video_request *req = (struct video_request *)malloc(sizeof(struct video_request));
@@ -1888,10 +1888,10 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
 
                     // check if the session video tone mapping has been filled already
                     // if not, fetch the global data statistics from FORTRAN
-                    if (isnan(_session->dmin) || isnan(_session->dmax) || isnan(_session->dmedian) || isnan(_session->dmadN) || isnan(_session->dmadP))
+                    if (isnan(_session->dmin[0]) || isnan(_session->dmax[0]) || isnan(_session->dmedian[0]) || isnan(_session->dmadN[0]) || isnan(_session->dmadP[0]))
                     {
                         printf("[C] calling 'fill_global_statistics(...)'\n");
-                        fill_global_statistics(item, &(_session->dmin), &(_session->dmax), &(_session->dmedian), &(_session->dmadN), &(_session->dmadP), 1);
+                        fill_global_statistics(item, _session->dmin, _session->dmax, _session->dmedian, _session->dmadN, _session->dmadP);
                     }
 
                     // get the video frame index

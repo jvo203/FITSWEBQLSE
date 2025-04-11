@@ -64,8 +64,7 @@ typedef struct
     pthread_mutex_t send_mutex;
 
     char *flux;
-    float dmin, dmax, dmedian;
-    float dmadN, dmadP;
+    float dmin[4], dmax[4], dmedian[4], dmadN[4], dmadP[4];
     pthread_mutex_t stat_mtx;
 
     int image_width;
