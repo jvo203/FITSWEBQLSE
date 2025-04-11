@@ -6756,11 +6756,12 @@ void write_partial_statistics(int fd, const float *sumP, const int64_t *countP, 
 
 void write_statistics(int fd, float *dmin, float *dmax, float *dmedian, float *dmadN, float *dmadP)
 {
-    chunked_write(fd, (const char *)dmin, sizeof(float));
-    chunked_write(fd, (const char *)dmax, sizeof(float));
-    chunked_write(fd, (const char *)dmedian, sizeof(float));
-    chunked_write(fd, (const char *)dmadN, sizeof(float));
-    chunked_write(fd, (const char *)dmadP, sizeof(float));
+    // there are 4 floats in the statistics arrays
+    chunked_write(fd, (const char *)dmin, 4 * sizeof(float));
+    chunked_write(fd, (const char *)dmax, 4 * sizeof(float));
+    chunked_write(fd, (const char *)dmedian, 4 * sizeof(float));
+    chunked_write(fd, (const char *)dmadN, 4 * sizeof(float));
+    chunked_write(fd, (const char *)dmadP, 4 * sizeof(float));
 }
 
 void write_histogram(int fd, const int *hist, int n)

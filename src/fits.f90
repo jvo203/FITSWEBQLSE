@@ -1278,16 +1278,14 @@ module fits
          integer(c_int64_t), intent(in) :: countP, countN
       end subroutine write_partial_statistics
 
-      ! void write_statistics(int fd, float *dmin, float *dmax, float *dmedian,&
-      !  float *dmadN, float *dmadP)
+      ! void write_statistics(int fd, float *dmin, float *dmax, float *dmedian, float *dmadN, float *dmadP)
       subroutine write_statistics(fd, dmin, dmax, dmedian, dmadN, dmadP)&
       & BIND(C, name='write_statistics')
          use, intrinsic :: ISO_C_BINDING
          implicit none
 
          integer(c_int), value, intent(in) :: fd
-         real(c_float), intent(in) :: dmin, dmax, dmedian
-         real(c_float), intent(in) :: dmadN, dmadP
+         real(c_float), intent(in) :: dmin(4), dmax(4), dmedian(4), dmadN(4), dmadP(4)
       end subroutine write_statistics
 
       subroutine write_spectrum(fd, no_planes, spectrum, n, prec) BIND(C, name='write_spectrum')
@@ -11118,15 +11116,15 @@ contains
 
       ! regenerate the video tone mapping global statistics
       real(c_float) :: dmin(4), dmax(4), dmedian(4)
-      real(c_float) :: dmad, dmadP, dmadN
+      real(c_float) :: dmad(4), dmadP(4), dmadN(40)
 
       ! accumulators, counters
-      real(c_float) :: sumP, sumN
-      integer(c_int64_t) :: countP, countN
+      real(c_float) :: sumP(4), sumN(4)
+      integer(c_int64_t) :: countP(4), countN(4)
 
       ! OpenMP thread-local variables
-      real(c_float) :: thread_sumP, thread_sumN
-      integer(c_int64_t) :: thread_countP, thread_countN
+      real(c_float) :: thread_sumP(4), thread_sumN(4)
+      integer(c_int64_t) :: thread_countP(4), thread_countN(4)
 
       ! cluster
       type(image_spectrum_request_t), target :: cluster_req
@@ -11277,7 +11275,7 @@ contains
             &width, height, item%frame_min(frame, k), item%frame_max(frame, k),&
             &c_loc(thread_pixels(:, k, tid)), c_loc(thread_mask(:, tid)), dimx, &
             &req%x1 - 1, req%x2 - 1, req%y1 - 1, req%y2 - 1, 0, 0, average, cdelt3,&
-            &dmedian(k), thread_sumP, thread_countP, thread_sumN, thread_countN)
+            &dmedian(k), thread_sumP(k), thread_countP(k), thread_sumN(k), thread_countN(k))
          end do
       end do
       !$omp END DO
