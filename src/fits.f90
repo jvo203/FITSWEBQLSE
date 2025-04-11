@@ -6205,9 +6205,9 @@ contains
       implicit none
 
       type(C_PTR), intent(in), value :: ptr
-      real(c_float), intent(in), value :: dmedian
-      real(c_float), intent(out) :: sumP, sumN
-      integer(c_int64_t), intent(out) :: countP, countN
+      real(c_float), intent(in) :: dmedian(4)
+      real(c_float), intent(out) :: sumP(4), sumN(4)
+      integer(c_int64_t), intent(out) :: countP(4), countN(4)
       integer(c_int), intent(in), value :: first, last
 
       type(dataset), pointer :: item
