@@ -11106,8 +11106,9 @@ contains
       integer(c_int) :: precision
       real :: scale
 
-      type(resize_task_t), target :: task
-      type(c_ptr) :: task_pid
+      type(resize_task_t), target :: pixels_task(4)
+      type(c_ptr) :: pixels_pid(4)
+      integer(kind=c_int) :: pixels_rc(4)
 
       ! image histogram
       integer(kind=c_int), target :: hist(NBINS, 4) ! up to 4 planes
@@ -11334,30 +11335,33 @@ contains
          allocate (view_pixels(img_width, img_height, max_planes))
          allocate (view_mask(img_width, img_height))
 
-         task%pSrc = c_loc(pixels)
-         task%srcWidth = item%naxes(1)
-         task%srcHeight = item%naxes(2)
+         do i = 1, max_planes
+            pixels_task(i)%pSrc = c_loc(pixels(:, i))
+            pixels_task(i)%srcWidth = item%naxes(1)
+            pixels_task(i)%srcHeight = item%naxes(2)
 
-         task%pDest = c_loc(view_pixels)
-         task%dstWidth = img_width
-         task%dstHeight = img_height
+            pixels_task(i)%pDest = c_loc(view_pixels(:, :, i))
+            pixels_task(i)%dstWidth = img_width
+            pixels_task(i)%dstHeight = img_height
 
-         if (scale .gt. 0.2) then
-            task%numLobes = 3
-            ! call resizeLanczos(c_loc(pixels), item%naxes(1), item%naxes(2), c_loc(view_pixels), img_width, img_height, 3)
-         else
-            task%numLobes = 0
-            ! call resizeSuper(c_loc(pixels), item%naxes(1), item%naxes(2), c_loc(view_pixels), img_width, img_height)
-         end if
+            if (scale .gt. 0.2) then
+               pixels_task(i)%numLobes = 3
+            else
+               pixels_task(i)%numLobes = 0
+            end if
 
-         ! launch a pthread to resize pixels
-         task_pid = my_pthread_create(start_routine=c_funloc(launch_resize_task), arg=c_loc(task), rc=rc)
+            ! launch a pthread to resize pixels
+            pixels_pid(i) = my_pthread_create(start_routine=c_funloc(launch_resize_task),&
+            & arg=c_loc(pixels_task(i)), rc=pixels_rc(i))
+         end do
 
          call resizeNearest(c_loc(mask), item%naxes(1), item%naxes(2), c_loc(view_mask), img_width, img_height)
          ! call resizeMask(mask, item%naxes(1), item%naxes(2), view_mask, img_width, img_height)
 
-         ! join a thread
-         rc = my_pthread_join(task_pid)
+         ! join pixels thread(s)
+         do i = 1, max_planes
+            rc = my_pthread_join(pixels_pid(i))
+         end do
       else
          img_width = item%naxes(1)
          img_height = item%naxes(2)
