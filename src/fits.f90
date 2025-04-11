@@ -9427,6 +9427,8 @@ contains
       real(c_float) :: sumP(4), sumN(4)
       integer(c_int64_t) :: countP(4), countN(4)
 
+      integer :: i
+
       if (.not. c_associated(arg)) return
       call c_f_pointer(arg, item)
 
@@ -9462,19 +9464,21 @@ contains
 
       print *, "final statistics... sumP", sumP, ", countP", countP, ", sumN", sumN, ", countN", countN
 
-      if (countP + countN .gt. 0) item%dmad = (sumP + sumN)/real(countP + countN)
+      do i = 1,4
+         if (countP(i) + countN(i) .gt. 0) item%dmad(i) = (sumP(i) + sumN(i))/real(countP(i) + countN(i))
 
-      if (countP .gt. 0) then
-         item%dmadP = sumP/real(countP)
-      else
-         item%dmadP = item%dmad
-      end if
+         if (countP(i) .gt. 0) then
+            item%dmadP(i) = sumP(i)/real(countP(i))
+         else
+            item%dmadP(i) = item%dmad(i)
+         end if
 
-      if (countN .gt. 0) then
-         item%dmadN = sumN/real(countN)
-      else
-         item%dmadN = item%dmad
-      end if
+         if (countN(i) .gt. 0) then
+            item%dmadN(i) = sumN(i)/real(countN(i))
+         else
+            item%dmadN(i) = item%dmad(i)
+         end if
+      end do
 
       call set_video_status(item, .true.)
 
@@ -11299,23 +11303,27 @@ contains
 
       print *, "final statistics... sumP", sumP, ", countP", countP, ", sumN", sumN, ", countN", countN
 
-      if (countP + countN .gt. 0) then
-         dmad = (sumP + sumN)/real(countP + countN)
-      else
-         dmad = ieee_value(0.0, ieee_quiet_nan)
-      end if
+      dmad = ieee_value(0.0, ieee_quiet_nan)
+      dmadP = ieee_value(0.0, ieee_quiet_nan)
+      dmadN = ieee_value(0.0, ieee_quiet_nan)
 
-      if (countP .gt. 0) then
-         dmadP = sumP/real(countP)
-      else
-         dmadP = dmad
-      end if
+      do k = 1, max_planes
+         if (countP(k) + countN(k) .gt. 0) then
+            dmad(k) = (sumP(k) + sumN(k))/real(countP(k) + countN(k))
+         end if
 
-      if (countN .gt. 0) then
-         dmadN = sumN/real(countN)
-      else
-         dmadN = dmad
-      end if
+         if (countP(k) .gt. 0) then
+            dmadP(k) = sumP(k)/real(countP(k))
+         else
+            dmadP(k) = dmad(k)
+         end if
+
+         if (countN(k) .gt. 0) then
+            dmadN(k) = sumN(k)/real(countN(k))
+         else
+            dmadN(k) = dmad(k)
+         end if
+      end do
 
       ! combine the spectra from other cluster nodes (if any)
       if (cluster_req%valid) spectrum = spectrum + cluster_spectrum
