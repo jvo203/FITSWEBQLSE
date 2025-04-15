@@ -3990,7 +3990,7 @@ void *ws_image_spectrum_response(void *ptr)
     if (n < 0)
         printf("[C] PIPE_END_WITH_ERROR\n");
 
-    // <offset> contains the number of valid bytes in <buf>
+    // <offset> contains the number of valid bytes in <buf> max_planes
     if (offset < sizeof(uint32_t))
         goto free_image_spectrum_mem;
 
@@ -4006,6 +4006,7 @@ void *ws_image_spectrum_response(void *ptr)
     // image + histogram
     uint32_t max_planes = 0;
     uint32_t flux_len = 0;
+    uint32_t cumulative_flux_len = 0;
     uint32_t pixels_len = 0;
     uint32_t mask_len = 0;
     uint32_t hist_len = 0;
@@ -4017,10 +4018,20 @@ void *ws_image_spectrum_response(void *ptr)
     memcpy(&max_planes, buf + read_offset, sizeof(uint32_t));
     read_offset += sizeof(uint32_t);
 
-    memcpy(&flux_len, buf + read_offset, sizeof(uint32_t));
-    read_offset += sizeof(uint32_t);
+    // there will be <max_planes> tone mappings to skip
+    for (int i = 0; i < max_planes; i++)
+    {
+        if (offset < read_offset + sizeof(uint32_t))
+            goto free_image_spectrum_session;
 
-    read_offset += flux_len + 7 * sizeof(float) + 2 * sizeof(uint32_t);
+        memcpy(&flux_len, buf + read_offset, sizeof(uint32_t));
+        read_offset += sizeof(uint32_t);
+        cumulative_flux_len += flux_len;
+
+        read_offset += flux_len + 7 * sizeof(float); // flux + 7 * float tone mapping parameters
+    }
+
+    read_offset += 2 * sizeof(uint32_t); // img_width, img_height
 
     if (offset < read_offset + sizeof(uint32_t))
         goto free_image_spectrum_session;
@@ -4076,7 +4087,7 @@ void *ws_image_spectrum_response(void *ptr)
         ws_offset += sizeof(uint32_t);
 
         // fill-in the content up to pixels/mask
-        write_offset = 2 * sizeof(uint32_t) + flux_len + 7 * sizeof(float) + 2 * sizeof(uint32_t) + sizeof(uint32_t) + pixels_len + sizeof(uint32_t) + mask_len;
+        write_offset = sizeof(uint32_t) + max_planes * sizeof(uint32_t) + (size_t)cumulative_flux_len + max_planes * 7 * sizeof(float) + 2 * sizeof(uint32_t) + sizeof(uint32_t) + pixels_len + sizeof(uint32_t) + mask_len;
         memcpy((char *)image_payload + ws_offset, buf, write_offset);
         ws_offset += write_offset;
 
