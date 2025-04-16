@@ -4259,7 +4259,7 @@ contains
 
       !  Check that it found at least both NAXIS1 and NAXIS2 keywords.
       ! HDS only has 1 axis, so we need to check for NAXIS1
-      if (naxis .lt. 2) then
+      if (naxis .lt. 1) then
          print *, 'READIMAGE failed to read the NAXISn keywords.'
          call set_error_status(item, .true.)
 

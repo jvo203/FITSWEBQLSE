@@ -1457,7 +1457,7 @@ static void *handle_url_download(void *arg)
             stream.bitpix = 0;
             stream.naxis = 0;
             stream.naxes[0] = 0;
-            stream.naxes[1] = 0;
+            stream.naxes[1] = 1;
             stream.naxes[2] = 1;
             stream.naxes[3] = 1;
 
