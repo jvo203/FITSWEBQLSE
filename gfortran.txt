@@ -27,9 +27,9 @@ src/fixed_array.f90:122:24:
       |                        1
 Error: Reference to impure function at (1) inside a DO CONCURRENT
 
-This has never happened before. The code used to compile fine prior gfortran versions 10, 11, 12, 13 and 14.
+This has never happened before. The code used to compile fine with prior gfortran versions 10, 11, 12, 13 and 14.
 
-Is this a bug in the new gfortran v15 series or is this a deliberate design decision made by gfortran developers? Could this be fixed in the gfortran 15.1?
+Is this a bug in the new gfortran v15 series or is this a deliberate design decision made by gfortran developers? Would this be fixed in the gfortran 15.1?
 
 Regards,
 Christopher Zapart
