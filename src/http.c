@@ -792,7 +792,7 @@ bool scan_fits_header(struct FITSDownloadStream *stream)
 
 void scan_fits_data(struct FITSDownloadStream *stream)
 {
-    if (stream->frame == stream->naxes[2])
+    if (stream->frame == stream->naxes[2] * stream->naxes[3])
     {
         printf("[C] scan_fits_data:\tend of the stream.\n");
         return; // there is no more work to do
