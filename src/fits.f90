@@ -4268,6 +4268,9 @@ contains
          return
       end if
 
+      ! force the second dimension to be 1 for 1D images (e.g. spectra)
+      if (naxis .eq. 1) naxes(2) = 1
+
       ! detect the FITS header types and units (frequency, velocity)
       call frame_reference_type(item)
       call frame_reference_unit(item)
