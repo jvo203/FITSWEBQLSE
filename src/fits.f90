@@ -4286,12 +4286,16 @@ contains
       ! reset the progress
       ! progress is being handled differently for URL-based datasets
       ! the total is now given by the number of pixels in the FITS file
-      npixels = naxes(1)*naxes(2)
-
-      if (naxis .eq. 2 .or. naxes(3) .eq. 1) then
-         ! do nothing
+      if (naxis .eq. 1) then
+         npixels = naxes(1)
+      else if (naxis .eq. 2) then
+         npixels = naxes(1)*naxes(2)
+      else if (naxis .eq. 3) then
+         npixels = naxes(1)*naxes(2)*naxes(3)
+      else if (naxis .eq. 4) then
+         npixels = naxes(1)*naxes(2)*naxes(3)*naxes(4)
       else
-         npixels = npixels*naxes(3)
+         npixels = 0
       end if
 
       item%filesize = filesize
