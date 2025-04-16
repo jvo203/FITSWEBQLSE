@@ -5176,8 +5176,8 @@ contains
       ! print *, 'frame', frame, 'min', frame_min, 'max', frame_max,&
       ! & 'mean_spec_val', mean_spec_val, 'int_spec_val', int_spec_val
 
-      ! a 2D image only
-      if (item%naxis .eq. 2 .or. item%naxes(3) .eq. 1) then
+      ! a 1D HDS spectrum or a 2D image
+      if (item%naxis .eq. 1 .or. item%naxis .eq. 2 .or. item%naxes(3) .eq. 1) then
          item%dmin(plane) = frame_min
          item%dmax(plane) = frame_max
 
