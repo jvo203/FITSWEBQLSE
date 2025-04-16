@@ -1,0 +1,36 @@
+fortran@gcc.gnu.org
+
+After a recent upgrade from Fedora 41 to 42 the gfortran got updated from 14 to 15.0.1:
+[chris@fedora FITSWEBQLSE]$ gfortran --version
+GNU Fortran (GCC) 15.0.1 20250329 (Red Hat 15.0.1-0)
+
+The new version 15.0.1 seems to treat "shiftl" elemental intrinsic functions as IMPURE. As a consequence "shiftl" cannot be used inside DO CONCURRENT anymore:
+Error: Reference to impure function at (1) inside a DO CONCURRENT
+src/fixed_array.f90:118:27:
+
+  118 |             x1 = 1 + shiftl(i - 1, BASE)
+      |                           1
+Error: Reference to impure function at (1) inside a DO CONCURRENT
+src/fixed_array.f90:119:24:
+
+  119 |             x2 = min(n, shiftl(i, BASE))
+      |                        1
+Error: Reference to impure function at (1) inside a DO CONCURRENT
+src/fixed_array.f90:121:27:
+
+  121 |             y1 = 1 + shiftl(j - 1, BASE)
+      |                           1
+Error: Reference to impure function at (1) inside a DO CONCURRENT
+src/fixed_array.f90:122:24:
+
+  122 |             y2 = min(m, shiftl(j, BASE))
+      |                        1
+Error: Reference to impure function at (1) inside a DO CONCURRENT
+
+This has never happened before. The code used to compile fine prior gfortran versions 10, 11, 12, 13 and 14.
+
+Is this a bug in the new gfortran v15 series or is this a deliberate design decision made by gfortran developers? Could this be fixed in the gfortran 15.1?
+
+Regards,
+Christopher Zapart
+National Astronomical Observatory in Japan
