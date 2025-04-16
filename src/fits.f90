@@ -5036,8 +5036,8 @@ contains
       ! print *, 'frame', frame, 'min', frame_min, 'max', frame_max,&
       ! & 'mean_spec_val', mean_spec_val, 'int_spec_val', int_spec_val
 
-      ! a 2D image only
-      if (item%naxis .eq. 2 .or. item%naxes(3) .eq. 1) then
+      ! a 1D HDS spectrum or a 2D image
+      if (item%naxis .eq. 1 .or. item%naxis .eq. 2 .or. item%naxes(3) .eq. 1) then
          item%dmin = frame_min
          item%dmax = frame_max
 
@@ -5052,7 +5052,6 @@ contains
       end if
 
       ! a data cube
-
       item%frame_min(frame) = frame_min
       item%frame_max(frame) = frame_max
       item%frame_median(frame) = hist_median(pack(data, data_mask), frame_min, frame_max)
