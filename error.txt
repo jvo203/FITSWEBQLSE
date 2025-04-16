@@ -22,3 +22,23 @@
  PIPE-1.0_1d_nrmwec_fsclmo_HDSA00141935: closing the FITS file unit:         269
 [C] aborting http_propagate_timeout (no cluster nodes found)
 make: *** [Makefile:312: run] Segmentation fault (core dumped)
+
+Tue, 15 Apr 2025 17:27:10 JST	140.109.178.48	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36	GET	<URL>	HTTP/1.1	ALMA01566840
+Tue, 15 Apr 2025 17:32:04 JST	133.40.67.239	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3 Safari/605.1.15	GET	<URL>	HTTP/1.1	PIPE-1.0_1d_nrmwec_fsclmo_HDSA00143791.fits
+Tue, 15 Apr 2025 17:32:06 JST	133.40.67.239	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3 Safari/605.1.15	GET	<URL>	HTTP/1.1	PIPE-1.0_1d_nrmwec_fsclmo_HDSA00143791.fits
+Tue, 15 Apr 2025 18:01:18 JST	140.109.178.48	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36	GET	<URL>	HTTP/1.1	ALMB00169994
+Tue, 15 Apr 2025 18:01:53 JST	140.109.178.48	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36	GET	<URL>	HTTP/1.1	ALMA01098475
+Tue, 15 Apr 2025 18:03:21 JST	140.109.178.48	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36	GET	<URL>	HTTP/1.1	ALMA01085457
+Tue, 15 Apr 2025 18:29:07 JST	140.109.178.48	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36	GET	<URL>	HTTP/1.1	ALMA01566780
+Tue, 15 Apr 2025 18:30:37 JST	140.109.178.48	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36	GET	<URL>	HTTP/1.1	ALMA01566915
+Tue, 15 Apr 2025 18:48:15 JST	167.205.0.248	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36	GET	<URL>	HTTP/1.1	NROA00006543
+Tue, 15 Apr 2025 18:48:40 JST	167.205.0.248	Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36	GET	<URL>	HTTP/1.1	NROA00006543
+Tue, 15 Apr 2025 19:33:16 JST	193.80.205.170	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36	GET	<URL>	HTTP/1.1	ALMA01401864
+Tue, 15 Apr 2025 20:21:19 JST	130.62.64.226	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3 Safari/605.1.15	GET	<URL>	HTTP/1.1	PIPE-1.0_1d_nrmwec_fsclmo_HDSA00143791.fits
+Tue, 15 Apr 2025 20:23:16 JST	193.80.205.170	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36	GET	<URL>	HTTP/1.1	ALMA01446544
+Tue, 15 Apr 2025 21:55:14 JST	133.40.66.149	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.6 Safari/605.1.15	GET	<URL>	HTTP/1.1	ALMA01001267
+Tue, 15 Apr 2025 23:18:00 JST	130.62.64.226	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3 Safari/605.1.15	GET	<URL>	HTTP/1.1	PIPE-1.0_1d_nrmwec_fsclmo_HDSA00143791.fits
+Tue, 15 Apr 2025 23:25:08 JST	130.62.64.226	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3 Safari/605.1.15	GET	<URL>	HTTP/1.1	PIPE-1.0_rmwec_fsclmo_HDSA00143791.fits
+Tue, 15 Apr 2025 23:25:22 JST	130.62.64.226	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3 Safari/605.1.15	GET	<URL>	HTTP/1.1	PIPE-1.0_1d_nrmwec_fsclmo_HDSA00143791.fits
+Tue, 15 Apr 2025 23:37:15 JST	130.62.64.226	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3 Safari/605.1.15	GET	<URL>	HTTP/1.1	PIPE-1.0_1d_nrmwec_fsclmo_HDSA00143792.fits
+Tue, 15 Apr 2025 23:41:20 JST	130.62.64.226	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3 Safari/605.1.15	GET	http://jvo.nao.ac.jp/skynode/do/download/hds/public/file/PIPE-1.0_1d_nrmwec_fsclmo_HDSA00141935.fits	HTTP/1.1	PIPE-1.0_1d_nrmwec_fsclmo_HDSA00141935
