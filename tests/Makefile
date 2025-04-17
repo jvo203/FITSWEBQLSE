@@ -24,7 +24,8 @@ IFORT = ifx # ifort or ifx
 IFLAGS = -g -Ofast -xHost -axAVX -qopt-report=2 -qopenmp -mcmodel=large -parallel
 
 gcc:
-	$(FORT) $(FLAGS) -o intel_fixed_array intel_fixed_array.f90
+	$(FORT) $(FLAGS) -o test_concurrent_fixed_array test_concurrent_fixed_array.f90
+#$(FORT) $(FLAGS) -o intel_fixed_array intel_fixed_array.f90
 
 intel:
 	$(IFORT) $(IFLAGS) -o intel_fixed_array intel_fixed_array.f90

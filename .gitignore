@@ -9,6 +9,7 @@
 /test_fixed_array
 /*.dSYM
 /tests/intel_fixed_array
+/tests/test_concurrent_fixed_array
 /tests/num_overflow
 /tests/test_image_compression
 /tests/test_wcslib
