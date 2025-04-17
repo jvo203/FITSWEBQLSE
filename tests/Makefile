@@ -16,8 +16,7 @@ endif
 
 # GCC FORTRAN
 FORT = gfortran
-FLAGS = -march=native -g -Ofast -fPIC -fno-finite-math-only -funroll-loops -ftree-vectorize
-#  -fopenmp
+FLAGS = -march=native -g -Ofast -fPIC -fno-finite-math-only -funroll-loops -ftree-vectorize -fopenmp
 
 # Intel FORTRAN
 IFORT = ifx # ifort or ifx
@@ -34,8 +33,8 @@ intel:
 #rm -f intel_fixed_array
 
 # differential evolution
-FORT := flang-new
-FLAGS := -Ofast -flto -fopenmp
+#FORT := flang-new
+#FLAGS := -O3 -ffast-math -fstack-arrays -flto -fopenmp
 #=libomp
 #MOD := -I${HOMEBREW_PREFIX}/opt/libomp/include
 FLIBS := -L${HOMEBREW_PREFIX}/opt/llvm/lib -lomp

@@ -34,7 +34,7 @@ program main
 
    integer :: k
 
-   print *, "INTEL FORTRAN COMPILER TEST"
+   print *, "GFORTRAN COMPILER TEST"
 
    ! dynamically allocate the data
    allocate(data(nx,ny,nz))
@@ -51,7 +51,7 @@ program main
    !$omp PARALLEL DO DEFAULT(SHARED) SHARED(data, compressed_data) PRIVATE(k)
    do k = 1, nz
       ! convert the data cube to fixed-point
-      compressed_data(k)%ptr => to_fixed(data(:, :, k), 0.0, 1.0)
+      compressed_data(k)%ptr => to_fixed_concurrent(data(:, :, k), -1.0, 0.0, 1.0)
    end do
    !$omp END PARALLEL DO
 
@@ -61,13 +61,13 @@ program main
       call print_fixed_block(compressed_data(k)%ptr(1,1))
    end do
 contains
-   function to_fixed(x, datamin, datamax) result(compressed)
+   function to_fixed_concurrent(x, ignrval, datamin, datamax) result(compressed)
       use, intrinsic :: ieee_arithmetic
       implicit none
 
       integer(kind=4) :: n, m ! input dimensions
       real(kind=4), dimension(:, :), intent(in) :: x
-      real, intent(in) :: datamin, datamax
+      real, intent(in) :: ignrval, datamin, datamax
 
       integer(kind=4) :: i, j
 
@@ -91,8 +91,6 @@ contains
       allocate (compressed(cn, cm))
 
       do concurrent(j=1:cm, i=1:cn)
-         !do j = 1, cm
-         !   do i = 1, cn
          ! a block of <DIM> x <DIM> elements
          block
             real(kind=4), dimension(DIM, DIM) :: input
@@ -109,19 +107,18 @@ contains
 
             input(1:x2 - x1 + 1, 1:y2 - y1 + 1) = x(x1:x2, y1:y2)
 
-            call to_fixed_block(input, compressed(i, j), datamin, datamax)
+            call to_fixed_block(input, compressed(i, j), ignrval, datamin, datamax)
          end block
       end do
-      !end do
 
-   end function to_fixed
+   end function to_fixed_concurrent
 
-   pure subroutine to_fixed_block(x, compressed, datamin, datamax)
+   pure subroutine to_fixed_block(x, compressed, ignrval, datamin, datamax)
       use, intrinsic :: ieee_arithmetic
       implicit none
 
       real(kind=4), dimension(DIM, DIM), intent(inout) :: x
-      real, intent(in) :: datamin, datamax
+      real, intent(in) :: ignrval, datamin, datamax
 
       integer, dimension(DIM, DIM) :: e
 
@@ -137,7 +134,7 @@ contains
       integer :: i, j, pos
 
       !  pick out all the NaN
-      where (ieee_is_nan(x) .or. (x .lt. datamin) .or. (x .gt. datamax))
+      where (ieee_is_nan(x) .or. (x .le. ignrval) .or. (x .lt. datamin) .or. (x .gt. datamax))
          mask = .true.
       elsewhere
          mask = .false.
