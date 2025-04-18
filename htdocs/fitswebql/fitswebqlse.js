@@ -6145,6 +6145,11 @@ async function open_websocket_connection(_datasetId, index) {
                         offset += 4;
                         console.log("type: image, no_planes:", no_planes);
 
+                        if (no_planes != plane_count) {
+                            show_critical_error();
+                            return;
+                        }
+
                         var tone_mapping = new Object();
                         let p = 0.5;
                         tone_mapping.lmin = Math.log(p);
