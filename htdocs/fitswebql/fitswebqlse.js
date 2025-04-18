@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-03-15.0";
+    return "JS2025-03-16.0";
 }
 
 function uuidv4() {
@@ -191,6 +191,18 @@ function getUint64(dataview, byteOffset, littleEndian) {
         console.warn(combined, 'exceeds MAX_SAFE_INTEGER. Precision may be lost');
 
     return combined;
+}
+
+function getOStheme() {
+    // Detect the user's OS theme preference
+    const prefersDarkScheme = window.matchMedia("(prefers-color-scheme: dark)");
+
+    // Check if the user has set a preference for dark mode
+    if (prefersDarkScheme.matches) {
+        return "dark";
+    } else {
+        return "light";
+    }
 }
 
 var colours = ["red", "green", "lightblue"];
