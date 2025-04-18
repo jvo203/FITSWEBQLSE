@@ -6150,6 +6150,8 @@ async function open_websocket_connection(_datasetId, index) {
                             return;
                         }
 
+                        var tone_array = new Array(plane_count);
+
                         for (let i = 1; i <= plane_count; i++) {
                             let tone_mapping = new Object();
                             let p = 0.5;
@@ -6200,10 +6202,7 @@ async function open_websocket_connection(_datasetId, index) {
                                 }
                             }
 
-                            if (imageContainer[i - 1] != null) {
-                                // re-set the existing tone mapping settings
-                                imageContainer[i - 1].tone_mapping = tone_mapping;
-                            }
+                            tone_array[i - 1] = tone_mapping;
                         }
 
                         // next receive/process the 32-bit floating-point image frame
@@ -6247,10 +6246,24 @@ async function open_websocket_connection(_datasetId, index) {
 
                             // console.log("image width: ", img_width, "height: ", img_height, "elapsed: ", elapsed, "[ms]");
 
-                            process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index);
+                            if (!spectrum_view) {
+                                var StokesP = new Array(plane_count);
 
-                            if (displayContours)
-                                update_contours();
+                                if (plane_count > 1) {
+                                    for (let i = 0; i < plane_count; i++) {
+                                        // extract each plane from pixels
+                                        let pixels_i = pixels.slice(i * img_width * img_height, (i + 1) * img_width * img_height);
+                                        process_hdr_image(img_width, img_height, pixels_i, alpha, tone_array[i], i + 1);
+                                        StokesP[i] = pixels_i;
+                                    }
+                                } else {
+                                    // no need to slice a single pixels array
+                                    process_hdr_image(img_width, img_height, pixels, alpha, tone_array[0], index);
+                                }
+
+                                if (displayContours)
+                                    update_contours();
+                            }
                         }
 
                         let padding = 4 - offset % 4;
