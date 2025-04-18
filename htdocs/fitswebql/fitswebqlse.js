@@ -6150,55 +6150,60 @@ async function open_websocket_connection(_datasetId, index) {
                             return;
                         }
 
-                        var tone_mapping = new Object();
-                        let p = 0.5;
-                        tone_mapping.lmin = Math.log(p);
-                        tone_mapping.lmax = Math.log(p + 1.0);
+                        for (let i = 1; i <= plane_count; i++) {
+                            let tone_mapping = new Object();
+                            let p = 0.5;
+                            tone_mapping.lmin = Math.log(p);
+                            tone_mapping.lmax = Math.log(p + 1.0);
 
-                        let str_length = dv.getUint32(offset, endianness);
-                        offset += 4;
+                            let str_length = dv.getUint32(offset, endianness);
+                            offset += 4;
 
-                        let flux = new Uint8Array(received_msg, offset, str_length);
-                        tone_mapping.flux = (new TextDecoder("utf-8").decode(flux)).trim();
-                        offset += str_length;
+                            let flux = new Uint8Array(received_msg, offset, str_length);
+                            tone_mapping.flux = (new TextDecoder("utf-8").decode(flux)).trim();
+                            offset += str_length;
 
-                        tone_mapping.min = dv.getFloat32(offset, endianness);
-                        offset += 4;
+                            tone_mapping.min = dv.getFloat32(offset, endianness);
+                            offset += 4;
 
-                        tone_mapping.max = dv.getFloat32(offset, endianness);
-                        offset += 4;
+                            tone_mapping.max = dv.getFloat32(offset, endianness);
+                            offset += 4;
 
-                        tone_mapping.median = dv.getFloat32(offset, endianness);
-                        offset += 4;
+                            tone_mapping.median = dv.getFloat32(offset, endianness);
+                            offset += 4;
 
-                        tone_mapping.sensitivity = dv.getFloat32(offset, endianness);
-                        offset += 4;
+                            tone_mapping.sensitivity = dv.getFloat32(offset, endianness);
+                            offset += 4;
 
-                        tone_mapping.ratio_sensitivity = dv.getFloat32(offset, endianness);
-                        offset += 4;
+                            tone_mapping.ratio_sensitivity = dv.getFloat32(offset, endianness);
+                            offset += 4;
 
-                        tone_mapping.white = dv.getFloat32(offset, endianness);
-                        offset += 4;
+                            tone_mapping.white = dv.getFloat32(offset, endianness);
+                            offset += 4;
 
-                        tone_mapping.black = dv.getFloat32(offset, endianness);
-                        offset += 4;
+                            tone_mapping.black = dv.getFloat32(offset, endianness);
+                            offset += 4;
 
-                        if (tone_mapping.flux == "legacy") {
-                            tone_mapping.black = tone_mapping.min;
-                            tone_mapping.white = tone_mapping.max;
-                        }
+                            if (tone_mapping.flux == "legacy") {
+                                tone_mapping.black = tone_mapping.min;
+                                tone_mapping.white = tone_mapping.max;
+                            }
 
-                        // console.log(tone_mapping);
+                            console.log("polarisation plane:", i, "tone mapping:", tone_mapping);
 
-                        let currentFlux = document.getElementById('flux' + index).value;
+                            if (i == previous_plane) {
+                                console.log("previous_plane:", previous_plane, "tone_mapping:", tone_mapping);
+                                let currentFlux = document.getElementById('flux' + index).value;
 
-                        if (currentFlux != tone_mapping.flux) {
-                            document.getElementById('flux' + index).value = tone_mapping.flux;
-                        }
+                                if (currentFlux != tone_mapping.flux) {
+                                    document.getElementById('flux' + index).value = tone_mapping.flux;
+                                }
+                            }
 
-                        if (imageContainer[index - 1] != null) {
-                            // re-set the existing tone mapping settings
-                            imageContainer[index - 1].tone_mapping = tone_mapping;
+                            if (imageContainer[i - 1] != null) {
+                                // re-set the existing tone mapping settings
+                                imageContainer[i - 1].tone_mapping = tone_mapping;
+                            }
                         }
 
                         // next receive/process the 32-bit floating-point image frame
@@ -6208,12 +6213,12 @@ async function open_websocket_connection(_datasetId, index) {
                         var img_height = dv.getUint32(offset, endianness);
                         offset += 4;
 
-                        //console.log('img_width:', img_width, 'img_height:', img_height);
+                        // console.log('img_width:', img_width, 'img_height:', img_height);
 
                         var pixels_length = dv.getUint32(offset, endianness);
                         offset += 4;
 
-                        //console.log('pixels length:', pixels_length);
+                        // console.log('pixels length:', pixels_length);
 
                         var frame_pixels = new Uint8Array(received_msg, offset, pixels_length);
                         offset += pixels_length;
@@ -6221,7 +6226,7 @@ async function open_websocket_connection(_datasetId, index) {
                         var mask_length = dv.getUint32(offset, endianness);
                         offset += 4;
 
-                        //console.log('mask length:', mask_length);
+                        // console.log('mask length:', mask_length);
 
                         var frame_mask = new Uint8Array(received_msg, offset, mask_length);
                         offset += mask_length;
