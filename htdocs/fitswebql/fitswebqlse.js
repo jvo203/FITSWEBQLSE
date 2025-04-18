@@ -6277,7 +6277,15 @@ async function open_websocket_connection(_datasetId, index) {
                         var histogram = new Int32Array(received_msg, offset, nbins);
                         offset += nbins * 4;
 
-                        fitsContainer[index - 1].histogram = histogram;
+                        if (plane_count > 1) {
+                            nbins = histogram.length / plane_count;
+
+                            for (let i = 0; i < plane_count; i++) {
+                                fitsContainer[i].histogram = histogram.slice(i * nbins, (i + 1) * nbins);
+                            }
+                        } else {
+                            fitsContainer[index - 1].histogram = histogram;
+                        }
 
                         //refresh the histogram
                         redraw_histogram(index);
