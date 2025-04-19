@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-03-16.0";
+    return "JS2025-03-19.0";
 }
 
 function uuidv4() {
@@ -201,7 +201,7 @@ function getOStheme() {
     if (prefersDarkScheme.matches) {
         return "dark";
     } else {
-        return "light";
+        return "bright";
     }
 }
 
@@ -21117,20 +21117,17 @@ async function mainRenderer() {
     console.log('endianness: ', endianness);
 
     if (localStorage.getItem("ui_theme") === null) {
-        //if(isLocal)
-        {
-            /*theme = "bright" ;
-            colourmap = "haxby" ;*/
+        theme = getOStheme();
 
-            theme = "dark";
+
+        if (theme == "dark") {
             colourmap = "green";
             axisColour = "rgba(255,204,0,0.8)";
         }
-        /*else
-        {
-          theme = "dark" ;
-          colourmap = "green" ;
-        }*/
+        else {
+            colourmap = "haxby";
+            axisColour = "#000000";
+        }
 
         localStorage.setItem("ui_theme", theme);
         localStorage.setItem("v5_colourmap", colourmap);
