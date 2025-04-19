@@ -11625,8 +11625,6 @@ function setup_axes(plane_index = previous_plane) {
 
             strCSV = '<span id="exportCSV" class="fas fa-file-csv" style="display:inline-block; cursor: pointer" title="click to export spectrum to a local file"></span>'
 
-            var colour_style = "csv-" + theme; // "csv-light" or "csv-dark"
-
             let x1 = range.xMax + 0.75 * emFontSize;
             let x2 = (range.xMax + width) / 2.0 - 0.5 * emFontSize;
 
@@ -11638,7 +11636,7 @@ function setup_axes(plane_index = previous_plane) {
                 .attr("height", 2 * emFontSize)
                 .append("xhtml:div")
                 .attr("id", "csv")
-                .attr("class", colour_style)
+                .attr("class", "csv-" + theme) // "csv-light" or "csv-dark"
                 .attr("pointer-events", "auto")
                 .html(strCSV);
 
