@@ -4232,7 +4232,7 @@ function plot_polarisation(field, mean, std, xScale, yScale, spacing, canvasId) 
     // for each item in the resized field    
     for (let item of field) {
         // add 90 degrees to the angle (polarisation vectors are perpendicular to the magnetic field)
-        let angle = item.A + Math.PI / 2.0;
+        let angle = item.A + Math.PI / 2;
         let mag = (item.I - mean) / (std * Math.sqrt(2.0)); // normalise the intensity
 
         let x = item.x;
