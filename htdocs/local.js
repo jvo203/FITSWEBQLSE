@@ -21,7 +21,7 @@ function show_directory_contents(response) {
         //.css("position", "fixed")
         .attr("class", "breadcrumb"));
 
-    if (theme == 'bright')
+    if (theme == 'light')
         $("#breadcrumb").css('background-color', 'darkgrey');
 
     /*$(window).scroll(function(){
@@ -280,11 +280,11 @@ function main() {
     filelist = null;
 
     if (localStorage.getItem("ui_theme") === null)
-        theme = "dark";//default theme, needs to be aligned with the main FITSWebQL;  "dark" or "bright"
+        theme = "dark";//default theme, needs to be aligned with the main FITSWebQL;  "dark" or "light"
     else
         theme = localStorage.getItem("ui_theme");
 
-    if (theme == 'bright') {
+    if (theme == 'light') {
         $("body").css('background-color', 'white');
         $("body").css('color', 'black');
 
