@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-03-19.0";
+    return "JS2025-03-19.2";
 }
 
 function uuidv4() {
@@ -201,7 +201,7 @@ function getOStheme() {
     if (prefersDarkScheme.matches) {
         return "dark";
     } else {
-        return "bright";
+        return "light";
     }
 }
 
@@ -605,7 +605,7 @@ function largestTriangleThreeBuckets(data, threshold) {
 
 function getShadowStyle() {
     if (!composite_view) {
-        if (theme == 'bright')
+        if (theme == 'light')
             return "black";// purple
         else
             //return "yellow";//was red
@@ -625,7 +625,7 @@ function getStrokeStyle() {
     style = "rgba(255,255,255,1.0)";//white
     //style = "rgba(153, 102, 153, 0.9)" ;//violet
 
-    if (theme == 'bright') {
+    if (theme == 'light') {
         //style = "rgba(0,0,0,1.0)";//black
         style = "rgba(127,127,127,1.0)";// grey
 
@@ -4817,7 +4817,7 @@ async function plot_time_series(x, y, mean, std, div, width, height, yoffset, ti
     fetch_atomic_spectra(wmin, wmax).then(spectra => {
         console.log("fetch_atomic_spectra: #" + spectra.length);
 
-        if (theme == 'bright') {
+        if (theme == 'light') {
             paper_bgcolor = 'rgba(255, 255, 255, 1.0)';
             plot_bgcolor = 'rgba(255, 255, 255, 1.0)';
             line_color = '#636EFA'; // default Plotly.js muted blue
@@ -7522,7 +7522,7 @@ function display_gridlines(index = previous_plane) {
     let fillColour = 'white';
     let strokeColour = 'white';
 
-    if (theme == 'bright') {
+    if (theme == 'light') {
         fillColour = 'gray';
         strokeColour = 'gray';
     }
@@ -7736,7 +7736,7 @@ function display_cd_gridlines() {
     let fillColour = 'white';
     let strokeColour = 'white';
 
-    if (theme == 'bright') {
+    if (theme == 'light') {
         fillColour = 'gray';
         strokeColour = 'gray';
     }
@@ -7994,7 +7994,7 @@ function display_beam() {
         let fillColour = 'white';
         let strokeColour = 'white';
 
-        if (theme == 'bright') {
+        if (theme == 'light') {
             fillColour = 'black';
             strokeColour = 'black';
         }
@@ -8084,7 +8084,7 @@ function zoom_beam(index = previous_plane) {
 
         let strokeColour = 'white';
 
-        if (theme == 'bright')
+        if (theme == 'light')
             strokeColour = 'black';
 
         //first handle the circular viewport
@@ -8764,7 +8764,7 @@ function display_dataset_info() {
 
     let strokeColour = 'white';
 
-    if (theme == 'bright')
+    if (theme == 'light')
         strokeColour = 'black';
 
     //add a menu activation area
@@ -9440,7 +9440,7 @@ function change_ui_theme() {
     theme = document.getElementById('ui_theme').value;
     localStorage.setItem("ui_theme", theme);
 
-    if (theme == 'bright')
+    if (theme == 'light')
         colourmap = "haxby";
     else
         colourmap = "green";
@@ -10252,7 +10252,7 @@ function display_preferences(index) {
 
     let fillColour = 'yellow';
 
-    if (theme == 'bright')
+    if (theme == 'light')
         fillColour = 'black';
 
     let bottomY = svgHeight - offset / 4;
@@ -10515,7 +10515,7 @@ function display_preferences(index) {
             //.attr("class", "form-control")
             .attr("id", "ui_theme")
             .attr("onchange", "javascript:change_ui_theme();")
-            .html("<option>dark</option><option>bright</option>");
+            .html("<option>dark</option><option>light</option>");
 
         document.getElementById('ui_theme').value = theme;
     }
@@ -11625,9 +11625,7 @@ function setup_axes(plane_index = previous_plane) {
 
             strCSV = '<span id="exportCSV" class="fas fa-file-csv" style="display:inline-block; cursor: pointer" title="click to export spectrum to a local file"></span>'
 
-            var colour_style = "csv-dark";
-            if (theme == 'bright')
-                colour_style = "csv-light";
+            var colour_style = "csv-" + theme; // "csv-light" or "csv-dark"
 
             let x1 = range.xMax + 0.75 * emFontSize;
             let x2 = (range.xMax + width) / 2.0 - 0.5 * emFontSize;
@@ -11819,7 +11817,7 @@ function setup_axes(plane_index = previous_plane) {
 
             let fillColour = 'white';
 
-            if (theme == 'bright')
+            if (theme == 'light')
                 fillColour = 'black';
 
             d3.select("#yaxis")
@@ -11927,7 +11925,7 @@ function x_axis_mouseenter(offset) {
 
     let fillColour = 'white';
 
-    if (theme == 'bright')
+    if (theme == 'light')
         fillColour = 'black';
 
     d3.select("#xaxis")
@@ -11943,7 +11941,7 @@ function x_axis_mouseenter(offset) {
     fillColour = 'white';
     let strokeColour = 'black';
 
-    if (theme == 'bright') {
+    if (theme == 'light') {
         fillColour = 'black';
         strokeColour = 'white';
     }
@@ -12210,7 +12208,7 @@ function x_axis_move(offset) {
 
     let strokeColour = 'white';
 
-    if (theme == 'bright')
+    if (theme == 'light')
         strokeColour = 'black';
 
     d3.select("#freq_bar")
@@ -12915,7 +12913,7 @@ function pv_event(event) {
 
                 let fillColour = 'white';
 
-                if (theme == 'bright')
+                if (theme == 'light')
                     fillColour = 'black';
 
                 //pv line selection
@@ -13832,7 +13830,7 @@ function add_line_label(index) {
 
     let fontColour = 'gray';//white
 
-    if (theme == 'bright')
+    if (theme == 'light')
         fontColour = 'gray';
 
     if (colourmap == "greyscale" || colourmap == "negative")
@@ -14041,7 +14039,7 @@ function setup_image_selection_index(index, topx, topy, img_width, img_height) {
     var svg = d3.select("#FrontSVG");
 
     //add a bounding box
-    if (theme == 'bright')
+    if (theme == 'light')
         var strokeStyle = "white";
     else
         var strokeStyle = "black";
@@ -14338,7 +14336,7 @@ function setup_image_selection(plane_index = previous_plane) {
 
     let fillColour = 'white';
 
-    if (theme == 'bright')
+    if (theme == 'light')
         fillColour = 'black';
 
     if (colourmap == "greyscale" || colourmap == "negative")
@@ -14883,7 +14881,7 @@ function setup_image_selection(plane_index = previous_plane) {
 
                 let fillColour = 'white';
 
-                if (theme == 'bright')
+                if (theme == 'light')
                     fillColour = 'black';
 
                 d3.select("#yaxis")
@@ -15452,7 +15450,7 @@ function display_molecules() {
     var fontStyle = Math.round(0.67 * emFontSize) + "px";// Helvetica";
     var strokeStyle = "#FFCC00";
 
-    if (theme == 'bright')
+    if (theme == 'light')
         strokeStyle = 'black';
 
     /*if(colourmap == "rainbow" || colourmap == "hot")
@@ -19159,7 +19157,7 @@ function show_welcome() {
     let src = 'https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@' + votable.getAttribute('data-version-major') + '.' + votable.getAttribute('data-version-minor') + '.' + votable.getAttribute('data-version-sub') + '/CHANGELOG.md';
     let html = '<zero-md src="' + src + '">';
 
-    if (theme == 'bright') {
+    if (theme == 'light') {
         html += '<template><style>* { color:gray;font-size:small;font-family: Helvetica;}</style></template>';
     }
 
@@ -19184,7 +19182,7 @@ function show_welcome() {
 
     let textColour = 'yellow';
 
-    if (theme == 'bright')
+    if (theme == 'light')
         textColour = 'red';
 
     if (!wasm_supported) {
@@ -19479,7 +19477,7 @@ function setup_help() {
 
         let textColour = 'yellow';
 
-        if (theme == 'bright')
+        if (theme == 'light')
             textColour = 'red';
 
         footer.append("p")
@@ -19538,7 +19536,7 @@ function setup_changelog() {
     let src = 'https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@' + votable.getAttribute('data-version-major') + '.' + votable.getAttribute('data-version-minor') + '.' + votable.getAttribute('data-version-sub') + '/CHANGELOG.md';
     let html = '<zero-md src="' + src + '">';
 
-    if (theme == 'bright') {
+    if (theme == 'light') {
         html += '<template><style>* { color:gray;font-size:small;font-family: Helvetica;}</style></template>';
     }
 
@@ -20004,7 +20002,7 @@ function draw_rbg_legend(index) {
 
     let strokeColour = 'white';
 
-    if (theme == 'bright')
+    if (theme == 'light')
         strokeColour = 'black';
 
     let rgb = ['red', 'green', 'blue'];
@@ -20326,7 +20324,7 @@ function update_legend(index) {
 
     let strokeColour = 'white';
 
-    if (theme == 'bright')
+    if (theme == 'light')
         strokeColour = 'black';
 
     var upper_range;
@@ -21119,7 +21117,6 @@ async function mainRenderer() {
     if (localStorage.getItem("ui_theme") === null) {
         theme = getOStheme();
 
-
         if (theme == "dark") {
             colourmap = "green";
             axisColour = "rgba(255,204,0,0.8)";
@@ -21135,7 +21132,13 @@ async function mainRenderer() {
     else {
         theme = localStorage.getItem("ui_theme");
 
-        if (theme == 'bright')
+        // migrate the legacy theme 'bright'
+        if (theme == "bright") {
+            theme = "light";
+            localStorage.setItem("ui_theme", theme);
+        }
+
+        if (theme == 'light')
             axisColour = "#000000";
         else
             axisColour = "rgba(255,204,0,0.8)"; // axisColour
@@ -21165,7 +21168,7 @@ async function mainRenderer() {
         intensity_mode = localStorage.getItem("intensity_mode");
 
     if (localStorage.getItem("v5_colourmap") === null) {
-        if (theme == 'bright')
+        if (theme == 'light')
             colourmap = "haxby";
         else
             colourmap = "green";
@@ -21386,7 +21389,7 @@ async function mainRenderer() {
 
         console.log("theme:", theme);
 
-        if (theme == 'bright') {
+        if (theme == 'light') {
             d3.select("body")
                 .style('background-color', 'white')
                 .style('color', 'black');
@@ -21457,7 +21460,7 @@ async function mainRenderer() {
         // canvas styling
         var blend = '';
 
-        if (theme == 'bright')
+        if (theme == 'light')
             blend = 'mix-blend-mode: difference; ';
 
         d3.select("#mainDiv").append("svg")
