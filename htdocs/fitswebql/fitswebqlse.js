@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-03-19.2";
+    return "JS2025-04-20.0";
 }
 
 function uuidv4() {
@@ -9438,13 +9438,13 @@ function change_coords_fmt() {
 
 function change_ui_theme() {
     theme = document.getElementById('ui_theme').value;
-    localStorage.setItem("ui_theme", theme);
 
     if (theme == 'light')
         colourmap = "haxby";
     else
         colourmap = "green";
 
+    localStorage.setItem("v5_ui_theme", theme);
     localStorage.setItem("v5_colourmap", colourmap);
 
     location.reload(); // was reload(false)
@@ -21112,7 +21112,7 @@ async function mainRenderer() {
     endianness = getEndianness();
     console.log('endianness: ', endianness);
 
-    if (localStorage.getItem("ui_theme") === null) {
+    if (localStorage.getItem("v5_ui_theme") === null) {
         theme = getOStheme();
 
         if (theme == "dark") {
@@ -21124,17 +21124,11 @@ async function mainRenderer() {
             axisColour = "#000000";
         }
 
-        localStorage.setItem("ui_theme", theme);
+        localStorage.setItem("v5_ui_theme", theme);
         localStorage.setItem("v5_colourmap", colourmap);
     }
     else {
-        theme = localStorage.getItem("ui_theme");
-
-        // migrate the legacy theme 'bright'
-        if (theme == "bright") {
-            theme = "light";
-            localStorage.setItem("ui_theme", theme);
-        }
+        theme = localStorage.getItem("v5_ui_theme");
 
         if (theme == 'light')
             axisColour = "#000000";
