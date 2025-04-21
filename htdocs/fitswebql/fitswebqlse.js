@@ -6338,7 +6338,8 @@ async function open_websocket_connection(_datasetId, index) {
                             // ZFP decoder part
                             Module.ready
                                 .then(_ => {
-                                    var res = Module.decompressZFPspectrum(spectrum_len, frame);
+                                    console.log("FITS spectrum length:", spectrum_len);
+                                    var res = Module.decompressZFPspectrum(plane_count, spectrum_len, frame);
                                     const spectrum = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
 
                                     // console.log("spectrum size: ", spectrum.length, spectrum, "elapsed: ", elapsed, "[ms]");
@@ -6347,16 +6348,33 @@ async function open_websocket_connection(_datasetId, index) {
                                         // attach the spectrum as either "mean" or "integrated"
                                         //insert a spectrum object to the spectrumContainer at <index-1>
 
-                                        fitsContainer[index - 1].depth = spectrum.length;
+                                        if (plane_count > 1) {
+                                            for (let i = 0; i < plane_count; i++) {
+                                                // slice the spectrum into <spectrum_len> chunks
+                                                let spectrum_i = spectrum.slice(i * spectrum_len, (i + 1) * spectrum_len);
 
-                                        if (intensity_mode == "mean") {
-                                            fitsContainer[index - 1].mean_spectrum = spectrum;
-                                            mean_spectrumContainer[index - 1] = spectrum;
-                                        }
+                                                fitsContainer[i].depth = spectrum_i.length;
 
-                                        if (intensity_mode == "integrated") {
-                                            fitsContainer[index - 1].integrated_spectrum = spectrum;
-                                            integrated_spectrumContainer[index - 1] = spectrum;
+                                                if (intensity_mode == "mean") {
+                                                    fitsContainer[i].mean_spectrum = spectrum_i;
+                                                }
+
+                                                if (intensity_mode == "integrated") {
+                                                    fitsContainer[i].integrated_spectrum = spectrum_i;
+                                                }
+                                            }
+                                        } else {
+                                            fitsContainer[index - 1].depth = spectrum.length;
+
+                                            if (intensity_mode == "mean") {
+                                                fitsContainer[index - 1].mean_spectrum = spectrum;
+                                                mean_spectrumContainer[index - 1] = spectrum;
+                                            }
+
+                                            if (intensity_mode == "integrated") {
+                                                fitsContainer[index - 1].integrated_spectrum = spectrum;
+                                                integrated_spectrumContainer[index - 1] = spectrum;
+                                            }
                                         }
 
                                         spectrum_count++;
@@ -6364,7 +6382,19 @@ async function open_websocket_connection(_datasetId, index) {
                                         if (va_count == 1) {
                                             setup_axes();
 
-                                            plot_spectrum([spectrum]);
+                                            var index = parseInt(document.getElementById('intensity_plane').value);
+                                            let fitsData = fitsContainer[index - 1];
+
+                                            //plot_spectrum([spectrum]);
+                                            if (intensity_mode == "mean") {
+                                                plot_spectrum([fitsData.mean_spectrum]);
+                                                replot_y_axis();
+                                            }
+
+                                            if (intensity_mode == "integrated") {
+                                                plot_spectrum([fitsData.integrated_spectrum]);
+                                                replot_y_axis();
+                                            }
                                         }
                                         else {
                                             if (spectrum_count == va_count) {
