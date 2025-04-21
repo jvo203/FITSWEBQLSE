@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-04-20.0";
+    return "JS2025-04-21.0";
 }
 
 function uuidv4() {
@@ -6263,6 +6263,17 @@ async function open_websocket_connection(_datasetId, index) {
 
                                 if (displayContours)
                                     update_contours();
+
+                                if (plane_count > 1 && va_count == 1) {
+                                    polarisation = compute_polarisation(StokesP, alpha, plane_count);
+                                    polarisation.pol_width = img_width;
+                                    polarisation.pol_height = img_height;
+                                    console.log("polarisation:", polarisation);
+
+                                    if (polarisation != null) {
+                                        process_polarisation(index, img_width, img_height, polarisation.intensity, polarisation.angle, polarisation.mask);
+                                    }
+                                }
                             }
                         }
 
