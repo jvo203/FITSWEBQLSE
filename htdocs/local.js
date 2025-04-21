@@ -276,13 +276,25 @@ function find_group(name) {
     return matches;
 }
 
+function getOStheme() {
+    // Detect the user's OS theme preference
+    const prefersDarkScheme = window.matchMedia("(prefers-color-scheme: dark)");
+
+    // Check if the user has set a preference for dark mode
+    if (prefersDarkScheme.matches) {
+        return "dark";
+    } else {
+        return "light";
+    }
+}
+
 function main() {
     filelist = null;
 
-    if (localStorage.getItem("ui_theme") === null)
-        theme = "dark";//default theme, needs to be aligned with the main FITSWebQL;  "dark" or "light"
+    if (localStorage.getItem("v5_ui_theme") === null)
+        theme = getOStheme();//default theme, needs to be aligned with the main FITSWebQL; "dark" or "light"
     else
-        theme = localStorage.getItem("ui_theme");
+        theme = localStorage.getItem("v5_ui_theme");
 
     if (theme == 'light') {
         $("body").css('background-color', 'white');
