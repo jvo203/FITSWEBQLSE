@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-04-21.0";
+    return "JS2025-04-21.1";
 }
 
 function uuidv4() {
@@ -6388,12 +6388,10 @@ async function open_websocket_connection(_datasetId, index) {
                                             //plot_spectrum([spectrum]);
                                             if (intensity_mode == "mean") {
                                                 plot_spectrum([fitsData.mean_spectrum]);
-                                                replot_y_axis();
                                             }
 
                                             if (intensity_mode == "integrated") {
                                                 plot_spectrum([fitsData.integrated_spectrum]);
-                                                replot_y_axis();
                                             }
                                         }
                                         else {
