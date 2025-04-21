@@ -11432,9 +11432,10 @@ contains
 
          threshold = req%dx/2
 
-         print *, 'ws_image_spectrum_request::spectrum size:', size(spectrum), 'max_planes:', max_planes, 'threshold:', threshold
+         print *, 'ws_image_spectrum_request::spectrum length:', size(spectrum,1),&
+         & 'max_planes:', max_planes, 'threshold:', threshold
 
-         if (size(spectrum) .gt. threshold) then
+         if (size(spectrum,1) .gt. threshold) then
             ! allocate the reduced spectrum
             allocate (reduced_spectrum(threshold, max_planes))
 
@@ -11450,7 +11451,7 @@ contains
             call write_spectrum(req%fd, max_planes, c_loc(reduced_spectrum), size(reduced_spectrum)/max_planes,&
             & ZFP_HIGH_PRECISION)
          else
-            print *, 'no downsizing needed, spectrum size:', size(spectrum), 'max_planes:', max_planes
+            print *, 'no downsizing needed, spectrum length:', size(spectrum,1), 'max_planes:', max_planes
             call write_spectrum(req%fd, max_planes, c_loc(spectrum), size(spectrum)/max_planes, ZFP_HIGH_PRECISION)
          end if
 
