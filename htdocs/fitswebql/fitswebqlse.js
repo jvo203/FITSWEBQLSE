@@ -11929,7 +11929,7 @@ function x_axis_mouseenter(offset) {
             video_stack[0] = [];
         } else for (let index = 0; index < va_count; index++) {
             var request = {
-                type: "disabled_init_video",
+                type: "init_video",
                 frame: freq,
                 view: "tile",
                 ref_freq: RESTFRQ,
@@ -12346,7 +12346,7 @@ function x_axis_move(offset) {
                         wsConn[0].send(JSON.stringify(request));
                 } else for (let index = 0; index < va_count; index++) {
                     var request = {
-                        type: "disabled_video",
+                        type: "video",
                         frame: freq,
                         plane: previous_plane,
                         key: false,
