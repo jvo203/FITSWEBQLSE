@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-04-23.1";
+    return "JS2025-04-23.2";
 }
 
 function uuidv4() {
@@ -6981,10 +6981,12 @@ async function open_websocket_connection(_datasetId, index) {
                                 document.getElementById("ContourSVG").style.display = "none";
 
                             // hide the polarisation plot
-                            if (displayPolarisation) {
-                                document.getElementById('PolarisationCanvas').style.display = "none";
-                                document.getElementById('PolarisationViewport').style.display = "none";
-                            }
+                            try {
+                                if (displayPolarisation) {
+                                    document.getElementById('PolarisationCanvas').style.display = "none";
+                                    document.getElementById('PolarisationViewport').style.display = "none";
+                                }
+                            } catch (_) { };
                         }
 
                         return;
@@ -12070,10 +12072,13 @@ function x_axis_mouseleave() {
     }
 
     // show the polarization plot
-    if (displayPolarisation) {
-        document.getElementById('PolarisationCanvas').style.display = "block";
-        document.getElementById('PolarisationViewport').style.display = "block";
+    try {
+        if (displayPolarisation) {
+            document.getElementById('PolarisationCanvas').style.display = "block";
+            document.getElementById('PolarisationViewport').style.display = "block";
+        }
     }
+    catch (_) { };
 
     //send an end_video command via WebSockets
     var request = {
