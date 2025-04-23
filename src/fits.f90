@@ -93,6 +93,12 @@ module fits
 
    end type spectrum_request_f
 
+   type :: polarisation_request_f
+      type(dataset), pointer :: item
+      integer(c_int) :: frame
+      type(C_PTR) :: json
+   end type polarisation_request_f
+
    type :: video_response_f
       type(C_PTR) :: session
       integer(c_int) :: seq_id
@@ -9582,6 +9588,7 @@ contains
 
       type(video_fetch_f), allocatable, target :: fetch_req
       type(video_response_f), pointer :: resp => null()
+      type(polarisation_request_f), pointer :: pol_req => null()
       type(c_ptr) :: pid
       integer(kind=c_int) :: rc
 
