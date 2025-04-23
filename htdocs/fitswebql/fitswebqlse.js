@@ -6979,6 +6979,12 @@ async function open_websocket_connection(_datasetId, index) {
                             // hide the contour plot
                             if (displayContours)
                                 document.getElementById("ContourSVG").style.display = "none";
+
+                            // hide the polarisation plot
+                            if (displayPolarisation) {
+                                document.getElementById('PolarisationCanvas').style.display = "none";
+                                document.getElementById('PolarisationViewport').style.display = "none";
+                            }
                         }
 
                         return;
