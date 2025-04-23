@@ -11447,10 +11447,11 @@ contains
             end do
             !$omp end parallel do
 
-            call write_spectrum(req%fd, size(reduced_spectrum, 2), c_loc(reduced_spectrum), size(reduced_spectrum, 1),&
-            & ZFP_HIGH_PRECISION)
+            call write_spectrum(req%fd, size(reduced_spectrum, 2, kind=c_int), c_loc(reduced_spectrum),&
+            & size(reduced_spectrum, 1, kind=c_int), ZFP_HIGH_PRECISION)
          else
-            call write_spectrum(req%fd, size(reduced_spectrum, 2), c_loc(spectrum), size(spectrum, 1), ZFP_HIGH_PRECISION)
+            call write_spectrum(req%fd, size(spectrum, 2, kind=c_int), c_loc(spectrum),&
+            & size(spectrum, 1, kind=c_int), ZFP_HIGH_PRECISION)
          end if
 
          ! send the revised global statistics too
