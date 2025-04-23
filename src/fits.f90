@@ -9594,8 +9594,8 @@ contains
       type(video_fetch_f), allocatable, target :: fetch_req
       type(video_response_f), pointer :: resp => null()
       type(polarisation_request_f), pointer :: pol_req => null()
-      type(c_ptr) :: pid
-      integer(kind=c_int) :: rc
+      type(c_ptr) :: pid, pol_pid
+      integer(kind=c_int) :: rc, pol_rc
 
       type(video_tone_mapping) :: tone
       integer(kind=1), pointer, contiguous :: pixels(:, :), mask(:, :)
@@ -9627,15 +9627,20 @@ contains
 
       if (.not. allocated(item%compressed)) goto 5000
 
-      ! allocate & prepare the polarisation request structure for a POSIX thread
-      allocate (pol_req)
+      if( item%is_stokes .and. size(item%compressed, 2) .gt. 1) then
+         ! allocate & prepare the polarisation request structure for a POSIX thread
+         allocate (pol_req)
 
-      pol_req%item => item
-      pol_req%frame = req%frame
-      pol_req%session = req%session
-      pol_req%seq_id = req%seq_id
-      pol_req%timestamp = req%timestamp
-      pol_req%elapsed = elapsed
+         pol_req%item => item
+         pol_req%frame = req%frame
+         pol_req%session = req%session
+         pol_req%seq_id = req%seq_id
+         pol_req%timestamp = req%timestamp
+         pol_req%elapsed = elapsed
+
+         ! launch a polarisation pthread
+         pol_pid = my_pthread_create(start_routine=c_funloc(polarisation_request_simd), arg=c_loc(pol_req), rc=pol_rc)
+      end if
 
       ! set the video tone mapping
       allocate (character(len=req%len)::tone%flux)
@@ -9728,8 +9733,14 @@ contains
          call release_session(req%session) ! decrement the session reference counter
       end if
 
-      ! deallocate the memory
-      deallocate(pol_req)
+      ! join a polarisation thread
+      if( item%is_stokes .and. size(item%compressed, 2) .gt. 1) then
+         pol_rc = my_pthread_join(pol_pid)
+         if (pol_rc .ne. 0) print *, 'my_pthread_join failed with pol_rc:', pol_rc
+
+         ! deallocate the memory
+         deallocate(pol_req)
+      end if
 
 5000  nullify (item)
       nullify (flux)
@@ -9762,6 +9773,21 @@ contains
       deallocate (resp)
 
    end subroutine send_ws_video
+
+   recursive subroutine polarisation_request_simd(arg) BIND(C)
+      use, intrinsic :: iso_c_binding
+      implicit none
+
+      type(c_ptr), intent(in), value :: arg
+      type(polarisation_request_f), pointer :: req
+
+      if (.not. c_associated(arg)) return
+      call c_f_pointer(arg, req)
+
+      print *, 'polarisation_request_simd::', req%item%datasetid, 'frame:', req%frame
+
+   end subroutine polarisation_request_simd
+
 
    recursive subroutine composite_video_request_simd(user) BIND(C, name='composite_video_request_simd')
       use :: unix_pthread
