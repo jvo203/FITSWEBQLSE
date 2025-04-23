@@ -94,9 +94,14 @@ module fits
    end type spectrum_request_f
 
    type :: polarisation_request_f
+      ! request
       type(dataset), pointer :: item
       integer(c_int) :: frame
-      type(C_PTR) :: json
+
+      ! response
+      type(C_PTR) :: session
+      integer(c_int) :: seq_id
+      real(c_float) :: timestamp, elapsed
    end type polarisation_request_f
 
    type :: video_response_f
@@ -9622,6 +9627,16 @@ contains
 
       if (.not. allocated(item%compressed)) goto 5000
 
+      ! allocate & prepare the polarisation request structure for a POSIX thread
+      allocate (pol_req)
+
+      pol_req%item => item
+      pol_req%frame = req%frame
+      pol_req%session = req%session
+      pol_req%seq_id = req%seq_id
+      pol_req%timestamp = req%timestamp
+      pol_req%elapsed = elapsed
+
       ! set the video tone mapping
       allocate (character(len=req%len)::tone%flux)
 
@@ -9712,6 +9727,9 @@ contains
 
          call release_session(req%session) ! decrement the session reference counter
       end if
+
+      ! deallocate the memory
+      deallocate(pol_req)
 
 5000  nullify (item)
       nullify (flux)
