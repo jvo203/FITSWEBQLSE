@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-04-23.0";
+    return "JS2025-04-23.1";
 }
 
 function uuidv4() {
@@ -12067,6 +12067,12 @@ function x_axis_mouseleave() {
 
         if (!has_contours)
             update_contours();
+    }
+
+    // show the polarization plot
+    if (displayPolarisation) {
+        document.getElementById('PolarisationCanvas').style.display = "block";
+        document.getElementById('PolarisationViewport').style.display = "block";
     }
 
     //send an end_video command via WebSockets
