@@ -9775,16 +9775,84 @@ contains
    end subroutine send_ws_video
 
    recursive subroutine polarisation_request_simd(arg) BIND(C)
+      use omp_lib
       use, intrinsic :: iso_c_binding
       implicit none
 
       type(c_ptr), intent(in), value :: arg
       type(polarisation_request_f), pointer :: req
 
+      real(kind=c_float), allocatable, target :: pixels(:, :, :)
+      logical(kind=c_bool), allocatable, target :: thread_mask(:, :, :), mask(:,:)
+
+      integer(kind=c_int) :: x1, x2, y1, y2, dimx, dimy, width, height
+      integer :: k, max_planes, max_threads
+
+      real(kind=c_float) :: spectrum ! the actual value will be ignored, it's not need for polarisation
+      real(kind=8) :: cdelt3
+      real(kind=c_float) :: dmedian, sumP, sumN
+      integer(c_int64_t) :: countP, countN
+
+
       if (.not. c_associated(arg)) return
       call c_f_pointer(arg, req)
 
       print *, 'polarisation_request_simd::', req%item%datasetid, '; frame:', req%frame
+
+      max_planes = size(req%item%compressed, 2)
+
+
+      ! set the viewport to the whole image
+      x1 = 1
+      y1 = 1
+      x2 = req%item%naxes(1)
+      y2 = req%item%naxes(2)
+
+      dimx = abs(x2 - x1) + 1
+      dimy = abs(y2 - y1) + 1
+
+      width = req%item%naxes(1)
+      height = req%item%naxes(2)
+
+      ! TO-DO (a cluster version): if a frame has not been found it needs to be fetched from the cluster
+      if (.not. associated(req%item%compressed(req%frame, max_planes)%ptr)) return
+
+      call get_cdelt3(req%item, cdelt3)
+      ! set dmedian to IEEE NaN to signal no need to do statistics
+      dmedian = ieee_value(0.0, ieee_quiet_nan)
+
+      ! allocate the pixels and masks
+      allocate (pixels(dimx, dimy, max_planes))
+      allocate (thread_mask(dimx, dimy, max_planes))
+      allocate (mask(dimx, dimy))
+
+      pixels = 0.0
+      thread_mask = .false.
+      mask = .false.
+
+      ! an OpenMP parallel region
+      !$omp PARALLEL DEFAULT(SHARED) SHARED(req, pixels, thread_mask, dmedian)&
+      !$omp& PRIVATE(k, spectrum, sumP, countP, sumN, countN)
+      !$omp DO
+      do k = 1, max_planes
+         print *, 'tid:', 1 + OMP_GET_THREAD_NUM(), '; plane:', k
+         ! skip frames for which there is no data on this node
+         if (.not. associated(req%item%compressed(req%frame, k)%ptr)) cycle
+
+         ! the image is square (rectangular)
+         spectrum = viewport_image_spectrum_rect(c_loc(req%item%compressed(req%frame, k)%ptr),&
+         &width, height, req%item%frame_min(req%frame, k), req%item%frame_max(req%frame, k),&
+         &c_loc(pixels(:, :, k)), c_loc(thread_mask(:, :, k)), dimx, &
+         &x1 - 1, x2 - 1, y1 - 1, y2 - 1, 0, 0, 0, cdelt3,&
+         &dmedian, sumP, countP, sumN, countN)
+
+         ! reduce the mask here in a critical section
+         !$omp critical
+         mask(:, :) = mask(:, :) .or. thread_mask(:, :, k)
+         !$omp end critical
+      end do
+      !$omp END DO
+      !$omp END PARALLEL
 
    end subroutine polarisation_request_simd
 
