@@ -9636,7 +9636,10 @@ contains
       ! print *, 'video_request_simd for ', item%datasetid, '; keyframe:', req%keyframe, 'frame:', &
       ! &req%frame, 'fill:', req%fill, 'fd:', req%fd
 
-      if (.not. allocated(item%compressed)) goto 5000
+      if (.not. allocated(item%compressed)) then
+         call release_session(req%session) ! video thread counter
+         goto 5000
+      end if
 
       if( item%is_stokes .and. size(item%compressed, 2) .gt. 1) then
          ! allocate & prepare the polarisation request structure for a POSIX thread
@@ -9710,7 +9713,10 @@ contains
          rc = my_pthread_join(pid)
 
          ! skip invalid frames (not found on other cluster nodes)
-         if (.not. fetch_req%valid) goto 5000
+         if (.not. fetch_req%valid) then
+            call release_session(req%session) ! video thread counter
+            goto 5000
+         end if
       else
          call get_video_frame(item, req%frame, req%plane, req%fill, tone, pixels, mask, req%width, req%height, req%downsize)
       end if
@@ -9922,14 +9928,21 @@ contains
       if (.not. c_associated(user)) return
       call c_f_pointer(user, req)
 
-      if (.not. c_associated(req%flux)) return
-      call c_f_pointer(req%flux, flux, [req%len])
+      if (.not. c_associated(req%flux)) then
+         call release_session(req%session) ! decrement the session reference counter
+         return
+      else
+         call c_f_pointer(req%flux, flux, [req%len])
+      end if
 
       ! ifort
       ! print *, 'composite_video_request_simd; keyframe:', req%keyframe, 'fill:', req%fill, 'va_count:',&
       ! &req%va_count, 'fd:', req%fd
 
-      if (req%va_count .le. 0) goto 9000
+      if (req%va_count .le. 0) then
+         call release_session(req%session) ! decrement the session reference counter
+         goto 9000
+      end if
 
       ! allocate the composite pixels
       allocate (pixels(req%width, req%height, req%va_count))
