@@ -9746,7 +9746,8 @@ contains
          deallocate(pol_req)
       end if
 
-5000  nullify (item)
+5000  call release_session(req%session) ! decrement the polarisation session reference counter too
+      nullify (item)
       nullify (flux)
       call free(req%flux)
       nullify (req) ! disassociate the FORTRAN pointer from the C memory region

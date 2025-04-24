@@ -510,7 +510,11 @@ void *video_event_loop(void *arg)
             req->session = g_atomic_rc_box_acquire(session);
 
             if (req->video_type == single)
+            {
+                // increase the reference count once more to account for the polarisation thread
+                g_atomic_rc_box_acquire(session);
                 video_request_simd(req);
+            }
             else
                 composite_video_request_simd(req);
         }
