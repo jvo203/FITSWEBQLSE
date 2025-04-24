@@ -101,7 +101,8 @@ module fits
       ! response
       type(C_PTR) :: session
       integer(c_int) :: seq_id
-      real(c_float) :: timestamp, elapsed
+      real(c_float) :: timestamp
+      real(kind=8) :: t1
    end type polarisation_request_f
 
    type :: video_response_f
@@ -9582,6 +9583,7 @@ contains
    end subroutine video_request
 
    recursive subroutine video_request_simd(user) BIND(C, name='video_request_simd')
+      use omp_lib
       use :: unix_pthread
       use, intrinsic :: iso_c_binding
       implicit none
@@ -9636,7 +9638,9 @@ contains
          pol_req%session = req%session
          pol_req%seq_id = req%seq_id
          pol_req%timestamp = req%timestamp
-         pol_req%elapsed = elapsed
+
+         ! start the timer
+         pol_req%t1 = omp_get_wtime()
 
          ! launch a polarisation pthread
          pol_pid = my_pthread_create(start_routine=c_funloc(polarisation_request_simd), arg=c_loc(pol_req), rc=pol_rc)
@@ -9790,9 +9794,13 @@ contains
 
       real(kind=c_float) :: spectrum ! the actual value will be ignored, it's not need for polarisation
       real(kind=8) :: cdelt3
-      real(kind=c_float) :: dmedian, sumP, sumN
-      integer(c_int64_t) :: countP, countN
+      real(kind=c_float) :: dmedian, sumP, sumN ! unneeded
+      integer(c_int64_t) :: countP, countN ! unneeded
 
+      real(kind=8) :: t2
+      real(kind=c_float) :: elapsed
+
+      type(C_PTR) :: json
 
       if (.not. c_associated(arg)) return
       call c_f_pointer(arg, req)
@@ -9800,7 +9808,6 @@ contains
       print *, 'polarisation_request_simd::', req%item%datasetid, '; frame:', req%frame
 
       max_planes = size(req%item%compressed, 2)
-
 
       ! set the viewport to the whole image
       x1 = 1
@@ -9835,7 +9842,7 @@ contains
       !$omp& PRIVATE(k, spectrum, sumP, countP, sumN, countN)
       !$omp DO
       do k = 1, max_planes
-         print *, 'tid:', 1 + OMP_GET_THREAD_NUM(), '; plane:', k
+         ! print *, 'tid:', 1 + OMP_GET_THREAD_NUM(), '; plane:', k
          ! skip frames for which there is no data on this node
          if (.not. associated(req%item%compressed(req%frame, k)%ptr)) cycle
 
@@ -9853,6 +9860,25 @@ contains
       end do
       !$omp END DO
       !$omp END PARALLEL
+
+      json = DownsizePolarization(pixels, mask, dimx, dimy, square)
+
+      ! end the timer
+      t2 = omp_get_wtime()
+      elapsed = 1000.0*real(t2 - req%t1) ! [ms]
+
+      ! perhaps we should be creating a new WebSocket send thread here
+      call write_ws_polarisation(req%session, req%seq_id, req%timestamp, elapsed, json)
+      print *, 'polarisation_request_simd elapsed time:', elapsed, '[ms]'
+
+      ! deallocate the memory
+      call delete_json(json)
+
+      ! end the timer
+      t2 = omp_get_wtime()
+      elapsed = 1000.0*real(t2 - req%t1) ! [ms]
+
+      print *, 'polarisation_request_simd completion elapsed time:', elapsed, '[ms]'
 
    end subroutine polarisation_request_simd
 
