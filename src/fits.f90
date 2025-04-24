@@ -9617,13 +9617,22 @@ contains
       if (.not. c_associated(user)) return
       call c_f_pointer(user, req)
 
-      if (.not. c_associated(req%ptr)) return
-      call c_f_pointer(req%ptr, item)
+      if (.not. c_associated(req%ptr)) then
+         call release_session(req%session) ! video thread counter
+         call release_session(req%session) ! polarisation thread counter
+         return
+      else
+         call c_f_pointer(req%ptr, item)
+      end if
 
-      if (.not. c_associated(req%flux)) return
-      call c_f_pointer(req%flux, flux, [req%len])
+      if (.not. c_associated(req%flux)) then
+         call release_session(req%session) ! video thread counter
+         call release_session(req%session) ! polarisation thread counter
+         return
+      else
+         call c_f_pointer(req%flux, flux, [req%len])
+      end if
 
-      ! ifort
       ! print *, 'video_request_simd for ', item%datasetid, '; keyframe:', req%keyframe, 'frame:', &
       ! &req%frame, 'fill:', req%fill, 'fd:', req%fd
 
