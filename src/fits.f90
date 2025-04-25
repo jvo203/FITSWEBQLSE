@@ -9821,7 +9821,7 @@ contains
       if (.not. c_associated(arg)) return
       call c_f_pointer(arg, req)
 
-      print *, 'polarisation_request_simd::', req%item%datasetid, '; frame:', req%frame
+      print *, 'polarisation_request_simd::', req%item%datasetid, 'frame:', req%frame
 
       max_planes = size(req%item%compressed, 2)
 
