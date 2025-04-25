@@ -4359,6 +4359,63 @@ function process_polarisation_viewport(json) {
     plot_polarisation(field, mean, std, xScale, yScale, grid_spacing, "PolarisationViewport");
 }
 
+function process_polarisation_video(json) {
+    const field = json.polarisation;
+    const range = json.range;
+
+    // polarisation viewport dimensions
+    let pol_xmin = 0;
+    let pol_ymin = 0;
+    let pol_xmax = json.width - 1;
+    let pol_ymax = json.height - 1;
+
+    // re-use the statistics from the polarisation object                
+    const mean = polarisation.mean;
+    const std = polarisation.std;
+
+    // re-calculate the statistics
+    /*var mean = 0.0;
+    var std = 0.0;
+
+    for (let item of field) {
+        mean += item.I;
+        std += item.I * item.I;
+    }
+
+    mean /= field.length;
+    std = Math.sqrt(std / field.length - mean * mean);*/
+
+    // get the image rectangle
+    var rect_elem = d3.select("#image_rectangle");
+    var width = parseFloat(rect_elem.attr("width"));
+    var height = parseFloat(rect_elem.attr("height"));
+    var x = parseFloat(rect_elem.attr("x"));
+    var y = parseFloat(rect_elem.attr("y"));
+    console.log("rect. width:", width, "rect. height:", height, "image x:", x, "image y:", y);
+
+    var image_bounding_dims = imageContainer[previous_plane - 1].image_bounding_dims;
+    var scale = get_image_scale(width, height, image_bounding_dims.width, image_bounding_dims.height);
+    var img_width = Math.floor(scale * image_bounding_dims.width);
+    var img_height = Math.floor(scale * image_bounding_dims.height);
+    console.log("scaling by", scale, "new width:", img_width, "new height:", img_height, "orig. width:", image_bounding_dims.width, "orig. height:", image_bounding_dims.height);
+
+    /*zoom_px = parseFloat(elem.attr('x'));
+    zoom_py = parseFloat(elem.attr('y'));
+    let zoom_width = parseFloat(elem.attr('width'));
+    let zoom_height = parseFloat(elem.attr('height'));
+    var zoom_viewport_size = Math.min(zoom_width, zoom_height);
+
+    var xScale = d3.scaleLinear().domain([pol_xmin, pol_xmax]).range([zoom_px, zoom_px + zoom_viewport_size]);
+    var yScale = d3.scaleLinear().domain([pol_ymax, pol_ymin]).range([zoom_py, zoom_py + zoom_viewport_size]);*/
+
+    const xScale = d3.scaleLinear().domain([image_bounding_dims.x1, image_bounding_dims.x2]).range([x, x + width]);
+    const yScale = d3.scaleLinear().domain([image_bounding_dims.y1, image_bounding_dims.y1 + (image_bounding_dims.height - 1)]).range([y + height, y]);
+
+    const grid_spacing = 2 * range;
+
+    plot_polarisation(field, mean, std, xScale, yScale, grid_spacing, "PolarisationViewport");
+}
+
 function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, index) {
     // console.log("process_hdr_image: #" + index);
     var image_bounding_dims = true_image_dimensions(alpha, img_width, img_height);
@@ -6438,7 +6495,13 @@ async function open_websocket_connection(_datasetId, index) {
                             console.log("json:", jsonData);
 
                             if (polarisation != null) {
-                                process_polarisation_viewport(jsonData);
+                                if (!streaming) {
+                                    if (!windowLeft) {
+                                        process_polarisation_viewport(jsonData);
+                                    }
+                                } else {
+                                    process_polarisation_video(jsonData);
+                                }
                             }
                         } catch (e) {
                             console.log(e);
