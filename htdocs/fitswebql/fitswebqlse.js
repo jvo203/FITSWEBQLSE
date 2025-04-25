@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-04-23.2";
+    return "JS2025-04-25.0";
 }
 
 function uuidv4() {
@@ -12079,6 +12079,17 @@ function x_axis_mouseleave() {
         }
     }
     catch (_) { };
+
+    try {
+        if (polarisation != null) {
+            // Clear the PolarisationViewport HTML5 Canvas
+            let pol_canvas = document.getElementById("PolarisationViewport");
+            let pol_ctx = pol_canvas.getContext('2d');
+            let pol_width = pol_canvas.width;
+            var pol_height = pol_canvas.height;
+            pol_ctx.clearRect(0, 0, pol_width, pol_height);
+        }
+    } catch (_) { };
 
     //send an end_video command via WebSockets
     var request = {
