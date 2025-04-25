@@ -9808,7 +9808,7 @@ contains
       integer(kind=c_int) :: x1, x2, y1, y2, dimx, dimy, width, height
       integer :: k, max_planes, max_threads
 
-      real(kind=c_float) :: spectrum ! the actual value will be ignored, it's not need for polarisation
+      real(kind=c_float) :: spectrum ! the actual value will be ignored, it's not needed for polarisation
       real(kind=8) :: cdelt3
       real(kind=c_float) :: dmedian, sumP, sumN ! unneeded
       integer(c_int64_t) :: countP, countN ! unneeded
