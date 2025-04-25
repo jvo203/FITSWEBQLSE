@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-04-25.0";
+    return "JS2025-04-25.1";
 }
 
 function uuidv4() {
@@ -4368,6 +4368,7 @@ function process_polarisation_video(json) {
     let pol_ymin = 0;
     let pol_xmax = json.width - 1;
     let pol_ymax = json.height - 1;
+    console.log(pol_xmin, pol_xmax, pol_ymin, pol_ymax);
 
     // re-use the statistics from the polarisation object                
     const mean = polarisation.mean;
@@ -4394,6 +4395,7 @@ function process_polarisation_video(json) {
     console.log("rect. width:", width, "rect. height:", height, "image x:", x, "image y:", y);
 
     var image_bounding_dims = imageContainer[previous_plane - 1].image_bounding_dims;
+    console.log(image_bounding_dims);
     var scale = get_image_scale(width, height, image_bounding_dims.width, image_bounding_dims.height);
     var img_width = Math.floor(scale * image_bounding_dims.width);
     var img_height = Math.floor(scale * image_bounding_dims.height);
@@ -4413,6 +4415,7 @@ function process_polarisation_video(json) {
 
     const grid_spacing = 2 * range;
 
+    console.log(field);
     plot_polarisation(field, mean, std, xScale, yScale, grid_spacing, "PolarisationViewport");
 }
 
