@@ -4410,8 +4410,13 @@ function process_polarisation_video(json) {
     var xScale = d3.scaleLinear().domain([pol_xmin, pol_xmax]).range([zoom_px, zoom_px + zoom_viewport_size]);
     var yScale = d3.scaleLinear().domain([pol_ymax, pol_ymin]).range([zoom_py, zoom_py + zoom_viewport_size]);*/
 
-    const xScale = d3.scaleLinear().domain([image_bounding_dims.x1, image_bounding_dims.x2]).range([x, x + width]);
-    const yScale = d3.scaleLinear().domain([image_bounding_dims.y1, image_bounding_dims.y1 + (image_bounding_dims.height - 1)]).range([y + height, y]);
+    if (scale >= 1.0) {
+        var xScale = d3.scaleLinear().domain([image_bounding_dims.x1, image_bounding_dims.x2]).range([x, x + width]);
+        var yScale = d3.scaleLinear().domain([image_bounding_dims.y1, image_bounding_dims.y1 + (image_bounding_dims.height - 1)]).range([y + height, y]);
+    } else {
+        var xScale = d3.scaleLinear().domain([image_bounding_dims.x1 * scale, image_bounding_dims.x2 * scale]).range([x, x + width]);
+        var yScale = d3.scaleLinear().domain([image_bounding_dims.y1 * scale, (image_bounding_dims.y1 + (image_bounding_dims.height - 1)) * scale]).range([y + height, y]);
+    }
 
     const grid_spacing = 2 * range;
 
