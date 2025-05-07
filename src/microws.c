@@ -1440,6 +1440,26 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                     // 'bitrate'
                     if (strncmp(frame_data + koff, "\"bitrate\"", klen) == 0)
                         bitrate = atoi2(frame_data + voff, vlen);
+
+                    // 'pol_xmin'
+                    if (strncmp(frame_data + koff, "\"pol_xmin\"", klen) == 0)
+                        session->pol_xmin = atoi2(frame_data + voff, vlen);
+
+                    // 'pol_xmax'
+                    if (strncmp(frame_data + koff, "\"pol_xmax\"", klen) == 0)
+                        session->pol_xmax = atoi2(frame_data + voff, vlen);
+
+                    // 'pol_ymin'
+                    if (strncmp(frame_data + koff, "\"pol_ymin\"", klen) == 0)
+                        session->pol_ymin = atoi2(frame_data + voff, vlen);
+
+                    // 'pol_ymax'
+                    if (strncmp(frame_data + koff, "\"pol_ymax\"", klen) == 0)
+                        session->pol_ymax = atoi2(frame_data + voff, vlen);
+
+                    // 'pol_range'
+                    if (strncmp(frame_data + koff, "\"pol_range\"", klen) == 0)
+                        session->pol_range = atoi2(frame_data + voff, vlen);
                 }
 
                 // printf("[C]::init_video width: %d, height: %d, flux: %s, fps: %d, bitrate: %d\n", width, height, session->flux, fps, bitrate);
