@@ -2602,6 +2602,12 @@ on_ws_connection(void *cls,
                 session->image_height = 0;
                 session->bDownsize = false;
 
+                session->pol_xmin = 0;
+                session->pol_xmax = 0;
+                session->pol_ymin = 0;
+                session->pol_ymax = 0;
+                session->pol_range = 0;
+
                 pthread_mutex_init(&session->vid_mtx, NULL);
                 session->last_frame_idx = -1;
                 session->param = NULL;

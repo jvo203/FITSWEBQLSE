@@ -71,6 +71,13 @@ typedef struct
     int image_height;
     bool bDownsize;
 
+    // polarisation
+    int pol_xmin;
+    int pol_xmax;
+    int pol_ymin;
+    int pol_ymax;
+    int pol_range;
+
     // video
     pthread_mutex_t vid_mtx;
     int last_frame_idx;
