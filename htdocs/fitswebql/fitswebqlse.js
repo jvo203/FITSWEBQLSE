@@ -12051,7 +12051,7 @@ function x_axis_mouseenter(offset) {
                 request.pol_xmax = Math.round(1 + scale * polarisation.xmax);
                 request.pol_ymin = Math.round(1 + scale * polarisation.ymin);
                 request.pol_ymax = Math.round(1 + scale * polarisation.ymax);
-                request.pol_range = scale * polarisation.range;
+                request.pol_range = Math.round(scale * polarisation.range);
             }
 
             if (wsConn[index].readyState == 1)
