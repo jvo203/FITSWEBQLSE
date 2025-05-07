@@ -12047,13 +12047,11 @@ function x_axis_mouseenter(offset) {
                 let scale = (fitsData.width - 1) / (polarisation.pol_width - 1);
                 console.log("'init_video'::polarisation scale =", scale);
 
-                //request.pol_x = pol_x;
-                //request.pol_y = pol_y;
-                request.pol_xmin = polarisation.xmin;
-                request.pol_xmax = polarisation.xmax;
-                request.pol_ymin = polarisation.ymin;
-                request.pol_ymax = polarisation.ymax;
-                request.pol_range = polarisation.range;
+                request.pol_xmin = 1 + scale * polarisation.xmin;
+                request.pol_xmax = 1 + scale * polarisation.xmax;
+                request.pol_ymin = 1 + scale * polarisation.ymin;
+                request.pol_ymax = 1 + scale * polarisation.ymax;
+                request.pol_range = scale * polarisation.range;
             }
 
             if (wsConn[index].readyState == 1)
