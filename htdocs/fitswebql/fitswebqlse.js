@@ -4314,6 +4314,10 @@ function process_polarisation(index, pol_width, pol_height, intensity, angle, ma
     plot_polarisation(field, mean, std, xScale, yScale, grid_spacing, "PolarisationCanvas");
 
     polarisation.field = field;
+    polarisation.xmin = image_bounding_dims.x1;
+    polarisation.xmax = image_bounding_dims.x2;
+    polarisation.ymin = image_bounding_dims.y1;
+    polarisation.ymax = image_bounding_dims.y1 + (image_bounding_dims.height - 1);
     polarisation.range = range;
     polarisation.mean = mean;
     polarisation.std = std;
@@ -12039,9 +12043,17 @@ function x_axis_mouseenter(offset) {
                 console.log("pol_y = ", pol_y);
                 console.log("pol_range = ", polarisation.range);
 
-                /*request.pol_x = pol_x;
-                request.pol_y = pol_y;
-                request.pol_range = polarisation.range;*/
+                let fitsData = fitsContainer[index];
+                let scale = (fitsData.width - 1) / (polarisation.pol_width - 1);
+                console.log("'init_video'::polarisation scale =", scale);
+
+                //request.pol_x = pol_x;
+                //request.pol_y = pol_y;
+                request.pol_xmin = polarisation.xmin;
+                request.pol_xmax = polarisation.xmax;
+                request.pol_ymin = polarisation.ymin;
+                request.pol_ymax = polarisation.ymax;
+                request.pol_range = polarisation.range;
             }
 
             if (wsConn[index].readyState == 1)
