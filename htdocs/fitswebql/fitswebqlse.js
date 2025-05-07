@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-04-25.1";
+    return "JS2025-05-07.0";
 }
 
 function uuidv4() {
@@ -4313,6 +4313,7 @@ function process_polarisation(index, pol_width, pol_height, intensity, angle, ma
 
     plot_polarisation(field, mean, std, xScale, yScale, grid_spacing, "PolarisationCanvas");
 
+    polarisation.field = field;
     polarisation.range = range;
     polarisation.mean = mean;
     polarisation.std = std;
@@ -12020,6 +12021,10 @@ function x_axis_mouseenter(offset) {
                 flux: document.getElementById('flux' + (index + 1)).value,
                 timestamp: performance.now()
             };
+
+            if (polarisation != null) {
+                console.log("polarisation = ", polarisation);
+            }
 
             if (wsConn[index].readyState == 1)
                 wsConn[index].send(JSON.stringify(request));
