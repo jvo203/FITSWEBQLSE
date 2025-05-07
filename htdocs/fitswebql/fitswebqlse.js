@@ -12023,7 +12023,25 @@ function x_axis_mouseenter(offset) {
             };
 
             if (polarisation != null) {
-                console.log("polarisation = ", polarisation);
+                // extract field.x,field.y coordinates into pol_x and pol_y arrays
+                let pol_x = [];
+                let pol_y = [];
+
+                // for each item in polarisation.field
+                // TO-DO: re-scale the polarisation field to match fitsData.width, fitsData.height
+                for (let i = 0; i < polarisation.field.length; i++) {
+                    let vector = polarisation.field[i];
+                    pol_x.push(vector.x);
+                    pol_y.push(vector.y);
+                }
+
+                console.log("pol_x = ", pol_x);
+                console.log("pol_y = ", pol_y);
+                console.log("pol_range = ", polarisation.range);
+
+                /*request.pol_x = pol_x;
+                request.pol_y = pol_y;
+                request.pol_range = polarisation.range;*/
             }
 
             if (wsConn[index].readyState == 1)
