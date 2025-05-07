@@ -12047,10 +12047,10 @@ function x_axis_mouseenter(offset) {
                 let scale = (fitsData.width - 1) / (polarisation.pol_width - 1);
                 console.log("'init_video'::polarisation scale =", scale);
 
-                request.pol_xmin = 1 + scale * polarisation.xmin;
-                request.pol_xmax = 1 + scale * polarisation.xmax;
-                request.pol_ymin = 1 + scale * polarisation.ymin;
-                request.pol_ymax = 1 + scale * polarisation.ymax;
+                request.pol_xmin = Math.round(1 + scale * polarisation.xmin);
+                request.pol_xmax = Math.round(1 + scale * polarisation.xmax);
+                request.pol_ymin = Math.round(1 + scale * polarisation.ymin);
+                request.pol_ymax = Math.round(1 + scale * polarisation.ymax);
                 request.pol_range = scale * polarisation.range;
             }
 
