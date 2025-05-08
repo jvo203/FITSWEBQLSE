@@ -97,6 +97,9 @@ module fits
       ! request
       type(dataset), pointer :: item
       integer(c_int) :: frame
+      integer(c_int) :: pol_xmin, pol_xmax
+      integer(c_int) :: pol_ymin, pol_ymax
+      integer(c_int) :: pol_range
 
       ! response
       type(C_PTR) :: session
@@ -9651,6 +9654,11 @@ contains
 
          pol_req%item => item
          pol_req%frame = req%frame
+         pol_req%pol_xmin = req%pol_xmin
+         pol_req%pol_xmax = req%pol_xmax
+         pol_req%pol_ymin = req%pol_ymin
+         pol_req%pol_ymax = req%pol_ymax
+         pol_req%pol_range = req%pol_range
          pol_req%session = req%session
          pol_req%seq_id = req%seq_id
          pol_req%timestamp = req%timestamp
