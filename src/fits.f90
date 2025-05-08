@@ -8944,12 +8944,13 @@ contains
 
    end function DownsizePolarization
 
-   subroutine DownsizeVideoPolarization(pixels, mask, width, height)
+   subroutine DownsizeVideoPolarization(pixels, mask, width, height, pol_xmin, pol_ymin, pol_xmax, pol_ymax, pol_range)
       implicit none
 
       real(c_float), dimension(:, :, :), intent(in) :: pixels
       logical(kind=c_bool), dimension(:, :), intent(in) :: mask
       integer, intent(in) :: width, height
+      integer, intent(in) :: pol_xmin, pol_ymin, pol_xmax, pol_ymax, pol_range
 
       integer :: xmin, xmax, ymin, ymax, max_planes, i, j, ii, jj
 
@@ -8962,16 +8963,16 @@ contains
       max_planes = size(pixels, 3)
       if (max_planes .lt. 3) return
 
-      range = max(1, floor(0.5*(real(width) + real(height))/real(target)))
+      range = min(pol_range, 1)
       min_count = nint(0.75*range**2)
 
       ! print the width X height of the input pixels and mask
       print *, 'DownsizePolarization: width:', width, 'height:', height, 'range:', range, 'min_count:', min_count
 
-      xmin = lbound(pixels, 1)
-      xmax = ubound(pixels, 1)
-      ymin = lbound(pixels, 2)
-      ymax = ubound(pixels, 2)
+      xmin = max(lbound(pixels, 1), pol_xmin)
+      xmax = min(ubound(pixels, 1), pol_xmax)
+      ymin = max(lbound(pixels, 2), pol_ymin)
+      ymax = min(ubound(pixels, 2), pol_ymax)
 
       print *, 'DownsizeVideoPolarization: xmin:', xmin, 'xmax:', xmax, 'ymin:', ymin, 'ymax:', ymax,&
       & 'max_planes:', max_planes, 'range:', range, 'min_count:', min_count
