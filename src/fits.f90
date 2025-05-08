@@ -9992,18 +9992,20 @@ contains
       !$omp END DO
       !$omp END PARALLEL
 
-      json = DownsizePolarization(pixels, mask, dimx, dimy, square)
+      !json = DownsizePolarization(pixels, mask, dimx, dimy, square)
+      call DownsizeVideoPolarization(pixels, mask, dimx, dimy,&
+      & req%pol_xmin, req%pol_ymin, req%pol_xmax, req%pol_ymax, req%pol_range)
 
       ! end the timer
       t2 = omp_get_wtime()
       elapsed = 1000.0*real(t2 - req%t1) ! [ms]
 
       ! perhaps we should be creating a new WebSocket send thread here
-      call write_ws_polarisation(req%session, req%seq_id, req%timestamp, elapsed, json)
+      !call write_ws_polarisation(req%session, req%seq_id, req%timestamp, elapsed, json)
       print *, 'polarisation_request_simd elapsed time:', elapsed, '[ms]'
 
       ! deallocate the memory
-      call delete_json(json)
+      !call delete_json(json)
 
       ! end the timer
       t2 = omp_get_wtime()
