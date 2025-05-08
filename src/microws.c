@@ -1670,6 +1670,12 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                 req->flux = NULL;
                 req->len = 0;
 
+                req->pol_xmin = session->pol_xmin;
+                req->pol_xmax = session->pol_xmax;
+                req->pol_ymin = session->pol_ymin;
+                req->pol_ymax = session->pol_ymax;
+                req->pol_range = session->pol_range;
+
                 req->width = session->image_width;
                 req->height = session->image_height;
                 req->downsize = session->bDownsize;

@@ -173,6 +173,10 @@ struct video_request
     float dmin, dmax, dmedian;
     float dmadN, dmadP;
 
+    int pol_xmin, pol_xmax;
+    int pol_ymin, pol_ymax;
+    int pol_range;
+
     // output
     int width;
     int height;
