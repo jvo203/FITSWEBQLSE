@@ -137,6 +137,10 @@ module fits
       real(kind=c_float) dmin, dmax, dmedian
       real(kind=c_float) dmadN, dmadP
 
+      integer(c_int) :: pol_xmin, pol_xmax
+      integer(c_int) :: pol_ymin, pol_ymax
+      integer(c_int) :: pol_range
+
       ! output
       integer(kind=c_int) :: width
       integer(kind=c_int) :: height
