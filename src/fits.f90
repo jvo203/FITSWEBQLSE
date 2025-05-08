@@ -8944,6 +8944,107 @@ contains
 
    end function DownsizePolarization
 
+   subroutine DownsizeVideoPolarization(pixels, mask, width, height)
+      implicit none
+
+      real(c_float), dimension(:, :, :), intent(in) :: pixels
+      logical(kind=c_bool), dimension(:, :), intent(in) :: mask
+      integer, intent(in) :: width, height
+
+      integer :: xmin, xmax, ymin, ymax, max_planes, i, j, ii, jj
+
+      integer, parameter :: target = 34;
+      integer :: range, count, min_count, total_count
+
+      real :: tmp, tmpA, tmpI, tmpQ, tmpU, tmpV
+      real :: intensity, angle, x0, y0
+
+      max_planes = size(pixels, 3)
+      if (max_planes .lt. 3) return
+
+      range = max(1, floor(0.5*(real(width) + real(height))/real(target)))
+      min_count = nint(0.75*range**2)
+
+      ! print the width X height of the input pixels and mask
+      print *, 'DownsizePolarization: width:', width, 'height:', height, 'range:', range, 'min_count:', min_count
+
+      xmin = lbound(pixels, 1)
+      xmax = ubound(pixels, 1)
+      ymin = lbound(pixels, 2)
+      ymax = ubound(pixels, 2)
+
+      print *, 'DownsizeVideoPolarization: xmin:', xmin, 'xmax:', xmax, 'ymin:', ymin, 'ymax:', ymax,&
+      & 'max_planes:', max_planes, 'range:', range, 'min_count:', min_count
+
+      total_count = 0
+
+      ! loop over the pixels and mask
+      do j = ymin, ymax, range
+         do i = xmin, xmax, range
+            ! print *, 'DownsizeVideoPolarization: i:', i, 'j:', j
+
+            intensity = 0.0
+            angle = 0.0
+            count = 0
+
+            do jj = j, min(j + range - 0, ymax)
+               do ii = i, min(i + range - 0, xmax)
+                  if (mask(ii, jj)) then
+                     tmpI = pixels(ii, jj, 1)
+                     tmpQ = pixels(ii, jj, 2)
+                     tmpU = pixels(ii, jj, 3)
+
+                     if (abs(tmpQ) .le. epsilon(tmpQ) .and. abs(tmpU) .le. epsilon(tmpU)) then
+                        tmpA = ieee_value(0.0, ieee_quiet_nan)
+                     else
+                        tmpA = 0.5*atan2(tmpU, tmpQ) ! polarisation angle
+                     end if
+
+                     if (max_planes .gt. 3) then
+                        tmpV = pixels(ii, jj, 4)
+
+                        if (abs(tmpI) .le. epsilon(tmpI)) then
+                           tmp = ieee_value(0.0, ieee_quiet_nan)
+                        else
+                           tmp = sqrt(tmpQ**2 + tmpU**2 + tmpV**2)/tmpI ! total intensity
+                        end if
+                     else
+                        if (abs(tmpI) .le. epsilon(tmpI)) then
+                           tmp = ieee_value(0.0, ieee_quiet_nan)
+                        else
+                           tmp = sqrt(tmpQ**2 + tmpU**2)/tmpI ! linear intensity
+                        end if
+                     end if
+
+                     if ((.not. ieee_is_nan(tmpA)) .and. (.not. ieee_is_nan(tmp))) then
+                        intensity = intensity + tmp
+                        angle = angle + tmpA
+                        count = count + 1
+                     end if
+                  end if
+               end do
+            end do
+
+            if (count .ge. min_count) then
+               intensity = intensity/real(count)
+               angle = angle/real(count)
+
+               x0 = real(i) + 0.5*real(range) - xmin ! 0-based indexing
+               y0 = real(j) + 0.5*real(range) - ymin ! 0-based indexing
+
+               if (x0 .ge. 0.0 .and. x0 .le. real(width - 1) .and. y0 .ge. 0.0 .and. y0 .le. real(height - 1)) then
+                  total_count = total_count + 1
+                  print *, 'DownsizePolarization: x:', x0, 'y:', y0, 'intensity:', intensity, 'angle:', angle
+               end if
+            end if
+
+         end do
+      end do
+
+      print *, 'DownsizeVideoPolarization: total_count:', total_count
+
+   end subroutine DownsizeVideoPolarization
+
    recursive subroutine viewport_request(user) BIND(C, name='viewport_request')
       use omp_lib
       use, intrinsic :: iso_c_binding
