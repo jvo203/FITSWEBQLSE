@@ -3401,6 +3401,21 @@ void write_ws_viewport(websocket_session *session, const int *seq_id, const floa
         free(compressed_mask);
 }
 
+void write_ws_polarisation(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, int width, int height, const float *restrict intensity, const float *restrict angle)
+{
+    if (session == NULL)
+    {
+        printf("[C] <write_ws_polarisation> NULL session pointer!\n");
+        return;
+    }
+
+    if (intensity == NULL || angle == NULL)
+    {
+        printf("[C] <write_ws_polarisation> NULL intensity or angle!\n");
+        return;
+    }
+}
+
 void write_ws_json_polarisation(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, GString *json)
 {
     if (session == NULL)
