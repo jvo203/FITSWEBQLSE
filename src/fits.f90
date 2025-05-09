@@ -8960,7 +8960,8 @@ contains
       integer :: range, count, min_count, total_count
 
       real :: tmp, tmpA, tmpI, tmpQ, tmpU, tmpV
-      real :: intensity, angle, x0, y0
+      real :: intensity, angle
+      integer :: x0, y0
 
       max_planes = size(pixels, 3)
       if (max_planes .lt. 3) return
@@ -9032,10 +9033,10 @@ contains
                intensity = intensity/real(count)
                angle = angle/real(count)
 
-               x0 = real(i) + 0.5*real(range) - xmin ! 0-based indexing
-               y0 = real(j) + 0.5*real(range) - ymin ! 0-based indexing
+               x0 = i - xmin ! 0-based indexing, remove the offset
+               y0 = j - ymin ! 0-based indexing, remove the offset
 
-               if (x0 .ge. 0.0 .and. x0 .le. real(width - 1) .and. y0 .ge. 0.0 .and. y0 .le. real(height - 1)) then
+               if (x0 .ge. 0.0 .and. x0 .le. (width - 1) .and. y0 .ge. 0.0 .and. y0 .le. (height - 1)) then
                   total_count = total_count + 1
                   print *, 'DownsizePolarization: x:', x0, 'y:', y0, 'intensity:', intensity, 'angle:', angle
                end if
