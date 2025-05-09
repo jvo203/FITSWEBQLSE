@@ -3401,9 +3401,9 @@ void write_ws_viewport(websocket_session *session, const int *seq_id, const floa
         free(compressed_mask);
 }
 
-uchar *zfp_compress_2d(const float *restrict pixels, int width, int height, int precision)
+uchar *zfp_compress_2d(const float *restrict array, int width, int height, int precision, size_t *zfpsize)
 {
-    uchar *compressed_pixels = NULL;
+    uchar *compressed_array = NULL;
 
     // ZFP variables
     zfp_type data_type = zfp_type_float;
@@ -3411,28 +3411,28 @@ uchar *zfp_compress_2d(const float *restrict pixels, int width, int height, int 
     zfp_stream *zfp = NULL;
     size_t bufsize = 0;
     bitstream *stream = NULL;
-    size_t zfpsize = 0;
+    *zfpsize = 0;
     uint nx = width;
     uint ny = height;
 
     // compress 2D pixels with ZFP
-    field = zfp_field_2d((void *)pixels, data_type, nx, ny);
+    field = zfp_field_2d((void *)array, data_type, nx, ny);
 
     // allocate metadata for a compressed stream
     zfp = zfp_stream_open(NULL);
 
-    // zfp_stream_set_rate(zfp, 8.0, data_type, 2, 0);
+    // set the compression precision
     zfp_stream_set_precision(zfp, precision);
 
     // allocate buffer for compressed data
     bufsize = zfp_stream_maximum_size(zfp, field);
 
-    compressed_pixels = (uchar *)malloc(bufsize);
+    compressed_array = (uchar *)malloc(bufsize);
 
-    if (compressed_pixels != NULL)
+    if (compressed_array != NULL)
     {
         // associate bit stream with allocated buffer
-        stream = bitstream_open((void *)compressed_pixels, bufsize);
+        stream = bitstream_open((void *)compressed_array, bufsize);
 
         if (stream != NULL)
         {
@@ -3441,14 +3441,16 @@ uchar *zfp_compress_2d(const float *restrict pixels, int width, int height, int 
             zfp_write_header(zfp, field, ZFP_HEADER_FULL);
 
             // compress entire array
-            zfpsize = zfp_compress(zfp, field);
+            *zfpsize = zfp_compress(zfp, field);
 
             if (zfpsize == 0)
                 printf("[C] ZFP compression failed!\n");
             else
-                printf("[C] viewport pixels compressed size: %zu bytes\n", zfpsize);
+                printf("[C] 2D float array compressed size: %zu bytes\n", *zfpsize);
 
             bitstream_close(stream);
+
+            // the compressed part is available at compressed_array[0..*zfpsize-1]
         }
 
         // clean up
@@ -3456,9 +3458,9 @@ uchar *zfp_compress_2d(const float *restrict pixels, int width, int height, int 
         zfp_stream_close(zfp);
     }
     else
-        printf("[C] a NULL compressed_pixels buffer!\n");
+        printf("[C] a NULL compressed_array buffer!\n");
 
-    return compressed_pixels;
+    return compressed_array;
 }
 
 void write_ws_polarisation(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, int width, int height, const float *restrict intensity, const float *restrict angle, int precision)
