@@ -7467,7 +7467,10 @@ contains
       if (.not. c_associated(user)) return
       call c_f_pointer(user, req)
 
-      if (.not. c_associated(req%ptr)) return
+      if (.not. c_associated(req%ptr)) then
+         call release_session(req%session) ! decrement the session reference counter
+         return
+      end if
       call c_f_pointer(req%ptr, item)
 
       ! ifort
@@ -9935,7 +9938,7 @@ contains
 
       real(kind=c_float), allocatable, target :: pixels(:, :, :)
       logical(kind=c_bool), allocatable, target :: thread_mask(:, :, :), mask(:,:)
-      real(kind=c_float), dimension(:,:), allocatable :: intensity, angle
+      real(kind=c_float), dimension(:,:), allocatable, target :: intensity, angle
 
       integer(kind=c_int) :: x1, x2, y1, y2, dimx, dimy, width, height
       integer :: k, max_planes, max_threads
