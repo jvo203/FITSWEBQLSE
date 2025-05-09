@@ -8634,7 +8634,7 @@ contains
             len = max(item%naxes(1), item%naxes(2))
 
             !$omp parallel default(shared) private(x1,x2,y1,y2) num_threads(2)
-            !$omp single
+            !$omp single nowait
             !$omp task
             ! the X-axis
             x1 = x - len
@@ -8651,7 +8651,7 @@ contains
             !$omp end task
             !$omp end single
 
-            !$omp single
+            !$omp single nowait
             !$omp task
             ! the Y-axis
             x1 = x
@@ -10438,14 +10438,14 @@ contains
 
          ! downsize {pixels, mask} into {dst_pixels, dst_mask}
          !$omp parallel default(shared) num_threads(2)
-         !$omp single
+         !$omp single nowait
          !$omp task
          call resizeNearest(c_loc(pixels), width, height,&
          & c_loc(dst_pixels), dst_width, dst_height)
          !$omp end task
          !$omp end single
 
-         !$omp single
+         !$omp single nowait
          !$omp task
          call resizeNearest(c_loc(mask), width, height,&
          & c_loc(dst_mask), dst_width, dst_height)

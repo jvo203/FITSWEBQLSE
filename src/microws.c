@@ -3488,15 +3488,31 @@ void write_ws_polarisation(websocket_session *session, const int *seq_id, const 
         return;
     }
 
-    // compress 2D intensity with ZFP
-    compressed_intensity = zfp_compress_2d(intensity, width, height, precision, &intensity_size);
-    if (compressed_intensity == NULL)
-        printf("[C] a NULL compressed_intensity buffer!\n");
+    // use OpenMP tasks
+#pragma omp parallel num_threads(2)
+    {
+#pragma omp single nowait
+        {
+#pragma omp task
+            {
+                // compress 2D intensity with ZFP
+                compressed_intensity = zfp_compress_2d(intensity, width, height, precision, &intensity_size);
+                if (compressed_intensity == NULL)
+                    printf("[C] a NULL compressed_intensity buffer!\n");
+            }
+        }
 
-    // compress 2D angle with ZFP
-    compressed_angle = zfp_compress_2d(angle, width, height, precision, &angle_size);
-    if (compressed_angle == NULL)
-        printf("[C] a NULL compressed_angle buffer!\n");
+#pragma omp single nowait
+        {
+#pragma omp task
+            {
+                // compress 2D angle with ZFP
+                compressed_angle = zfp_compress_2d(angle, width, height, precision, &angle_size);
+                if (compressed_angle == NULL)
+                    printf("[C] a NULL compressed_angle buffer!\n");
+            }
+        }
+    }
 
     if (compressed_intensity == NULL || compressed_angle == NULL)
     {
