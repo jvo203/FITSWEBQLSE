@@ -23,7 +23,7 @@ void *send_cluster_heartbeat(void *arg);
 void write_ws_spectrum(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, const float *spectrum, int n, int precision);
 void write_ws_viewport(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, int width, int height, const float *restrict pixels, const bool *restrict mask, int precision);
 void write_ws_hds_spectra(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, const float *restrict xspec, const bool *restrict xmask, int xlen, const float *restrict yspec, const bool *restrict ymask, int ylen, const int *x, const int *y, const float *theta, int precision);
-void write_ws_polarisation(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, GString *json);
+void write_ws_json_polarisation(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, GString *json);
 
 // video
 void write_ws_video(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, const uint8_t *restrict pixels, const uint8_t *restrict mask);
@@ -3400,23 +3400,23 @@ void write_ws_viewport(websocket_session *session, const int *seq_id, const floa
         free(compressed_mask);
 }
 
-void write_ws_polarisation(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, GString *json)
+void write_ws_json_polarisation(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, GString *json)
 {
     if (session == NULL)
     {
-        printf("[C] <write_ws_polarisation> NULL session pointer!\n");
+        printf("[C] <write_ws_json_polarisation> NULL session pointer!\n");
         return;
     }
 
     if (json == NULL)
     {
-        printf("[C] <write_ws_polarisation> NULL json!\n");
+        printf("[C] <write_ws_json_polarisation> NULL json!\n");
         return;
     }
 
 #ifdef DEBUG
     // first print the JSON string
-    printf("[C] <write_ws_polarisation> :: %s\n", json->str);
+    printf("[C] <write_ws_json_polarisation> :: %s\n", json->str);
 #endif
 
     // compress JSON with LZ4-HC

@@ -1374,9 +1374,9 @@ module fits
          type(C_PTR), value :: pixels, mask
       end subroutine write_ws_viewport
 
-      ! void write_ws_polarisation(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, GString *json);
-      subroutine write_ws_polarisation(session, seq_id, timestamp, elapsed, json)&
-      & BIND(C, name='write_ws_polarisation')
+      ! void write_ws_json_polarisation(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, GString *json);
+      subroutine write_ws_json_polarisation(session, seq_id, timestamp, elapsed, json)&
+      & BIND(C, name='write_ws_json_polarisation')
          use, intrinsic :: ISO_C_BINDING
          implicit none
 
@@ -1384,7 +1384,7 @@ module fits
          integer(c_int), intent(in) :: seq_id
          real(c_float), intent(in) :: timestamp, elapsed
          type(C_PTR), value :: json
-      end subroutine write_ws_polarisation
+      end subroutine write_ws_json_polarisation
 
       ! void write_ws_video(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, const uint8_t *restrict pixels, const uint8_t *restrict mask);
       subroutine write_ws_video(session, seq_id, timestamp, elapsed, pixels, mask)&
@@ -7774,7 +7774,7 @@ contains
             &dimx, dimy, c_loc(pixels(:, :, plane)), c_loc(mask), precision)
          end if
 
-         call write_ws_polarisation(req%session, req%seq_id, req%timestamp, elapsed, json)
+         call write_ws_json_polarisation(req%session, req%seq_id, req%timestamp, elapsed, json)
 
          ! deallocate the memory
          call delete_json(json)
@@ -8802,7 +8802,7 @@ contains
          &dimx, dimy, c_loc(pixels(:, :, plane)), c_loc(mask), precision)
       end if
 
-      call write_ws_polarisation(req%session, req%seq_id, req%timestamp, elapsed, json)
+      call write_ws_json_polarisation(req%session, req%seq_id, req%timestamp, elapsed, json)
 
       ! deallocate the memory
       call delete_json(json)
@@ -10019,7 +10019,7 @@ contains
       elapsed = 1000.0*real(t2 - req%t1) ! [ms]
 
       ! perhaps we should be creating a new WebSocket send thread here
-      !call write_ws_polarisation(req%session, req%seq_id, req%timestamp, elapsed, json)
+      !call write_ws_json_polarisation(req%session, req%seq_id, req%timestamp, elapsed, json)
       print *, 'polarisation_request_simd elapsed time:', elapsed, '[ms]'
 
       ! deallocate the memory
