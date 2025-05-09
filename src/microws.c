@@ -24,6 +24,7 @@ void write_ws_spectrum(websocket_session *session, const int *seq_id, const floa
 void write_ws_viewport(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, int width, int height, const float *restrict pixels, const bool *restrict mask, int precision);
 void write_ws_hds_spectra(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, const float *restrict xspec, const bool *restrict xmask, int xlen, const float *restrict yspec, const bool *restrict ymask, int ylen, const int *x, const int *y, const float *theta, int precision);
 void write_ws_json_polarisation(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, GString *json);
+void write_ws_polarisation(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, int width, int height, const float *restrict intensity, const float *restrict angle);
 
 // video
 void write_ws_video(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, const uint8_t *restrict pixels, const uint8_t *restrict mask);
