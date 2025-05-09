@@ -24,7 +24,7 @@ void write_ws_spectrum(websocket_session *session, const int *seq_id, const floa
 void write_ws_viewport(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, int width, int height, const float *restrict pixels, const bool *restrict mask, int precision);
 void write_ws_hds_spectra(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, const float *restrict xspec, const bool *restrict xmask, int xlen, const float *restrict yspec, const bool *restrict ymask, int ylen, const int *x, const int *y, const float *theta, int precision);
 void write_ws_json_polarisation(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, GString *json);
-void write_ws_polarisation(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, int width, int height, const float *restrict intensity, const float *restrict angle);
+void write_ws_polarisation(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, int width, int height, const float *restrict intensity, const float *restrict angle, int precision);
 
 // video
 void write_ws_video(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, const uint8_t *restrict pixels, const uint8_t *restrict mask);
@@ -3401,7 +3401,67 @@ void write_ws_viewport(websocket_session *session, const int *seq_id, const floa
         free(compressed_mask);
 }
 
-void write_ws_polarisation(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, int width, int height, const float *restrict intensity, const float *restrict angle)
+uchar *zfp_compress_2d(const float *restrict pixels, int width, int height, int precision)
+{
+    uchar *compressed_pixels = NULL;
+
+    // ZFP variables
+    zfp_type data_type = zfp_type_float;
+    zfp_field *field = NULL;
+    zfp_stream *zfp = NULL;
+    size_t bufsize = 0;
+    bitstream *stream = NULL;
+    size_t zfpsize = 0;
+    uint nx = width;
+    uint ny = height;
+
+    // compress 2D pixels with ZFP
+    field = zfp_field_2d((void *)pixels, data_type, nx, ny);
+
+    // allocate metadata for a compressed stream
+    zfp = zfp_stream_open(NULL);
+
+    // zfp_stream_set_rate(zfp, 8.0, data_type, 2, 0);
+    zfp_stream_set_precision(zfp, precision);
+
+    // allocate buffer for compressed data
+    bufsize = zfp_stream_maximum_size(zfp, field);
+
+    compressed_pixels = (uchar *)malloc(bufsize);
+
+    if (compressed_pixels != NULL)
+    {
+        // associate bit stream with allocated buffer
+        stream = bitstream_open((void *)compressed_pixels, bufsize);
+
+        if (stream != NULL)
+        {
+            zfp_stream_set_bit_stream(zfp, stream);
+
+            zfp_write_header(zfp, field, ZFP_HEADER_FULL);
+
+            // compress entire array
+            zfpsize = zfp_compress(zfp, field);
+
+            if (zfpsize == 0)
+                printf("[C] ZFP compression failed!\n");
+            else
+                printf("[C] viewport pixels compressed size: %zu bytes\n", zfpsize);
+
+            bitstream_close(stream);
+        }
+
+        // clean up
+        zfp_field_free(field);
+        zfp_stream_close(zfp);
+    }
+    else
+        printf("[C] a NULL compressed_pixels buffer!\n");
+
+    return compressed_pixels;
+}
+
+void write_ws_polarisation(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, int width, int height, const float *restrict intensity, const float *restrict angle, int precision)
 {
     if (session == NULL)
     {

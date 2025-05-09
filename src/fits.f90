@@ -1386,8 +1386,8 @@ module fits
          type(C_PTR), value :: json
       end subroutine write_ws_json_polarisation
 
-      ! void write_ws_polarisation(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, int width, int height, const float *restrict intensity, const float *restrict angle);
-      subroutine write_ws_polarisation(session, seq_id, timestamp, elapsed, width, height, intensity, angle)&
+      ! void write_ws_polarisation(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, int width, int height, const float *restrict intensity, const float *restrict angle, int precision);
+      subroutine write_ws_polarisation(session, seq_id, timestamp, elapsed, width, height, intensity, angle, precision)&
       & BIND(C, name='write_ws_polarisation')
          use, intrinsic :: ISO_C_BINDING
          implicit none
@@ -1397,6 +1397,7 @@ module fits
          real(c_float), intent(in) :: timestamp, elapsed
          integer(c_int), value, intent(in) :: width, height
          type(C_PTR), value :: intensity, angle
+         integer(c_int), value, intent(in) :: precision
       end subroutine write_ws_polarisation
 
       ! void write_ws_video(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, const uint8_t *restrict pixels, const uint8_t *restrict mask);
@@ -10042,7 +10043,7 @@ contains
       !call delete_json(json)
 
       call write_ws_polarisation(req%session, req%seq_id, req%timestamp, elapsed,&
-      & size(intensity, 1), size(intensity, 2), c_loc(intensity), c_loc(angle))
+      & size(intensity, 1), size(intensity, 2), c_loc(intensity), c_loc(angle), ZFP_MEDIUM_PRECISION)
 
       ! end the timer
       t2 = omp_get_wtime()
