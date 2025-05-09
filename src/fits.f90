@@ -9054,9 +9054,6 @@ contains
                   total_count = total_count + 1
                   ! print *, 'DownsizePolarization: x:', x0, 'y:', y0, 'intensity:', intensity, 'angle:', angle
                end if
-
-               total_count = total_count + 1
-               !print *, 'DownsizePolarization: x:', x0, 'y:', y0, 'intensity:', intensity, 'angle:', angle
             end if
 
          end do
