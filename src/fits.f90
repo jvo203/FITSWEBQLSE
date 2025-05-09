@@ -9046,8 +9046,14 @@ contains
                x0 = 1 + (i - xmin)/range
                y0 = 1 + (j - ymin)/range
 
-               pol_intensity(x0, y0) = intensity
-               pol_angle(x0, y0) = angle
+               ! fill-in the output arrays
+               if (x0 .ge. 1 .and. x0 .le. size(pol_intensity, 1) .and. y0 .ge. 1 .and. y0 .le. size(pol_intensity, 2)) then
+                  pol_intensity(x0, y0) = intensity
+                  pol_angle(x0, y0) = angle
+
+                  total_count = total_count + 1
+                  ! print *, 'DownsizePolarization: x:', x0, 'y:', y0, 'intensity:', intensity, 'angle:', angle
+               end if
 
                total_count = total_count + 1
                !print *, 'DownsizePolarization: x:', x0, 'y:', y0, 'intensity:', intensity, 'angle:', angle
