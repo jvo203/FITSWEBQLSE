@@ -7754,7 +7754,7 @@ contains
                rc = my_pthread_join(task_pid(k))
             end do
 
-            json = DownsizePolarization(view_pixels, view_mask, req%width, req%height, req%beam)
+            json = DownsizeJSONPolarization(view_pixels, view_mask, req%width, req%height, req%beam)
 
             ! end the timer
             call system_clock(finish_t)
@@ -7764,7 +7764,7 @@ contains
             &req%width, req%height, c_loc(view_pixels(:, :, plane)), c_loc(view_mask), precision)
          else
             ! no need for downsizing
-            json = DownsizePolarization(pixels, mask, dimx, dimy, req%beam)
+            json = DownsizeJSONPolarization(pixels, mask, dimx, dimy, req%beam)
 
             ! end the timer
             call system_clock(finish_t)
@@ -8782,7 +8782,7 @@ contains
             rc = my_pthread_join(task_pid(i))
          end do
 
-         json = DownsizePolarization(view_pixels, view_mask, req%width, req%height, req%beam)
+         json = DownsizeJSONPolarization(view_pixels, view_mask, req%width, req%height, req%beam)
 
          ! end the timer
          t2 = omp_get_wtime()
@@ -8792,7 +8792,7 @@ contains
          &req%width, req%height, c_loc(view_pixels(:, :, plane)), c_loc(view_mask), precision)
       else
          ! no need for downsizing
-         json = DownsizePolarization(pixels, mask, dimx, dimy, req%beam)
+         json = DownsizeJSONPolarization(pixels, mask, dimx, dimy, req%beam)
 
          ! end the timer
          t2 = omp_get_wtime()
@@ -8810,7 +8810,7 @@ contains
       print *, "handle_viewport_request elapsed time:", elapsed, '[ms]'
    end subroutine realtime_viewport_request
 
-   type(C_PTR) function DownsizePolarization(pixels, mask, width, height, beam)
+   type(C_PTR) function DownsizeJSONPolarization(pixels, mask, width, height, beam)
       implicit none
 
       real(c_float), dimension(:, :, :), intent(in) :: pixels
@@ -8829,7 +8829,7 @@ contains
       type(C_PTR) :: json
 
       ! a default return value
-      DownsizePolarization = c_null_ptr
+      DownsizeJSONPolarization = c_null_ptr
 
       max_planes = size(pixels, 3)
       if (max_planes .lt. 3) return
@@ -8838,7 +8838,7 @@ contains
       min_count = nint(0.75*range**2)
 
       ! print the width X height of the input pixels and mask
-      print *, 'DownsizePolarization: width:', width, 'height:', height, 'range:', range, 'min_count:', min_count
+      print *, 'DownsizeJSONPolarization: width:', width, 'height:', height, 'range:', range, 'min_count:', min_count
 
       xmin = lbound(pixels, 1)
       xmax = ubound(pixels, 1)
@@ -8849,7 +8849,7 @@ contains
       yr = real(ymax + ymin)/2.0
       radius = min(xr - real(xmin), yr - real(ymin)) - 1.0
 
-      print *, 'DownsizePolarization: xmin:', xmin, 'xmax:', xmax, 'ymin:', ymin, 'ymax:', ymax,&
+      print *, 'DownsizeJSONPolarization: xmin:', xmin, 'xmax:', xmax, 'ymin:', ymin, 'ymax:', ymax,&
       & 'max_planes:', max_planes, 'range:', range, 'min_count:', min_count, 'radius:', radius
 
       total_count = 0
@@ -8865,7 +8865,7 @@ contains
       ! loop over the pixels and mask
       do j = ymin, ymax, range
          do i = xmin, xmax, range
-            ! print *, 'DownsizePolarization: i:', i, 'j:', j
+            ! print *, 'DownsizeJSONPolarization: i:', i, 'j:', j
 
             intensity = 0.0
             angle = 0.0
@@ -8928,7 +8928,7 @@ contains
                   total_count = total_count + 1
                   call add_json_polarisation_entry(json, x0, y0, intensity, angle)
 
-                  ! print *, 'DownsizePolarization: x:', x0, 'y:', y0, 'intensity:', intensity, 'angle:', angle
+                  ! print *, 'DownsizeJSONPolarization: x:', x0, 'y:', y0, 'intensity:', intensity, 'angle:', angle
                end if
             end if
 
@@ -8938,19 +8938,21 @@ contains
       call end_json_array(json, total_count)
       call end_json(json)
 
-      DownsizePolarization = json
+      DownsizeJSONPolarization = json
 
-      print *, 'DownsizePolarization: total_count:', total_count
+      print *, 'DownsizeJSONPolarization: total_count:', total_count
 
-   end function DownsizePolarization
+   end function DownsizeJSONPolarization
 
-   subroutine DownsizeVideoPolarization(pixels, mask, width, height, pol_xmin, pol_ymin, pol_xmax, pol_ymax, pol_range)
+   subroutine DownsizePolarization(pixels, mask, width, height, pol_xmin, pol_ymin, pol_xmax, pol_ymax,&
+   & pol_range, pol_intensity, pol_angle)
       implicit none
 
       real(c_float), dimension(:, :, :), intent(in) :: pixels
       logical(kind=c_bool), dimension(:, :), intent(in) :: mask
       integer, intent(in) :: width, height
       integer, intent(in) :: pol_xmin, pol_ymin, pol_xmax, pol_ymax, pol_range
+      real(kind=c_float), dimension(:,:), allocatable, intent(out) :: pol_intensity, pol_angle
 
       integer :: xmin, xmax, ymin, ymax, max_planes, i, j, ii, jj
 
@@ -8974,7 +8976,7 @@ contains
       ymin = max(lbound(pixels, 2), pol_ymin)
       ymax = min(ubound(pixels, 2), pol_ymax)
 
-      print *, 'DownsizeVideoPolarization: xmin:', xmin, 'xmax:', xmax, 'ymin:', ymin, 'ymax:', ymax,&
+      print *, 'DownsizePolarization: xmin:', xmin, 'xmax:', xmax, 'ymin:', ymin, 'ymax:', ymax,&
       & 'max_planes:', max_planes, 'range:', range, 'min_count:', min_count
 
       total_count = 0
@@ -8982,7 +8984,7 @@ contains
       ! loop over the pixels and mask
       do j = ymin, ymax, range
          do i = xmin, xmax, range
-            ! print *, 'DownsizeVideoPolarization: i:', i, 'j:', j
+            ! print *, 'DownsizePolarization: i:', i, 'j:', j
 
             intensity = 0.0
             angle = 0.0
@@ -9042,9 +9044,9 @@ contains
          end do
       end do
 
-      print *, 'DownsizeVideoPolarization: total_count:', total_count
+      print *, 'DownsizePolarization: total_count:', total_count
 
-   end subroutine DownsizeVideoPolarization
+   end subroutine DownsizePolarization
 
    recursive subroutine viewport_request(user) BIND(C, name='viewport_request')
       use omp_lib
@@ -9918,6 +9920,7 @@ contains
 
       real(kind=c_float), allocatable, target :: pixels(:, :, :)
       logical(kind=c_bool), allocatable, target :: thread_mask(:, :, :), mask(:,:)
+      real(kind=c_float), dimension(:,:), allocatable :: intensity, angle
 
       integer(kind=c_int) :: x1, x2, y1, y2, dimx, dimy, width, height
       integer :: k, max_planes, max_threads
@@ -9992,9 +9995,9 @@ contains
       !$omp END DO
       !$omp END PARALLEL
 
-      !json = DownsizePolarization(pixels, mask, dimx, dimy, square)
-      call DownsizeVideoPolarization(pixels, mask, dimx, dimy,&
-      & req%pol_xmin, req%pol_ymin, req%pol_xmax, req%pol_ymax, req%pol_range)
+      !json = DownsizeJSONPolarization(pixels, mask, dimx, dimy, square)
+      call DownsizePolarization(pixels, mask, dimx, dimy, req%pol_xmin, req%pol_ymin, req%pol_xmax, req%pol_ymax,&
+      & req%pol_range, intensity, angle)
 
       ! end the timer
       t2 = omp_get_wtime()
