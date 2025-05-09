@@ -10043,7 +10043,7 @@ contains
       !call delete_json(json)
 
       call write_ws_polarisation(req%session, req%seq_id, req%timestamp, elapsed,&
-      & size(intensity, 1), size(intensity, 2), c_loc(intensity), c_loc(angle), ZFP_MEDIUM_PRECISION)
+      & size(intensity, 1), size(intensity, 2), c_loc(intensity), c_loc(angle), ZFP_LOW_PRECISION)
 
       ! end the timer
       t2 = omp_get_wtime()

@@ -3403,7 +3403,7 @@ void write_ws_viewport(websocket_session *session, const int *seq_id, const floa
 
 uchar *zfp_compress_2d(const float *restrict array, int width, int height, int precision, size_t *zfpsize)
 {
-    uchar *compressed_array = NULL;
+    uchar *restrict compressed_array = NULL;
 
     // ZFP variables
     zfp_type data_type = zfp_type_float;
@@ -3465,6 +3465,11 @@ uchar *zfp_compress_2d(const float *restrict array, int width, int height, int p
 
 void write_ws_polarisation(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, int width, int height, const float *restrict intensity, const float *restrict angle, int precision)
 {
+    uchar *restrict compressed_intensity = NULL;
+    uchar *restrict compressed_angle = NULL;
+    size_t intensity_size = 0;
+    size_t angle_size = 0;
+
     if (session == NULL)
     {
         printf("[C] <write_ws_polarisation> NULL session pointer!\n");
@@ -3476,6 +3481,34 @@ void write_ws_polarisation(websocket_session *session, const int *seq_id, const 
         printf("[C] <write_ws_polarisation> NULL intensity or angle!\n");
         return;
     }
+
+    if (width <= 0 || height <= 0)
+    {
+        printf("[C] <write_ws_polarisation> invalid image data!\n");
+        return;
+    }
+
+    // compress 2D intensity with ZFP
+    compressed_intensity = zfp_compress_2d(intensity, width, height, precision, &intensity_size);
+    if (compressed_intensity == NULL)
+        printf("[C] a NULL compressed_intensity buffer!\n");
+
+    // compress 2D angle with ZFP
+    compressed_angle = zfp_compress_2d(angle, width, height, precision, &angle_size);
+    if (compressed_angle == NULL)
+        printf("[C] a NULL compressed_angle buffer!\n");
+
+    if (compressed_intensity == NULL || compressed_angle == NULL)
+    {
+        free(compressed_intensity);
+        free(compressed_angle);
+
+        printf("[C] <write_ws_polarisation> compression failed!\n");
+        return;
+    }
+
+    printf("[C] compressed_intensity size: %zu bytes\n", intensity_size);
+    printf("[C] compressed_angle size: %zu bytes\n", angle_size);
 }
 
 void write_ws_json_polarisation(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, GString *json)
