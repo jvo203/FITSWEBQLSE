@@ -8980,6 +8980,15 @@ contains
       print *, 'DownsizePolarization: xmin:', xmin, 'xmax:', xmax, 'ymin:', ymin, 'ymax:', ymax,&
       & 'max_planes:', max_planes, 'range:', range, 'min_count:', min_count
 
+      ! allocate the output arrays
+      allocate (pol_intensity(1+(xmax - xmin)/range, 1+(ymax - ymin)/range))
+      allocate (pol_angle(1+(xmax - xmin)/range, 1+(ymax - ymin)/range))
+
+      ! clear the output arrays
+      pol_intensity = 0.0
+      pol_angle = 0.0
+
+      ! re-set the counter
       total_count = 0
 
       ! loop over the pixels and mask
@@ -9033,13 +9042,15 @@ contains
                intensity = intensity/real(count)
                angle = angle/real(count)
 
-               x0 = i - xmin ! 0-based indexing, remove the offset
-               y0 = j - ymin ! 0-based indexing, remove the offset
+               ! at first 0-based indexing, remove the offset and the step, then make i and j 1-based array indices
+               x0 = 1 + (i - xmin)/range
+               y0 = 1 + (j - ymin)/range
 
-               if (x0 .ge. 0.0 .and. x0 .le. (width - 1) .and. y0 .ge. 0.0 .and. y0 .le. (height - 1)) then
-                  total_count = total_count + 1
-                  print *, 'DownsizePolarization: x:', x0, 'y:', y0, 'intensity:', intensity, 'angle:', angle
-               end if
+               pol_intensity(x0, y0) = intensity
+               pol_angle(x0, y0) = angle
+
+               total_count = total_count + 1
+               !print *, 'DownsizePolarization: x:', x0, 'y:', y0, 'intensity:', intensity, 'angle:', angle
             end if
 
          end do
