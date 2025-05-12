@@ -96,6 +96,7 @@ module fits
    type :: polarisation_request_f
       ! request
       type(dataset), pointer :: item
+      logical(kind=c_bool) :: keyframe
       integer(c_int) :: frame
       integer(c_int) :: pol_xmin, pol_xmax
       integer(c_int) :: pol_ymin, pol_ymax
@@ -9797,6 +9798,7 @@ contains
          allocate (pol_req)
 
          pol_req%item => item
+         pol_req%keyframe = req%keyframe
          pol_req%frame = req%frame
          pol_req%pol_xmin = req%pol_xmin
          pol_req%pol_xmax = req%pol_xmax
@@ -9962,7 +9964,7 @@ contains
       logical(kind=c_bool), allocatable, target :: thread_mask(:, :, :), mask(:,:)
       real(kind=c_float), dimension(:,:), allocatable, target :: intensity, angle
 
-      integer(kind=c_int) :: x1, x2, y1, y2, dimx, dimy, width, height
+      integer(kind=c_int) :: x1, x2, y1, y2, dimx, dimy, width, height, precision
       integer :: k, max_planes, max_threads
 
       real(kind=c_float) :: spectrum ! the actual value will be ignored, it's not needed for polarisation
@@ -10050,8 +10052,15 @@ contains
       ! deallocate the memory
       !call delete_json(json)
 
+      ! set the ZFP compression precision
+      if (req%keyframe) then
+         precision = ZFP_MEDIUM_PRECISION
+      else
+         precision = ZFP_LOW_PRECISION
+      end if
+
       call write_ws_polarisation(req%session, req%seq_id, req%timestamp, elapsed,&
-      & size(intensity, 1), size(intensity, 2), req%pol_target, c_loc(intensity), c_loc(angle), ZFP_LOW_PRECISION)
+      & size(intensity, 1), size(intensity, 2), req%pol_target, c_loc(intensity), c_loc(angle), precision)
 
       ! end the timer
       t2 = omp_get_wtime()
