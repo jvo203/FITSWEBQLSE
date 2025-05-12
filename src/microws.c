@@ -3529,6 +3529,8 @@ void write_ws_polarisation(websocket_session *session, const int *seq_id, const 
         uint32_t pol_target = pol_target;
         uint32_t intensity_len = intensity_size;
         uint32_t angle_len = angle_size;
+
+        size_t pol_size = intensity_size + angle_size;
     }
 
     // finally free the compressed buffers
