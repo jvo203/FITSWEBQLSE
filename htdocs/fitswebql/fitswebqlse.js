@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-05-07.0";
+    return "JS2025-05-12.0";
 }
 
 function uuidv4() {
@@ -4318,7 +4318,6 @@ function process_polarisation(index, pol_width, pol_height, intensity, angle, ma
     polarisation.xmax = image_bounding_dims.x2;
     polarisation.ymin = image_bounding_dims.y1;
     polarisation.ymax = image_bounding_dims.y1 + (image_bounding_dims.height - 1);
-    polarisation.range = range;
     polarisation.mean = mean;
     polarisation.std = std;
 }
@@ -12041,7 +12040,6 @@ function x_axis_mouseenter(offset) {
 
                 console.log("pol_x = ", pol_x);
                 console.log("pol_y = ", pol_y);
-                console.log("pol_range = ", polarisation.range);
 
                 let fitsData = fitsContainer[index];
                 let scale = (fitsData.width - 1) / (polarisation.pol_width - 1);
@@ -12051,7 +12049,6 @@ function x_axis_mouseenter(offset) {
                 request.pol_xmax = Math.round(1 + scale * polarisation.xmax);
                 request.pol_ymin = Math.round(1 + scale * polarisation.ymin);
                 request.pol_ymax = Math.round(1 + scale * polarisation.ymax);
-                request.pol_range = Math.round(scale * polarisation.range);
             }
 
             if (wsConn[index].readyState == 1)
@@ -12482,6 +12479,7 @@ function x_axis_move(offset) {
                         frame: freq,
                         plane: previous_plane,
                         key: false,
+                        pol_target: 50,
                         fill: fill,
                         ref_freq: RESTFRQ,
                         fps: vidFPS,
@@ -16825,6 +16823,7 @@ function videoTimeout(freq) {
             frame: freq,
             plane: previous_plane,
             key: true,
+            pol_target: 100,
             fill: fill,
             ref_freq: RESTFRQ,
             fps: vidFPS,
