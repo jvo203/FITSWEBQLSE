@@ -6941,6 +6941,11 @@ async function open_websocket_connection(_datasetId, index) {
                         return;
                     }
 
+                    // Video Polarisation
+                    if (type == 9) {
+                        console.log("Video Polarisation WebSocket message received");
+                    }
+
                 }
 
                 if (typeof evt.data === "string") {
