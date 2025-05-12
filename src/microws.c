@@ -3521,9 +3521,6 @@ void write_ws_polarisation(websocket_session *session, const int *seq_id, const 
         return;
     }
 
-    printf("[C] compressed_intensity size: %zu bytes\n", intensity_size);
-    printf("[C] compressed_angle size: %zu bytes\n", angle_size);
-
     // TO-DO: WebSocket message
 
     // finally free the compressed buffers
