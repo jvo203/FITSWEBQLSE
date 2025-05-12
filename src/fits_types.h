@@ -175,7 +175,7 @@ struct video_request
 
     int pol_xmin, pol_xmax;
     int pol_ymin, pol_ymax;
-    int pol_range;
+    int pol_target;
 
     // output
     int width;

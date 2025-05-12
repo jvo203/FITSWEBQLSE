@@ -1457,10 +1457,6 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                     // 'pol_ymax'
                     if (strncmp(frame_data + koff, "\"pol_ymax\"", klen) == 0)
                         session->pol_ymax = atoi2(frame_data + voff, vlen);
-
-                    // 'pol_range'
-                    if (strncmp(frame_data + koff, "\"pol_range\"", klen) == 0)
-                        session->pol_range = atoi2(frame_data + voff, vlen);
                 }
 
                 // printf("[C]::init_video width: %d, height: %d, flux: %s, fps: %d, bitrate: %d\n", width, height, session->flux, fps, bitrate);
@@ -1675,7 +1671,6 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                 req->pol_xmax = session->pol_xmax;
                 req->pol_ymin = session->pol_ymin;
                 req->pol_ymax = session->pol_ymax;
-                req->pol_range = session->pol_range;
 
                 req->width = session->image_width;
                 req->height = session->image_height;
@@ -1715,6 +1710,10 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                         if (strncmp(frame_data + voff, "true", vlen) == 0)
                             req->keyframe = true;
                     }
+
+                    // 'pol_target'
+                    if (strncmp(frame_data + koff, "\"pol_target\"", klen) == 0)
+                        req->pol_target = atoi2(frame_data + voff, vlen);
 
                     // 'frame'
                     if (strncmp(frame_data + koff, "\"frame\"", klen) == 0)
@@ -2633,7 +2632,6 @@ on_ws_connection(void *cls,
                 session->pol_xmax = 0;
                 session->pol_ymin = 0;
                 session->pol_ymax = 0;
-                session->pol_range = 0;
 
                 pthread_mutex_init(&session->vid_mtx, NULL);
                 session->last_frame_idx = -1;

@@ -76,7 +76,6 @@ typedef struct
     int pol_xmax;
     int pol_ymin;
     int pol_ymax;
-    int pol_range;
 
     // video
     pthread_mutex_t vid_mtx;

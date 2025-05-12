@@ -4297,7 +4297,7 @@ function process_polarisation(index, pol_width, pol_height, intensity, angle, ma
     const target = 100;
     const range_x = image_bounding_dims.width / target;
     const range_y = image_bounding_dims.height / target;
-    const range = Math.floor(Math.max(range_x, range_y));
+    const range = Math.max(1, Math.floor(Math.max(range_x, range_y)));
     console.log("target field density:", target, "pixel window:", range, "( range_x:", range_x, "range_y:", range_y, ")");
 
     const resized = DownsizePolarisation(intensity, angle, mask, pol_width, pol_height, range, image_bounding_dims.x1, image_bounding_dims.y1, image_bounding_dims.x2, image_bounding_dims.y1 + (image_bounding_dims.height - 1));

@@ -99,7 +99,7 @@ module fits
       integer(c_int) :: frame
       integer(c_int) :: pol_xmin, pol_xmax
       integer(c_int) :: pol_ymin, pol_ymax
-      integer(c_int) :: pol_range
+      integer(c_int) :: pol_target
 
       ! response
       type(C_PTR) :: session
@@ -142,7 +142,7 @@ module fits
 
       integer(c_int) :: pol_xmin, pol_xmax
       integer(c_int) :: pol_ymin, pol_ymax
-      integer(c_int) :: pol_range
+      integer(c_int) :: pol_target
 
       ! output
       integer(kind=c_int) :: width
@@ -8962,19 +8962,21 @@ contains
    end function DownsizeJSONPolarization
 
    subroutine DownsizePolarization(pixels, mask, width, height, pol_xmin, pol_ymin, pol_xmax, pol_ymax,&
-   & pol_range, pol_intensity, pol_angle)
+   & pol_target, pol_intensity, pol_angle)
       implicit none
 
       real(c_float), dimension(:, :, :), intent(in) :: pixels
       logical(kind=c_bool), dimension(:, :), intent(in) :: mask
       integer, intent(in) :: width, height
-      integer, intent(in) :: pol_xmin, pol_ymin, pol_xmax, pol_ymax, pol_range
+      integer, intent(in) :: pol_xmin, pol_ymin, pol_xmax, pol_ymax, pol_target
       real(kind=c_float), dimension(:,:), allocatable, intent(out) :: pol_intensity, pol_angle
 
-      integer :: xmin, xmax, ymin, ymax, max_planes, i, j, ii, jj
+      integer :: xmin, xmax, ymin, ymax, dimx, dimy
+      integer :: max_planes, i, j, ii, jj
 
       integer, parameter :: target = 34;
       integer :: range, count, min_count, total_count
+      real :: range_x, range_y
 
       real :: tmp, tmpA, tmpI, tmpQ, tmpU, tmpV
       real :: intensity, angle
@@ -8983,19 +8985,25 @@ contains
       max_planes = size(pixels, 3)
       if (max_planes .lt. 3) return
 
-      range = min(pol_range, 1)
-      min_count = nint(0.75*range**2)
-
-      ! print the width X height of the input pixels and mask
-      print *, 'DownsizePolarization: width:', width, 'height:', height, 'range:', range, 'min_count:', min_count
-
       xmin = max(lbound(pixels, 1), pol_xmin)
       xmax = min(ubound(pixels, 1), pol_xmax)
       ymin = max(lbound(pixels, 2), pol_ymin)
       ymax = min(ubound(pixels, 2), pol_ymax)
 
-      print *, 'DownsizePolarization: xmin:', xmin, 'xmax:', xmax, 'ymin:', ymin, 'ymax:', ymax,&
-      & 'max_planes:', max_planes, 'range:', range, 'min_count:', min_count
+      print *, 'DownsizePolarization: xmin:', xmin, 'xmax:', xmax, 'ymin:', ymin, 'ymax:', ymax, 'max_planes:', max_planes
+
+      dimx = abs(xmax - xmin) + 1
+      dimy = abs(ymax - ymin) + 1
+
+      range_x = real(dimx)/real(pol_target)
+      range_y = real(dimy)/real(pol_target)
+
+      range = max(1, floor(max(range_x, range_y)))
+      min_count = nint(0.75*range**2)
+
+      ! print the width X height of the input pixels and mask
+      print *, 'DownsizePolarization: width:', width, 'height:', height, 'dimx:', dimx, 'dimy:', dimy,&
+      & 'range:', range, 'min_count:', min_count
 
       ! allocate the output arrays
       allocate (pol_intensity(1+(xmax - xmin)/range, 1+(ymax - ymin)/range))
@@ -9794,7 +9802,7 @@ contains
          pol_req%pol_xmax = req%pol_xmax
          pol_req%pol_ymin = req%pol_ymin
          pol_req%pol_ymax = req%pol_ymax
-         pol_req%pol_range = req%pol_range
+         pol_req%pol_target = req%pol_target
          pol_req%session = req%session
          pol_req%seq_id = req%seq_id
          pol_req%timestamp = req%timestamp
@@ -9971,7 +9979,7 @@ contains
       call c_f_pointer(arg, req)
 
       print *, 'polarisation_request_simd::', req%item%datasetid, ' frame:', req%frame, &
-      & 'xmin:', req%pol_xmin, 'ymin:', req%pol_ymin, 'xmax:', req%pol_xmax, 'ymax:', req%pol_ymax, 'range:', req%pol_range
+      & 'xmin:', req%pol_xmin, 'ymin:', req%pol_ymin, 'xmax:', req%pol_xmax, 'ymax:', req%pol_ymax, 'range:', req%pol_target
 
       max_planes = size(req%item%compressed, 2)
 
@@ -10029,7 +10037,7 @@ contains
 
       !json = DownsizeJSONPolarization(pixels, mask, dimx, dimy, square)
       call DownsizePolarization(pixels, mask, dimx, dimy, req%pol_xmin, req%pol_ymin, req%pol_xmax, req%pol_ymax,&
-      & req%pol_range, intensity, angle)
+      & req%pol_target, intensity, angle)
 
       ! end the timer
       t2 = omp_get_wtime()
