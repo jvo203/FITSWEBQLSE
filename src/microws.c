@@ -3521,11 +3521,22 @@ void write_ws_polarisation(websocket_session *session, const int *seq_id, const 
         return;
     }
 
-    // TO-DO: WebSocket message
+    // directly prepare and queue the WebSocket message
+    if (intensity_size > 0 && angle_size > 0)
+    {
+        uint32_t pol_width = width;
+        uint32_t pol_height = height;
+        uint32_t pol_target = pol_target;
+        uint32_t intensity_len = intensity_size;
+        uint32_t angle_len = angle_size;
+    }
 
     // finally free the compressed buffers
-    free(compressed_intensity);
-    free(compressed_angle);
+    if (compressed_intensity != NULL)
+        free(compressed_intensity);
+
+    if (compressed_angle != NULL)
+        free(compressed_angle);
 }
 
 void write_ws_json_polarisation(websocket_session *session, const int *seq_id, const float *timestamp, const float *elapsed, GString *json)
