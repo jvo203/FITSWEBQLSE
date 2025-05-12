@@ -3531,6 +3531,87 @@ void write_ws_polarisation(websocket_session *session, const int *seq_id, const 
         uint32_t angle_len = angle_size;
 
         size_t pol_size = intensity_size + angle_size;
+
+        //  header
+        size_t msg_len = sizeof(float) + sizeof(uint32_t) + sizeof(uint32_t) + sizeof(float);
+        // body
+        msg_len += 5 * sizeof(uint32_t) + pol_size;
+
+        char *payload = NULL;
+        size_t ws_len = preamble_ws_frame(&payload, msg_len, WS_FRAME_BINARY);
+        msg_len += ws_len;
+
+        if (payload != NULL)
+        {
+            uint32_t id = (unsigned int)(*seq_id);
+            uint32_t msg_type = 9; // binary video polarisation
+            // 0 - 4: JSON viewport polarisation
+
+            size_t ws_offset = ws_len;
+
+            memcpy((char *)payload + ws_offset, timestamp, sizeof(float));
+            ws_offset += sizeof(float);
+
+            memcpy((char *)payload + ws_offset, &id, sizeof(uint32_t));
+            ws_offset += sizeof(uint32_t);
+
+            memcpy((char *)payload + ws_offset, &msg_type, sizeof(uint32_t));
+            ws_offset += sizeof(uint32_t);
+
+            memcpy((char *)payload + ws_offset, elapsed, sizeof(float));
+            ws_offset += sizeof(float);
+
+            // pol_width
+            memcpy((char *)payload + ws_offset, &pol_width, sizeof(uint32_t));
+            ws_offset += sizeof(uint32_t);
+
+            // pol_height
+            memcpy((char *)payload + ws_offset, &pol_height, sizeof(uint32_t));
+            ws_offset += sizeof(uint32_t);
+
+            // pol_target
+            memcpy((char *)payload + ws_offset, &pol_target, sizeof(uint32_t));
+            ws_offset += sizeof(uint32_t);
+
+            // intensity_len
+            memcpy((char *)payload + ws_offset, &intensity_len, sizeof(uint32_t));
+            ws_offset += sizeof(uint32_t);
+
+            // compressed_intensity
+            memcpy((char *)payload + ws_offset, compressed_intensity, intensity_size);
+            ws_offset += intensity_size;
+
+            // angle_len
+            memcpy((char *)payload + ws_offset, &angle_len, sizeof(uint32_t));
+            ws_offset += sizeof(uint32_t);
+
+            // compressed_angle
+            memcpy((char *)payload + ws_offset, compressed_angle, angle_size);
+            ws_offset += angle_size;
+
+            if (ws_offset != msg_len)
+                printf("[C] size mismatch! ws_offset: %zu, msg_len: %zu\n", ws_offset, msg_len);
+
+#ifdef DIRECT
+            if (!session->disconnect)
+                send_all(session, payload, msg_len);
+            free(payload);
+#else
+            // queue a message
+            struct data_buf *msg = (struct data_buf *)malloc(sizeof(struct data_buf));
+
+            if (msg != NULL)
+            {
+                msg->buf = payload;
+                msg->len = msg_len;
+
+                // push the message into the queue
+                g_async_queue_push(session->send_queue, msg);
+            }
+            else
+                free(payload);
+#endif
+        }
     }
 
     // finally free the compressed buffers
