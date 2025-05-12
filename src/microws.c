@@ -3526,7 +3526,7 @@ void write_ws_polarisation(websocket_session *session, const int *seq_id, const 
     {
         uint32_t pol_width = width;
         uint32_t pol_height = height;
-        uint32_t pol_target = pol_target;
+        uint32_t pol_target32 = pol_target;
         uint32_t intensity_len = intensity_size;
         uint32_t angle_len = angle_size;
 
@@ -3570,7 +3570,7 @@ void write_ws_polarisation(websocket_session *session, const int *seq_id, const 
             ws_offset += sizeof(uint32_t);
 
             // pol_target
-            memcpy((char *)payload + ws_offset, &pol_target, sizeof(uint32_t));
+            memcpy((char *)payload + ws_offset, &pol_target32, sizeof(uint32_t));
             ws_offset += sizeof(uint32_t);
 
             // intensity_len

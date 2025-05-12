@@ -6483,7 +6483,7 @@ async function open_websocket_connection(_datasetId, index) {
                         return;
                     }
 
-                    // polarisation
+                    // JSON viewport polarisation
                     if (type == 4) {
                         hide_hourglass();
 
@@ -6941,9 +6941,19 @@ async function open_websocket_connection(_datasetId, index) {
                         return;
                     }
 
-                    // Video Polarisation
+                    // video polarisation (binary)
                     if (type == 9) {
-                        console.log("Video Polarisation WebSocket message received");
+                        var offset = 16;
+                        var pol_width = dv.getUint32(offset, endianness);
+                        offset += 4;
+
+                        var pol_height = dv.getUint32(offset, endianness);
+                        offset += 4;
+
+                        var pol_target = dv.getUint32(offset, endianness);
+                        offset += 4;
+
+                        console.log("video polarisation: pol_width:", pol_width, "pol_height:", pol_height, "pol_target:", pol_target);
                     }
 
                 }
