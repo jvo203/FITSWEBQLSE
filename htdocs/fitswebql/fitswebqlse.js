@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-05-12.0";
+    return "JS2025-05-13.0";
 }
 
 function uuidv4() {
@@ -6954,6 +6954,20 @@ async function open_websocket_connection(_datasetId, index) {
                         offset += 4;
 
                         console.log("video polarisation: pol_width:", pol_width, "pol_height:", pol_height, "pol_target:", pol_target);
+
+                        var intensity_length = dv.getUint32(offset, endianness);
+                        offset += 4;
+
+                        var frame_intensity = new Uint8Array(received_msg, offset, intensity_length);
+                        offset += intensity_length;
+
+                        var angle_length = dv.getUint32(offset, endianness);
+                        offset += 4;
+
+                        var frame_angle = new Uint8Array(received_msg, offset, angle_length);
+                        offset += angle_length;
+
+                        console.log("video polarisation: frame_intensity.length:", frame_intensity.length, "frame_angle.length:", frame_angle.length);
                     }
 
                 }
