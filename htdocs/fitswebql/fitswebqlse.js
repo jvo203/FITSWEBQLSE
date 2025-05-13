@@ -6976,8 +6976,6 @@ async function open_websocket_connection(_datasetId, index) {
 
                             var res = Module.decompressZFPimage(pol_width, pol_height, 1, frame_angle);
                             const angle = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
-
-                            console.log("video polarisation: intensity:", intensity, "angle:", angle);
                         }
 
                         return;
