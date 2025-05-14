@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-05-13.0";
+    return "JS2025-05-14.0";
 }
 
 function uuidv4() {
@@ -4322,6 +4322,10 @@ function process_polarisation(index, pol_width, pol_height, intensity, angle, ma
     polarisation.std = std;
 }
 
+function process_polarisation_video(index, pol_width, pol_height, pol_target, intensity, angle) {
+    console.log("process_polarisation_video pol_width:", pol_width, "pol_height:", pol_height, "pol_target:", pol_target);
+}
+
 function process_polarisation_viewport(json) {
     const field = json.polarisation;
     const range = json.range;
@@ -4363,7 +4367,7 @@ function process_polarisation_viewport(json) {
     plot_polarisation(field, mean, std, xScale, yScale, grid_spacing, "PolarisationViewport");
 }
 
-function process_polarisation_video(json) {
+function process_polarisation_json(json) {
     const field = json.polarisation;
     const range = json.range;
 
@@ -4404,15 +4408,6 @@ function process_polarisation_video(json) {
     var img_width = Math.floor(scale * image_bounding_dims.width);
     var img_height = Math.floor(scale * image_bounding_dims.height);
     console.log("scaling by", scale, "new width:", img_width, "new height:", img_height, "orig. width:", image_bounding_dims.width, "orig. height:", image_bounding_dims.height);
-
-    /*zoom_px = parseFloat(elem.attr('x'));
-    zoom_py = parseFloat(elem.attr('y'));
-    let zoom_width = parseFloat(elem.attr('width'));
-    let zoom_height = parseFloat(elem.attr('height'));
-    var zoom_viewport_size = Math.min(zoom_width, zoom_height);
-
-    var xScale = d3.scaleLinear().domain([pol_xmin, pol_xmax]).range([zoom_px, zoom_px + zoom_viewport_size]);
-    var yScale = d3.scaleLinear().domain([pol_ymax, pol_ymin]).range([zoom_py, zoom_py + zoom_viewport_size]);*/
 
     if (scale >= 1.0) {
         var xScale = d3.scaleLinear().domain([image_bounding_dims.x1, image_bounding_dims.x2]).range([x, x + width]);
@@ -6512,7 +6507,7 @@ async function open_websocket_connection(_datasetId, index) {
                                         process_polarisation_viewport(jsonData);
                                     }
                                 } else {
-                                    process_polarisation_video(jsonData);
+                                    process_polarisation_json(jsonData);
                                 }
                             }
                         } catch (e) {
@@ -6976,6 +6971,8 @@ async function open_websocket_connection(_datasetId, index) {
 
                             var res = Module.decompressZFPimage(pol_width, pol_height, 1, frame_angle);
                             const angle = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
+
+                            process_polarisation_video(index, pol_width, pol_height, pol_target, intensity, angle);
                         }
 
                         return;
