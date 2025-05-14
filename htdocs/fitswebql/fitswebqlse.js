@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-05-14.0";
+    return "JS2025-05-14.1";
 }
 
 function uuidv4() {
@@ -4025,6 +4025,10 @@ function process_hdr_viewport(img_width, img_height, pixels, alpha, index) {
     }
 }
 
+function DownsizeVideoPolarisation(srcI, srcA, sw, sh, target, xmin, ymin, xmax, ymax) {
+    console.log("DownsizeVideoPolarisation", sw, sh, target, xmin, ymin, xmax, ymax);
+}
+
 function DownsizePolarisation(srcI, srcA, mask, sw, sh, range, xmin = 0, ymin = 0, xmax = sw - 1, ymax = sh - 1, circular = false) {
     console.log("DownsizePolarisation", sw, sh, range, xmin, ymin, xmax, ymax, circular);
 
@@ -4345,7 +4349,7 @@ function process_polarisation_video(index, pol_width, pol_height, pol_target, in
     console.log("target field density:", pol_target, "range:", range, "( range_x:", range_x, "range_y:", range_y, ")");*/
 
     const pol_scale = polarisation.scale;
-    const resized = DownsizeVideoPolarisation(intensity, angle, pol_width * pol_height, Math.round(pol_scale * polarisation.xmin), Math.round(pol_scale * polarisation.ymin), Math.round(pol_scale * polarisation.xmax), Math.round(pol_scale * polarisation.ymax));
+    const resized = DownsizeVideoPolarisation(intensity, angle, pol_width, pol_height, pol_target, Math.round(pol_scale * polarisation.xmin), Math.round(pol_scale * polarisation.ymin), Math.round(pol_scale * polarisation.xmax), Math.round(pol_scale * polarisation.ymax));
     console.log("resized:", resized);
 }
 
