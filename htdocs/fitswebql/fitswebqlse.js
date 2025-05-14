@@ -4037,8 +4037,8 @@ function DownsizeVideoPolarisation(srcI, srcA, sw, sh, target, xmin, ymin, xmax,
     console.log("target field density:", target, "range:", range, "( range_x:", range_x, "range_y:", range_y, ")");
 
     // FORTRAN used integer arithmetic
-    let pol_width = Math.trunc(1 + (xmax - xmin) / range);
-    let pol_height = Math.trunc(1 + (ymax - ymin) / range);
+    let pol_width = (1 + (xmax - xmin) / range) | 0;
+    let pol_height = (1 + (ymax - ymin) / range) | 0;
     console.log("pol_width:", pol_width, "pol_height:", pol_height);
 
     return { range: Math.max(1, range / polarisation.scale) };
