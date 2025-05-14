@@ -4027,6 +4027,21 @@ function process_hdr_viewport(img_width, img_height, pixels, alpha, index) {
 
 function DownsizeVideoPolarisation(srcI, srcA, sw, sh, target, xmin, ymin, xmax, ymax) {
     console.log("DownsizeVideoPolarisation", sw, sh, target, xmin, ymin, xmax, ymax);
+
+    let dimx = Math.abs(xmax - xmin) + 1;
+    let dimy = Math.abs(ymax - ymin) + 1;
+
+    const range_x = dimx / target;
+    const range_y = dimy / target;
+    const range = Math.max(1, Math.floor(Math.max(range_x, range_y)));
+    console.log("target field density:", target, "range:", range, "( range_x:", range_x, "range_y:", range_y, ")");
+
+    // FORTRAN used integer arithmetic
+    let pol_width = Math.trunc(1 + (xmax - xmin) / range);
+    let pol_height = Math.trunc(1 + (ymax - ymin) / range);
+    console.log("pol_width:", pol_width, "pol_height:", pol_height);
+
+    return { range: Math.max(1, range / polarisation.scale) };
 }
 
 function DownsizePolarisation(srcI, srcA, mask, sw, sh, range, xmin = 0, ymin = 0, xmax = sw - 1, ymax = sh - 1, circular = false) {
