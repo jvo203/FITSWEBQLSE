@@ -4339,10 +4339,14 @@ function process_polarisation_video(index, pol_width, pol_height, pol_target, in
     var img_height = Math.floor(scale * image_bounding_dims.height);
     console.log("scaling by", scale, "new width:", img_width, "new height:", img_height, "orig. width:", image_bounding_dims.width, "orig. height:", image_bounding_dims.height);
 
-    const range_x = image_bounding_dims.width / pol_target;
+    /*const range_x = image_bounding_dims.width / pol_target;
     const range_y = image_bounding_dims.height / pol_target;
     const range = Math.max(1, Math.floor(Math.max(range_x, range_y)));
-    console.log("target field density:", pol_target, "range:", range, "( range_x:", range_x, "range_y:", range_y, ")");
+    console.log("target field density:", pol_target, "range:", range, "( range_x:", range_x, "range_y:", range_y, ")");*/
+
+    const pol_scale = polarisation.scale;
+    const resized = DownsizeVideoPolarisation(intensity, angle, pol_width * pol_height, Math.round(pol_scale * polarisation.xmin), Math.round(pol_scale * polarisation.ymin), Math.round(pol_scale * polarisation.xmax), Math.round(pol_scale * polarisation.ymax));
+    console.log("resized:", resized);
 }
 
 function process_polarisation_viewport(json) {
@@ -12101,6 +12105,7 @@ function x_axis_mouseenter(offset) {
                 let fitsData = fitsContainer[index];
                 let scale = (fitsData.width - 1) / (polarisation.pol_width - 1);
                 console.log("'init_video'::polarisation scale =", scale);
+                polarisation.scale = scale; // store the scale factor in polarisation
 
                 request.pol_xmin = Math.round(1 + scale * polarisation.xmin);
                 request.pol_xmax = Math.round(1 + scale * polarisation.xmax);
