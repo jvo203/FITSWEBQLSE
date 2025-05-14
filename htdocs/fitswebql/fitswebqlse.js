@@ -4298,7 +4298,7 @@ function process_polarisation(index, pol_width, pol_height, intensity, angle, ma
     const range_x = image_bounding_dims.width / target;
     const range_y = image_bounding_dims.height / target;
     const range = Math.max(1, Math.floor(Math.max(range_x, range_y)));
-    console.log("target field density:", target, "pixel window:", range, "( range_x:", range_x, "range_y:", range_y, ")");
+    console.log("target field density:", target, "range:", range, "( range_x:", range_x, "range_y:", range_y, ")");
 
     const resized = DownsizePolarisation(intensity, angle, mask, pol_width, pol_height, range, image_bounding_dims.x1, image_bounding_dims.y1, image_bounding_dims.x2, image_bounding_dims.y1 + (image_bounding_dims.height - 1));
     console.log("resized:", resized);
@@ -4324,6 +4324,25 @@ function process_polarisation(index, pol_width, pol_height, intensity, angle, ma
 
 function process_polarisation_video(index, pol_width, pol_height, pol_target, intensity, angle) {
     console.log("process_polarisation_video pol_width:", pol_width, "pol_height:", pol_height, "pol_target:", pol_target);
+
+    // get the image rectangle
+    var rect_elem = d3.select("#image_rectangle");
+    var width = parseFloat(rect_elem.attr("width"));
+    var height = parseFloat(rect_elem.attr("height"));
+    var x = parseFloat(rect_elem.attr("x"));
+    var y = parseFloat(rect_elem.attr("y"));
+    console.log("rect. width:", width, "rect. height:", height, "image x:", x, "image y:", y);
+
+    var image_bounding_dims = imageContainer[index - 1].image_bounding_dims;
+    var scale = get_image_scale(width, height, image_bounding_dims.width, image_bounding_dims.height);
+    var img_width = Math.floor(scale * image_bounding_dims.width);
+    var img_height = Math.floor(scale * image_bounding_dims.height);
+    console.log("scaling by", scale, "new width:", img_width, "new height:", img_height, "orig. width:", image_bounding_dims.width, "orig. height:", image_bounding_dims.height);
+
+    const range_x = image_bounding_dims.width / pol_target;
+    const range_y = image_bounding_dims.height / pol_target;
+    const range = Math.max(1, Math.floor(Math.max(range_x, range_y)));
+    console.log("target field density:", pol_target, "range:", range, "( range_x:", range_x, "range_y:", range_y, ")");
 }
 
 function process_polarisation_viewport(json) {
