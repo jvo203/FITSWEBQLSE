@@ -4025,8 +4025,8 @@ function process_hdr_viewport(img_width, img_height, pixels, alpha, index) {
     }
 }
 
-function DownsizeVideoPolarisation(srcI, srcA, sw, sh, target, xmin, ymin, xmax, ymax) {
-    console.log("DownsizeVideoPolarisation", sw, sh, target, xmin, ymin, xmax, ymax);
+function DownsizeVideoPolarisation(srcI, srcA, sw, sh, target, scale, xmin, ymin, xmax, ymax) {
+    console.log("DownsizeVideoPolarisation", sw, sh, target, scale, xmin, ymin, xmax, ymax);
 
     let dimx = Math.abs(xmax - xmin) + 1;
     let dimy = Math.abs(ymax - ymin) + 1;
@@ -4072,7 +4072,7 @@ function DownsizeVideoPolarisation(srcI, srcA, sw, sh, target, xmin, ymin, xmax,
                 mag_std += I * I;
                 mag_count++;
 
-                field.push({ x: x0, y: y0, I: I, A: A });
+                field.push({ x: x0 / scale, y: y0 / scale, I: I, A: A });
             }
         }
     }
@@ -4399,14 +4399,21 @@ function process_polarisation_video(index, pol_width, pol_height, pol_target, in
     var img_height = Math.floor(scale * image_bounding_dims.height);
     console.log("scaling by", scale, "new width:", img_width, "new height:", img_height, "orig. width:", image_bounding_dims.width, "orig. height:", image_bounding_dims.height);
 
-    /*const range_x = image_bounding_dims.width / pol_target;
-    const range_y = image_bounding_dims.height / pol_target;
-    const range = Math.max(1, Math.floor(Math.max(range_x, range_y)));
-    console.log("target field density:", pol_target, "range:", range, "( range_x:", range_x, "range_y:", range_y, ")");*/
-
     const pol_scale = polarisation.scale;
-    const resized = DownsizeVideoPolarisation(intensity, angle, pol_width, pol_height, pol_target, Math.round(pol_scale * polarisation.xmin), Math.round(pol_scale * polarisation.ymin), Math.round(pol_scale * polarisation.xmax), Math.round(pol_scale * polarisation.ymax));
+    const resized = DownsizeVideoPolarisation(intensity, angle, pol_width, pol_height, pol_target, pol_scale, Math.round(pol_scale * polarisation.xmin), Math.round(pol_scale * polarisation.ymin), Math.round(pol_scale * polarisation.xmax), Math.round(pol_scale * polarisation.ymax));
     console.log("resized:", resized);
+
+    const field = resized.field;
+    const mean = resized.mean;
+    const std = resized.std;
+    const range = resized.range;
+
+    const xScale = d3.scaleLinear().domain([image_bounding_dims.x1, image_bounding_dims.x2]).range([x, x + width]);
+    const yScale = d3.scaleLinear().domain([image_bounding_dims.y1, image_bounding_dims.y1 + (image_bounding_dims.height - 1)]).range([y + height, y]);
+    const grid_spacing = 2 * range;
+
+    plot_polarisation(field, mean, std, xScale, yScale, grid_spacing, "PolarisationViewport");
+
 }
 
 function process_polarisation_viewport(json) {
