@@ -4058,6 +4058,25 @@ function DownsizeVideoPolarisation(srcI, srcA, sw, sh, target, xmin, ymin, xmax,
     var mag_std = 0.0;
     var mag_count = 0;
 
+    for (let i = xmin; i <= xmax; i += di) {
+        for (let j = ymin; j <= ymax; j += dj) {
+            let x0 = i + di / 2;
+            let y0 = j + dj / 2;
+
+            let I = srcI[offset];
+            let A = srcA[offset];
+            offset = (offset + 1) | 0;
+
+            if (I != 0) {
+                mag_mean += I;
+                mag_std += I * I;
+                mag_count++;
+
+                field.push({ x: x0, y: y0, I: I, A: A });
+            }
+        }
+    }
+
     if (mag_count > 0) {
         mag_mean /= mag_count;
         mag_std = Math.sqrt(mag_std / mag_count - mag_mean * mag_mean);
