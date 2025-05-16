@@ -4048,9 +4048,22 @@ function DownsizeVideoPolarisation(srcI, srcA, sw, sh, target, xmin, ymin, xmax,
         throw new Error("DownsizeVideoPolarisation: sw and sh do not match the polarisation dimensions.");
     }
 
+    let di = range;
+    let dj = range;
     let offset = 0 | 0;
 
-    return { range: Math.max(1, range / polarisation.scale) };
+    // start with an empty field
+    var field = [];
+    var mag_mean = 0.0;
+    var mag_std = 0.0;
+    var mag_count = 0;
+
+    if (mag_count > 0) {
+        mag_mean /= mag_count;
+        mag_std = Math.sqrt(mag_std / mag_count - mag_mean * mag_mean);
+    };
+
+    return { field: field, mean: mag_mean, std: mag_std, range: Math.max(1, range / polarisation.scale) };
 }
 
 function DownsizePolarisation(srcI, srcA, mask, sw, sh, range, xmin = 0, ymin = 0, xmax = sw - 1, ymax = sh - 1, circular = false) {
