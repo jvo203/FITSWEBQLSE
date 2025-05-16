@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-05-14.1";
+    return "JS2025-05-16.0";
 }
 
 function uuidv4() {
@@ -4041,6 +4041,15 @@ function DownsizeVideoPolarisation(srcI, srcA, sw, sh, target, xmin, ymin, xmax,
     let pol_height = (1 + (ymax - ymin) / range) | 0;
     console.log("pol_width:", pol_width, "pol_height:", pol_height);
 
+    // cross-check sw and sh with pol_width and pol_height
+    if (sw != pol_width || sh != pol_height) {
+        console.log("DownsizeVideoPolarisation: sw and sh do not match the polarisation dimensions");
+        console.log("sw:", sw, "sh:", sh, "pol_width:", pol_width, "pol_height:", pol_height);
+        throw new Error("DownsizeVideoPolarisation: sw and sh do not match the polarisation dimensions.");
+    }
+
+    let offset = 0 | 0;
+
     return { range: Math.max(1, range / polarisation.scale) };
 }
 
@@ -7004,7 +7013,7 @@ async function open_websocket_connection(_datasetId, index) {
                         var frame_angle = new Uint8Array(received_msg, offset, angle_length);
                         offset += angle_length;
 
-                        console.log("video polarisation: frame_intensity.length:", frame_intensity.length, "frame_angle.length:", frame_angle.length);
+                        // console.log("video polarisation: frame_intensity.length:", frame_intensity.length, "frame_angle.length:", frame_angle.length);
 
                         // WASM decoder part
                         {
