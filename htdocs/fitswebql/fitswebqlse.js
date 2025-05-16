@@ -4058,8 +4058,9 @@ function DownsizeVideoPolarisation(srcI, srcA, sw, sh, target, scale, xmin, ymin
     var mag_std = 0.0;
     var mag_count = 0;
 
-    for (let i = xmin; i <= xmax; i += di) {
-        for (let j = ymin; j <= ymax; j += dj) {
+    // preserve the column/row FORTRAN ordering
+    for (let j = ymin; j <= ymax; j += dj) {
+        for (let i = xmin; i <= xmax; i += di) {
             let x0 = i + di / 2;
             let y0 = j + dj / 2;
 
