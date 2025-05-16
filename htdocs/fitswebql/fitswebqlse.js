@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-05-16.0";
+    return "JS2025-05-16.1";
 }
 
 function uuidv4() {
@@ -4073,7 +4073,9 @@ function DownsizeVideoPolarisation(srcI, srcA, sw, sh, target, scale, xmin, ymin
                 mag_std += I * I;
                 mag_count++;
 
-                field.push({ x: x0 / scale, y: y0 / scale, I: I, A: A });
+                if (x0 <= xmax && y0 <= ymax && x0 >= xmin && y0 >= ymin) {
+                    field.push({ x: x0 / scale, y: y0 / scale, I: I, A: A });
+                }
             }
         }
     }
