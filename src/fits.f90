@@ -9020,7 +9020,7 @@ contains
       total_count = 0
 
       ! loop over the pixels and mask
-      !$omp PARALLEL DEFAULT(SHARED) SHARED(pol_intensity,pol_angle)&
+      !$omp PARALLEL DEFAULT(SHARED) SHARED(pol_intensity,pol_angle, min_count, range)&
       !$omp& SHARED(pixels, mask) PRIVATE(i,j, tmp, tmpA, tmpI, tmpQ, tmpU, tmpV)&
       !$omp& PRIVATE(x0, y0, intensity, angle, count, ii, jj)&
       !$omp& REDUCTION(+:total_count)&
@@ -9096,6 +9096,9 @@ contains
       !$omp END PARALLEL
 
       print *, 'DownsizePolarization: total_count:', total_count, 'max_threads:', max_threads
+
+      !print *, pol_intensity(1:10, 1:10)
+      !print *, pol_angle(1:10, 1:10)
 
    end subroutine DownsizePolarization
 
