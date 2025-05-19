@@ -8973,9 +8973,8 @@ contains
       real(kind=c_float), dimension(:,:), allocatable, intent(out) :: pol_intensity, pol_angle
 
       integer :: xmin, xmax, ymin, ymax, dimx, dimy
-      integer :: max_planes, i, j, ii, jj
+      integer :: max_threads, max_planes, i, j, ii, jj
 
-      integer, parameter :: target = 34;
       integer :: range, count, min_count, total_count
       real :: range_x, range_y
 
@@ -8985,6 +8984,9 @@ contains
 
       max_planes = size(pixels, 3)
       if (max_planes .lt. 3) return
+
+      ! get #physical cores (ignore HT)
+      max_threads = get_max_threads()
 
       xmin = max(lbound(pixels, 1), pol_xmin)
       xmax = min(ubound(pixels, 1), pol_xmax)
@@ -9018,6 +9020,12 @@ contains
       total_count = 0
 
       ! loop over the pixels and mask
+      !$omp PARALLEL DEFAULT(SHARED) SHARED(pol_intensity,pol_angle)&
+      !$omp& SHARED(pixels, mask) PRIVATE(i,j, tmp, tmpA, tmpI, tmpQ, tmpU, tmpV)&
+      !$omp& PRIVATE(x0, y0, intensity, angle, count, ii, jj)&
+      !$omp& REDUCTION(+:total_count)&
+      !$omp& NUM_THREADS(max_threads)
+      !$omp DO
       do j = ymin, ymax, range
          do i = xmin, xmax, range
             ! print *, 'DownsizePolarization: i:', i, 'j:', j
@@ -9084,6 +9092,8 @@ contains
 
          end do
       end do
+      !$omp END DO
+      !$omp END PARALLEL
 
       print *, 'DownsizePolarization: total_count:', total_count
 
