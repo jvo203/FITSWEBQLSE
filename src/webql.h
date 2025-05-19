@@ -67,10 +67,6 @@ extern "C" {
     extern void array_stat(float * pixels, float * pmin, float * pmax, float * pmean, int64_t npixels);
     extern float array_std(float * pixels, float pmean, int64_t npixels);
     extern float brightness_ratio(float * pixels, float black, float sensitivity, int32_t offset, int32_t total_size);
-    extern float calculate_radial_spectrumF16(int16_t * cubeData, uint32_t stride, int32_t x1, int32_t x2, int32_t y1, int32_t y2, int32_t cx, int32_t cy, int32_t r2, bool average, float cdelt3);
-    extern float calculate_radial_viewport_spectrumF16(int16_t * cubeData, uint32_t cubeStride, float * pixels, bool * mask, uint32_t stride, int32_t x1, int32_t x2, int32_t y1, int32_t y2, int32_t cx, int32_t cy, int32_t r2, bool average, float cdelt3);
-    extern float calculate_square_spectrumF16(int16_t * cubeData, uint32_t stride, int32_t x1, int32_t x2, int32_t y1, int32_t y2, bool average, float cdelt3);
-    extern float calculate_square_viewport_spectrumF16(int16_t * cubeData, uint32_t cubeStride, float * pixels, bool * mask, uint32_t stride, int32_t x1, int32_t x2, int32_t y1, int32_t y2, bool average, float cdelt3);
     extern void fits2float32(int32_t * src, float * dest, uint32_t size);
     extern bool fits2float64(int64_t * src, float * dest, uint32_t size);
     extern void fits2int16(int16_t * src, float * dest, uint32_t size);
@@ -81,11 +77,6 @@ extern "C" {
     extern void hds_image_spectrum_y(int32_t x1, int32_t x2, float x0, float y0, float theta, float * pixels, uint8_t * mask, int32_t dimx, int32_t dimy, float * outspec, uint8_t * outmask, uint8_t * valid);
     extern void make_global_statistics(struct fixed_block_t * compressed, int32_t width, int32_t height, float median, float * sumP, int64_t * countP, float * sumN, int64_t * countN);
     extern void make_image_spectrumF32(float * src, float * pixels, uint8_t * mask, uint8_t * data_mask, double ignrval, double datamin, double datamax, double cdelt3, float * res, int64_t npixels);
-    extern void make_video_frameF16_legacy(uint16_t * src, int32_t width, int32_t height, int32_t src_stride, uint8_t * dst_luma, uint8_t * dst_mask, int32_t dst_width, int32_t dst_height, int32_t dst_stride, float dmin, float dmax, float lmin, float lmax);
-    extern void make_video_frameF16_linear(uint16_t * src, int32_t width, int32_t height, int32_t src_stride, uint8_t * dst_luma, uint8_t * dst_mask, int32_t dst_width, int32_t dst_height, int32_t dst_stride, float black, float slope);
-    extern void make_video_frameF16_logistic(uint16_t * src, int32_t width, int32_t height, int32_t src_stride, uint8_t * dst_luma, uint8_t * dst_mask, int32_t dst_width, int32_t dst_height, int32_t dst_stride, float median, float sensitivity);
-    extern void make_video_frameF16_ratio(uint16_t * src, int32_t width, int32_t height, int32_t src_stride, uint8_t * dst_luma, uint8_t * dst_mask, int32_t dst_width, int32_t dst_height, int32_t dst_stride, float black, float sensitivity);
-    extern void make_video_frameF16_square(uint16_t * src, int32_t width, int32_t height, int32_t src_stride, uint8_t * dst_luma, uint8_t * dst_mask, int32_t dst_width, int32_t dst_height, int32_t dst_stride, float black, float sensitivity);
     extern void make_video_frame_fixed_legacy(struct fixed_block_t * compressed, int32_t width, int32_t height, uint8_t * dst_luma, uint8_t * dst_mask, int32_t stride, float dmin, float dmax, float lmin, float lmax, int32_t fill);
     extern void make_video_frame_fixed_legacy_threaded(struct fixed_block_t * compressed, int32_t width, int32_t height, uint8_t * dst_luma, uint8_t * dst_mask, int32_t stride, float dmin, float dmax, float lmin, float lmax, int32_t fill, int32_t start, int32_t work_size);
     extern void make_video_frame_fixed_linear(struct fixed_block_t * compressed, int32_t width, int32_t height, uint8_t * dst_luma, uint8_t * dst_mask, int32_t stride, float black, float slope, int32_t fill);
@@ -96,6 +87,7 @@ extern "C" {
     extern void make_video_frame_fixed_ratio_threaded(struct fixed_block_t * compressed, int32_t width, int32_t height, uint8_t * dst_luma, uint8_t * dst_mask, int32_t stride, float black, float sensitivity, int32_t fill, int32_t start, int32_t work_size);
     extern void make_video_frame_fixed_square(struct fixed_block_t * compressed, int32_t width, int32_t height, uint8_t * dst_luma, uint8_t * dst_mask, int32_t stride, float black, float sensitivity, int32_t fill);
     extern void make_video_frame_fixed_square_threaded(struct fixed_block_t * compressed, int32_t width, int32_t height, uint8_t * dst_luma, uint8_t * dst_mask, int32_t stride, float black, float sensitivity, int32_t fill, int32_t start, int32_t work_size);
+    extern int32_t polarisation_simd_3(float * pixels, uint8_t * mask);
     extern void resizeNearestSIMD(uint8_t * src, int32_t srcWidth, int32_t srcHeight, uint8_t * dst, int32_t dstWidth, int32_t dstHeight);
     extern void standardise_array(float * pixels, float pmean, float pstd, int64_t npixels);
     extern float viewport_image_spectrum_circle(struct fixed_block_t * compressed, int32_t width, int32_t height, float pmin, float pmax, float * view_pixels, bool * view_mask, int32_t stride, int32_t x1, int32_t x2, int32_t y1, int32_t y2, int32_t horizontal, int32_t vertical, float cx, float cy, float r2, bool average, double cdelt3);

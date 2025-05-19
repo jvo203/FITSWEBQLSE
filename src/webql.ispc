@@ -188,7 +188,7 @@ export uniform float brightness_ratio(uniform float pixels[], uniform float blac
   return sum;
 } ;
 
-export uniform float calculate_radial_spectrumF16(uniform int16 cubeData[], uniform unsigned int stride, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform int cx, uniform int cy, uniform int r2, uniform bool average, uniform float cdelt3)
+/*export uniform float calculate_radial_spectrumF16(uniform int16 cubeData[], uniform unsigned int stride, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform int cx, uniform int cy, uniform int r2, uniform bool average, uniform float cdelt3)
 {  
   double partial_sum = 0.0 ;
   unsigned int64 partial_count = 0 ;
@@ -314,7 +314,7 @@ export uniform float calculate_square_viewport_spectrumF16(uniform int16 cubeDat
     }
   else
     return 0.0f ;
-} ;
+} ;*/
 
 /* without any downsizing
 foreach (y=0 ... height, x=0 ... width)
@@ -323,7 +323,7 @@ float tmp = half_to_float_fast(src[y*src_stride+x]) ;
 unsigned int idx = y * dst_stride + x ;
 */
 
-export void make_video_frameF16_linear(uniform unsigned int16 src[], uniform int width, uniform int height, uniform int src_stride, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int dst_width, uniform int dst_height, uniform int dst_stride, uniform float black, uniform float slope)
+/*export void make_video_frameF16_linear(uniform unsigned int16 src[], uniform int width, uniform int height, uniform int src_stride, uniform unsigned int8 dst_luma[], uniform unsigned int8 dst_mask[], uniform int dst_width, uniform int dst_height, uniform int dst_stride, uniform float black, uniform float slope)
 {
   uniform float scale_x = (float)width / (float)dst_width ;
   uniform float scale_y = (float)height / (float)dst_height ;
@@ -496,7 +496,7 @@ export void make_video_frameF16_legacy(uniform unsigned int16 src[], uniform int
 	      dst_mask[idx] = 0 ;
       }
     } ;  
-} ;
+} ;*/
 
 export uniform float viewport_spectrum_rect(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform float pmin, uniform float pmax, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform bool average, uniform double cdelt3)
 {
@@ -1787,4 +1787,11 @@ export void hds_image_spectrum_y(uniform int x1, uniform int x2, uniform float x
     outmask[j] = any(_outmask) ? 1 : 0 ;
     valid[j] = any(_valid) ? 1 : 0 ;
   }
+}
+
+export uniform int polarisation_simd_3(uniform float pixels[], uniform unsigned int8 mask[])
+{
+  uniform int count = 0;
+
+  return count;
 }
