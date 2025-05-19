@@ -8966,8 +8966,8 @@ contains
    & pol_target, pol_intensity, pol_angle)
       implicit none
 
-      real(c_float), dimension(:, :, :), intent(in) :: pixels
-      logical(kind=c_bool), dimension(:, :), intent(in) :: mask
+      real(c_float), dimension(:, :, :), intent(in), contiguous :: pixels
+      logical(kind=c_bool), dimension(:, :), intent(in), contiguous :: mask
       integer, intent(in) :: width, height
       integer, intent(in) :: pol_xmin, pol_ymin, pol_xmax, pol_ymax, pol_target
       real(kind=c_float), dimension(:,:), allocatable, intent(out) :: pol_intensity, pol_angle
