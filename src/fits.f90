@@ -9095,7 +9095,7 @@ contains
       !$omp END DO
       !$omp END PARALLEL
 
-      print *, 'DownsizePolarization: total_count:', total_count
+      print *, 'DownsizePolarization: total_count:', total_count, 'max_threads:', max_threads
 
    end subroutine DownsizePolarization
 
