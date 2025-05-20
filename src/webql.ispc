@@ -1792,7 +1792,7 @@ export void hds_image_spectrum_y(uniform int x1, uniform int x2, uniform float x
 // max_planes == 3
 // to be called from within FORTRAN "polarisation_simd_3"
 // remember to subtract 1 from i and j when calling from FORTRAN
-export uniform int polarisation_simd_3(uniform float pixels[], uniform unsigned int8 mask[], uniform int plane_offset, uniform int stride, uniform int range, uniform int i, uniform int j, uniform int xmax, uniform int ymax)
+export uniform int polarisation_simd_3(uniform float pixels[], uniform unsigned int8 mask[], uniform int plane_offset, uniform int stride, uniform int range, uniform int i, uniform int j, uniform int xmax, uniform int ymax, uniform float res[])
 {
     varying float intensity = 0.0f;
     varying float angle = 0.0f;
@@ -1834,6 +1834,9 @@ export uniform int polarisation_simd_3(uniform float pixels[], uniform unsigned 
         _intensity = 0.0f ;
         _angle = 0.0f ;
     }
+
+    res[0] = _intensity;
+    res[1] = _angle;
 
     return _count;
 }
