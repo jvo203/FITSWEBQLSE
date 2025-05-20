@@ -1789,9 +1789,24 @@ export void hds_image_spectrum_y(uniform int x1, uniform int x2, uniform float x
   }
 }
 
-export uniform int polarisation_simd_3(uniform float pixels[], uniform unsigned int8 mask[])
+export uniform int polarisation_simd(uniform float pixels[], uniform unsigned int8 mask[], uniform int plane_offset, uniform int stride, uniform int range, uniform int i, uniform int j, uniform int xmax, uniform int ymax, uniform int min_count, uniform int max_planes)
 {
-  uniform int count = 0;
+    varying float intensity = 0.0f;
+    varying float angle = 0.0f;
+    varying int count = 0;
 
-  return count;
+    foreach(jj=j ... min(j+range, ymax-1), ii=i ... min(i+range, xmax-1))
+    {
+        varying int offset = jj*stride + ii ;
+        varying unsigned int8 _mask = mask[offset] ;
+
+        cif(_mask)
+        {
+            count++ ;
+        }
+    }
+
+    uniform int _count = reduce_add(count) ;
+
+    return _count >= min_count ? _count : 0;
 }
