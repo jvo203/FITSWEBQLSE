@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-05-19.0";
+    return "JS2025-05-20.0";
 }
 
 function uuidv4() {
@@ -4387,6 +4387,19 @@ function process_polarisation(index, pol_width, pol_height, intensity, angle, ma
     polarisation.std = std;
 }
 
+function validate_vector(vector, width, height, mask) {
+    let x = Math.round(vector.x);
+    let y = Math.round(vector.y);
+    let offset = y * width + x;
+
+    try {
+        // check the mask
+        return mask[offset] > 0;
+    } catch (e) {
+        return false;
+    }
+}
+
 function process_polarisation_video(index, pol_width, pol_height, pol_target, intensity, angle) {
     console.log("process_polarisation_video pol_width:", pol_width, "pol_height:", pol_height, "pol_target:", pol_target);
 
@@ -4408,7 +4421,8 @@ function process_polarisation_video(index, pol_width, pol_height, pol_target, in
     const resized = DownsizeVideoPolarisation(intensity, angle, pol_width, pol_height, pol_target, pol_scale, Math.round(pol_scale * polarisation.xmin), Math.round(pol_scale * polarisation.ymin), Math.round(pol_scale * polarisation.xmax), Math.round(pol_scale * polarisation.ymax));
     console.log("resized:", resized);
 
-    const field = resized.field;
+    const field = resized.field.filter((vector) => validate_vector(vector, imageContainer[index - 1].width, imageContainer[index - 1].height, imageContainer[index - 1].alpha));
+
     const mean = resized.mean;
     const std = resized.std;
     const range = resized.range;
