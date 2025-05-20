@@ -4025,8 +4025,8 @@ function process_hdr_viewport(img_width, img_height, pixels, alpha, index) {
     }
 }
 
-function DownsizeVideoPolarisation(srcI, srcA, sw, sh, target, scale, xmin, ymin, xmax, ymax) {
-    console.log("DownsizeVideoPolarisation", sw, sh, target, scale, xmin, ymin, xmax, ymax);
+function DownsizeImagePolarisation(srcI, srcA, sw, sh, target, scale, xmin, ymin, xmax, ymax) {
+    console.log("DownsizeImagePolarisation", sw, sh, target, scale, xmin, ymin, xmax, ymax);
 
     let dimx = Math.abs(xmax - xmin) + 1;
     let dimy = Math.abs(ymax - ymin) + 1;
@@ -4043,9 +4043,9 @@ function DownsizeVideoPolarisation(srcI, srcA, sw, sh, target, scale, xmin, ymin
 
     // cross-check sw and sh with pol_width and pol_height
     if (sw != pol_width || sh != pol_height) {
-        console.log("DownsizeVideoPolarisation: sw and sh do not match the polarisation dimensions");
+        console.log("DownsizeImagePolarisation: sw and sh do not match the polarisation dimensions");
         console.log("sw:", sw, "sh:", sh, "pol_width:", pol_width, "pol_height:", pol_height);
-        throw new Error("DownsizeVideoPolarisation: sw and sh do not match the polarisation dimensions.");
+        throw new Error("DownsizeImagePolarisation: sw and sh do not match the polarisation dimensions.");
     }
 
     let di = range;
@@ -4418,7 +4418,7 @@ function process_polarisation_video(index, pol_width, pol_height, pol_target, in
     console.log("scaling by", scale, "new width:", img_width, "new height:", img_height, "orig. width:", image_bounding_dims.width, "orig. height:", image_bounding_dims.height);
 
     const pol_scale = polarisation.scale;
-    const resized = DownsizeVideoPolarisation(intensity, angle, pol_width, pol_height, pol_target, pol_scale, Math.round(pol_scale * polarisation.xmin), Math.round(pol_scale * polarisation.ymin), Math.round(pol_scale * polarisation.xmax), Math.round(pol_scale * polarisation.ymax));
+    const resized = DownsizeImagePolarisation(intensity, angle, pol_width, pol_height, pol_target, pol_scale, Math.round(pol_scale * polarisation.xmin), Math.round(pol_scale * polarisation.ymin), Math.round(pol_scale * polarisation.xmax), Math.round(pol_scale * polarisation.ymax));
     console.log("resized:", resized);
 
     const field = resized.field.filter((vector) => validate_vector(vector, imageContainer[index - 1].width, imageContainer[index - 1].height, imageContainer[index - 1].alpha));
