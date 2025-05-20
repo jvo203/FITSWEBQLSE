@@ -1811,8 +1811,8 @@ export uniform int polarisation_simd_3(uniform float pixels[], uniform unsigned 
             varying float tmpU = pixels[offset + 2*plane_offset] ;
 
             // derived values
-            varying float tmpA = abs(tmpU) > 0.0f && abs(tmpQ) > 0.0f ? 0.5f * atan2(tmpU, tmpQ) : 0.0f;
             varying float tmp = abs(tmpI) > 0.0f ? sqrt(tmpQ * tmpQ + tmpU * tmpU)/tmpI : 0.0f;
+            varying float tmpA = abs(tmpU) > 0.0f && abs(tmpQ) > 0.0f ? 0.5f * atan2(tmpU, tmpQ) : 0.0f;            
             
             // accumulate
             intensity += tmp ;
