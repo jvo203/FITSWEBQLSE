@@ -1805,7 +1805,9 @@ export uniform int polarisation_simd(uniform float pixels[], uniform unsigned in
             count++ ;
         }
     }
-
+    
+    uniform float _intensity = reduce_add(intensity) ;
+    uniform float _angle = reduce_add(angle) ;
     uniform int _count = reduce_add(count) ;
 
     return _count >= min_count ? _count : 0;
