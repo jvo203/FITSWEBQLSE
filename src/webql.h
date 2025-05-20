@@ -88,6 +88,7 @@ extern "C" {
     extern void make_video_frame_fixed_square(struct fixed_block_t * compressed, int32_t width, int32_t height, uint8_t * dst_luma, uint8_t * dst_mask, int32_t stride, float black, float sensitivity, int32_t fill);
     extern void make_video_frame_fixed_square_threaded(struct fixed_block_t * compressed, int32_t width, int32_t height, uint8_t * dst_luma, uint8_t * dst_mask, int32_t stride, float black, float sensitivity, int32_t fill, int32_t start, int32_t work_size);
     extern int32_t polarisation_simd_3(float * pixels, uint8_t * mask, int32_t plane_offset, int32_t stride, int32_t range, int32_t i, int32_t j, int32_t xmax, int32_t ymax, float * res);
+    extern int32_t polarisation_simd_4(float * pixels, uint8_t * mask, int32_t plane_offset, int32_t stride, int32_t range, int32_t i, int32_t j, int32_t xmax, int32_t ymax, float * res);
     extern void resizeNearestSIMD(uint8_t * src, int32_t srcWidth, int32_t srcHeight, uint8_t * dst, int32_t dstWidth, int32_t dstHeight);
     extern void standardise_array(float * pixels, float pmean, float pstd, int64_t npixels);
     extern float viewport_image_spectrum_circle(struct fixed_block_t * compressed, int32_t width, int32_t height, float pmin, float pmax, float * view_pixels, bool * view_mask, int32_t stride, int32_t x1, int32_t x2, int32_t y1, int32_t y2, int32_t horizontal, int32_t vertical, float cx, float cy, float r2, bool average, double cdelt3);

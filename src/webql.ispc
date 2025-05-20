@@ -1840,3 +1840,56 @@ export uniform int polarisation_simd_3(uniform float pixels[], uniform unsigned 
 
     return _count;
 }
+
+// max_planes == 4
+// to be called from within FORTRAN "polarisation_simd_4"
+// remember to subtract 1 from i and j when calling from FORTRAN
+export uniform int polarisation_simd_4(uniform float pixels[], uniform unsigned int8 mask[], uniform int plane_offset, uniform int stride, uniform int range, uniform int i, uniform int j, uniform int xmax, uniform int ymax, uniform float res[])
+{
+    varying float intensity = 0.0f;
+    varying float angle = 0.0f;
+    varying int count = 0;
+
+    foreach(jj=j ... min(j+range, ymax-1), ii=i ... min(i+range, xmax-1))
+    {
+        varying int offset = jj*stride + ii ;
+        varying unsigned int8 _mask = mask[offset] ;
+
+        cif(_mask)
+        {            
+            // Stokes parameters
+            varying float tmpI = pixels[offset] ;
+            varying float tmpQ = pixels[offset + plane_offset] ;
+            varying float tmpU = pixels[offset + 2*plane_offset] ;
+            varying float tmpV = pixels[offset + 3*plane_offset] ;
+
+            // derived values
+            varying float tmp = abs(tmpI) > 0.0f ? sqrt(tmpQ * tmpQ + tmpU * tmpU + tmpV * tmpV)/tmpI : 0.0f ;
+            varying float tmpA = abs(tmpU) > 0.0f && abs(tmpQ) > 0.0f ? 0.5f * atan2(tmpU, tmpQ) : 0.0f ;
+            
+            // accumulate
+            intensity += tmp ;
+            angle += tmpA ;
+            count++ ;            
+        }
+    }
+    
+    uniform float _intensity = reduce_add(intensity) ;
+    uniform float _angle = reduce_add(angle) ;
+    uniform int _count = reduce_add(count) ;
+
+    if(_count > 0)
+    {
+        _intensity /= (float)_count ;
+        _angle /= (float)_count ;
+    } else
+    {
+        _intensity = 0.0f ;
+        _angle = 0.0f ;
+    }
+
+    res[0] = _intensity;
+    res[1] = _angle;
+
+    return _count;
+}
