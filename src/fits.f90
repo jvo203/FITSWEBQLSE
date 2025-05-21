@@ -9018,10 +9018,11 @@ contains
       ymin = max(lbound(pixels, 2), pol_ymin)
       ymax = min(ubound(pixels, 2), pol_ymax)
 
+      print *, 'DownsizePolarization: xmin:', xmin, 'xmax:', xmax, 'ymin:', ymin, 'ymax:', ymax, 'max_planes:', max_planes
+
       c_stride = ubound(pixels, 1)
       c_offset = ubound(pixels, 1) * ubound(pixels, 2)
-
-      print *, 'DownsizePolarization: xmin:', xmin, 'xmax:', xmax, 'ymin:', ymin, 'ymax:', ymax, 'max_planes:', max_planes
+      print *, 'DownsizePolarization: c_stride:', c_stride, 'c_offset:', c_offset
 
       dimx = abs(xmax - xmin) + 1
       dimy = abs(ymax - ymin) + 1
