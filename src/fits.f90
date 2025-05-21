@@ -9106,16 +9106,18 @@ contains
 
             ! compare with the SPMD C
             if (max_planes .gt. 3) then
-               count = polarisation_simd_4(c_loc(pixels), c_loc(mask), c_offset, c_stride, range,&
+               c_count = polarisation_simd_4(c_loc(pixels), c_loc(mask), c_offset, c_stride, range,&
                & i-1, j-1, xmax-1, ymax-1, c_loc(res))
             else
-               count = polarisation_simd_3(c_loc(pixels), c_loc(mask), c_offset, c_stride, range,&
+               c_count = polarisation_simd_3(c_loc(pixels), c_loc(mask), c_offset, c_stride, range,&
                & i-1, j-1, xmax-1, ymax-1, c_loc(res))
             end if
 
-            if (count .ge. min_count) then
-               intensity = intensity/real(count)
-               angle = angle/real(count)
+            if (c_count .ge. min_count) then
+               !intensity = intensity/real(count)
+               !angle = angle/real(count)
+               intensity = res(1)
+               angle = res(2)
 
                ! at first 0-based indexing, remove the offset and the step, then make i and j 1-based array indices
                x0 = 1 + (i - xmin)/range
