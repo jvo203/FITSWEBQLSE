@@ -1852,7 +1852,7 @@ export uniform int polarisation_simd_4(uniform float pixels[], uniform unsigned 
 
     foreach(jj=j ... min(j+range, ymax)+1, ii=i ... min(i+range, xmax)+1)
     {
-        varying int offset = jj*stride + ii ;
+        varying int offset = jj*stride + ii ;        
         varying unsigned int8 _mask = mask[offset] ;
 
         cif(_mask)
