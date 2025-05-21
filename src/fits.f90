@@ -796,6 +796,30 @@ module fits
          type(c_ptr), value :: ptr
       end subroutine free
 
+      ! export uniform int polarisation_simd_3(uniform float pixels[], uniform unsigned int8 mask[], uniform int plane_offset, uniform int stride, uniform int range, uniform int i, uniform int j, uniform int xmax, uniform int ymax, uniform float res[])
+      integer(c_int) function polarisation_simd_3(pixels, mask, plane_offset, stride, range, i, j, xmax, ymax, res)&
+      & BIND(C, name='polarisation_simd_3')
+         use, intrinsic :: ISO_C_BINDING
+         implicit none
+
+         type(C_PTR), value, intent(in) :: pixels, mask
+         integer(c_int), value, intent(in) :: plane_offset, stride, range, i, j, xmax, ymax
+         type(C_PTR), value, intent(in) :: res
+
+      end function polarisation_simd_3
+
+      ! export uniform int polarisation_simd_4(uniform float pixels[], uniform unsigned int8 mask[], uniform int plane_offset, uniform int stride, uniform int range, uniform int i, uniform int j, uniform int xmax, uniform int ymax, uniform float res[])
+      integer(c_int) function polarisation_simd_4(pixels, mask, plane_offset, stride, range, i, j, xmax, ymax, res)&
+      & BIND(C, name='polarisation_simd_4')
+         use, intrinsic :: ISO_C_BINDING
+         implicit none
+
+         type(C_PTR), value, intent(in) :: pixels, mask
+         integer(c_int), value, intent(in) :: plane_offset, stride, range, i, j, xmax, ymax
+         type(C_PTR), value, intent(in) :: res
+
+      end function polarisation_simd_4
+
       ! export uniform float brightness_ratio(uniform float pixels[], uniform float black, uniform float sensitivity, uniform int offset, uniform int total_size)
       real(c_float) function brightness_ratio(pixels, black, sensitivity, offset, total_size)&
       &BIND(C, name='brightness_ratio')
