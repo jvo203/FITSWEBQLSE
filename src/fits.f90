@@ -9113,11 +9113,17 @@ contains
                & i-1, j-1, xmax-1, ymax-1, c_loc(res))
             end if
 
-            if (c_count .ge. min_count) then
-               !intensity = intensity/real(count)
-               !angle = angle/real(count)
-               intensity = res(1)
-               angle = res(2)
+            if (count .ge. min_count) then
+               intensity = intensity/real(count)
+               angle = angle/real(count)
+               !intensity = res(1)
+               !angle = res(2)
+
+               ! only print out if the counts are different
+               if (count .ne. c_count) then
+                  print *, 'DownsizePolarization: i:', i, 'j:', j, 'count:', count, 'c_count:', c_count,&
+                  & 'intensity:', intensity, 'angle:', angle, 'res:', res
+               end if
 
                ! at first 0-based indexing, remove the offset and the step, then make i and j 1-based array indices
                x0 = 1 + (i - xmin)/range
