@@ -9020,8 +9020,8 @@ contains
 
       print *, 'DownsizePolarization: xmin:', xmin, 'xmax:', xmax, 'ymin:', ymin, 'ymax:', ymax, 'max_planes:', max_planes
 
-      c_stride = ubound(pixels, 1)
-      c_offset = ubound(pixels, 1) * ubound(pixels, 2)
+      c_stride = size(pixels, 1)
+      c_offset = size(pixels, 1) * size(pixels, 2)
       print *, 'DownsizePolarization: c_stride:', c_stride, 'c_offset:', c_offset
 
       dimx = abs(xmax - xmin) + 1
