@@ -9006,16 +9006,20 @@ contains
       real :: intensity, angle
       integer :: x0, y0
 
+      ! SPMD C interface
+      real(kind=c_float), target :: res(2)
+      integer(kind=c_int) :: c_count, c_offset, c_stride
+
       max_planes = size(pixels, 3)
       if (max_planes .lt. 3) return
-
-      ! get #physical cores (ignore HT)
-      max_threads = get_max_threads()
 
       xmin = max(lbound(pixels, 1), pol_xmin)
       xmax = min(ubound(pixels, 1), pol_xmax)
       ymin = max(lbound(pixels, 2), pol_ymin)
       ymax = min(ubound(pixels, 2), pol_ymax)
+
+      c_stride = ubound(pixels, 1)
+      c_offset = ubound(pixels, 1) * ubound(pixels, 2)
 
       print *, 'DownsizePolarization: xmin:', xmin, 'xmax:', xmax, 'ymin:', ymin, 'ymax:', ymax, 'max_planes:', max_planes
 
@@ -9042,6 +9046,9 @@ contains
 
       ! re-set the counter
       total_count = 0
+
+      ! get #physical cores (ignore HT)
+      max_threads = get_max_threads()
 
       ! loop over the pixels and mask
       !$omp PARALLEL DEFAULT(SHARED) SHARED(pol_intensity,pol_angle, min_count, range)&
@@ -9095,6 +9102,13 @@ contains
                   end if
                end do
             end do
+
+            ! compare with the SPMD C
+            if (max_planes .gt. 3) then
+               !count = polarisation_simd_4(c_loc(pixels), c_loc(mask), i, j, range, count, intensity, angle)
+            else
+               !count = polarisation_simd_3(c_loc(pixels), c_loc(mask), i, j, range, count, intensity, angle)
+            end if
 
             if (count .ge. min_count) then
                intensity = intensity/real(count)
