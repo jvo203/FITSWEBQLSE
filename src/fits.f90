@@ -8990,8 +8990,8 @@ contains
    & pol_target, pol_intensity, pol_angle)
       implicit none
 
-      real(c_float), dimension(:, :, :), intent(in), contiguous :: pixels
-      logical(kind=c_bool), dimension(:, :), intent(in), contiguous :: mask
+      real(c_float), dimension(:, :, :), intent(in), contiguous, target :: pixels
+      logical(kind=c_bool), dimension(:, :), intent(in), contiguous, target :: mask
       integer, intent(in) :: width, height
       integer, intent(in) :: pol_xmin, pol_ymin, pol_xmax, pol_ymax, pol_target
       real(kind=c_float), dimension(:,:), allocatable, intent(out) :: pol_intensity, pol_angle
@@ -9106,9 +9106,11 @@ contains
 
             ! compare with the SPMD C
             if (max_planes .gt. 3) then
-               !count = polarisation_simd_4(c_loc(pixels), c_loc(mask), i, j, range, count, intensity, angle)
+               count = polarisation_simd_4(c_loc(pixels), c_loc(mask), c_offset, c_stride, range,&
+               & i-1, j-1, xmax-1, ymax-1, c_loc(res))
             else
-               !count = polarisation_simd_3(c_loc(pixels), c_loc(mask), i, j, range, count, intensity, angle)
+               count = polarisation_simd_3(c_loc(pixels), c_loc(mask), c_offset, c_stride, range,&
+               & i-1, j-1, xmax-1, ymax-1, c_loc(res))
             end if
 
             if (count .ge. min_count) then
