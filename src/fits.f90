@@ -9060,9 +9060,7 @@ contains
       !$omp DO
       do j = ymin, ymax, range
          do i = xmin, xmax, range
-            if ((i-1) .eq. 85 .and. (j-1) .eq. 50) then
-               print *, 'DownsizePolarization: i:', i, 'j:', j, 'range:', range
-            end if
+            ! print *, 'DownsizePolarization: i:', i, 'j:', j, 'range:', range
 
             intensity = 0.0
             angle = 0.0
@@ -9106,15 +9104,13 @@ contains
                end do
             end do
 
-            if ((i-1) .eq. 85 .and. (j-1) .eq. 50) then
-               ! compare with the SPMD C
-               if (max_planes .gt. 3) then
-                  c_count = polarisation_simd_4(c_loc(pixels), c_loc(mask), c_offset, c_stride, range,&
-                  & i-1, j-1, xmax-1, ymax-1, c_loc(res))
-               else
-                  c_count = polarisation_simd_3(c_loc(pixels), c_loc(mask), c_offset, c_stride, range,&
-                  & i-1, j-1, xmax-1, ymax-1, c_loc(res))
-               end if
+            ! compare with the SPMD C
+            if (max_planes .gt. 3) then
+               c_count = polarisation_simd_4(c_loc(pixels), c_loc(mask), c_offset, c_stride, range,&
+               & i-1, j-1, xmax-1, ymax-1, c_loc(res))
+            else
+               c_count = polarisation_simd_3(c_loc(pixels), c_loc(mask), c_offset, c_stride, range,&
+               & i-1, j-1, xmax-1, ymax-1, c_loc(res))
             end if
 
             if (count .ge. min_count) then
@@ -9123,12 +9119,10 @@ contains
                !intensity = res(1)
                !angle = res(2)
 
-               if ((i-1) .eq. 85 .and. (j-1) .eq. 50) then
-                  ! only print out if the counts are different
-                  if (count .ne. c_count) then
-                     print *, 'DownsizePolarization: i:', i, 'j:', j, 'count:', count, 'c_count:', c_count,&
-                     & 'intensity:', intensity, 'angle:', angle, 'res:', res
-                  end if
+               ! only print out if the counts are different
+               if (count .ne. c_count) then
+                  print *, 'DownsizePolarization: i:', i, 'j:', j, 'count:', count, 'c_count:', c_count,&
+                  & 'intensity:', intensity, 'angle:', angle, 'res:', res
                end if
 
                ! at first 0-based indexing, remove the offset and the step, then make i and j 1-based array indices
