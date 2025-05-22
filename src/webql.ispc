@@ -1869,7 +1869,7 @@ export uniform int polarisation_simd_4(uniform float pixels[], uniform unsigned 
         varying float tmpV = pixels[offset + 3*plane_offset] ;
 
         // check if the Stokes parameters are in a valid range
-        varying bool valid_angle = abs(tmpU) > FLT_EPSILON && abs(tmpQ) > FLT_EPSILON ;
+        varying bool valid_angle = abs(tmpU) > FLT_EPSILON || abs(tmpQ) > FLT_EPSILON ;
         varying bool valid_intensity = abs(tmpI) > FLT_EPSILON ;
         varying bool valid = valid_angle && valid_intensity && _mask;
 
@@ -1880,7 +1880,9 @@ export uniform int polarisation_simd_4(uniform float pixels[], uniform unsigned 
         // accumulate
         intensity += valid ? tmp : 0.0f ;
         angle += valid ? tmpA : 0.0f ;
-        count += valid ? 1 : 0 ;        
+        count += valid ? 1 : 0 ;
+
+        print("I: %, J: %, ii: %, jj: %, tmpI: %, tmpQ: %, tmpU: %, tmpV: %, mask: %\n", i, j, ii, jj, tmpI, tmpQ, tmpU, tmpV, _mask);        
     }
     
     uniform float _intensity = reduce_add(intensity) ;
@@ -1896,6 +1898,8 @@ export uniform int polarisation_simd_4(uniform float pixels[], uniform unsigned 
         _intensity = 0.0f ;
         _angle = 0.0f ;
     }
+
+    print ("intensity: %, angle: %, count: %\n", _intensity, _angle, _count);
 
     res[0] = _intensity;
     res[1] = _angle;
