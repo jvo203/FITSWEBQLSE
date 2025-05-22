@@ -8999,10 +8999,9 @@ contains
       integer :: xmin, xmax, ymin, ymax, dimx, dimy
       integer :: max_threads, max_planes, i, j, ii, jj
 
-      integer :: range, count, min_count, total_count
+      integer :: range, min_count, total_count
       real :: range_x, range_y
 
-      real :: tmp, tmpA, tmpI, tmpQ, tmpU, tmpV
       real :: intensity, angle
       integer :: x0, y0
 
@@ -9053,8 +9052,8 @@ contains
 
       ! loop over the pixels and mask
       !$omp PARALLEL DEFAULT(SHARED) SHARED(pol_intensity, pol_angle, min_count, range)&
-      !$omp& SHARED(pixels, mask) PRIVATE(i, j, tmp, tmpA, tmpI, tmpQ, tmpU, tmpV)&
-      !$omp& PRIVATE(x0, y0, intensity, angle, count, c_count, res, ii, jj)&
+      !$omp& SHARED(pixels, mask) PRIVATE(i, j)&
+      !$omp& PRIVATE(x0, y0, intensity, angle, c_count, res)&
       !$omp& REDUCTION(+:total_count)&
       !$omp& NUM_THREADS (max_threads)
       !$omp DO
@@ -9062,49 +9061,7 @@ contains
          do i = xmin, xmax, range
             ! print *, 'DownsizePolarization: i:', i, 'j:', j, 'range:', range, 'xmax:', xmax, 'ymax:', ymax
 
-            intensity = 0.0
-            angle = 0.0
-            count = 0
-
-            do jj = j, min(j + range - 0, ymax)
-               do ii = i, min(i + range - 0, xmax)
-                  if (mask(ii, jj)) then
-                     tmpI = pixels(ii, jj, 1)
-                     tmpQ = pixels(ii, jj, 2)
-                     tmpU = pixels(ii, jj, 3)
-
-                     if (abs(tmpQ) .le. epsilon(tmpQ) .and. abs(tmpU) .le. epsilon(tmpU)) then
-                        tmpA = ieee_value(0.0, ieee_quiet_nan)
-                     else
-                        tmpA = 0.5*atan2(tmpU, tmpQ) ! polarisation angle
-                     end if
-
-                     if (max_planes .gt. 3) then
-                        tmpV = pixels(ii, jj, 4)
-
-                        if (abs(tmpI) .le. epsilon(tmpI)) then
-                           tmp = ieee_value(0.0, ieee_quiet_nan)
-                        else
-                           tmp = sqrt(tmpQ**2 + tmpU**2 + tmpV**2)/tmpI ! total intensity
-                        end if
-                     else
-                        if (abs(tmpI) .le. epsilon(tmpI)) then
-                           tmp = ieee_value(0.0, ieee_quiet_nan)
-                        else
-                           tmp = sqrt(tmpQ**2 + tmpU**2)/tmpI ! linear intensity
-                        end if
-                     end if
-
-                     if ((.not. ieee_is_nan(tmpA)) .and. (.not. ieee_is_nan(tmp))) then
-                        intensity = intensity + tmp
-                        angle = angle + tmpA
-                        count = count + 1
-                     end if
-                  end if
-               end do
-            end do
-
-            ! compare with the SPMD C
+            ! SPMD C
             if (max_planes .gt. 3) then
                c_count = polarisation_simd_4(c_loc(pixels), c_loc(mask), c_offset, c_stride, range,&
                & i-1, j-1, xmax-1, ymax-1, c_loc(res))
@@ -9113,19 +9070,9 @@ contains
                & i-1, j-1, xmax-1, ymax-1, c_loc(res))
             end if
 
-            if (count .ge. min_count) then
-               intensity = intensity/real(count)
-               angle = angle/real(count)
-               !intensity = res(1)
-               !angle = res(2)
-
-               ! only print out if the counts are different
-               !if (count .ne. c_count) then
-               if (count .ne. c_count .or. abs(intensity - res(1)) .gt. 0.001 .or. abs(angle - res(2)) .gt. 0.001) then
-                  print *, 'DownsizePolarization: i:', i, 'j:', j, 'count:', count, 'c_count:', c_count,&
-                  & 'intensity:', intensity, 'angle:', angle, 'res:', res
-                  stop
-               end if
+            if (c_count .ge. min_count) then
+               intensity = res(1)
+               angle = res(2)
 
                ! at first 0-based indexing, remove the offset and the step, then make i and j 1-based array indices
                x0 = 1 + (i - xmin)/range
@@ -9147,9 +9094,6 @@ contains
       !$omp END PARALLEL
 
       print *, 'DownsizePolarization: total_count:', total_count, 'max_threads:', max_threads
-
-      !print *, pol_intensity(1:10, 1:10)
-      !print *, pol_angle(1:10, 1:10)
 
    end subroutine DownsizePolarization
 
