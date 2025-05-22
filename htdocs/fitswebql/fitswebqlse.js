@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-05-20.0";
+    return "JS2025-05-22.0";
 }
 
 function uuidv4() {
@@ -4296,8 +4296,9 @@ function plot_polarisation(field, mean, std, xScale, yScale, spacing, canvasId) 
 
     // for each item in the resized field    
     for (let item of field) {
-        //let angle = item.A + Math.PI / 2; // add 90 degrees to the angle
-        let angle = -item.A; // reflect the angle around the x-axis (FITS to computer graphics inverted Y axis)
+        // first add 90 degrees to the angle (the angle is measure from the North Pole towards anti-clock-wise)
+        // then reflect the angle around the x-axis (FITS to computer graphics inverted Y axis)
+        let angle = -(item.A + Math.PI / 2);
         let mag = (item.I - mean) / (std * Math.sqrt(2.0)); // normalise the intensity
 
         let x = item.x;
