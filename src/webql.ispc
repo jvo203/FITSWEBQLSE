@@ -10,6 +10,11 @@ typedef unsigned int64 uint64_t;
 #define FLT_MAX 3.402823466e+38F
 #endif
 
+// define epsilon if not defined (float precision)
+#ifndef FLT_EPSILON
+#define FLT_EPSILON 1.192092896e-07F
+#endif
+
 /* FIXED-POINT COMPRESSION */
 #define BASE 4
 #define DIM 16
