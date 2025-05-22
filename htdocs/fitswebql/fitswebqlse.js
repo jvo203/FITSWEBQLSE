@@ -4296,7 +4296,7 @@ function plot_polarisation(field, mean, std, xScale, yScale, spacing, canvasId) 
 
     // for each item in the resized field    
     for (let item of field) {
-        // add 90 degrees to the angle (the angle is measure from the North Pole anti-clockwise)
+        // add 90 degrees to the angle (the angle is measured from the North Pole anti-clockwise)
         // the reflection of the angle around the x-axis (FITS to computer graphics inverted Y axis) is handled by the inverted yScale function
         let angle = item.A + Math.PI / 2;
         let mag = (item.I - mean) / (std * Math.sqrt(2.0)); // normalise the intensity
