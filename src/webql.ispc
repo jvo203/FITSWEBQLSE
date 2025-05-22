@@ -1815,14 +1815,19 @@ export uniform int polarisation_simd_3(uniform float pixels[], uniform unsigned 
             varying float tmpQ = pixels[offset + plane_offset] ;
             varying float tmpU = pixels[offset + 2*plane_offset] ;
 
+            // check if the Stokes parameters are in a valid range
+            varying bool valid_angle = abs(tmpU) > FLT_EPSILON && abs(tmpQ) > FLT_EPSILON ;
+            varying bool valid_intensity = abs(tmpI) > FLT_EPSILON ;
+            varying bool valid = valid_angle && valid_intensity ;
+
             // derived values
-            varying float tmp = abs(tmpI) > 0.0f ? sqrt(tmpQ * tmpQ + tmpU * tmpU)/tmpI : 0.0f ;
-            varying float tmpA = abs(tmpU) > 0.0f && abs(tmpQ) > 0.0f ? 0.5f * atan2(tmpU, tmpQ) : 0.0f ;
+            varying float tmp = sqrt(tmpQ * tmpQ + tmpU * tmpU)/tmpI ;
+            varying float tmpA = 0.5f * atan2(tmpU, tmpQ) ;
             
             // accumulate
-            intensity += tmp ;
-            angle += tmpA ;
-            count++ ;            
+            intensity += valid ? tmp : 0.0f ;
+            angle += valid ? tmpA : 0.0f ;
+            count += valid ? 1 : 0 ;
         }
     }
     
