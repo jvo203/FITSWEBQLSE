@@ -9052,15 +9052,15 @@ contains
       max_threads = get_max_threads()
 
       ! loop over the pixels and mask
-      !$omp PARALLEL DEFAULT(SHARED) SHARED(pol_intensity,pol_angle, min_count, range)&
-      !$omp& SHARED(pixels, mask) PRIVATE(i,j, tmp, tmpA, tmpI, tmpQ, tmpU, tmpV)&
-      !$omp& PRIVATE(x0, y0, intensity, angle, count, ii, jj)&
+      !$omp PARALLEL DEFAULT(SHARED) SHARED(pol_intensity, pol_angle, min_count, range)&
+      !$omp& SHARED(pixels, mask) PRIVATE(i, j, tmp, tmpA, tmpI, tmpQ, tmpU, tmpV)&
+      !$omp& PRIVATE(x0, y0, intensity, angle, count, c_count, res, ii, jj)&
       !$omp& REDUCTION(+:total_count)&
-      !$omp& NUM_THREADS(max_threads)
+      !$omp& NUM_THREADS (max_threads)
       !$omp DO
       do j = ymin, ymax, range
          do i = xmin, xmax, range
-            ! print *, 'DownsizePolarization: i:', i, 'j:', j, 'range:', range
+            ! print *, 'DownsizePolarization: i:', i, 'j:', j, 'range:', range, 'xmax:', xmax, 'ymax:', ymax
 
             intensity = 0.0
             angle = 0.0
@@ -9120,9 +9120,11 @@ contains
                !angle = res(2)
 
                ! only print out if the counts are different
-               if (count .ne. c_count) then
+               !if (count .ne. c_count) then
+               if (count .ne. c_count .or. abs(intensity - res(1)) .gt. 0.001 .or. abs(angle - res(2)) .gt. 0.001) then
                   print *, 'DownsizePolarization: i:', i, 'j:', j, 'count:', count, 'c_count:', c_count,&
                   & 'intensity:', intensity, 'angle:', angle, 'res:', res
+                  stop
                end if
 
                ! at first 0-based indexing, remove the offset and the step, then make i and j 1-based array indices

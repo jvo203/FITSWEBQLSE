@@ -1816,7 +1816,7 @@ export uniform int polarisation_simd_3(uniform float pixels[], uniform unsigned 
         // check if the Stokes parameters are in a valid range
         varying bool valid_angle = abs(tmpU) > FLT_EPSILON || abs(tmpQ) > FLT_EPSILON ;
         varying bool valid_intensity = abs(tmpI) > FLT_EPSILON ;
-        varying bool valid = valid_angle && valid_intensity && _mask;
+        varying bool valid = valid_angle && valid_intensity && _mask > 0;
 
         // derived values (ignore the potential division by zero)
         varying float tmp = sqrt(tmpQ * tmpQ + tmpU * tmpU)/tmpI ;
@@ -1855,7 +1855,7 @@ export uniform int polarisation_simd_4(uniform float pixels[], uniform unsigned 
 {
     varying float intensity = 0.0f;
     varying float angle = 0.0f;
-    varying int count = 0;
+    varying int count = 0;    
 
     foreach(jj=j ... min(j+range, ymax)+1, ii=i ... min(i+range, xmax)+1)
     {
@@ -1871,7 +1871,7 @@ export uniform int polarisation_simd_4(uniform float pixels[], uniform unsigned 
         // check if the Stokes parameters are in a valid range
         varying bool valid_angle = abs(tmpU) > FLT_EPSILON || abs(tmpQ) > FLT_EPSILON ;
         varying bool valid_intensity = abs(tmpI) > FLT_EPSILON ;
-        varying bool valid = valid_angle && valid_intensity && _mask;
+        varying bool valid = valid_angle && valid_intensity && _mask > 0;
 
         // derived values (ignore the potential division by zero)
         varying float tmp = sqrt(tmpQ * tmpQ + tmpU * tmpU + tmpV * tmpV)/tmpI ;
