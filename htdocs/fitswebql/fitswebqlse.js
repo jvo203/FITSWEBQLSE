@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-05-22.0";
+    return "JS2025-05-23.0";
 }
 
 function uuidv4() {
@@ -12174,21 +12174,6 @@ function x_axis_mouseenter(offset) {
             };
 
             if (polarisation != null) {
-                // extract field.x,field.y coordinates into pol_x and pol_y arrays
-                let pol_x = [];
-                let pol_y = [];
-
-                // for each item in polarisation.field
-                // TO-DO: re-scale the polarisation field to match fitsData.width, fitsData.height
-                for (let i = 0; i < polarisation.field.length; i++) {
-                    let vector = polarisation.field[i];
-                    pol_x.push(vector.x);
-                    pol_y.push(vector.y);
-                }
-
-                console.log("pol_x = ", pol_x);
-                console.log("pol_y = ", pol_y);
-
                 let fitsData = fitsContainer[index];
                 let scale = (fitsData.width - 1) / (polarisation.pol_width - 1);
                 console.log("'init_video'::polarisation scale =", scale);
