@@ -6196,21 +6196,27 @@ contains
       type(dataset), pointer, intent(in) :: item
       integer, intent(out) :: width, height
 
+      integer :: x1, x2, y1, y2 ! unused
+
       if (.not. allocated(item%mask)) then
          width = 0
          height = 0
          return
       end if
 
-      call inherent_image_dimensions_from_mask(item%mask, width, height)
+      call inherent_image_dimensions_from_mask(item%mask, width, height, x1, x2, y1, y2)
 
    end subroutine inherent_image_dimensions
 
-   subroutine inherent_image_dimensions_from_mask(mask, width, height)
+   subroutine inherent_image_dimensions_from_mask(mask, width, height, x1, x2, y1, y2)
+      use, intrinsic :: iso_c_binding
+      implicit none
+
       logical(kind=c_bool), dimension(:, :), intent(in) :: mask
       integer, intent(out) :: width, height
+      integer, intent(out) :: x1, x2, y1, y2
 
-      integer x1, x2, y1, y2, k
+      integer :: k
       integer, dimension(2) :: dims
 
       ! get the dimensions from the mask
@@ -11596,6 +11602,7 @@ contains
       integer :: inner_width, inner_height
       integer :: img_width, img_height
       integer(c_int) :: precision
+      integer :: x1, x2, y1, y2 ! unused
       real :: scale
 
       type(resize_task_t), target :: pixels_task(4)
@@ -11819,7 +11826,7 @@ contains
       if (cluster_req%valid) spectrum = spectrum + cluster_spectrum
 
       ! get the inner image bounding box (excluding NaNs)
-      call inherent_image_dimensions_from_mask(reshape(mask, (/dimx, dimy/)), inner_width, inner_height)
+      call inherent_image_dimensions_from_mask(reshape(mask, (/dimx, dimy/)), inner_width, inner_height, x1, y1, x2, y2)
 
       ! get the downscaled image dimensions
       scale = get_image_scale(req%width, req%height, inner_width, inner_height)
