@@ -6663,6 +6663,7 @@ contains
 
       real(kind=c_float), dimension(:, :, :), allocatable, target :: pixels
       logical(kind=c_bool), dimension(:, :), allocatable, target :: mask
+      real(kind=c_float), dimension(:,:), allocatable, target :: intensity, angle ! optional polarisation
 
       ! image histogram
       integer :: hist(NBINS, 4) ! up to 4 planes
@@ -6844,9 +6845,11 @@ contains
 
       ! optional polarisation
       if (item%is_stokes .and. max_planes .ge. 3) then
+         ! get the min/max spatial range
          call inherent_image_dimensions_from_mask(mask, inner_width, inner_height, xmin, xmax, ymin, ymax)
 
-         ! TO-DO: prepare a call to DownsizePolarizationSIMD
+         ! obtain the polarisation intensity and angle
+         call DownsizePolarizationSIMD(pixels, mask, img_width, img_height, xmin, ymin, xmax, ymax, 100, intensity, angle)
       end if
 
       deallocate (pixels)
