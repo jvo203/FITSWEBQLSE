@@ -10121,8 +10121,6 @@ contains
       real(kind=8) :: t2
       real(kind=c_float) :: elapsed
 
-      type(C_PTR) :: json
-
       if (.not. c_associated(arg)) return
       call c_f_pointer(arg, req)
 
@@ -10183,7 +10181,6 @@ contains
       !$omp END DO
       !$omp END PARALLEL
 
-      !json = DownsizeJSONPolarization(pixels, mask, dimx, dimy, square)
       call DownsizePolarizationSIMD(pixels, mask, dimx, dimy, req%pol_xmin, req%pol_ymin, req%pol_xmax, req%pol_ymax,&
       & req%pol_target, intensity, angle)
 
@@ -10194,9 +10191,6 @@ contains
       ! perhaps we should be creating a new WebSocket send thread here
       !call write_ws_json_polarisation(req%session, req%seq_id, req%timestamp, elapsed, json)
       print *, 'polarisation_request_simd elapsed time:', elapsed, '[ms]'
-
-      ! deallocate the memory
-      !call delete_json(json)
 
       ! set the ZFP compression precision
       if (req%keyframe) then
