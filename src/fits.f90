@@ -6680,7 +6680,8 @@ contains
       integer :: inner_width, inner_height
       integer :: img_width, img_height
       integer :: max_planes, i, j
-      real scale
+      real :: scale
+      integer :: xmin, xmax, ymin, ymax
 
       type(resize_task_t), target :: pixels_task(4) ! up to 4 planes
       type(c_ptr) :: pixels_pid(4) ! up to 4 planes
@@ -6840,6 +6841,13 @@ contains
       !$omp end parallel do
 
       call write_image_spectrum(fd, max_planes, c_loc(tone), img_width, img_height, precision, c_loc(pixels), c_loc(mask))
+
+      ! optional polarisation
+      if (item%is_stokes .and. max_planes .ge. 3) then
+         call inherent_image_dimensions_from_mask(mask, inner_width, inner_height, xmin, xmax, ymin, ymax)
+
+         ! TO-DO: prepare a call to DownsizePolarizationSIMD
+      end if
 
       deallocate (pixels)
       deallocate (mask)
