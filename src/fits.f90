@@ -8986,6 +8986,144 @@ contains
 
    end function DownsizeJSONPolarization
 
+
+   subroutine DownsizePolarization(pixels, mask, width, height, pol_xmin, pol_ymin, pol_xmax, pol_ymax,&
+   & pol_target, pol_intensity, pol_angle)
+      implicit none
+
+      real(c_float), dimension(:, :, :), intent(in), contiguous, target :: pixels
+      logical(kind=c_bool), dimension(:, :), intent(in), contiguous, target :: mask
+      integer, intent(in) :: width, height
+      integer, intent(in) :: pol_xmin, pol_ymin, pol_xmax, pol_ymax, pol_target
+      real(kind=c_float), dimension(:,:), allocatable, intent(out) :: pol_intensity, pol_angle
+
+      integer :: xmin, xmax, ymin, ymax, dimx, dimy
+      integer :: max_threads, max_planes, i, j, ii, jj
+
+      integer :: range, count, min_count, total_count
+      real :: range_x, range_y
+
+      real :: tmp, tmpA, tmpI, tmpQ, tmpU, tmpV
+      real :: intensity, angle
+      integer :: x0, y0
+
+      max_planes = size(pixels, 3)
+      if (max_planes .lt. 3) return
+
+      xmin = max(lbound(pixels, 1), pol_xmin)
+      xmax = min(ubound(pixels, 1), pol_xmax)
+      ymin = max(lbound(pixels, 2), pol_ymin)
+      ymax = min(ubound(pixels, 2), pol_ymax)
+
+      print *, 'DownsizePolarization: xmin:', xmin, 'xmax:', xmax, 'ymin:', ymin, 'ymax:', ymax, 'max_planes:', max_planes
+
+      dimx = abs(xmax - xmin) + 1
+      dimy = abs(ymax - ymin) + 1
+
+      range_x = real(dimx)/real(pol_target)
+      range_y = real(dimy)/real(pol_target)
+
+      range = max(1, floor(max(range_x, range_y)))
+      min_count = nint(0.75*range**2)
+
+      ! print the width X height of the input pixels and mask
+      print *, 'DownsizePolarization: width:', width, 'height:', height, 'dimx:', dimx, 'dimy:', dimy,&
+      & 'range:', range, 'min_count:', min_count
+
+      ! allocate the output arrays
+      allocate (pol_intensity(1+(xmax - xmin)/range, 1+(ymax - ymin)/range))
+      allocate (pol_angle(1+(xmax - xmin)/range, 1+(ymax - ymin)/range))
+
+      ! clear the output arrays
+      pol_intensity = 0.0
+      pol_angle = 0.0
+
+      ! re-set the counter
+      total_count = 0
+
+      ! get #physical cores (ignore HT)
+      max_threads = get_max_threads()
+
+      ! loop over the pixels and mask
+      !$omp PARALLEL DEFAULT(SHARED) SHARED(pol_intensity, pol_angle, min_count, range)&
+      !$omp& SHARED(pixels, mask) PRIVATE(i, j, tmp, tmpA, tmpI, tmpQ, tmpU, tmpV)&
+      !$omp& PRIVATE(x0, y0, intensity, angle, count, ii, jj)&
+      !$omp& REDUCTION(+:total_count)&
+      !$omp& NUM_THREADS (max_threads)
+      !$omp DO
+      do j = ymin, ymax, range
+         do i = xmin, xmax, range
+            ! print *, 'DownsizePolarization: i:', i, 'j:', j, 'range:', range, 'xmax:', xmax, 'ymax:', ymax
+
+            intensity = 0.0
+            angle = 0.0
+            count = 0
+
+            do jj = j, min(j + range - 0, ymax)
+               do ii = i, min(i + range - 0, xmax)
+                  if (mask(ii, jj)) then
+                     tmpI = pixels(ii, jj, 1)
+                     tmpQ = pixels(ii, jj, 2)
+                     tmpU = pixels(ii, jj, 3)
+
+                     if (abs(tmpQ) .le. epsilon(tmpQ) .and. abs(tmpU) .le. epsilon(tmpU)) then
+                        tmpA = ieee_value(0.0, ieee_quiet_nan)
+                     else
+                        tmpA = 0.5*atan2(tmpU, tmpQ) ! polarisation angle
+                     end if
+
+                     if (max_planes .gt. 3) then
+                        tmpV = pixels(ii, jj, 4)
+
+                        if (abs(tmpI) .le. epsilon(tmpI)) then
+                           tmp = ieee_value(0.0, ieee_quiet_nan)
+                        else
+                           tmp = sqrt(tmpQ**2 + tmpU**2 + tmpV**2)/tmpI ! total intensity
+                        end if
+                     else
+                        if (abs(tmpI) .le. epsilon(tmpI)) then
+                           tmp = ieee_value(0.0, ieee_quiet_nan)
+                        else
+                           tmp = sqrt(tmpQ**2 + tmpU**2)/tmpI ! linear intensity
+                        end if
+                     end if
+
+                     if ((.not. ieee_is_nan(tmpA)) .and. (.not. ieee_is_nan(tmp))) then
+                        intensity = intensity + tmp
+                        angle = angle + tmpA
+                        count = count + 1
+                     end if
+                  end if
+               end do
+            end do
+
+            if (count .ge. min_count) then
+               intensity = intensity/real(count)
+               angle = angle/real(count)
+
+               ! at first 0-based indexing, remove the offset and the step, then make i and j 1-based array indices
+               x0 = 1 + (i - xmin)/range
+               y0 = 1 + (j - ymin)/range
+
+               ! fill-in the output arrays
+               if (x0 .ge. 1 .and. x0 .le. size(pol_intensity, 1) .and. y0 .ge. 1 .and. y0 .le. size(pol_intensity, 2)) then
+                  pol_intensity(x0, y0) = intensity
+                  pol_angle(x0, y0) = angle
+
+                  total_count = total_count + 1
+                  ! print *, 'DownsizePolarization: x:', x0, 'y:', y0, 'intensity:', intensity, 'angle:', angle
+               end if
+            end if
+
+         end do
+      end do
+      !$omp END DO
+      !$omp END PARALLEL
+
+      print *, 'DownsizePolarization: total_count:', total_count, 'max_threads:', max_threads
+
+   end subroutine DownsizePolarization
+
    subroutine DownsizePolarizationSIMD(pixels, mask, width, height, pol_xmin, pol_ymin, pol_xmax, pol_ymax,&
    & pol_target, pol_intensity, pol_angle)
       implicit none
@@ -9017,11 +9155,11 @@ contains
       ymin = max(lbound(pixels, 2), pol_ymin)
       ymax = min(ubound(pixels, 2), pol_ymax)
 
-      print *, 'DownsizePolarization: xmin:', xmin, 'xmax:', xmax, 'ymin:', ymin, 'ymax:', ymax, 'max_planes:', max_planes
+      print *, 'DownsizePolarizationSIMD: xmin:', xmin, 'xmax:', xmax, 'ymin:', ymin, 'ymax:', ymax, 'max_planes:', max_planes
 
       c_stride = size(pixels, 1)
       c_offset = size(pixels, 1) * size(pixels, 2)
-      print *, 'DownsizePolarization: c_stride:', c_stride, 'c_offset:', c_offset
+      print *, 'DownsizePolarizationSIMD: c_stride:', c_stride, 'c_offset:', c_offset
 
       dimx = abs(xmax - xmin) + 1
       dimy = abs(ymax - ymin) + 1
@@ -9033,7 +9171,7 @@ contains
       min_count = nint(0.75*range**2)
 
       ! print the width X height of the input pixels and mask
-      print *, 'DownsizePolarization: width:', width, 'height:', height, 'dimx:', dimx, 'dimy:', dimy,&
+      print *, 'DownsizePolarizationSIMD: width:', width, 'height:', height, 'dimx:', dimx, 'dimy:', dimy,&
       & 'range:', range, 'min_count:', min_count
 
       ! allocate the output arrays
@@ -9059,7 +9197,7 @@ contains
       !$omp DO
       do j = ymin, ymax, range
          do i = xmin, xmax, range
-            ! print *, 'DownsizePolarization: i:', i, 'j:', j, 'range:', range, 'xmax:', xmax, 'ymax:', ymax
+            ! print *, 'DownsizePolarizationSIMD: i:', i, 'j:', j, 'range:', range, 'xmax:', xmax, 'ymax:', ymax
 
             ! SPMD C
             if (max_planes .gt. 3) then
@@ -9084,7 +9222,7 @@ contains
                   pol_angle(x0, y0) = angle
 
                   total_count = total_count + 1
-                  ! print *, 'DownsizePolarization: x:', x0, 'y:', y0, 'intensity:', intensity, 'angle:', angle
+                  ! print *, 'DownsizePolarizationSIMD: x:', x0, 'y:', y0, 'intensity:', intensity, 'angle:', angle
                end if
             end if
 
@@ -9093,7 +9231,7 @@ contains
       !$omp END DO
       !$omp END PARALLEL
 
-      print *, 'DownsizePolarization: total_count:', total_count, 'max_threads:', max_threads
+      print *, 'DownsizePolarizationSIMD: total_count:', total_count, 'max_threads:', max_threads
 
    end subroutine DownsizePolarizationSIMD
 
