@@ -8986,7 +8986,7 @@ contains
 
    end function DownsizeJSONPolarization
 
-   subroutine DownsizePolarization(pixels, mask, width, height, pol_xmin, pol_ymin, pol_xmax, pol_ymax,&
+   subroutine DownsizePolarizationSIMD(pixels, mask, width, height, pol_xmin, pol_ymin, pol_xmax, pol_ymax,&
    & pol_target, pol_intensity, pol_angle)
       implicit none
 
@@ -9095,7 +9095,7 @@ contains
 
       print *, 'DownsizePolarization: total_count:', total_count, 'max_threads:', max_threads
 
-   end subroutine DownsizePolarization
+   end subroutine DownsizePolarizationSIMD
 
    recursive subroutine viewport_request(user) BIND(C, name='viewport_request')
       use omp_lib
@@ -10046,7 +10046,7 @@ contains
       !$omp END PARALLEL
 
       !json = DownsizeJSONPolarization(pixels, mask, dimx, dimy, square)
-      call DownsizePolarization(pixels, mask, dimx, dimy, req%pol_xmin, req%pol_ymin, req%pol_xmax, req%pol_ymax,&
+      call DownsizePolarizationSIMD(pixels, mask, dimx, dimy, req%pol_xmin, req%pol_ymin, req%pol_xmax, req%pol_ymax,&
       & req%pol_target, intensity, angle)
 
       ! end the timer
