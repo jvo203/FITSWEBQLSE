@@ -1808,24 +1808,27 @@ export uniform int polarisation_simd_3(uniform float pixels[], uniform unsigned 
         varying int offset = jj*stride + ii ;
         varying unsigned int8 _mask = mask[offset] ;
 
-        // Stokes parameters
-        varying float tmpI = pixels[offset] ;
-        varying float tmpQ = pixels[offset + plane_offset] ;
-        varying float tmpU = pixels[offset + 2*plane_offset] ;
+        cif(_mask)
+        {
+          // Stokes parameters
+          varying float tmpI = pixels[offset] ;
+          varying float tmpQ = pixels[offset + plane_offset] ;
+          varying float tmpU = pixels[offset + 2*plane_offset] ;
 
-        // check if the Stokes parameters are in a valid range
-        varying bool valid_angle = abs(tmpU) > FLT_EPSILON || abs(tmpQ) > FLT_EPSILON ;
-        varying bool valid_intensity = abs(tmpI) > FLT_EPSILON ;
-        varying bool valid = valid_angle && valid_intensity && _mask;
+          // check if the Stokes parameters are in a valid range
+          varying bool valid_angle = abs(tmpU) > FLT_EPSILON || abs(tmpQ) > FLT_EPSILON ;
+          varying bool valid_intensity = abs(tmpI) > FLT_EPSILON ;
+          varying bool valid = valid_angle && valid_intensity;
 
-        // derived values (ignore the potential division by zero)
-        varying float tmp = sqrt(tmpQ * tmpQ + tmpU * tmpU)/tmpI ;
-        varying float tmpA = 0.5f * atan2(tmpU, tmpQ) ;
+          // derived values (ignore the potential division by zero)
+          varying float tmp = sqrt(tmpQ * tmpQ + tmpU * tmpU)/tmpI ;
+          varying float tmpA = 0.5f * atan2(tmpU, tmpQ) ;
             
-        // accumulate
-        intensity += valid ? tmp : 0.0f ;
-        angle += valid ? tmpA : 0.0f ;
-        count += valid ? 1 : 0 ;        
+          // accumulate
+          intensity += valid ? tmp : 0.0f ;
+          angle += valid ? tmpA : 0.0f ;
+          count += valid ? 1 : 0 ;
+        }
     }
     
     uniform float _intensity = reduce_add(intensity) ;
@@ -1862,25 +1865,28 @@ export uniform int polarisation_simd_4(uniform float pixels[], uniform unsigned 
         varying int offset = jj*stride + ii ;        
         varying unsigned int8 _mask = mask[offset] ;
                     
-        // Stokes parameters
-        varying float tmpI = pixels[offset] ;
-        varying float tmpQ = pixels[offset + plane_offset] ;
-        varying float tmpU = pixels[offset + 2*plane_offset] ;
-        varying float tmpV = pixels[offset + 3*plane_offset] ;
+        cif(_mask)
+        {
+          // Stokes parameters
+          varying float tmpI = pixels[offset] ;
+          varying float tmpQ = pixels[offset + plane_offset] ;
+          varying float tmpU = pixels[offset + 2*plane_offset] ;
+          varying float tmpV = pixels[offset + 3*plane_offset] ;
 
-        // check if the Stokes parameters are in a valid range
-        varying bool valid_angle = abs(tmpU) > FLT_EPSILON || abs(tmpQ) > FLT_EPSILON ;
-        varying bool valid_intensity = abs(tmpI) > FLT_EPSILON ;
-        varying bool valid = valid_angle && valid_intensity && _mask;
+          // check if the Stokes parameters are in a valid range
+          varying bool valid_angle = abs(tmpU) > FLT_EPSILON || abs(tmpQ) > FLT_EPSILON ;
+          varying bool valid_intensity = abs(tmpI) > FLT_EPSILON ;
+          varying bool valid = valid_angle && valid_intensity;
 
-        // derived values (ignore the potential division by zero)
-        varying float tmp = sqrt(tmpQ * tmpQ + tmpU * tmpU + tmpV * tmpV)/tmpI ;
-        varying float tmpA = 0.5f * atan2(tmpU, tmpQ) ;
+          // derived values (ignore the potential division by zero)
+          varying float tmp = sqrt(tmpQ * tmpQ + tmpU * tmpU + tmpV * tmpV)/tmpI ;
+          varying float tmpA = 0.5f * atan2(tmpU, tmpQ) ;
             
-        // accumulate
-        intensity += valid ? tmp : 0.0f ;
-        angle += valid ? tmpA : 0.0f ;
-        count += valid ? 1 : 0 ;        
+          // accumulate
+          intensity += valid ? tmp : 0.0f ;
+          angle += valid ? tmpA : 0.0f ;
+          count += valid ? 1 : 0 ;
+        }
     }
     
     uniform float _intensity = reduce_add(intensity) ;
