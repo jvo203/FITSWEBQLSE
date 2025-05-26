@@ -200,8 +200,8 @@ ifeq ($(UNAME_S),Darwin)
 	LIBS += -L${HOMEBREW_PREFIX}/opt/libpq/lib -L${HOMEBREW_PREFIX}/opt/bzip2/lib -L${HOMEBREW_PREFIX}/opt/gperftools/lib
 	# -L${HOMEBREW_PREFIX}/opt/libtar/lib
 
-	CC = ${HOMEBREW_PREFIX}/opt/gcc/bin/gcc-14
-	FORT = ${HOMEBREW_PREFIX}/opt/gcc/bin/gfortran-14
+	CC = ${HOMEBREW_PREFIX}/opt/gcc/bin/gcc-15
+	FORT = ${HOMEBREW_PREFIX}/opt/gcc/bin/gfortran-15
 	FLAGS = -march=native -Ofast -flto -fPIC -fno-finite-math-only -funroll-loops -ftree-vectorize -fopenmp	
 	# -mcmodel=large results in "error: invalid variant 'BLEAH'"
 	# Apple Silicon: -march=native conflicts between macOS-arm64 and macOS-x86_64 with Intel oneAPI
@@ -210,7 +210,7 @@ ifeq ($(UNAME_S),Darwin)
 	FLAGS := $(FLAGS) -std=f2018 -fall-intrinsics
 
 	# GCC FORTRAN runtime
-	LIBS += -L${HOMEBREW_PREFIX}/opt/gcc/lib/gcc/14 -lgfortran -lm -framework Accelerate
+	LIBS += -L${HOMEBREW_PREFIX}/opt/gcc/lib/gcc/15 -lgfortran -lm -framework Accelerate
 	
 	# disable the use of Intel IPP and MKL on macOS
 	# use the built-in macOS Accelerate instead but only on Apple Silicon (OK, Intel macOS too)
