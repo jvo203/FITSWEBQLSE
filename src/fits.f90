@@ -1267,6 +1267,16 @@ module fits
          type(C_PTR), value :: pv
       end subroutine write_composite_pv_diagram
 
+      ! void write_polarisation(int fd, int width, int height, int pol_target, const float *restrict intensity, const float *restrict angle, int precision)
+      subroutine write_polarisation(fd, width, height, pol_target, intensity, angle, precision)&
+      & BIND(C, name='write_polarisation')
+         use, intrinsic :: ISO_C_BINDING
+         implicit none
+
+         integer(c_int), value, intent(in) :: fd, width, height, pol_target, precision
+         type(C_PTR), value :: intensity, angle
+      end subroutine write_polarisation
+
       ! void write_ws_pv_diagram(websocket_session *session, const int *seq_id, const float *timestamp, int width, int height, int precision, const float *restrict pv, const float pmean, const float pstd, const float pmin, const float pmax, const int xmin, const int xmax, const double vmin, const double vmax, const int x1, const int y1, const int x2, const int y2);
       subroutine write_ws_pv_diagram(session, seq_id, timestamp, width, height, precision, pv, pmean, pstd, pmin, pmax,&
       & xmin, xmax, vmin, vmax, x1, y1, x2, y2) BIND(C, name='write_ws_pv_diagram')
@@ -6850,6 +6860,10 @@ contains
 
          ! obtain the polarisation intensity and angle
          call DownsizePolarizationSIMD(pixels, mask, img_width, img_height, xmin, ymin, xmax, ymax, 100, intensity, angle)
+
+         call write_polarisation(fd, img_width, img_height, 100, c_loc(intensity), c_loc(angle), precision)
+      else
+         call write_polarisation(fd, 0, 0, 0, c_null_ptr, c_null_ptr, 0)
       end if
 
       deallocate (pixels)
