@@ -7523,8 +7523,8 @@ void write_polarisation(int fd, int width, int height, int pol_target, const flo
         chunked_write(fd, (const char *)&pol_height, sizeof(pol_height));
         chunked_write(fd, (const char *)&pol_target32, sizeof(pol_target32));
         chunked_write(fd, (const char *)&intensity_len, sizeof(intensity_len));
-        chunked_write(fd, (const char *)&compressed_intensity, intensity_size);
         chunked_write(fd, (const char *)&angle_len, sizeof(angle_len));
+        chunked_write(fd, (const char *)&compressed_intensity, intensity_size);
         chunked_write(fd, (const char *)&compressed_angle, angle_size);
     }
 
