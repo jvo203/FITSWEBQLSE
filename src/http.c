@@ -163,6 +163,7 @@ void write_viewport_deprecated(int fd, int width, int height, const float *restr
 void write_image_spectrum(int fd, int no_planes, struct image_tone_mapping_type *tone, int width, int height, int precision, const float *restrict pixels, const bool *restrict mask);
 void write_pv_diagram(int fd, int width, int height, int precision, const float *restrict pv, const float pmean, const float pstd, const float pmin, const float pmax, const int xmin, const int xmax, const double vmin, const double vmax, const int x1, const int y1, const int x2, const int y2);
 void write_composite_pv_diagram(int fd, int width, int height, int precision, const float *restrict pv, const float *restrict pmean, const float *restrict pstd, const float *restrict pmin, const float *restrict pmax, const int xmin, const int xmax, const double vmin, const double vmax, const int x1, const int y1, const int x2, const int y2, int va_count);
+void write_polarisation(int fd, int width, int height, int pol_target, const float *restrict intensity, const float *restrict angle, int precision);
 
 void *stream_molecules(void *args);
 void *stream_atomic_lines(void *args);
@@ -7458,6 +7459,29 @@ void write_composite_pv_diagram(int fd, int width, int height, int precision, co
 
     // release the memory
     free(compressed_pv);
+}
+
+void write_polarisation(int fd, int width, int height, int pol_target, const float *restrict intensity, const float *restrict angle, int precision)
+{
+    if (intensity == NULL || angle == NULL)
+        goto null_polarisation;
+
+    uint32_t pol_width = width;
+    uint32_t pol_height = height;
+    uint32_t target = pol_target;
+
+null_polarisation:
+    // write out NULL polarisation data
+    pol_width = 0;
+    pol_height = 0;
+    target = 0;
+
+    // pol_width
+    chunked_write(fd, (const char *)&pol_width, sizeof(pol_width));
+    // pol_height
+    chunked_write(fd, (const char *)&pol_height, sizeof(pol_height));
+    // pol_target
+    chunked_write(fd, (const char *)&target, sizeof(target));
 }
 
 void split_wcs(const char *coord, char *key, char *value, const char *null_key)
