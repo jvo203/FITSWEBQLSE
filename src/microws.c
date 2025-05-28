@@ -3480,7 +3480,7 @@ void write_ws_polarisation(websocket_session *session, const int *seq_id, const 
         return;
     }
 
-    if (width <= 0 || height <= 0)
+    if (width <= 0 || height <= 0 || pol_target <= 0)
     {
         printf("[C] <write_ws_polarisation> invalid image data!\n");
         return;

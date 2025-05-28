@@ -164,6 +164,7 @@ void write_image_spectrum(int fd, int no_planes, struct image_tone_mapping_type 
 void write_pv_diagram(int fd, int width, int height, int precision, const float *restrict pv, const float pmean, const float pstd, const float pmin, const float pmax, const int xmin, const int xmax, const double vmin, const double vmax, const int x1, const int y1, const int x2, const int y2);
 void write_composite_pv_diagram(int fd, int width, int height, int precision, const float *restrict pv, const float *restrict pmean, const float *restrict pstd, const float *restrict pmin, const float *restrict pmax, const int xmin, const int xmax, const double vmin, const double vmax, const int x1, const int y1, const int x2, const int y2, int va_count);
 void write_polarisation(int fd, int width, int height, int pol_target, const float *restrict intensity, const float *restrict angle, int precision);
+extern uchar *zfp_compress_2d(const float *restrict array, int width, int height, int precision, size_t *zfpsize);
 
 void *stream_molecules(void *args);
 void *stream_atomic_lines(void *args);
@@ -7466,22 +7467,84 @@ void write_polarisation(int fd, int width, int height, int pol_target, const flo
     if (intensity == NULL || angle == NULL)
         goto null_polarisation;
 
+    if (width <= 0 || height <= 0 || pol_target <= 0)
+        goto null_polarisation;
+
     uint32_t pol_width = width;
     uint32_t pol_height = height;
-    uint32_t target = pol_target;
+    uint32_t pol_target32 = pol_target;
+
+    uchar *restrict compressed_intensity = NULL;
+    uchar *restrict compressed_angle = NULL;
+    size_t intensity_size = 0;
+    size_t angle_size = 0;
+
+    // use OpenMP tasks
+#pragma omp parallel num_threads(2)
+    {
+#pragma omp single nowait
+        {
+#pragma omp task
+            {
+                // compress 2D intensity with ZFP
+                compressed_intensity = zfp_compress_2d(intensity, width, height, precision, &intensity_size);
+                if (compressed_intensity == NULL)
+                    printf("[C] a NULL compressed_intensity buffer!\n");
+            }
+        }
+
+#pragma omp single nowait
+        {
+#pragma omp task
+            {
+                // compress 2D angle with ZFP
+                compressed_angle = zfp_compress_2d(angle, width, height, precision, &angle_size);
+                if (compressed_angle == NULL)
+                    printf("[C] a NULL compressed_angle buffer!\n");
+            }
+        }
+    }
+
+    if (compressed_intensity == NULL || compressed_angle == NULL)
+    {
+        free(compressed_intensity);
+        free(compressed_angle);
+
+        printf("[C] <write_polarisation> compression failed!\n");
+        goto null_polarisation;
+    }
+
+    if (intensity_size > 0 && angle_size > 0)
+    {
+        // transmit the data
+        chunked_write(fd, (const char *)&pol_width, sizeof(pol_width));
+        chunked_write(fd, (const char *)&pol_height, sizeof(pol_height));
+        chunked_write(fd, (const char *)&pol_target32, sizeof(pol_target32));
+        chunked_write(fd, (const char *)&compressed_intensity, intensity_size);
+        chunked_write(fd, (const char *)&compressed_angle, angle_size);
+    }
+
+    // finally free the compressed buffers
+    if (compressed_intensity != NULL)
+        free(compressed_intensity);
+
+    if (compressed_angle != NULL)
+        free(compressed_angle);
+
+    return;
 
 null_polarisation:
     // write out NULL polarisation data
     pol_width = 0;
     pol_height = 0;
-    target = 0;
+    pol_target32 = 0;
 
     // pol_width
     chunked_write(fd, (const char *)&pol_width, sizeof(pol_width));
     // pol_height
     chunked_write(fd, (const char *)&pol_height, sizeof(pol_height));
     // pol_target
-    chunked_write(fd, (const char *)&target, sizeof(target));
+    chunked_write(fd, (const char *)&pol_target32, sizeof(pol_target32));
 }
 
 void split_wcs(const char *coord, char *key, char *value, const char *null_key)
