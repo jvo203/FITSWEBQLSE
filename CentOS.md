@@ -48,7 +48,7 @@ gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.
     
     wget https://bitbucket.org/multicoreware/x265_git/downloads/x265_4.1.tar.gz
     tar zxvf x265_4.1.tar.gz
-    cd x265_4.1    
+    cd x265_4.1
 
     mkdir -p build
     cd build
