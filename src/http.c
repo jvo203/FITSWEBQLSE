@@ -7470,10 +7470,6 @@ void write_polarisation(int fd, int width, int height, int pol_target, const flo
     if (width <= 0 || height <= 0 || pol_target <= 0)
         goto null_polarisation;
 
-    uint32_t pol_width = width;
-    uint32_t pol_height = height;
-    uint32_t pol_target32 = pol_target;
-
     uchar *restrict compressed_intensity = NULL;
     uchar *restrict compressed_angle = NULL;
     size_t intensity_size = 0;
@@ -7514,13 +7510,21 @@ void write_polarisation(int fd, int width, int height, int pol_target, const flo
         goto null_polarisation;
     }
 
+    uint32_t pol_width = width;
+    uint32_t pol_height = height;
+    uint32_t pol_target32 = pol_target;
+    uint32_t intensity_len = intensity_size;
+    uint32_t angle_len = angle_size;
+
     if (intensity_size > 0 && angle_size > 0)
     {
         // transmit the data
         chunked_write(fd, (const char *)&pol_width, sizeof(pol_width));
         chunked_write(fd, (const char *)&pol_height, sizeof(pol_height));
         chunked_write(fd, (const char *)&pol_target32, sizeof(pol_target32));
+        chunked_write(fd, (const char *)&intensity_len, sizeof(intensity_len));
         chunked_write(fd, (const char *)&compressed_intensity, intensity_size);
+        chunked_write(fd, (const char *)&angle_len, sizeof(angle_len));
         chunked_write(fd, (const char *)&compressed_angle, angle_size);
     }
 
@@ -7538,6 +7542,8 @@ null_polarisation:
     pol_width = 0;
     pol_height = 0;
     pol_target32 = 0;
+    intensity_len = 0;
+    angle_len = 0;
 
     // pol_width
     chunked_write(fd, (const char *)&pol_width, sizeof(pol_width));
@@ -7545,6 +7551,10 @@ null_polarisation:
     chunked_write(fd, (const char *)&pol_height, sizeof(pol_height));
     // pol_target
     chunked_write(fd, (const char *)&pol_target32, sizeof(pol_target32));
+    // intensity_len
+    chunked_write(fd, (const char *)&intensity_len, sizeof(intensity_len));
+    // angle_len
+    chunked_write(fd, (const char *)&angle_len, sizeof(angle_len));
 }
 
 void split_wcs(const char *coord, char *key, char *value, const char *null_key)
