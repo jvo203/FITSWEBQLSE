@@ -6859,12 +6859,12 @@ contains
          call inherent_image_dimensions_from_mask(mask, inner_width, inner_height, xmin, xmax, ymin, ymax)
 
          ! obtain the polarisation intensity and angle
-         call DownsizePolarizationSIMD(pixels, mask, img_width, img_height, xmin, ymin, xmax, ymax, 100, intensity, angle)
+         call DownsizePolarizationSIMD(pixels, mask, img_width, img_height, xmin, ymin, xmax, ymax, 50, intensity, angle)
          ! print the last line for intensity and angle
          print *, 'intensity:', intensity
          print *, 'polarisation intensity:', size(intensity), 'angle:', size(angle)
 
-         call write_polarisation(fd, size(intensity, 1), size(intensity, 2), 100, c_loc(intensity), c_loc(angle), precision)
+         call write_polarisation(fd, size(intensity, 1), size(intensity, 2), 50, c_loc(intensity), c_loc(angle), precision)
       else
          call write_polarisation(fd, 0, 0, 0, c_null_ptr, c_null_ptr, 0)
       end if
