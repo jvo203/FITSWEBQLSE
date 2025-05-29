@@ -17053,7 +17053,7 @@ function videoTimeout(freq) {
             frame: freq,
             plane: previous_plane,
             key: true,
-            pol_target: 75,
+            pol_target: 50,
             fill: fill,
             ref_freq: RESTFRQ,
             fps: vidFPS,
