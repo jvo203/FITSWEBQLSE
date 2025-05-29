@@ -6860,8 +6860,11 @@ contains
 
          ! obtain the polarisation intensity and angle
          call DownsizePolarizationSIMD(pixels, mask, img_width, img_height, xmin, ymin, xmax, ymax, 100, intensity, angle)
+         ! print the last line for intensity and angle
+         print *, 'intensity:', intensity
+         print *, 'polarisation intensity:', size(intensity), 'angle:', size(angle)
 
-         call write_polarisation(fd, img_width, img_height, 100, c_loc(intensity), c_loc(angle), precision)
+         call write_polarisation(fd, size(intensity, 1), size(intensity, 2), 100, c_loc(intensity), c_loc(angle), precision)
       else
          call write_polarisation(fd, 0, 0, 0, c_null_ptr, c_null_ptr, 0)
       end if
