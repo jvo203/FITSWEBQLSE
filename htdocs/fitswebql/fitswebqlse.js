@@ -16182,12 +16182,16 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                     var intensity = new Uint8Array(received_msg, offset, intensity_len);
                                     offset += intensity_len;
                                     console.log("FITS polarisation intensity length:", intensity_len);
+                                } else {
+                                    has_polarisation = false;
                                 }
 
                                 if (angle_len > 0) {
                                     var angle = new Uint8Array(received_msg, offset, angle_len);
                                     offset += angle_len;
                                     console.log("FITS polarisation angle length:", angle_len);
+                                } else {
+                                    has_polarisation = false;
                                 }
 
                             } catch (err) {
