@@ -16219,6 +16219,8 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                 var angle_len = dv.getUint32(offset, endianness);
                                 offset += 4;
 
+                                console.log("FITS polarisation width:", pol_width, "height:", pol_height, "target:", pol_target);
+
                                 if (intensity_len > 0) {
                                     var frame_intensity = new Uint8Array(received_msg, offset, intensity_len);
                                     offset += intensity_len;
