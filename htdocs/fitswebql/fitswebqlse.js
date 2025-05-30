@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-05-30.1";
+    return "JS2025-05-30.2";
 }
 
 function uuidv4() {
@@ -6272,26 +6272,21 @@ async function open_websocket_connection(_datasetId, index) {
                         var frame = new Uint8Array(received_msg, offset);
                         // console.log("computed:", computed, "spectrum length:", spectrum_len, "frame.length:", frame.length);
 
+                        // ZFP decoder part
                         waitForModuleReady().then(() => {
-                            // ZFP decoder part
-                            WASM.ready
-                                .then(_ => {
-                                    let start = performance.now();
-                                    var res = WASM.decompressZFPspectrum(1, spectrum_len, frame);
-                                    const spectrum = WASM.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
-                                    let elapsed = Math.round(performance.now() - start);
+                            let start = performance.now();
+                            var res = WASM.decompressZFPspectrum(1, spectrum_len, frame);
+                            const spectrum = WASM.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
+                            let elapsed = Math.round(performance.now() - start);
 
-                                    // console.log("spectrum size: ", spectrum.length, "elapsed: ", elapsed, "[ms]");
+                            // console.log("spectrum size: ", spectrum.length, "elapsed: ", elapsed, "[ms]");
 
-                                    if (spectrum.length > 0) {
-                                        if (!windowLeft) {
-                                            spectrum_stack[index - 1].push({ spectrum: spectrum, id: recv_seq_id });
-                                            //console.log("index:", index, "spectrum_stack length:", spectrum_stack[index - 1].length);
-                                        };
-                                    }
-
-                                })
-                                .catch(e => console.error(e));
+                            if (spectrum.length > 0) {
+                                if (!windowLeft) {
+                                    spectrum_stack[index - 1].push({ spectrum: spectrum, id: recv_seq_id });
+                                    //console.log("index:", index, "spectrum_stack length:", spectrum_stack[index - 1].length);
+                                };
+                            }
                         }).catch(e => console.error(e));
 
                         //console.log("[ws] computed = " + computed.toFixed(1) + " [ms]" + " length: " + length + " spectrum length:" + spectrum.length + " spectrum: " + spectrum);
@@ -6325,29 +6320,25 @@ async function open_websocket_connection(_datasetId, index) {
                         var frame_mask = new Uint8Array(received_msg, offset, mask_length);
                         offset += mask_length;
 
-                        // WASM decoder part
-                        WASM.ready
-                            .then(_ => {
-                                {
-                                    //console.log("processing an HDR viewport");
-                                    let start = performance.now();
+                        // WASM decoder part                        
+                        {
+                            //console.log("processing an HDR viewport");
+                            let start = performance.now();
 
-                                    // decompressZFP returns std::vector<float>
-                                    // decompressZFPimage returns Float32Array but emscripten::typed_memory_view is buggy
-                                    var res = WASM.decompressZFPimage(view_width, view_height, 1, frame_pixels);
-                                    const pixels = WASM.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
+                            // decompressZFP returns std::vector<float>
+                            // decompressZFPimage returns Float32Array but emscripten::typed_memory_view is buggy
+                            var res = WASM.decompressZFPimage(view_width, view_height, 1, frame_pixels);
+                            const pixels = WASM.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
 
-                                    var res = WASM.decompressLZ4mask(view_width, view_height, frame_mask);
-                                    const alpha = WASM.HEAPU8.slice(res[0], res[0] + res[1]);
+                            var res = WASM.decompressLZ4mask(view_width, view_height, frame_mask);
+                            const alpha = WASM.HEAPU8.slice(res[0], res[0] + res[1]);
 
-                                    let elapsed = Math.round(performance.now() - start);
+                            let elapsed = Math.round(performance.now() - start);
 
-                                    // console.log("viewport width: ", view_width, "height: ", view_height, "previous_plane", previous_plane, "elapsed: ", elapsed, "[ms]");
+                            // console.log("viewport width: ", view_width, "height: ", view_height, "previous_plane", previous_plane, "elapsed: ", elapsed, "[ms]");
 
-                                    process_hdr_viewport(view_width, view_height, pixels, alpha, index);
-                                }
-                            })
-                            .catch(e => console.error(e));
+                            process_hdr_viewport(view_width, view_height, pixels, alpha, index);
+                        }
 
                         return;
                     }
@@ -6549,81 +6540,76 @@ async function open_websocket_connection(_datasetId, index) {
 
                         var frame = new Uint8Array(received_msg, offset);
 
+                        // ZFP decoder part
                         waitForModuleReady().then(() => {
-                            // ZFP decoder part
-                            WASM.ready
-                                .then(_ => {
-                                    console.log("FITS spectrum length:", spectrum_len);
-                                    var res = WASM.decompressZFPspectrum(plane_count, spectrum_len, frame);
-                                    const spectrum = WASM.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
+                            console.log("FITS spectrum length:", spectrum_len);
+                            var res = WASM.decompressZFPspectrum(plane_count, spectrum_len, frame);
+                            const spectrum = WASM.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
 
-                                    // console.log("spectrum size: ", spectrum.length, spectrum, "elapsed: ", elapsed, "[ms]");
+                            // console.log("spectrum size: ", spectrum.length, spectrum, "elapsed: ", elapsed, "[ms]");
 
-                                    if (spectrum.length > 0) {
-                                        // attach the spectrum as either "mean" or "integrated"
-                                        //insert a spectrum object to the spectrumContainer at <index-1>
+                            if (spectrum.length > 0) {
+                                // attach the spectrum as either "mean" or "integrated"
+                                //insert a spectrum object to the spectrumContainer at <index-1>
 
-                                        if (plane_count > 1) {
-                                            for (let i = 0; i < plane_count; i++) {
-                                                // slice the spectrum into <spectrum_len> chunks
-                                                let spectrum_i = spectrum.slice(i * spectrum_len, (i + 1) * spectrum_len);
+                                if (plane_count > 1) {
+                                    for (let i = 0; i < plane_count; i++) {
+                                        // slice the spectrum into <spectrum_len> chunks
+                                        let spectrum_i = spectrum.slice(i * spectrum_len, (i + 1) * spectrum_len);
 
-                                                fitsContainer[i].depth = spectrum_i.length;
+                                        fitsContainer[i].depth = spectrum_i.length;
 
-                                                if (intensity_mode == "mean") {
-                                                    fitsContainer[i].mean_spectrum = spectrum_i;
-                                                }
-
-                                                if (intensity_mode == "integrated") {
-                                                    fitsContainer[i].integrated_spectrum = spectrum_i;
-                                                }
-                                            }
-                                        } else {
-                                            fitsContainer[index - 1].depth = spectrum.length;
-
-                                            if (intensity_mode == "mean") {
-                                                fitsContainer[index - 1].mean_spectrum = spectrum;
-                                                mean_spectrumContainer[index - 1] = spectrum;
-                                            }
-
-                                            if (intensity_mode == "integrated") {
-                                                fitsContainer[index - 1].integrated_spectrum = spectrum;
-                                                integrated_spectrumContainer[index - 1] = spectrum;
-                                            }
+                                        if (intensity_mode == "mean") {
+                                            fitsContainer[i].mean_spectrum = spectrum_i;
                                         }
 
-                                        spectrum_count++;
-
-                                        if (va_count == 1) {
-                                            setup_axes();
-
-                                            var index = parseInt(document.getElementById('intensity_plane').value);
-                                            let fitsData = fitsContainer[index - 1];
-
-                                            //plot_spectrum([spectrum]);
-                                            if (intensity_mode == "mean") {
-                                                plot_spectrum([fitsData.mean_spectrum]);
-                                            }
-
-                                            if (intensity_mode == "integrated") {
-                                                plot_spectrum([fitsData.integrated_spectrum]);
-                                            }
-                                        }
-                                        else {
-                                            if (spectrum_count == va_count) {
-                                                setup_axes();
-
-                                                if (intensity_mode == "mean")
-                                                    plot_spectrum(mean_spectrumContainer);
-
-                                                if (intensity_mode == "integrated")
-                                                    plot_spectrum(integrated_spectrumContainer);
-                                            }
+                                        if (intensity_mode == "integrated") {
+                                            fitsContainer[i].integrated_spectrum = spectrum_i;
                                         }
                                     }
+                                } else {
+                                    fitsContainer[index - 1].depth = spectrum.length;
 
-                                })
-                                .catch(e => console.error(e));
+                                    if (intensity_mode == "mean") {
+                                        fitsContainer[index - 1].mean_spectrum = spectrum;
+                                        mean_spectrumContainer[index - 1] = spectrum;
+                                    }
+
+                                    if (intensity_mode == "integrated") {
+                                        fitsContainer[index - 1].integrated_spectrum = spectrum;
+                                        integrated_spectrumContainer[index - 1] = spectrum;
+                                    }
+                                }
+
+                                spectrum_count++;
+
+                                if (va_count == 1) {
+                                    setup_axes();
+
+                                    var index = parseInt(document.getElementById('intensity_plane').value);
+                                    let fitsData = fitsContainer[index - 1];
+
+                                    //plot_spectrum([spectrum]);
+                                    if (intensity_mode == "mean") {
+                                        plot_spectrum([fitsData.mean_spectrum]);
+                                    }
+
+                                    if (intensity_mode == "integrated") {
+                                        plot_spectrum([fitsData.integrated_spectrum]);
+                                    }
+                                }
+                                else {
+                                    if (spectrum_count == va_count) {
+                                        setup_axes();
+
+                                        if (intensity_mode == "mean")
+                                            plot_spectrum(mean_spectrumContainer);
+
+                                        if (intensity_mode == "integrated")
+                                            plot_spectrum(integrated_spectrumContainer);
+                                    }
+                                }
+                            }
                         }).catch(e => console.error(e));
 
                         return;
@@ -7051,37 +7037,33 @@ async function open_websocket_connection(_datasetId, index) {
                         console.log("HDS X-Y spectra: xcomp_len:", xcomp_len, "xmask_len:", xmask_len, "ycomp_len:", ycomp_len, "ymask_len:", ymask_len);
                         console.log("HDS X-Y spectra: X:", X, "Y:", Y, "THETA:", THETA);*/
 
+                        // ZFP decoder part
                         waitForModuleReady().then(() => {
-                            // ZFP decoder part
-                            WASM.ready
-                                .then(_ => {
-                                    //console.log("processing HDS X-Y spectra");
-                                    let start = performance.now();
+                            //console.log("processing HDS X-Y spectra");
+                            let start = performance.now();
 
-                                    var res = WASM.decompressZFPspectrum(1, xlen, xcomp);
-                                    const xspectrum = WASM.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
+                            var res = WASM.decompressZFPspectrum(1, xlen, xcomp);
+                            const xspectrum = WASM.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
 
-                                    var res = WASM.decompressLZ4mask(xlen, 1, xframe);
-                                    const xmask = WASM.HEAPU8.slice(res[0], res[0] + res[1]);
+                            var res = WASM.decompressLZ4mask(xlen, 1, xframe);
+                            const xmask = WASM.HEAPU8.slice(res[0], res[0] + res[1]);
 
-                                    // console.log("HDS X-Y spectra: xspectrum:", xspectrum, "xmask:", xmask);
+                            // console.log("HDS X-Y spectra: xspectrum:", xspectrum, "xmask:", xmask);
 
-                                    var res = WASM.decompressZFPspectrum(1, ylen, ycomp);
-                                    const yspectrum = WASM.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
+                            var res = WASM.decompressZFPspectrum(1, ylen, ycomp);
+                            const yspectrum = WASM.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
 
-                                    var res = WASM.decompressLZ4mask(ylen, 1, yframe);
-                                    const ymask = WASM.HEAPU8.slice(res[0], res[0] + res[1]);
+                            var res = WASM.decompressLZ4mask(ylen, 1, yframe);
+                            const ymask = WASM.HEAPU8.slice(res[0], res[0] + res[1]);
 
-                                    // console.log("HDS X-Y spectra: yspectrum:", yspectrum, "ymask:", ymask);
+                            // console.log("HDS X-Y spectra: yspectrum:", yspectrum, "ymask:", ymask);
 
-                                    let elapsed = Math.round(performance.now() - start);
-                                    // console.log("HDS X-Y spectra: elapsed: ", elapsed, "[ms]");
+                            let elapsed = Math.round(performance.now() - start);
+                            // console.log("HDS X-Y spectra: elapsed: ", elapsed, "[ms]");
 
-                                    if (!windowLeft) {
-                                        spectrum_stack[index - 1].push({ xspectrum: xspectrum, xmask: xmask, yspectrum: yspectrum, ymask: ymask, x0: X - 1, y0: Y - 1, angle: THETA, id: recv_seq_id }); // -1 to convert from 1-based to 0-based
-                                    };
-                                })
-                                .catch(e => console.error(e));
+                            if (!windowLeft) {
+                                spectrum_stack[index - 1].push({ xspectrum: xspectrum, xmask: xmask, yspectrum: yspectrum, ymask: ymask, x0: X - 1, y0: Y - 1, angle: THETA, id: recv_seq_id }); // -1 to convert from 1-based to 0-based
+                            };
                         }).catch(e => console.error(e));
 
                         return;
@@ -16092,590 +16074,583 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
 
             setup_window_timeout();
 
+            // wait for WebAssembly to get compiled
             Promise.all([waitForModuleReady(), resGLSL]).then(async _ => {
-                // wait for WebAssembly to get compiled
-                WASM.ready
-                    .then(async _ => {
-                        document.getElementById('welcome').style.display = "none";
-                        //console.log('hiding the loading progress, style =', document.getElementById('welcome').style.display);
+                document.getElementById('welcome').style.display = "none";
+                //console.log('hiding the loading progress, style =', document.getElementById('welcome').style.display);
 
-                        var received_msg = xmlhttp.response;
+                var received_msg = xmlhttp.response;
 
-                        if (received_msg.byteLength == 0) {
-                            hide_hourglass();
-                            show_not_found();
-                            return;
+                if (received_msg.byteLength == 0) {
+                    hide_hourglass();
+                    show_not_found();
+                    return;
+                }
+
+                if (received_msg instanceof ArrayBuffer) {
+                    var fitsHeader, mean_spectrum, integrated_spectrum;
+
+                    var dv = new DataView(received_msg);
+                    //console.log("FITSImage dataview byte length: ", dv.byteLength);
+
+                    var offset = 0;
+                    plane_count = dv.getUint32(offset, endianness);
+                    offset += 4;
+
+                    // re-allocate the container arrays
+                    if (plane_count > 1) {
+                        fitsContainer = new Array(plane_count);
+                        imageContainer = new Array(plane_count);
+
+                        for (let i = 0; i < plane_count; i++) {
+                            fitsContainer[i] = null;
+                            imageContainer[i] = null;
+                        }
+                    }
+
+                    var tone_array = new Array(plane_count);
+
+                    for (let i = 0; i < plane_count; i++) {
+                        let tone_mapping = new Object();
+                        let p = 0.5;
+                        tone_mapping.lmin = Math.log(p);
+                        tone_mapping.lmax = Math.log(p + 1.0);
+
+                        let str_length = dv.getUint32(offset, endianness);
+                        offset += 4;
+
+                        let flux = new Uint8Array(received_msg, offset, str_length);
+                        tone_mapping.flux = (new TextDecoder("utf-8").decode(flux)).trim();
+                        offset += str_length;
+
+                        tone_mapping.min = dv.getFloat32(offset, endianness);
+                        offset += 4;
+
+                        tone_mapping.max = dv.getFloat32(offset, endianness);
+                        offset += 4;
+
+                        tone_mapping.median = dv.getFloat32(offset, endianness);
+                        offset += 4;
+
+                        tone_mapping.sensitivity = dv.getFloat32(offset, endianness);
+                        offset += 4;
+
+                        tone_mapping.ratio_sensitivity = dv.getFloat32(offset, endianness);
+                        offset += 4;
+
+                        tone_mapping.white = dv.getFloat32(offset, endianness);
+                        offset += 4;
+
+                        tone_mapping.black = dv.getFloat32(offset, endianness);
+                        offset += 4;
+
+                        if (tone_mapping.flux == "legacy") {
+                            tone_mapping.black = tone_mapping.min;
+                            tone_mapping.white = tone_mapping.max;
                         }
 
-                        if (received_msg instanceof ArrayBuffer) {
-                            var fitsHeader, mean_spectrum, integrated_spectrum;
+                        console.log(tone_mapping);
 
-                            var dv = new DataView(received_msg);
-                            //console.log("FITSImage dataview byte length: ", dv.byteLength);
+                        tone_array[i] = tone_mapping;
+                    }
 
-                            var offset = 0;
-                            plane_count = dv.getUint32(offset, endianness);
-                            offset += 4;
+                    console.log(tone_array);
 
-                            // re-allocate the container arrays
-                            if (plane_count > 1) {
-                                fitsContainer = new Array(plane_count);
-                                imageContainer = new Array(plane_count);
+                    var img_width = dv.getUint32(offset, endianness);
+                    offset += 4;
 
-                                for (let i = 0; i < plane_count; i++) {
-                                    fitsContainer[i] = null;
-                                    imageContainer[i] = null;
-                                }
+                    var img_height = dv.getUint32(offset, endianness);
+                    offset += 4;
+
+                    // console.log('img_width:', img_width, 'img_height:', img_height);
+
+                    var pixels_length = dv.getUint32(offset, endianness);
+                    offset += 4;
+
+                    //console.log('pixels length:', pixels_length);
+
+                    var frame_pixels = new Uint8Array(received_msg, offset, pixels_length);
+                    offset += pixels_length;
+
+                    var mask_length = dv.getUint32(offset, endianness);
+                    offset += 4;
+
+                    //console.log('mask length:', mask_length);
+
+                    var frame_mask = new Uint8Array(received_msg, offset, mask_length);
+                    offset += mask_length;
+
+                    // optional polarisation
+                    var has_polarisation = true;
+
+                    try {
+                        var pol_width = dv.getUint32(offset, endianness);
+                        offset += 4;
+
+                        var pol_height = dv.getUint32(offset, endianness);
+                        offset += 4;
+
+                        var pol_target = dv.getUint32(offset, endianness);
+                        offset += 4;
+
+                        var intensity_len = dv.getUint32(offset, endianness);
+                        offset += 4;
+
+                        var angle_len = dv.getUint32(offset, endianness);
+                        offset += 4;
+
+                        console.log("FITS polarisation width:", pol_width, "height:", pol_height, "target:", pol_target);
+
+                        if (intensity_len > 0) {
+                            var frame_intensity = new Uint8Array(received_msg, offset, intensity_len);
+                            offset += intensity_len;
+                            console.log("FITS polarisation intensity length:", intensity_len);
+                        } else {
+                            has_polarisation = false;
+                        }
+
+                        if (angle_len > 0) {
+                            var frame_angle = new Uint8Array(received_msg, offset, angle_len);
+                            offset += angle_len;
+                            console.log("FITS polarisation angle length:", angle_len);
+                        } else {
+                            has_polarisation = false;
+                        }
+
+                    } catch (err) {
+                        has_polarisation = false;
+                    }
+
+                    var has_json = true;
+
+                    try {
+                        var json_len = dv.getUint32(offset, endianness);
+                        offset += 4;
+
+                        var buffer_len = dv.getUint32(offset, endianness);
+                        offset += 4;
+
+                        var json = new Uint8Array(received_msg, offset, buffer_len);
+                        offset += buffer_len;
+                        //console.log("FITS json length:", json_len);
+                    } catch (err) {
+                        has_json = false;
+                    }
+
+                    var has_header = true;
+
+                    try {
+                        var header_len = dv.getUint32(offset, endianness);
+                        offset += 4;
+
+                        var buffer_len = dv.getUint32(offset, endianness);
+                        offset += 4;
+
+                        var header = new Uint8Array(received_msg, offset, buffer_len);
+                        offset += buffer_len;
+                        //console.log("FITS header length:", header_len);
+                    } catch (err) {
+                        has_header = false;
+                    }
+
+                    var mean_spectrum;
+                    var has_mean_spectrum = true;
+
+                    try {
+                        var spectrum_len = dv.getUint32(offset, endianness);
+                        offset += 4;
+
+                        var buffer_len = dv.getUint32(offset, endianness);
+                        offset += 4;
+
+                        var buffer = new Uint8Array(received_msg, offset, buffer_len);
+                        offset += buffer_len;
+                        console.log("FITS mean spectrum length:", spectrum_len);
+
+                        // ZFP decoder part                           
+                        let start = performance.now();
+                        var res = WASM.decompressZFPspectrum(plane_count, spectrum_len, buffer);
+                        mean_spectrum = WASM.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
+                        let elapsed = Math.round(performance.now() - start);
+                        console.log("mean_spectrum: ", mean_spectrum, "elapsed: ", elapsed, "[ms]");
+                    } catch (err) {
+                        has_mean_spectrum = false;
+                    }
+
+                    var integrated_spectrum;
+                    var has_integrated_spectrum = true;
+
+                    try {
+                        var spectrum_len = dv.getUint32(offset, endianness);
+                        offset += 4;
+
+                        var buffer_len = dv.getUint32(offset, endianness);
+                        offset += 4;
+
+                        var buffer = new Uint8Array(received_msg, offset, buffer_len);
+                        offset += buffer_len;
+                        console.log("FITS integrated spectrum length:", spectrum_len);
+
+                        // ZFP decoder part                              
+                        let start = performance.now();
+                        var res = WASM.decompressZFPspectrum(plane_count, spectrum_len, buffer);
+                        integrated_spectrum = WASM.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
+                        let elapsed = Math.round(performance.now() - start);
+                        console.log("integrated_spectrum: ", integrated_spectrum, "elapsed: ", elapsed, "[ms]");
+                    } catch (err) {
+                        has_integrated_spectrum = false;
+                    }
+
+                    if (has_header) {
+                        // decompress the FITS data etc.
+                        let LZ4 = require('lz4');
+
+                        let uncompressed = new Uint8Array(header_len);
+                        let uncompressedSize = LZ4.decodeBlock(header, uncompressed);
+                        uncompressed = uncompressed.slice(0, uncompressedSize);
+
+                        try {
+                            fitsHeader = new TextDecoder().decode(uncompressed);
+                        }
+                        catch (err) {
+                            fitsHeader = '';
+                            for (var i = 0; i < uncompressed.length; i++)
+                                fitsHeader += String.fromCharCode(uncompressed[i]);
+                        };
+
+                        // console.log(fitsHeader);
+                    }
+
+                    if (has_json) {
+                        // decompress the FITS data etc.
+                        let LZ4 = require('lz4');
+
+                        let uncompressed = new Uint8Array(json_len);
+                        let uncompressedSize = LZ4.decodeBlock(json, uncompressed);
+                        uncompressed = uncompressed.slice(0, uncompressedSize);
+
+                        var fitsData;
+
+                        try {
+                            fitsData = new TextDecoder().decode(uncompressed);
+                        }
+                        catch (err) {
+                            fitsData = '';
+                            for (var i = 0; i < uncompressed.length; i++)
+                                fitsData += String.fromCharCode(uncompressed[i]);
+                        };
+
+                        //console.log(fitsData);
+                        fitsData = JSON.parse(fitsData);
+
+                        // replace the dummy FITS header
+                        if (has_header) {
+                            fitsData.HEADER = fitsHeader;
+                        } else {
+                            fitsData.HEADER = 'N/A';
+                        };
+
+                        // console.log(fitsData);
+
+                        // handle the fitsData part
+                        fitsContainer[index - 1] = fitsData;
+                        optical_view = fitsData.is_optical;
+                        spectrum_view = fitsData.is_spectrum;
+
+                        if (!spectrum_view) {
+                            d3.select("#atomicMenu").remove();
+                        }
+
+                        if (optical_view) {
+                            d3.select("#splatMenu").remove();
+                        }
+
+                        if (!isLocal) {
+                            let filesize = fitsData.filesize;
+                            let strFileSize = numeral(filesize).format('0.0ib');
+                            d3.select("#FITS").html("full download (" + strFileSize + ")");
+                        }
+
+                        {
+                            frame_reference_unit(index);
+
+                            //rescale CRVAL3 and CDELT3
+                            fitsData.CRVAL3 *= frame_multiplier;
+                            fitsData.CDELT3 *= frame_multiplier;
+
+                            frame_reference_type(index);
+
+                            //console.log("has_freq:", has_frequency_info, "has_vel:", has_velocity_info);
+                        }
+
+                        if (plane_count > 1) {
+                            let nbins = fitsData.histogram_width;
+                            let nplanes = fitsData.histogram_height;
+                            let histogram_array = fitsData.histogram_array;
+
+                            // cross-check histogram_height and plane_count, throw an error if they are not equal
+                            if (nplanes != plane_count) {
+                                throw new Error("histogram_height != plane_count");
                             }
 
-                            var tone_array = new Array(plane_count);
-
+                            // deep-copy the fitsData object for each plane, adding respective histograms                                    
                             for (let i = 0; i < plane_count; i++) {
-                                let tone_mapping = new Object();
-                                let p = 0.5;
-                                tone_mapping.lmin = Math.log(p);
-                                tone_mapping.lmax = Math.log(p + 1.0);
+                                fitsContainer[i] = JSON.parse(JSON.stringify(fitsData));
 
-                                let str_length = dv.getUint32(offset, endianness);
-                                offset += 4;
+                                // extract the histogram_array for each plane
+                                fitsContainer[i].histogram = histogram_array.slice(i * nbins, (i + 1) * nbins);
+                                fitsContainer[i].histogram_array = null;
 
-                                let flux = new Uint8Array(received_msg, offset, str_length);
-                                tone_mapping.flux = (new TextDecoder("utf-8").decode(flux)).trim();
-                                offset += str_length;
-
-                                tone_mapping.min = dv.getFloat32(offset, endianness);
-                                offset += 4;
-
-                                tone_mapping.max = dv.getFloat32(offset, endianness);
-                                offset += 4;
-
-                                tone_mapping.median = dv.getFloat32(offset, endianness);
-                                offset += 4;
-
-                                tone_mapping.sensitivity = dv.getFloat32(offset, endianness);
-                                offset += 4;
-
-                                tone_mapping.ratio_sensitivity = dv.getFloat32(offset, endianness);
-                                offset += 4;
-
-                                tone_mapping.white = dv.getFloat32(offset, endianness);
-                                offset += 4;
-
-                                tone_mapping.black = dv.getFloat32(offset, endianness);
-                                offset += 4;
-
-                                if (tone_mapping.flux == "legacy") {
-                                    tone_mapping.black = tone_mapping.min;
-                                    tone_mapping.white = tone_mapping.max;
+                                // replace the dummy mean spectrum
+                                if (has_mean_spectrum) {
+                                    // split the spectrum by the plane_count and spectrum_len                                        
+                                    fitsContainer[i].mean_spectrum = mean_spectrum.slice(i * spectrum_len, (i + 1) * spectrum_len);
                                 }
 
-                                console.log(tone_mapping);
-
-                                tone_array[i] = tone_mapping;
-                            }
-
-                            console.log(tone_array);
-
-                            var img_width = dv.getUint32(offset, endianness);
-                            offset += 4;
-
-                            var img_height = dv.getUint32(offset, endianness);
-                            offset += 4;
-
-                            // console.log('img_width:', img_width, 'img_height:', img_height);
-
-                            var pixels_length = dv.getUint32(offset, endianness);
-                            offset += 4;
-
-                            //console.log('pixels length:', pixels_length);
-
-                            var frame_pixels = new Uint8Array(received_msg, offset, pixels_length);
-                            offset += pixels_length;
-
-                            var mask_length = dv.getUint32(offset, endianness);
-                            offset += 4;
-
-                            //console.log('mask length:', mask_length);
-
-                            var frame_mask = new Uint8Array(received_msg, offset, mask_length);
-                            offset += mask_length;
-
-                            // optional polarisation
-                            var has_polarisation = true;
-
-                            try {
-                                var pol_width = dv.getUint32(offset, endianness);
-                                offset += 4;
-
-                                var pol_height = dv.getUint32(offset, endianness);
-                                offset += 4;
-
-                                var pol_target = dv.getUint32(offset, endianness);
-                                offset += 4;
-
-                                var intensity_len = dv.getUint32(offset, endianness);
-                                offset += 4;
-
-                                var angle_len = dv.getUint32(offset, endianness);
-                                offset += 4;
-
-                                console.log("FITS polarisation width:", pol_width, "height:", pol_height, "target:", pol_target);
-
-                                if (intensity_len > 0) {
-                                    var frame_intensity = new Uint8Array(received_msg, offset, intensity_len);
-                                    offset += intensity_len;
-                                    console.log("FITS polarisation intensity length:", intensity_len);
-                                } else {
-                                    has_polarisation = false;
+                                // replace the dummy integrated spectrum
+                                if (has_integrated_spectrum) {
+                                    // split the spectrum by the plane_count and spectrum_len  
+                                    fitsContainer[i].integrated_spectrum = integrated_spectrum.slice(i * spectrum_len, (i + 1) * spectrum_len);
                                 }
+                            }
+                        } else {
+                            fitsData.histogram = fitsData.histogram_array;
+                            fitsData.histogram_array = null;
 
-                                if (angle_len > 0) {
-                                    var frame_angle = new Uint8Array(received_msg, offset, angle_len);
-                                    offset += angle_len;
-                                    console.log("FITS polarisation angle length:", angle_len);
-                                } else {
-                                    has_polarisation = false;
+                            // replace the dummy mean spectrum
+                            if (has_mean_spectrum) {
+                                fitsData.mean_spectrum = mean_spectrum;
+                            }
+
+                            // replace the dummy integrated spectrum
+                            if (has_integrated_spectrum) {
+                                fitsData.integrated_spectrum = integrated_spectrum;
+                            }
+                        }
+
+                        let res = display_FITS_header(index);
+
+                        display_preferences(index);
+
+                        await res;
+
+                        if (index == va_count)
+                            display_dataset_info();
+
+                        if (va_count == 1 || composite_view) {
+                            try {
+                                if (index == va_count) {
+                                    display_scale_info();
                                 }
-
-                            } catch (err) {
-                                has_polarisation = false;
                             }
+                            catch (err) {
+                            };
+                        };
 
-                            var has_json = true;
+                        if (!composite_view)
+                            add_line_label(index);
 
-                            try {
-                                var json_len = dv.getUint32(offset, endianness);
-                                offset += 4;
+                        frame_start = 0;
+                        frame_end = fitsData.depth - 1;
 
-                                var buffer_len = dv.getUint32(offset, endianness);
-                                offset += 4;
+                        if (fitsData.depth > 1) {
+                            //insert a spectrum object to the spectrumContainer at <index-1>
+                            mean_spectrumContainer[index - 1] = fitsData.mean_spectrum;
+                            integrated_spectrumContainer[index - 1] = fitsData.integrated_spectrum;
 
-                                var json = new Uint8Array(received_msg, offset, buffer_len);
-                                offset += buffer_len;
-                                //console.log("FITS json length:", json_len);
-                            } catch (err) {
-                                has_json = false;
+                            spectrum_count++;
+
+                            if (va_count == 1) {
+                                setup_axes();
+
+                                if (intensity_mode == "mean")
+                                    plot_spectrum([fitsContainer[index - 1].mean_spectrum]);
+
+                                if (intensity_mode == "integrated")
+                                    plot_spectrum([fitsContainer[index - 1].integrated_spectrum]);
+
+                                if (molecules.length > 0)
+                                    display_molecules();
                             }
+                            else {
+                                if (spectrum_count == va_count) {
+                                    //console.log("mean spectrumContainer:", mean_spectrumContainer);
+                                    //console.log("integrated spectrumContainer:", integrated_spectrumContainer);
 
-                            var has_header = true;
+                                    //display an RGB legend in place of REF FRQ
+                                    display_composite_legend();
 
-                            try {
-                                var header_len = dv.getUint32(offset, endianness);
-                                offset += 4;
+                                    setup_axes();
 
-                                var buffer_len = dv.getUint32(offset, endianness);
-                                offset += 4;
+                                    if (intensity_mode == "mean")
+                                        plot_spectrum(mean_spectrumContainer);
 
-                                var header = new Uint8Array(received_msg, offset, buffer_len);
-                                offset += buffer_len;
-                                //console.log("FITS header length:", header_len);
-                            } catch (err) {
-                                has_header = false;
-                            }
+                                    if (intensity_mode == "integrated")
+                                        plot_spectrum(integrated_spectrumContainer);
 
-                            var mean_spectrum;
-                            var has_mean_spectrum = true;
-
-                            try {
-                                var spectrum_len = dv.getUint32(offset, endianness);
-                                offset += 4;
-
-                                var buffer_len = dv.getUint32(offset, endianness);
-                                offset += 4;
-
-                                var buffer = new Uint8Array(received_msg, offset, buffer_len);
-                                offset += buffer_len;
-                                console.log("FITS mean spectrum length:", spectrum_len);
-
-                                // ZFP decoder part                           
-                                let start = performance.now();
-                                var res = WASM.decompressZFPspectrum(plane_count, spectrum_len, buffer);
-                                mean_spectrum = WASM.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
-                                let elapsed = Math.round(performance.now() - start);
-                                console.log("mean_spectrum: ", mean_spectrum, "elapsed: ", elapsed, "[ms]");
-                            } catch (err) {
-                                has_mean_spectrum = false;
-                            }
-
-                            var integrated_spectrum;
-                            var has_integrated_spectrum = true;
-
-                            try {
-                                var spectrum_len = dv.getUint32(offset, endianness);
-                                offset += 4;
-
-                                var buffer_len = dv.getUint32(offset, endianness);
-                                offset += 4;
-
-                                var buffer = new Uint8Array(received_msg, offset, buffer_len);
-                                offset += buffer_len;
-                                console.log("FITS integrated spectrum length:", spectrum_len);
-
-                                // ZFP decoder part                              
-                                let start = performance.now();
-                                var res = WASM.decompressZFPspectrum(plane_count, spectrum_len, buffer);
-                                integrated_spectrum = WASM.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
-                                let elapsed = Math.round(performance.now() - start);
-                                console.log("integrated_spectrum: ", integrated_spectrum, "elapsed: ", elapsed, "[ms]");
-                            } catch (err) {
-                                has_integrated_spectrum = false;
-                            }
-
-                            if (has_header) {
-                                // decompress the FITS data etc.
-                                let LZ4 = require('lz4');
-
-                                let uncompressed = new Uint8Array(header_len);
-                                let uncompressedSize = LZ4.decodeBlock(header, uncompressed);
-                                uncompressed = uncompressed.slice(0, uncompressedSize);
-
-                                try {
-                                    fitsHeader = new TextDecoder().decode(uncompressed);
+                                    if (molecules.length > 0)
+                                        display_molecules();
                                 }
-                                catch (err) {
-                                    fitsHeader = '';
-                                    for (var i = 0; i < uncompressed.length; i++)
-                                        fitsHeader += String.fromCharCode(uncompressed[i]);
-                                };
+                            }
+                        }
+                        else {
+                            spectrum_count++;
+                        }
+                    }
 
-                                // console.log(fitsHeader);
+                    // WASM decoder part                        
+                    {
+                        // console.log("processing an HDR image");
+                        let start = performance.now();
+
+                        // decompressZFP returns std::vector<float>
+                        // decompressZFPimage returns Float32Array but emscripten::typed_memory_view is buggy
+                        var res = WASM.decompressZFPimage(img_width, img_height, plane_count, frame_pixels);
+                        const pixels = WASM.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
+
+                        res = WASM.decompressLZ4mask(img_width, img_height, frame_mask);
+                        const alpha = WASM.HEAPU8.slice(res[0], res[0] + res[1]);
+
+                        let elapsed = Math.round(performance.now() - start);
+
+                        console.log("image width: ", img_width, "height: ", img_height, "no. intensity planes:", plane_count, "elapsed: ", elapsed, "[ms]");
+
+                        if (!spectrum_view) {
+                            d3.select("#peak_tracking").remove();
+
+                            var StokesP = new Array(plane_count);
+
+                            if (plane_count > 1) {
+                                for (let i = 0; i < plane_count; i++) {
+                                    // extract each plane from pixels
+                                    let pixels_i = pixels.slice(i * img_width * img_height, (i + 1) * img_width * img_height);
+                                    process_hdr_image(img_width, img_height, pixels_i, alpha, tone_array[i], i + 1);
+                                    StokesP[i] = pixels_i;
+                                }
+                            } else {
+                                // no need to slice a single pixels array
+                                process_hdr_image(img_width, img_height, pixels, alpha, tone_array[0], index);
                             }
 
                             if (has_json) {
-                                // decompress the FITS data etc.
-                                let LZ4 = require('lz4');
-
-                                let uncompressed = new Uint8Array(json_len);
-                                let uncompressedSize = LZ4.decodeBlock(json, uncompressed);
-                                uncompressed = uncompressed.slice(0, uncompressedSize);
-
-                                var fitsData;
+                                display_histogram(index);
 
                                 try {
-                                    fitsData = new TextDecoder().decode(uncompressed);
+                                    display_cd_gridlines();
                                 }
                                 catch (err) {
-                                    fitsData = '';
-                                    for (var i = 0; i < uncompressed.length; i++)
-                                        fitsData += String.fromCharCode(uncompressed[i]);
+                                    display_gridlines();
                                 };
 
-                                //console.log(fitsData);
-                                fitsData = JSON.parse(fitsData);
-
-                                // replace the dummy FITS header
-                                if (has_header) {
-                                    fitsData.HEADER = fitsHeader;
-                                } else {
-                                    fitsData.HEADER = 'N/A';
-                                };
-
-                                // console.log(fitsData);
-
-                                // handle the fitsData part
-                                fitsContainer[index - 1] = fitsData;
-                                optical_view = fitsData.is_optical;
-                                spectrum_view = fitsData.is_spectrum;
-
-                                if (!spectrum_view) {
-                                    d3.select("#atomicMenu").remove();
-                                }
-
-                                if (optical_view) {
-                                    d3.select("#splatMenu").remove();
-                                }
-
-                                if (!isLocal) {
-                                    let filesize = fitsData.filesize;
-                                    let strFileSize = numeral(filesize).format('0.0ib');
-                                    d3.select("#FITS").html("full download (" + strFileSize + ")");
-                                }
-
-                                {
-                                    frame_reference_unit(index);
-
-                                    //rescale CRVAL3 and CDELT3
-                                    fitsData.CRVAL3 *= frame_multiplier;
-                                    fitsData.CDELT3 *= frame_multiplier;
-
-                                    frame_reference_type(index);
-
-                                    //console.log("has_freq:", has_frequency_info, "has_vel:", has_velocity_info);
-                                }
-
-                                if (plane_count > 1) {
-                                    let nbins = fitsData.histogram_width;
-                                    let nplanes = fitsData.histogram_height;
-                                    let histogram_array = fitsData.histogram_array;
-
-                                    // cross-check histogram_height and plane_count, throw an error if they are not equal
-                                    if (nplanes != plane_count) {
-                                        throw new Error("histogram_height != plane_count");
-                                    }
-
-                                    // deep-copy the fitsData object for each plane, adding respective histograms                                    
-                                    for (let i = 0; i < plane_count; i++) {
-                                        fitsContainer[i] = JSON.parse(JSON.stringify(fitsData));
-
-                                        // extract the histogram_array for each plane
-                                        fitsContainer[i].histogram = histogram_array.slice(i * nbins, (i + 1) * nbins);
-                                        fitsContainer[i].histogram_array = null;
-
-                                        // replace the dummy mean spectrum
-                                        if (has_mean_spectrum) {
-                                            // split the spectrum by the plane_count and spectrum_len                                        
-                                            fitsContainer[i].mean_spectrum = mean_spectrum.slice(i * spectrum_len, (i + 1) * spectrum_len);
-                                        }
-
-                                        // replace the dummy integrated spectrum
-                                        if (has_integrated_spectrum) {
-                                            // split the spectrum by the plane_count and spectrum_len  
-                                            fitsContainer[i].integrated_spectrum = integrated_spectrum.slice(i * spectrum_len, (i + 1) * spectrum_len);
-                                        }
-                                    }
-                                } else {
-                                    fitsData.histogram = fitsData.histogram_array;
-                                    fitsData.histogram_array = null;
-
-                                    // replace the dummy mean spectrum
-                                    if (has_mean_spectrum) {
-                                        fitsData.mean_spectrum = mean_spectrum;
-                                    }
-
-                                    // replace the dummy integrated spectrum
-                                    if (has_integrated_spectrum) {
-                                        fitsData.integrated_spectrum = integrated_spectrum;
-                                    }
-                                }
-
-                                let res = display_FITS_header(index);
-
-                                display_preferences(index);
-
-                                await res;
-
-                                if (index == va_count)
-                                    display_dataset_info();
-
-                                if (va_count == 1 || composite_view) {
-                                    try {
-                                        if (index == va_count) {
-                                            display_scale_info();
-                                        }
-                                    }
-                                    catch (err) {
-                                    };
-                                };
-
-                                if (!composite_view)
-                                    add_line_label(index);
-
-                                frame_start = 0;
-                                frame_end = fitsData.depth - 1;
-
-                                if (fitsData.depth > 1) {
-                                    //insert a spectrum object to the spectrumContainer at <index-1>
-                                    mean_spectrumContainer[index - 1] = fitsData.mean_spectrum;
-                                    integrated_spectrumContainer[index - 1] = fitsData.integrated_spectrum;
-
-                                    spectrum_count++;
-
-                                    if (va_count == 1) {
-                                        setup_axes();
-
-                                        if (intensity_mode == "mean")
-                                            plot_spectrum([fitsContainer[index - 1].mean_spectrum]);
-
-                                        if (intensity_mode == "integrated")
-                                            plot_spectrum([fitsContainer[index - 1].integrated_spectrum]);
-
-                                        if (molecules.length > 0)
-                                            display_molecules();
-                                    }
-                                    else {
-                                        if (spectrum_count == va_count) {
-                                            //console.log("mean spectrumContainer:", mean_spectrumContainer);
-                                            //console.log("integrated spectrumContainer:", integrated_spectrumContainer);
-
-                                            //display an RGB legend in place of REF FRQ
-                                            display_composite_legend();
-
-                                            setup_axes();
-
-                                            if (intensity_mode == "mean")
-                                                plot_spectrum(mean_spectrumContainer);
-
-                                            if (intensity_mode == "integrated")
-                                                plot_spectrum(integrated_spectrumContainer);
-
-                                            if (molecules.length > 0)
-                                                display_molecules();
-                                        }
-                                    }
-                                }
-                                else {
-                                    spectrum_count++;
-                                }
+                                display_beam();
                             }
 
-                            // WASM decoder part                        
-                            {
-                                // console.log("processing an HDR image");
-                                let start = performance.now();
+                            if (composite_view) {
+                                if (spectrum_count == va_count)
+                                    display_rgb_legend();
+                            } else {
+                                display_legend();
+                            }
 
-                                // decompressZFP returns std::vector<float>
-                                // decompressZFPimage returns Float32Array but emscripten::typed_memory_view is buggy
-                                var res = WASM.decompressZFPimage(img_width, img_height, plane_count, frame_pixels);
-                                const pixels = WASM.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
+                            if (plane_count > 1 && va_count == 1 && has_polarisation) {
+                                polarisation = compute_polarisation(StokesP, alpha, plane_count);
+                                polarisation.pol_width = img_width;
+                                polarisation.pol_height = img_height;
+                                console.log("polarisation:", polarisation);
 
-                                res = WASM.decompressLZ4mask(img_width, img_height, frame_mask);
-                                const alpha = WASM.HEAPU8.slice(res[0], res[0] + res[1]);
+                                if (polarisation != null) {
+                                    process_polarisation(index, img_width, img_height, polarisation.intensity, polarisation.angle, polarisation.mask);
+                                }
 
-                                let elapsed = Math.round(performance.now() - start);
+                                console.log("frame_intensity:", frame_intensity, "frame_angle:", frame_angle, 'pol_width:', pol_width, 'pol_height:', pol_height, 'pol_target:', pol_target);
 
-                                console.log("image width: ", img_width, "height: ", img_height, "no. intensity planes:", plane_count, "elapsed: ", elapsed, "[ms]");
+                                var res = WASM.decompressZFPimage(pol_width, pol_height, 1, frame_intensity);
+                                const intensity = WASM.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
 
-                                if (!spectrum_view) {
-                                    d3.select("#peak_tracking").remove();
+                                var res = WASM.decompressZFPimage(pol_width, pol_height, 1, frame_angle);
+                                const angle = WASM.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
 
-                                    var StokesP = new Array(plane_count);
+                                // print the last 2 values of intensity and angle
+                                console.log("polarisation intensity:", intensity.slice(-2), "angle:", angle.slice(-2));
 
-                                    if (plane_count > 1) {
-                                        for (let i = 0; i < plane_count; i++) {
-                                            // extract each plane from pixels
-                                            let pixels_i = pixels.slice(i * img_width * img_height, (i + 1) * img_width * img_height);
-                                            process_hdr_image(img_width, img_height, pixels_i, alpha, tone_array[i], i + 1);
-                                            StokesP[i] = pixels_i;
-                                        }
-                                    } else {
-                                        // no need to slice a single pixels array
-                                        process_hdr_image(img_width, img_height, pixels, alpha, tone_array[0], index);
-                                    }
+                                /*polarisation = { pol_width: pol_width, pol_height: pol_height, pol_target: pol_target, intensity: intensity, angle: angle };
+                                process_polarisation_image(index, pol_width, pol_height, pol_target, intensity, angle);*/
+                            }
+                        } else {
+                            console.log("spectrum_view with dimensions: ", img_width, img_height);
 
-                                    if (has_json) {
-                                        display_histogram(index);
+                            d3.select("#regionLabel").remove();
+                            d3.select("#autoscale").remove();
+                            d3.select("#download_confirmation").remove();
+                            d3.select("#display_scaling_help").remove();
+                            d3.select("#realtime_video").remove();
+                            d3.select("#binning_li").remove();
+                            d3.select("#video_fps_control_li").remove();
+                            d3.select("#coords_fmt_li").remove();
+                            d3.select("#intensity_mode_li").remove();
+                            d3.select("#zoom_shape_li").remove();
 
-                                        try {
-                                            display_cd_gridlines();
-                                        }
-                                        catch (err) {
-                                            display_gridlines();
-                                        };
+                            let fitsData = fitsContainer[va_count - 1];
 
-                                        display_beam();
-                                    }
+                            // if img_height > 1 and CTYPE1 is 'PIXEL' then it is a 2D image spectrum
+                            if (img_height > 1 && fitsData.CTYPE1.trim().toUpperCase() == 'PIXEL') {
+                                console.log("2D image spectrum with dimensions: ", img_width, img_height);
 
-                                    if (composite_view) {
-                                        if (spectrum_count == va_count)
-                                            display_rgb_legend();
-                                    } else {
-                                        display_legend();
-                                    }
+                                d3.select("#atomicMenu").remove();
+                                d3.select("#displayGridlines").remove();
+                                d3.select("#displayMolecules").remove();
+                                d3.select("#displayBeam").remove();
 
-                                    if (plane_count > 1 && va_count == 1 && has_polarisation) {
-                                        polarisation = compute_polarisation(StokesP, alpha, plane_count);
-                                        polarisation.pol_width = img_width;
-                                        polarisation.pol_height = img_height;
-                                        console.log("polarisation:", polarisation);
+                                process_hdr_image(img_width, img_height, pixels, alpha, tone_array[0], index);
 
-                                        if (polarisation != null) {
-                                            process_polarisation(index, img_width, img_height, polarisation.intensity, polarisation.angle, polarisation.mask);
-                                        }
+                                if (has_json)
+                                    display_histogram(index);
 
-                                        console.log("frame_intensity:", frame_intensity, "frame_angle:", frame_angle, 'pol_width:', pol_width, 'pol_height:', pol_height, 'pol_target:', pol_target);
+                                display_legend();
+                            } else {
+                                // remove the unrelated menus
+                                d3.select("#imageMenu").remove();
+                                d3.select("#splatMenu").remove();
+                                d3.select("#viewMenu").remove();
+                                d3.select("#peak_tracking").remove();
+                                d3.select("#realtime_spectrum").remove();
+                                d3.select("#image_quality_li").remove();
 
-                                        var res = WASM.decompressZFPimage(pol_width, pol_height, 1, frame_intensity);
-                                        const intensity = WASM.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
+                                // remove an HTML element with id "SpectrumCanvas"
+                                d3.select("#SpectrumCanvas").remove();
 
-                                        var res = WASM.decompressZFPimage(pol_width, pol_height, 1, frame_angle);
-                                        const angle = WASM.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
+                                var svg = d3.select("#menu_activation_area");
+                                var y = parseFloat(svg.attr("y"));
+                                var height = parseFloat(svg.attr("height"));
 
-                                        // print the last 2 values of intensity and angle
-                                        console.log("polarisation intensity:", intensity.slice(-2), "angle:", angle.slice(-2));
+                                let top = y + height + 10 + emFontSize; // an extra spacing
+                                console.log("y:", y, "height:", height, "top:", top);
 
-                                        /*polarisation = { pol_width: pol_width, pol_height: pol_height, pol_target: pol_target, intensity: intensity, angle: angle };
-                                        process_polarisation_image(index, pol_width, pol_height, pol_target, intensity, angle);*/
-                                    }
-                                } else {
-                                    console.log("spectrum_view with dimensions: ", img_width, img_height);
+                                // add an HTML element with id "SpectrumDiv" to the "mainDiv"
+                                d3.select("#mainDiv").append("div")
+                                    .attr("id", "SpectrumDiv")
+                                    .on("mouseenter", hide_navigation_bar)
+                                    .attr('style', 'position: fixed; left: 10px; top: ' + top + 'px; z-index: 60');
 
-                                    d3.select("#regionLabel").remove();
-                                    d3.select("#autoscale").remove();
-                                    d3.select("#download_confirmation").remove();
-                                    d3.select("#display_scaling_help").remove();
-                                    d3.select("#realtime_video").remove();
-                                    d3.select("#binning_li").remove();
-                                    d3.select("#video_fps_control_li").remove();
-                                    d3.select("#coords_fmt_li").remove();
-                                    d3.select("#intensity_mode_li").remove();
-                                    d3.select("#zoom_shape_li").remove();
+                                try {
+                                    process_hds_spectrum(img_width, img_height, pixels, alpha, "SpectrumDiv");
 
-                                    let fitsData = fitsContainer[va_count - 1];
+                                    // remove object, dateobs, ra and dec elements
+                                    d3.select("#object").remove();
+                                    d3.select("#dateobs").remove();
+                                    d3.select("#ra").remove();
+                                    d3.select("#dec").remove();
 
-                                    // if img_height > 1 and CTYPE1 is 'PIXEL' then it is a 2D image spectrum
-                                    if (img_height > 1 && fitsData.CTYPE1.trim().toUpperCase() == 'PIXEL') {
-                                        console.log("2D image spectrum with dimensions: ", img_width, img_height);
+                                    // remove the jvo logo
+                                    d3.select("#jvoLogo").remove();
 
-                                        d3.select("#atomicMenu").remove();
-                                        d3.select("#displayGridlines").remove();
-                                        d3.select("#displayMolecules").remove();
-                                        d3.select("#displayBeam").remove();
-
-                                        process_hdr_image(img_width, img_height, pixels, alpha, tone_array[0], index);
-
-                                        if (has_json)
-                                            display_histogram(index);
-
-                                        display_legend();
-                                    } else {
-                                        // remove the unrelated menus
-                                        d3.select("#imageMenu").remove();
-                                        d3.select("#splatMenu").remove();
-                                        d3.select("#viewMenu").remove();
-                                        d3.select("#peak_tracking").remove();
-                                        d3.select("#realtime_spectrum").remove();
-                                        d3.select("#image_quality_li").remove();
-
-                                        // remove an HTML element with id "SpectrumCanvas"
-                                        d3.select("#SpectrumCanvas").remove();
-
-                                        var svg = d3.select("#menu_activation_area");
-                                        var y = parseFloat(svg.attr("y"));
-                                        var height = parseFloat(svg.attr("height"));
-
-                                        let top = y + height + 10 + emFontSize; // an extra spacing
-                                        console.log("y:", y, "height:", height, "top:", top);
-
-                                        // add an HTML element with id "SpectrumDiv" to the "mainDiv"
-                                        d3.select("#mainDiv").append("div")
-                                            .attr("id", "SpectrumDiv")
-                                            .on("mouseenter", hide_navigation_bar)
-                                            .attr('style', 'position: fixed; left: 10px; top: ' + top + 'px; z-index: 60');
-
-                                        try {
-                                            process_hds_spectrum(img_width, img_height, pixels, alpha, "SpectrumDiv");
-
-                                            // remove object, dateobs, ra and dec elements
-                                            d3.select("#object").remove();
-                                            d3.select("#dateobs").remove();
-                                            d3.select("#ra").remove();
-                                            d3.select("#dec").remove();
-
-                                            // remove the jvo logo
-                                            d3.select("#jvoLogo").remove();
-
-                                        } catch (err) {
-                                            console.error(err);
-                                        }
-                                    }
+                                } catch (err) {
+                                    console.error(err);
                                 }
                             }
-                            /*})
-                            .catch(e => console.error(e));*/
                         }
-
-                    })
-                    .catch(e => console.error(e));
+                    }
+                }
             }).catch(e => console.error(e));
         }
     }
@@ -20139,33 +20114,26 @@ async function display_FITS_header(index) {
 
         fitsData.ready = new Promise((resolve, reject) => {
             waitForModuleReady().then(_ => {
-                WASM.ready
-                    .then(_ => {
-                        // Allocate string on Emscripten heap and get byte offset
-                        nHeaderBytes = header.byteLength;
-                        headerPtr = WASM._malloc(nHeaderBytes);
-                        headerHeap = new Uint8Array(WASM.HEAPU8.buffer, headerPtr, nHeaderBytes);
-                        headerHeap.set(new Uint8Array(header));
+                // Allocate string on Emscripten heap and get byte offset
+                nHeaderBytes = header.byteLength;
+                headerPtr = WASM._malloc(nHeaderBytes);
+                headerHeap = new Uint8Array(WASM.HEAPU8.buffer, headerPtr, nHeaderBytes);
+                headerHeap.set(new Uint8Array(header));
 
-                        // Use byte offset to pass header string to libwcs
-                        stat = WASM.initWcs(index, headerHeap.byteOffset, nkeyrec, va_count);
+                // Use byte offset to pass header string to libwcs
+                stat = WASM.initWcs(index, headerHeap.byteOffset, nkeyrec, va_count);
 
-                        // Free memory
-                        headerHeap = null;
-                        WASM._free(headerPtr);
+                // Free memory
+                headerHeap = null;
+                WASM._free(headerPtr);
 
-                        if (stat != 0) {
-                            console.log("initWcs() failed");
-                            reject(false);
-                        } else {
-                            fitsData.index = index;
-                            resolve(true);
-                        }
-                    })
-                    .catch(e => {
-                        console.error(e);
-                        reject(false);
-                    });
+                if (stat != 0) {
+                    console.log("initWcs() failed");
+                    reject(false);
+                } else {
+                    fitsData.index = index;
+                    resolve(true);
+                }
             }).catch(e => {
                 console.error(e);
                 reject(false);
@@ -21470,7 +21438,6 @@ async function waitForModuleReady() {
             if (WASM == null) {
                 console.log("WebAssembly compiled successfully.");
                 WASM = instance;
-                WASM.ready = new Promise(resolve => resolve(true));
             };
 
             resolve();
