@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-05-30.2";
+    return "JS2025-05-30.3";
 }
 
 function uuidv4() {
@@ -4360,14 +4360,13 @@ function process_polarisation_image(index, pol_width, pol_height, pol_target, in
     var img_height = Math.floor(scale * image_bounding_dims.height);
     console.log("scaling by", scale, "new width:", img_width, "new height:", img_height, "orig. width:", image_bounding_dims.width, "orig. height:", image_bounding_dims.height);
 
-    polarisation.xmin = image_bounding_dims.x1;
-    polarisation.xmax = image_bounding_dims.x2;
-    polarisation.ymin = image_bounding_dims.y1;
-    polarisation.ymax = image_bounding_dims.y1 + (image_bounding_dims.height - 1);
-    polarisation.scale = 1.0;
+    const pol_xmin = image_bounding_dims.x1;
+    const pol_xmax = image_bounding_dims.x2;
+    const pol_ymin = image_bounding_dims.y1;
+    const pol_ymax = image_bounding_dims.y1 + (image_bounding_dims.height - 1);
+    const pol_scale = 1.0;
 
-    const pol_scale = polarisation.scale;
-    const resized = DownsizeImagePolarisation(intensity, angle, pol_width, pol_height, pol_target, pol_scale, Math.round(pol_scale * polarisation.xmin), Math.round(pol_scale * polarisation.ymin), Math.round(pol_scale * polarisation.xmax), Math.round(pol_scale * polarisation.ymax));
+    const resized = DownsizeImagePolarisation(intensity, angle, pol_width, pol_height, pol_target, pol_scale, Math.round(pol_scale * pol_xmin), Math.round(pol_scale * pol_ymin), Math.round(pol_scale * pol_xmax), Math.round(pol_scale * pol_ymax));
     console.log("resized:", resized);
 
     const field = resized.field.filter((vector) => validate_vector(vector, imageContainer[index - 1].width, imageContainer[index - 1].height, imageContainer[index - 1].alpha));
@@ -4414,11 +4413,10 @@ function process_polarisation(index, pol_width, pol_height, intensity, angle, ma
     const mean = resized.mean;
     const std = resized.std;
 
-    const xScale = d3.scaleLinear().domain([image_bounding_dims.x1, image_bounding_dims.x2]).range([x, x + width]);
+    /*const xScale = d3.scaleLinear().domain([image_bounding_dims.x1, image_bounding_dims.x2]).range([x, x + width]);
     const yScale = d3.scaleLinear().domain([image_bounding_dims.y1, image_bounding_dims.y1 + (image_bounding_dims.height - 1)]).range([y + height, y]);
     const grid_spacing = 2 * range;
-
-    plot_polarisation(field, mean, std, xScale, yScale, grid_spacing, "PolarisationCanvas");
+    plot_polarisation(field, mean, std, xScale, yScale, grid_spacing, "PolarisationCanvas");*/
 
     polarisation.field = field;
     polarisation.xmin = image_bounding_dims.x1;
@@ -16553,14 +16551,14 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                             }
 
                             if (plane_count > 1 && va_count == 1 && has_polarisation) {
-                                /*polarisation = compute_polarisation(StokesP, alpha, plane_count);
+                                polarisation = compute_polarisation(StokesP, alpha, plane_count);
                                 polarisation.pol_width = img_width;
                                 polarisation.pol_height = img_height;
                                 console.log("polarisation:", polarisation);
 
                                 if (polarisation != null) {
                                     process_polarisation(index, img_width, img_height, polarisation.intensity, polarisation.angle, polarisation.mask);
-                                }*/
+                                }
 
                                 console.log("frame_intensity:", frame_intensity, "frame_angle:", frame_angle, 'pol_width:', pol_width, 'pol_height:', pol_height, 'pol_target:', pol_target);
 
@@ -16570,7 +16568,7 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                 var res = WASM.decompressZFPimage(pol_width, pol_height, 1, frame_angle);
                                 const angle = WASM.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
 
-                                polarisation = { pol_width: pol_width, pol_height: pol_height, pol_target: pol_target, intensity: intensity, angle: angle };
+                                //polarisation = { pol_width: pol_width, pol_height: pol_height, pol_target: pol_target, intensity: intensity, angle: angle };
                                 process_polarisation_image(index, pol_width, pol_height, pol_target, intensity, angle);
                             }
                         } else {
