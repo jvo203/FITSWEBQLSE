@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := wasm
-VERSION = 25.03.05.0
+VERSION = 25.05.30.0
 
 ZFP = zfp-1.0.0
 ZFP_SRC := $(wildcard $(ZFP)/src/*.c)
@@ -35,8 +35,8 @@ EMFLAGS+=-s NO_FILESYSTEM=1
 #EMFLAGS+=-s USE_PTHREADS=1 -s PROXY_TO_PTHREAD -s WASM_MEM_MAX=2GB
 EMFLAGS+=-s USE_ZLIB=1
 EMFLAGS+=-s ERROR_ON_UNDEFINED_SYMBOLS=0
-
-#EMFLAGS+=-s MODULARIZE=1
+EMFLAGS+=-s MODULARIZE=1
+EMFLAGS+=-s EXPORTED_RUNTIME_METHODS=HEAPU8,HEAPF32
 #EMFLAGS+=-s EXPORT_NAME="WASM"
 
 # FPZIP_FP = FPZIP_FP_FAST
@@ -75,7 +75,7 @@ wcslib.tar.bz2:
 	curl "ftp://ftp.atnf.csiro.au/pub/software/wcslib/wcslib.tar.bz2" -o "/tmp/wcslib.tar.bz2"
 
 wasm: $(FFMPEG_OBJ) $(OBJ)
-	em++ -Oz $(EMFLAGS) $(DEFS) main.cc $(FFMPEG_OBJ) $(OBJ) -o ../htdocs/fitswebql/client.$(VERSION).js --post-js module-post.js $(INCLUDE) $(CXXFLAGS) $(LDFLAGS)
+	em++ -Oz $(EMFLAGS) $(DEFS) main.cc $(FFMPEG_OBJ) $(OBJ) -o ../htdocs/fitswebql/client.$(VERSION).js $(INCLUDE) $(CXXFLAGS) $(LDFLAGS)
 
 # -L$(LIBRARY) -lwcs
 # -s "EXPORTED_FUNCTIONS=['_hevc_init','_hevc_destroy','_hevc_decode_nal_unit']"

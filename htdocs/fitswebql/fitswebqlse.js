@@ -63,7 +63,7 @@ function pix2sky(wcs, x, y) {
     console.log("lon:", lon, "lat:", lat);*/
 
     // wcslib uses 1-indexing for pixel coordinates
-    var world = Module.pix2sky(wcs.index, x + 0.5, y + 0.5);
+    var world = WASM.pix2sky(wcs.index, x + 0.5, y + 0.5);
     // console.log("world:", world);
 
     return [world[0], world[1]];
@@ -73,7 +73,7 @@ function sky2pix(wcs, ra, dec) {
     /*const { x, y } = lonlat2pix_func(wcs.index, ra, dec);
     console.log("x:", x, "y:", y);*/
 
-    var pixcrd = Module.sky2pix(wcs.index, ra, dec);
+    var pixcrd = WASM.sky2pix(wcs.index, ra, dec);
     // console.log("pixcrd:", pixcrd);
 
     // wcslib uses 1-indexing for pixel coordinates
@@ -6274,11 +6274,11 @@ async function open_websocket_connection(_datasetId, index) {
 
                         waitForModuleReady().then(() => {
                             // ZFP decoder part
-                            Module.ready
+                            WASM.ready
                                 .then(_ => {
                                     let start = performance.now();
-                                    var res = Module.decompressZFPspectrum(1, spectrum_len, frame);
-                                    const spectrum = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
+                                    var res = WASM.decompressZFPspectrum(1, spectrum_len, frame);
+                                    const spectrum = WASM.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
                                     let elapsed = Math.round(performance.now() - start);
 
                                     // console.log("spectrum size: ", spectrum.length, "elapsed: ", elapsed, "[ms]");
@@ -6326,28 +6326,28 @@ async function open_websocket_connection(_datasetId, index) {
                         offset += mask_length;
 
                         // WASM decoder part
-                        /*Module.ready
-                          .then(_ => {*/
-                        {
-                            //console.log("processing an HDR viewport");
-                            let start = performance.now();
+                        WASM.ready
+                            .then(_ => {
+                                {
+                                    //console.log("processing an HDR viewport");
+                                    let start = performance.now();
 
-                            // decompressZFP returns std::vector<float>
-                            // decompressZFPimage returns Float32Array but emscripten::typed_memory_view is buggy
-                            var res = Module.decompressZFPimage(view_width, view_height, 1, frame_pixels);
-                            const pixels = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
+                                    // decompressZFP returns std::vector<float>
+                                    // decompressZFPimage returns Float32Array but emscripten::typed_memory_view is buggy
+                                    var res = WASM.decompressZFPimage(view_width, view_height, 1, frame_pixels);
+                                    const pixels = WASM.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
 
-                            var res = Module.decompressLZ4mask(view_width, view_height, frame_mask);
-                            const alpha = Module.HEAPU8.slice(res[0], res[0] + res[1]);
+                                    var res = WASM.decompressLZ4mask(view_width, view_height, frame_mask);
+                                    const alpha = WASM.HEAPU8.slice(res[0], res[0] + res[1]);
 
-                            let elapsed = Math.round(performance.now() - start);
+                                    let elapsed = Math.round(performance.now() - start);
 
-                            // console.log("viewport width: ", view_width, "height: ", view_height, "previous_plane", previous_plane, "elapsed: ", elapsed, "[ms]");
+                                    // console.log("viewport width: ", view_width, "height: ", view_height, "previous_plane", previous_plane, "elapsed: ", elapsed, "[ms]");
 
-                            process_hdr_viewport(view_width, view_height, pixels, alpha, index);
-                        }
-                        /*})
-                        .catch(e => console.error(e));*/
+                                    process_hdr_viewport(view_width, view_height, pixels, alpha, index);
+                                }
+                            })
+                            .catch(e => console.error(e));
 
                         return;
                     }
@@ -6451,11 +6451,11 @@ async function open_websocket_connection(_datasetId, index) {
 
                             // decompressZFP returns std::vector<float>
                             // decompressZFPimage returns Float32Array but emscripten::typed_memory_view is buggy
-                            var res = Module.decompressZFPimage(img_width, img_height, plane_count, frame_pixels);
-                            const pixels = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
+                            var res = WASM.decompressZFPimage(img_width, img_height, plane_count, frame_pixels);
+                            const pixels = WASM.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
 
-                            var res = Module.decompressLZ4mask(img_width, img_height, frame_mask);
-                            const alpha = Module.HEAPU8.slice(res[0], res[0] + res[1]);
+                            var res = WASM.decompressLZ4mask(img_width, img_height, frame_mask);
+                            const alpha = WASM.HEAPU8.slice(res[0], res[0] + res[1]);
 
                             let elapsed = Math.round(performance.now() - start);
 
@@ -6551,11 +6551,11 @@ async function open_websocket_connection(_datasetId, index) {
 
                         waitForModuleReady().then(() => {
                             // ZFP decoder part
-                            Module.ready
+                            WASM.ready
                                 .then(_ => {
                                     console.log("FITS spectrum length:", spectrum_len);
-                                    var res = Module.decompressZFPspectrum(plane_count, spectrum_len, frame);
-                                    const spectrum = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
+                                    var res = WASM.decompressZFPspectrum(plane_count, spectrum_len, frame);
+                                    const spectrum = WASM.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
 
                                     // console.log("spectrum size: ", spectrum.length, spectrum, "elapsed: ", elapsed, "[ms]");
 
@@ -6718,9 +6718,9 @@ async function open_websocket_connection(_datasetId, index) {
                                         _colourmap = colourmap;
                                     }
 
-                                    var res = Module.hevc_decode_frame(videoFrame[index - 1].width, videoFrame[index - 1].height, frame, index - 1, _colourmap, fill, contours);
-                                    // data = new Uint8ClampedArray(Module.HEAPU8.subarray(res[0], res[0] + res[1])); // it's OK to use .subarray() instead of .slice() as a copy is made in "new Uint8ClampedArray()"
-                                    var rgba = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]); // receive RGBA texture from the WASM module
+                                    var res = WASM.hevc_decode_frame(videoFrame[index - 1].width, videoFrame[index - 1].height, frame, index - 1, _colourmap, fill, contours);
+                                    // data = new Uint8ClampedArray(WASM.HEAPU8.subarray(res[0], res[0] + res[1])); // it's OK to use .subarray() instead of .slice() as a copy is made in "new Uint8ClampedArray()"
+                                    var rgba = WASM.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]); // receive RGBA texture from the WASM module
 
                                     videoFrame[index - 1].rgba = rgba;
 
@@ -6735,7 +6735,7 @@ async function open_websocket_connection(_datasetId, index) {
                             else {
                                 try {
                                     //HEVC, ignore the decompressed output, just purge the HEVC buffers
-                                    Module.hevc_decode_frame(0, 0, frame, index - 1, 'greyscale', fill, 0);
+                                    WASM.hevc_decode_frame(0, 0, frame, index - 1, 'greyscale', fill, 0);
                                 } catch (e) {
                                     // console.log(e);
                                 };
@@ -6887,12 +6887,12 @@ async function open_websocket_connection(_datasetId, index) {
                         if (id == "ZFP") {
                             // decompress ZFP
                             if (va_count == 1) {
-                                var res = Module.decompressPVdiagram(pv_width, pv_height, frame_pv);
+                                var res = WASM.decompressPVdiagram(pv_width, pv_height, frame_pv);
                             } else {
-                                var res = Module.decompressCompositePVdiagram(pv_width, pv_height, va_count, frame_pv);
+                                var res = WASM.decompressCompositePVdiagram(pv_width, pv_height, va_count, frame_pv);
                             }
 
-                            const pv = new Uint8ClampedArray(Module.HEAPU8.subarray(res[0], res[0] + res[1])); // it's OK to use .subarray() instead of .slice() as a copy is made in "new Uint8ClampedArray()"
+                            const pv = new Uint8ClampedArray(WASM.HEAPU8.subarray(res[0], res[0] + res[1])); // it's OK to use .subarray() instead of .slice() as a copy is made in "new Uint8ClampedArray()"
 
                             var pvData = new ImageData(pv, pv_width, pv_height);
 
@@ -7053,24 +7053,24 @@ async function open_websocket_connection(_datasetId, index) {
 
                         waitForModuleReady().then(() => {
                             // ZFP decoder part
-                            Module.ready
+                            WASM.ready
                                 .then(_ => {
                                     //console.log("processing HDS X-Y spectra");
                                     let start = performance.now();
 
-                                    var res = Module.decompressZFPspectrum(1, xlen, xcomp);
-                                    const xspectrum = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
+                                    var res = WASM.decompressZFPspectrum(1, xlen, xcomp);
+                                    const xspectrum = WASM.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
 
-                                    var res = Module.decompressLZ4mask(xlen, 1, xframe);
-                                    const xmask = Module.HEAPU8.slice(res[0], res[0] + res[1]);
+                                    var res = WASM.decompressLZ4mask(xlen, 1, xframe);
+                                    const xmask = WASM.HEAPU8.slice(res[0], res[0] + res[1]);
 
                                     // console.log("HDS X-Y spectra: xspectrum:", xspectrum, "xmask:", xmask);
 
-                                    var res = Module.decompressZFPspectrum(1, ylen, ycomp);
-                                    const yspectrum = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
+                                    var res = WASM.decompressZFPspectrum(1, ylen, ycomp);
+                                    const yspectrum = WASM.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
 
-                                    var res = Module.decompressLZ4mask(ylen, 1, yframe);
-                                    const ymask = Module.HEAPU8.slice(res[0], res[0] + res[1]);
+                                    var res = WASM.decompressLZ4mask(ylen, 1, yframe);
+                                    const ymask = WASM.HEAPU8.slice(res[0], res[0] + res[1]);
 
                                     // console.log("HDS X-Y spectra: yspectrum:", yspectrum, "ymask:", ymask);
 
@@ -7117,11 +7117,11 @@ async function open_websocket_connection(_datasetId, index) {
 
                         // WASM decoder part
                         {
-                            var res = Module.decompressZFPimage(pol_width, pol_height, 1, frame_intensity);
-                            const intensity = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
+                            var res = WASM.decompressZFPimage(pol_width, pol_height, 1, frame_intensity);
+                            const intensity = WASM.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
 
-                            var res = Module.decompressZFPimage(pol_width, pol_height, 1, frame_angle);
-                            const angle = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
+                            var res = WASM.decompressZFPimage(pol_width, pol_height, 1, frame_angle);
+                            const angle = WASM.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
 
                             process_polarisation_video(index, pol_width, pol_height, pol_target, intensity, angle);
                         }
@@ -7235,7 +7235,7 @@ async function open_websocket_connection(_datasetId, index) {
 
                             try {
                                 //init the HEVC decoder
-                                Module.hevc_init_frame(va_count, width, height);
+                                WASM.hevc_init_frame(va_count, width, height);
                             } catch (e) {
                                 //console.log(e);
                             };
@@ -12404,7 +12404,7 @@ function x_axis_mouseleave() {
         }
 
         try {
-            Module.hevc_destroy_frame(va_count);
+            WASM.hevc_destroy_frame(va_count);
         } catch (e) {
             //console.log(e);
         };
@@ -16094,7 +16094,7 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
 
             Promise.all([waitForModuleReady(), resGLSL]).then(async _ => {
                 // wait for WebAssembly to get compiled
-                Module.ready
+                WASM.ready
                     .then(async _ => {
                         document.getElementById('welcome').style.display = "none";
                         //console.log('hiding the loading progress, style =', document.getElementById('welcome').style.display);
@@ -16289,8 +16289,8 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
 
                                 // ZFP decoder part                           
                                 let start = performance.now();
-                                var res = Module.decompressZFPspectrum(plane_count, spectrum_len, buffer);
-                                mean_spectrum = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
+                                var res = WASM.decompressZFPspectrum(plane_count, spectrum_len, buffer);
+                                mean_spectrum = WASM.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
                                 let elapsed = Math.round(performance.now() - start);
                                 console.log("mean_spectrum: ", mean_spectrum, "elapsed: ", elapsed, "[ms]");
                             } catch (err) {
@@ -16313,8 +16313,8 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
 
                                 // ZFP decoder part                              
                                 let start = performance.now();
-                                var res = Module.decompressZFPspectrum(plane_count, spectrum_len, buffer);
-                                integrated_spectrum = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
+                                var res = WASM.decompressZFPspectrum(plane_count, spectrum_len, buffer);
+                                integrated_spectrum = WASM.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
                                 let elapsed = Math.round(performance.now() - start);
                                 console.log("integrated_spectrum: ", integrated_spectrum, "elapsed: ", elapsed, "[ms]");
                             } catch (err) {
@@ -16518,20 +16518,18 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                 }
                             }
 
-                            // WASM decoder part
-                            /*Module.ready
-                              .then(_ => {*/
+                            // WASM decoder part                        
                             {
                                 // console.log("processing an HDR image");
                                 let start = performance.now();
 
                                 // decompressZFP returns std::vector<float>
                                 // decompressZFPimage returns Float32Array but emscripten::typed_memory_view is buggy
-                                var res = Module.decompressZFPimage(img_width, img_height, plane_count, frame_pixels);
-                                const pixels = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
+                                var res = WASM.decompressZFPimage(img_width, img_height, plane_count, frame_pixels);
+                                const pixels = WASM.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
 
-                                res = Module.decompressLZ4mask(img_width, img_height, frame_mask);
-                                const alpha = Module.HEAPU8.slice(res[0], res[0] + res[1]);
+                                res = WASM.decompressLZ4mask(img_width, img_height, frame_mask);
+                                const alpha = WASM.HEAPU8.slice(res[0], res[0] + res[1]);
 
                                 let elapsed = Math.round(performance.now() - start);
 
@@ -16586,11 +16584,11 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
 
                                         console.log("frame_intensity:", frame_intensity, "frame_angle:", frame_angle, 'pol_width:', pol_width, 'pol_height:', pol_height, 'pol_target:', pol_target);
 
-                                        var res = Module.decompressZFPimage(pol_width, pol_height, 1, frame_intensity);
-                                        const intensity = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
+                                        var res = WASM.decompressZFPimage(pol_width, pol_height, 1, frame_intensity);
+                                        const intensity = WASM.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
 
-                                        var res = Module.decompressZFPimage(pol_width, pol_height, 1, frame_angle);
-                                        const angle = Module.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
+                                        var res = WASM.decompressZFPimage(pol_width, pol_height, 1, frame_angle);
+                                        const angle = WASM.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
 
                                         // print the last 2 values of intensity and angle
                                         console.log("polarisation intensity:", intensity.slice(-2), "angle:", angle.slice(-2));
@@ -17730,7 +17728,7 @@ function pv_contour(left, top, width, height, pvCanvas, flipY, pv_width, pv_heig
     if (!displayPVContours) return;
 
     if (va_count == 1) {
-        var pv_pixels = Module.decompressZFP2D(pv_width, pv_height, frame_pv);
+        var pv_pixels = WASM.decompressZFP2D(pv_width, pv_height, frame_pv);
 
         // get minimum and maximum floating point value
         var min_value = Number.MAX_VALUE
@@ -20141,20 +20139,20 @@ async function display_FITS_header(index) {
 
         fitsData.ready = new Promise((resolve, reject) => {
             waitForModuleReady().then(_ => {
-                Module.ready
+                WASM.ready
                     .then(_ => {
                         // Allocate string on Emscripten heap and get byte offset
                         nHeaderBytes = header.byteLength;
-                        headerPtr = Module._malloc(nHeaderBytes);
-                        headerHeap = new Uint8Array(Module.HEAPU8.buffer, headerPtr, nHeaderBytes);
+                        headerPtr = WASM._malloc(nHeaderBytes);
+                        headerHeap = new Uint8Array(WASM.HEAPU8.buffer, headerPtr, nHeaderBytes);
                         headerHeap.set(new Uint8Array(header));
 
                         // Use byte offset to pass header string to libwcs
-                        stat = Module.initWcs(index, headerHeap.byteOffset, nkeyrec, va_count);
+                        stat = WASM.initWcs(index, headerHeap.byteOffset, nkeyrec, va_count);
 
                         // Free memory
                         headerHeap = null;
-                        Module._free(headerPtr);
+                        WASM._free(headerPtr);
 
                         if (stat != 0) {
                             console.log("initWcs() failed");
@@ -21465,12 +21463,22 @@ async function fetch_glsl_shaders() {
     await fetch_glsl();
 }
 
-// async function to wait until Module.ready is defined
+// async function to wait until WebAssembly has been compiled
 async function waitForModuleReady() {
-    while (typeof Module === 'undefined' || typeof Module.ready === 'undefined') {
-        console.log('waiting for Module.ready...');
-        await sleep(100);
-    }
+    return new Promise((resolve, reject) => {
+        Module().then(instance => {
+            if (WASM == null) {
+                console.log("WebAssembly compiled successfully.");
+                WASM = instance;
+                WASM.ready = new Promise(resolve => resolve(true));
+            };
+
+            resolve();
+        }).catch(e => {
+            console.error(e);
+            reject();
+        });
+    });
 }
 
 async function mainRenderer() {
