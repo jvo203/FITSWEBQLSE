@@ -3413,6 +3413,14 @@ uchar *zfp_compress_2d(const float *restrict array, int width, int height, int p
     uint nx = width;
     uint ny = height;
 
+    printf("[C] compressing 2D float array with ZFP, width: %d, height: %d, precision: %d\n", width, height, precision);
+    // print the last 2 elements of the array for debugging
+    if (array == NULL || width <= 0 || height <= 0)
+    {
+        printf("[C] <zfp_compress_2d> invalid parameters!\n");
+        return NULL;
+    }
+
     // compress 2D pixels with ZFP
     field = zfp_field_2d((void *)array, data_type, nx, ny);
 

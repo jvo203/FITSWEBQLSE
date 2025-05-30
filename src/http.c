@@ -7476,10 +7476,6 @@ void write_polarisation(int fd, int width, int height, int pol_target, const flo
     size_t intensity_size = 0;
     size_t angle_size = 0;
 
-    // print the last 2 values of intensity and angle
-    printf("[C] write_polarisation fd: %d, width: %d, height: %d, pol_target: %d, precision: %d\n", fd, width, height, pol_target, precision);
-    printf("[C] intensity: %f, %f; angle: %f, %f\n", intensity[width * height - 2], intensity[width * height - 1], angle[width * height - 2], angle[width * height - 1]);
-
     // use OpenMP tasks
 #pragma omp parallel num_threads(2)
     {
@@ -7529,8 +7525,8 @@ void write_polarisation(int fd, int width, int height, int pol_target, const flo
         chunked_write(fd, (const char *)&pol_target32, sizeof(pol_target32));
         chunked_write(fd, (const char *)&intensity_len, sizeof(intensity_len));
         chunked_write(fd, (const char *)&angle_len, sizeof(angle_len));
-        chunked_write(fd, (const char *)&compressed_intensity, intensity_size);
-        chunked_write(fd, (const char *)&compressed_angle, angle_size);
+        chunked_write(fd, (const char *)compressed_intensity, intensity_size);
+        chunked_write(fd, (const char *)compressed_angle, angle_size);
     }
 
     // finally free the compressed buffers
