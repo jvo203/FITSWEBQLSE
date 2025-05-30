@@ -89,7 +89,7 @@ struct buffer
 {
     buffer wasmBuffer = {0, 0};
 
-    std::cout << "[decompressZFP2D] " << bytes.size() << " bytes, img_width: " << img_width << ", img_height: " << img_height << ", plane_count: " << plane_count << std::endl;
+    // std::cout << "[decompressZFP2D] " << bytes.size() << " bytes, img_width: " << img_width << ", img_height: " << img_height << ", plane_count: " << plane_count << std::endl;
 
     size_t img_size = size_t(img_width) * size_t(img_height) * size_t(plane_count);
 
@@ -149,8 +149,8 @@ struct buffer
 
         if (zfpsize == 0)
             printf("ZFP decompression failed!\n");
-        else
-            printf("decompressed %zu bytes (image pixels).\n", zfpsize);
+        /*else
+            printf("decompressed %zu bytes (image pixels).\n", zfpsize);*/
 
         stream_close(stream);
 
@@ -160,10 +160,6 @@ struct buffer
     // clean up
     zfp_field_free(field);
     zfp_stream_close(zfp);
-
-    // print the last 2 values
-    if (pixelLength > 2)
-        printf("last 2 pixel values: %f, %f\n", pixelBuffer[pixelLength - 2], pixelBuffer[pixelLength - 1]);
 
     /*for (size_t i = 0; i < pixelLength; i++)
       if (pixelBuffer[i] != 0.0f)

@@ -16553,14 +16553,14 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                             }
 
                             if (plane_count > 1 && va_count == 1 && has_polarisation) {
-                                polarisation = compute_polarisation(StokesP, alpha, plane_count);
+                                /*polarisation = compute_polarisation(StokesP, alpha, plane_count);
                                 polarisation.pol_width = img_width;
                                 polarisation.pol_height = img_height;
                                 console.log("polarisation:", polarisation);
 
                                 if (polarisation != null) {
                                     process_polarisation(index, img_width, img_height, polarisation.intensity, polarisation.angle, polarisation.mask);
-                                }
+                                }*/
 
                                 console.log("frame_intensity:", frame_intensity, "frame_angle:", frame_angle, 'pol_width:', pol_width, 'pol_height:', pol_height, 'pol_target:', pol_target);
 
@@ -16570,11 +16570,8 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                 var res = WASM.decompressZFPimage(pol_width, pol_height, 1, frame_angle);
                                 const angle = WASM.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
 
-                                // print the last 2 values of intensity and angle
-                                console.log("polarisation intensity:", intensity.slice(-2), "angle:", angle.slice(-2));
-
-                                /*polarisation = { pol_width: pol_width, pol_height: pol_height, pol_target: pol_target, intensity: intensity, angle: angle };
-                                process_polarisation_image(index, pol_width, pol_height, pol_target, intensity, angle);*/
+                                polarisation = { pol_width: pol_width, pol_height: pol_height, pol_target: pol_target, intensity: intensity, angle: angle };
+                                process_polarisation_image(index, pol_width, pol_height, pol_target, intensity, angle);
                             }
                         } else {
                             console.log("spectrum_view with dimensions: ", img_width, img_height);
