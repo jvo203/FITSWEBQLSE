@@ -4378,6 +4378,11 @@ void *ws_image_spectrum_response(void *ptr)
         memcpy((char *)image_payload + ws_offset, buf, write_offset);
         ws_offset += write_offset;
 
+        // polarisation data
+        write_offset += 5 * sizeof(uint32_t) + pol_intensity_len + pol_angle_len;
+        memcpy((char *)image_payload + ws_offset, buf, write_offset);
+        ws_offset += write_offset;
+
         // add an optional padding
         if (padding > 0)
         {
