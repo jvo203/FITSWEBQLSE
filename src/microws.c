@@ -4331,8 +4331,8 @@ void *ws_image_spectrum_response(void *ptr)
     memcpy(&pol_angle_len, buf + read_offset, sizeof(uint32_t));
     read_offset += sizeof(uint32_t);
 
-    read_offset += pol_intensity_len + pol_angle_len; // skip the polarisation data
     // if the polarisation is not present pol_intensity_len and pol_angle_len will be zero
+    read_offset += pol_intensity_len + pol_angle_len;
 
     if (offset < read_offset + sizeof(uint32_t))
         goto free_image_spectrum_session;
