@@ -4273,6 +4273,13 @@ void *ws_image_spectrum_response(void *ptr)
     uint32_t mask_len = 0;
     uint32_t hist_len = 0;
 
+    // optional polarisation (between image and histogram)
+    uint32_t pol_width = 0;
+    uint32_t pol_height = 0;
+    uint32_t pol_target = 0;
+    uint32_t pol_intensity_len = 0;
+    uint32_t pol_angle_len = 0;
+
     // spectrum
     uint32_t spectrum_len = 0;
     uint32_t compressed_size = 0;
@@ -4308,6 +4315,24 @@ void *ws_image_spectrum_response(void *ptr)
     // mask
     memcpy(&mask_len, buf + read_offset, sizeof(uint32_t));
     read_offset += sizeof(uint32_t) + mask_len;
+
+    if (offset < read_offset + 5 * sizeof(uint32_t))
+        goto free_image_spectrum_session;
+
+    // polarisation
+    memcpy(&pol_width, buf + read_offset, sizeof(uint32_t));
+    read_offset += sizeof(uint32_t);
+    memcpy(&pol_height, buf + read_offset, sizeof(uint32_t));
+    read_offset += sizeof(uint32_t);
+    memcpy(&pol_target, buf + read_offset, sizeof(uint32_t));
+    read_offset += sizeof(uint32_t);
+    memcpy(&pol_intensity_len, buf + read_offset, sizeof(uint32_t));
+    read_offset += sizeof(uint32_t);
+    memcpy(&pol_angle_len, buf + read_offset, sizeof(uint32_t));
+    read_offset += sizeof(uint32_t);
+
+    read_offset += pol_intensity_len + pol_angle_len; // skip the polarisation data
+    // if the polarisation is not present pol_intensity_len and pol_angle_len will be zero
 
     if (offset < read_offset + sizeof(uint32_t))
         goto free_image_spectrum_session;
