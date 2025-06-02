@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-05-30.3";
+    return "JS2025-06-02.0";
 }
 
 function uuidv4() {
@@ -4344,7 +4344,6 @@ function plot_polarisation(field, mean, std, xScale, yScale, spacing, canvasId) 
 
 function process_polarisation_image(index, pol_width, pol_height, pol_target, intensity, angle) {
     console.log("process_polarisation_image pol_width:", pol_width, "pol_height:", pol_height, "pol_target:", pol_target);
-    console.log(intensity, angle);
 
     // get the image rectangle
     var rect_elem = d3.select("#image_rectangle");
@@ -6434,6 +6433,47 @@ async function open_websocket_connection(_datasetId, index) {
                         var frame_mask = new Uint8Array(received_msg, offset, mask_length);
                         offset += mask_length;
 
+                        // optional polarisation
+                        var has_polarisation = true;
+
+                        try {
+                            var pol_width = dv.getUint32(offset, endianness);
+                            offset += 4;
+
+                            var pol_height = dv.getUint32(offset, endianness);
+                            offset += 4;
+
+                            var pol_target = dv.getUint32(offset, endianness);
+                            offset += 4;
+
+                            var intensity_len = dv.getUint32(offset, endianness);
+                            offset += 4;
+
+                            var angle_len = dv.getUint32(offset, endianness);
+                            offset += 4;
+
+                            console.log("FITS polarisation width:", pol_width, "height:", pol_height, "target:", pol_target);
+
+                            if (intensity_len > 0) {
+                                var frame_intensity = new Uint8Array(received_msg, offset, intensity_len);
+                                offset += intensity_len;
+                                console.log("FITS polarisation intensity length:", intensity_len);
+                            } else {
+                                has_polarisation = false;
+                            }
+
+                            if (angle_len > 0) {
+                                var frame_angle = new Uint8Array(received_msg, offset, angle_len);
+                                offset += angle_len;
+                                console.log("FITS polarisation angle length:", angle_len);
+                            } else {
+                                has_polarisation = false;
+                            }
+
+                        } catch (err) {
+                            has_polarisation = false;
+                        }
+
                         {
                             //console.log("processing an HDR image");
                             let start = performance.now();
@@ -6468,7 +6508,7 @@ async function open_websocket_connection(_datasetId, index) {
                                 if (displayContours)
                                     update_contours();
 
-                                if (plane_count > 1 && va_count == 1) {
+                                if (plane_count > 1 && va_count == 1 && has_polarisation) {
                                     polarisation = compute_polarisation(StokesP, alpha, plane_count);
                                     polarisation.pol_width = img_width;
                                     polarisation.pol_height = img_height;
@@ -6477,6 +6517,16 @@ async function open_websocket_connection(_datasetId, index) {
                                     if (polarisation != null) {
                                         process_polarisation(index, img_width, img_height, polarisation.intensity, polarisation.angle, polarisation.mask);
                                     }
+
+                                    //console.log("frame_intensity:", frame_intensity, "frame_angle:", frame_angle, 'pol_width:', pol_width, 'pol_height:', pol_height, 'pol_target:', pol_target);
+
+                                    var res = WASM.decompressZFPimage(pol_width, pol_height, 1, frame_intensity);
+                                    const intensity = WASM.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
+
+                                    var res = WASM.decompressZFPimage(pol_width, pol_height, 1, frame_angle);
+                                    const angle = WASM.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
+
+                                    process_polarisation_image(index, pol_width, pol_height, pol_target, intensity, angle);
                                 }
                             }
                         }
@@ -16560,7 +16610,7 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                     process_polarisation(index, img_width, img_height, polarisation.intensity, polarisation.angle, polarisation.mask);
                                 }
 
-                                console.log("frame_intensity:", frame_intensity, "frame_angle:", frame_angle, 'pol_width:', pol_width, 'pol_height:', pol_height, 'pol_target:', pol_target);
+                                //console.log("frame_intensity:", frame_intensity, "frame_angle:", frame_angle, 'pol_width:', pol_width, 'pol_height:', pol_height, 'pol_target:', pol_target);
 
                                 var res = WASM.decompressZFPimage(pol_width, pol_height, 1, frame_intensity);
                                 const intensity = WASM.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
@@ -16568,7 +16618,6 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                 var res = WASM.decompressZFPimage(pol_width, pol_height, 1, frame_angle);
                                 const angle = WASM.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
 
-                                //polarisation = { pol_width: pol_width, pol_height: pol_height, pol_target: pol_target, intensity: intensity, angle: angle };
                                 process_polarisation_image(index, pol_width, pol_height, pol_target, intensity, angle);
                             }
                         } else {
