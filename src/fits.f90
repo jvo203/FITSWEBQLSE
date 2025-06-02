@@ -6860,12 +6860,11 @@ contains
 
          ! obtain the polarisation intensity and angle
          call DownsizePolarizationSIMD(pixels, mask, img_width, img_height, xmin, ymin, xmax, ymax, 50, intensity, angle)
-         ! print the last line for intensity and angle
-         print *, 'intensity:', intensity
-         print *, 'polarisation intensity:', size(intensity), 'angle:', size(angle)
 
+         ! send the polarisation data
          call write_polarisation(fd, size(intensity, 1), size(intensity, 2), 50, c_loc(intensity), c_loc(angle), precision)
       else
+         ! send dummy polarisation information
          call write_polarisation(fd, 0, 0, 0, c_null_ptr, c_null_ptr, 0)
       end if
 
@@ -11637,6 +11636,9 @@ contains
       type(c_ptr) :: pixels_pid(4)
       integer(kind=c_int) :: pixels_rc(4)
 
+      real(kind=c_float), dimension(:,:), allocatable, target :: intensity, angle ! optional polarisation
+      integer :: xmin, xmax, ymin, ymax
+
       ! image histogram
       integer(kind=c_int), target :: hist(NBINS, 4) ! up to 4 planes
 
@@ -11939,6 +11941,22 @@ contains
 
          call write_image_spectrum(req%fd, max_planes, c_loc(tone), img_width, img_height, precision,&
          & c_loc(view_pixels), c_loc(view_mask))
+
+         ! optional polarisation
+         if (item%is_stokes .and. max_planes .ge. 3) then
+            ! get the min/max spatial range
+            call inherent_image_dimensions_from_mask(view_mask, inner_width, inner_height, xmin, xmax, ymin, ymax)
+
+            ! obtain the polarisation intensity and angle
+            call DownsizePolarizationSIMD(view_pixels, view_mask, img_width, img_height,&
+            & xmin, ymin, xmax, ymax, 50, intensity, angle)
+
+            ! send the polarisation data
+            call write_polarisation(req%fd, size(intensity, 1), size(intensity, 2), 50, c_loc(intensity), c_loc(angle), precision)
+         else
+            ! send dummy polarisation information
+            call write_polarisation(req%fd, 0, 0, 0, c_null_ptr, c_null_ptr, 0)
+         end if
 
          deallocate (view_pixels)
          deallocate (view_mask)
