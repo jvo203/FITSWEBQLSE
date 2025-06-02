@@ -4375,11 +4375,11 @@ void *ws_image_spectrum_response(void *ptr)
 
         // fill-in the content up to pixels/mask
         write_offset = sizeof(uint32_t) + max_planes * sizeof(uint32_t) + (size_t)cumulative_flux_len + max_planes * 7 * sizeof(float) + 2 * sizeof(uint32_t) + sizeof(uint32_t) + pixels_len + sizeof(uint32_t) + mask_len;
-        memcpy((char *)image_payload + ws_offset, buf, write_offset);
-        ws_offset += write_offset;
 
-        // polarisation data
+        // + polarisation data
         write_offset += 5 * sizeof(uint32_t) + pol_intensity_len + pol_angle_len;
+
+        // append the data
         memcpy((char *)image_payload + ws_offset, buf, write_offset);
         ws_offset += write_offset;
 
