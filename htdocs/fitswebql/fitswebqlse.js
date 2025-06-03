@@ -12342,7 +12342,7 @@ function x_axis_mouseleave() {
         } else {
             // re-display the image
             if (!composite_view)
-                init_webgl_image_buffers(va_count);
+                init_webgl_image_buffers(previous_plane);//va_count
             else
                 init_webgl_composite_image_buffers();
         }
