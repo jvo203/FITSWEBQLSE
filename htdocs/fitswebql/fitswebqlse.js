@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-06-02.0";
+    return "JS2025-06-03.1";
 }
 
 function uuidv4() {
@@ -12240,7 +12240,7 @@ function x_axis_mouseenter(offset) {
                 bitrate: Math.round(target_bitrate),
                 width: width,
                 height: height,
-                flux: document.getElementById('flux' + (index + 1)).value,
+                flux: polarisation == null ? document.getElementById('flux' + (index + 1)).value : document.getElementById('flux' + (previous_plane)).value,
                 timestamp: performance.now()
             };
 
