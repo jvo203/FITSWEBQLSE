@@ -38,3 +38,6 @@ htdocs/fitswebql_v5: File exists
  member.uid___A001_X12cc_X26.G14.225N.1_sci.spw19.cube.IQUV.manual.pbcor: dataset has been in error state for more than 60 seconds. Removing it.
  member.uid___A001_X12cc_X26.G14.225N.1_sci.spw19.cube.IQUV.manual.pbcor: dataset cannot be cached, destroying it.
 [C] aborting http_propagate_timeout (no cluster nodes found)
+
+Wed, 04 Jun 2025 17:03:22 JST	61.195.145.68	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.1.1 Safari/605.1.15	GET	http://jvo.nao.ac.jp/skynode/getDataForAkari.do?db=akari&schema=public&table=fis_image_v1&dataId=AKAI013000001	HTTP/1.1	getDataForAkari
+
