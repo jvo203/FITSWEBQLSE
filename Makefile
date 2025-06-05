@@ -194,6 +194,7 @@ ifeq ($(UNAME_S),Darwin)
 	# INC += -I/usr/local/include -I/usr/local/opt/openssl/include -I/usr/local/opt/curl/include
 	# LIBS += -L/usr/local/opt/openssl/lib -L/usr/local/opt/curl/lib -lcurl
 	#MOD += `pkg-config --cflags json-fortran`
+	LIBS += `pkg-config --libs openssl`
 
 	INC += -I${HOMEBREW_PREFIX}/opt/libpq/include -I${HOMEBREW_PREFIX}/opt/bzip2/include
 	# -I${HOMEBREW_PREFIX}/opt/libtar/include

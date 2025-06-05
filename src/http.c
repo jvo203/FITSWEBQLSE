@@ -21,6 +21,8 @@
 #include <glib.h>
 #include <microhttpd.h>
 #include <curl/curl.h>
+#include <openssl/sha.h>
+#include <uuid/uuid.h>
 
 // a libtar alternative C library
 #include "microtar.h"
@@ -67,6 +69,44 @@ static sqlite3 *splat_db = NULL;
 extern options_t options; // <options> is defined in main.c
 
 #include "mongoose.h" // mg_url_encode
+
+// uuid_tは16バイト配列
+#ifndef uuid_t
+typedef unsigned char uuid_t[16];
+#endif
+
+// 代替関数: namespace, name, name_lenをSHA-1でハッシュし、UUID v5形式に整形
+void uuid_generate_sha1(uuid_t out, const uuid_t ns, const void *name, size_t name_len)
+{
+    unsigned char hash[SHA_DIGEST_LENGTH];
+
+    SHA_CTX ctx;
+    SHA1_Init(&ctx);
+    SHA1_Update(&ctx, ns, 16);
+    SHA1_Update(&ctx, name, name_len);
+    SHA1_Final(hash, &ctx);
+
+    memcpy(out, hash, 16);
+
+    // バージョン5（SHA-1）をセット
+    out[6] = (out[6] & 0x0F) | 0x50;
+    // RFC4122 variant
+    out[8] = (out[8] & 0x3F) | 0x80;
+}
+
+// 名前空間UUID（例: DNS名前空間）
+#define NAMESPACE_UUID_STR "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
+
+void uuid_from_url(const char *input, char *uuid_str)
+{
+    uuid_t namespace_uuid, out;
+    uuid_parse(NAMESPACE_UUID_STR, namespace_uuid);
+
+    // UUID v5（SHA-1）で生成
+    uuid_generate_sha1(out, namespace_uuid, input, strlen(input)); // this function is only available in Linux (not under macOS)
+
+    uuid_unparse_lower(out, uuid_str);
+}
 
 inline const char *denull(const char *str)
 {
@@ -1349,6 +1389,11 @@ static void *handle_url_download(void *arg)
 
     char *extension = NULL;
 
+    // url to uuid
+    uuid_from_url(url, fname);
+    printf("[C] filename: %s\n", fname);
+
+    /*
     // find the last '/'
     char *last_slash = strrchr(url, '/');
 
@@ -1379,7 +1424,7 @@ static void *handle_url_download(void *arg)
         };
 
         extension = ext;
-    }
+    }*/
 
     if (req->datasetid == NULL)
     {
@@ -3931,6 +3976,11 @@ static enum MHD_Result on_http_connection(void *cls,
 
                 directory = options.fits_home;
 
+                // url to uuid
+                uuid_from_url(url, fname);
+                printf("[C] filename: %s\n", fname);
+
+                /*
                 // find the last '/'
                 char *last_slash = strrchr(url, '/');
 
@@ -3961,7 +4011,7 @@ static enum MHD_Result on_http_connection(void *cls,
                     };
 
                     extension = ext;
-                }
+                }*/
 
                 if (extension == NULL)
                     snprintf(filepath, sizeof(filepath), "%s/%s.fits", options.fits_home, fname);
