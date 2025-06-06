@@ -171,7 +171,7 @@ ifneq ($(SHARE),)
 endif
 
 # `pkg-config --libs libavif` `pkg-config --libs libjpeg`
-LIBS = -L/usr/local/lib `pkg-config --libs glib-2.0` `pkg-config --libs libmicrohttpd` -lmicrohttpd_ws `pkg-config --libs liblz4` `pkg-config --libs cfitsio` `pkg-config --libs wcslib` -lsqlite3 `pkg-config --libs libcurl` -lz -lbz2 -pthread `pkg-config --libs libzmq` `pkg-config --libs libczmq` `pkg-config --libs x265` `pkg-config --libs libpq` `ast_link`
+LIBS = -L/usr/local/lib `pkg-config --libs glib-2.0` `pkg-config --libs libmicrohttpd` -lmicrohttpd_ws `pkg-config --libs liblz4` `pkg-config --libs cfitsio` `pkg-config --libs wcslib` -lsqlite3 `pkg-config --libs libcurl` -lz -lbz2 -pthread `pkg-config --libs libzmq` `pkg-config --libs libczmq` `pkg-config --libs x265` `pkg-config --libs libpq` `ast_link` `pkg-config --libs openssl`
 #-ltar
 
 ifneq ($(UNAME_S),Darwin)
@@ -199,8 +199,8 @@ ifeq ($(UNAME_S),Darwin)
 	LIBS += -L${HOMEBREW_PREFIX}/opt/libpq/lib -L${HOMEBREW_PREFIX}/opt/bzip2/lib -L${HOMEBREW_PREFIX}/opt/gperftools/lib
 	# -L${HOMEBREW_PREFIX}/opt/libtar/lib
 
-	CC = ${HOMEBREW_PREFIX}/opt/gcc/bin/gcc-14
-	FORT = ${HOMEBREW_PREFIX}/opt/gcc/bin/gfortran-14
+	CC = ${HOMEBREW_PREFIX}/opt/gcc/bin/gcc-15
+	FORT = ${HOMEBREW_PREFIX}/opt/gcc/bin/gfortran-15
 	FLAGS = -march=native -Ofast -flto -fPIC -fno-finite-math-only -funroll-loops -ftree-vectorize -fopenmp	
 	# -mcmodel=large results in "error: invalid variant 'BLEAH'"
 	# Apple Silicon: -march=native conflicts between macOS-arm64 and macOS-x86_64 with Intel oneAPI
@@ -209,7 +209,7 @@ ifeq ($(UNAME_S),Darwin)
 	FLAGS := $(FLAGS) -std=f2018 -fall-intrinsics
 
 	# GCC FORTRAN runtime
-	LIBS += -L${HOMEBREW_PREFIX}/opt/gcc/lib/gcc/14 -lgfortran -lm -framework Accelerate
+	LIBS += -L${HOMEBREW_PREFIX}/opt/gcc/lib/gcc/15 -lgfortran -lm -framework Accelerate
 
 	# use the built-in macOS Accelerate instead but only on Apple Silicon (OK, Intel macOS too)
 	#ifeq ($(UNAME_M),arm64)

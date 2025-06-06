@@ -21,6 +21,7 @@
 #include <glib.h>
 #include <microhttpd.h>
 #include <curl/curl.h>
+#include <openssl/evp.h>
 
 // a libtar alternative C library
 #include "microtar.h"
@@ -67,6 +68,54 @@ static sqlite3 *splat_db = NULL;
 extern options_t options; // <options> is defined in main.c
 
 #include "mongoose.h" // mg_url_encode
+
+// uuid_tは16バイト配列
+#ifndef uuid_t
+typedef unsigned char uuid_t[16];
+#endif
+
+// EVPを使ってURL文字列からUUID（SHA-256ベース、v4風）を生成
+void uuid_from_url_evp(const char *url, uuid_t out)
+{
+    unsigned char hash[32]; // SHA-256は32バイト
+    unsigned int hash_len = 0;
+
+    EVP_MD_CTX *ctx = EVP_MD_CTX_new();
+    if (!ctx)
+        return;
+
+    if (EVP_DigestInit_ex(ctx, EVP_sha256(), NULL) == 1 &&
+        EVP_DigestUpdate(ctx, url, strlen(url)) == 1 &&
+        EVP_DigestFinal_ex(ctx, hash, &hash_len) == 1 && hash_len >= 16)
+    {
+        memcpy(out, hash, 16);
+        // バージョン4（ランダム）として整形
+        out[6] = (out[6] & 0x0F) | 0x40; // version 4
+        out[8] = (out[8] & 0x3F) | 0x80; // RFC4122 variant
+    }
+
+    EVP_MD_CTX_free(ctx);
+}
+
+// UUIDを文字列化（xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx形式）
+void uuid_unparse_lower_evp(const uuid_t in, char *out_str)
+{
+    snprintf(out_str, 37,
+             "%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x",
+             in[0], in[1], in[2], in[3], in[4], in[5], in[6], in[7],
+             in[8], in[9], in[10], in[11], in[12], in[13], in[14], in[15]);
+}
+
+void uuid_from_url(const char *input, char *uuid_str)
+{
+    uuid_t uuid;
+
+    // initialize the uuid with zeros
+    memset(uuid, 0, sizeof(uuid_t));
+
+    uuid_from_url_evp(input, uuid);
+    uuid_unparse_lower_evp(uuid, uuid_str);
+}
 
 inline const char *denull(const char *str)
 {
@@ -1347,6 +1396,11 @@ static void *handle_url_download(void *arg)
 
     char *extension = NULL;
 
+    // url to uuid
+    uuid_from_url(url, fname);
+    printf("[C] filename: %s\n", fname);
+
+    /*
     // find the last '/'
     char *last_slash = strrchr(url, '/');
 
@@ -1378,6 +1432,7 @@ static void *handle_url_download(void *arg)
 
         extension = ext;
     }
+    */
 
     if (req->datasetid == NULL)
     {
@@ -3918,6 +3973,11 @@ static enum MHD_Result on_http_connection(void *cls,
 
                 directory = options.fits_home;
 
+                // url to uuid
+                uuid_from_url(url, fname);
+                printf("[C] filename: %s\n", fname);
+
+                /*
                 // find the last '/'
                 char *last_slash = strrchr(url, '/');
 
@@ -3949,6 +4009,7 @@ static enum MHD_Result on_http_connection(void *cls,
 
                     extension = ext;
                 }
+                    */
 
                 if (extension == NULL)
                     snprintf(filepath, sizeof(filepath), "%s/%s.fits", options.fits_home, fname);
