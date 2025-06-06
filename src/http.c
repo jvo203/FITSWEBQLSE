@@ -21,8 +21,7 @@
 #include <glib.h>
 #include <microhttpd.h>
 #include <curl/curl.h>
-#include <openssl/sha.h>
-#include <uuid/uuid.h>
+#include <openssl/evp.h>
 
 // a libtar alternative C library
 #include "microtar.h"
@@ -75,37 +74,47 @@ extern options_t options; // <options> is defined in main.c
 typedef unsigned char uuid_t[16];
 #endif
 
-// 代替関数: namespace, name, name_lenをSHA-1でハッシュし、UUID v5形式に整形
-void uuid_generate_sha1(uuid_t out, const uuid_t ns, const void *name, size_t name_len)
+// EVPを使ってURL文字列からUUID（SHA-256ベース、v4風）を生成
+void uuid_from_url_evp(const char *url, uuid_t out)
 {
-    unsigned char hash[SHA_DIGEST_LENGTH];
+    unsigned char hash[32]; // SHA-256は32バイト
+    unsigned int hash_len = 0;
 
-    SHA_CTX ctx;
-    SHA1_Init(&ctx);
-    SHA1_Update(&ctx, ns, 16);
-    SHA1_Update(&ctx, name, name_len);
-    SHA1_Final(hash, &ctx);
+    EVP_MD_CTX *ctx = EVP_MD_CTX_new();
+    if (!ctx)
+        return;
 
-    memcpy(out, hash, 16);
+    if (EVP_DigestInit_ex(ctx, EVP_sha256(), NULL) == 1 &&
+        EVP_DigestUpdate(ctx, url, strlen(url)) == 1 &&
+        EVP_DigestFinal_ex(ctx, hash, &hash_len) == 1 && hash_len >= 16)
+    {
+        memcpy(out, hash, 16);
+        // バージョン4（ランダム）として整形
+        out[6] = (out[6] & 0x0F) | 0x40; // version 4
+        out[8] = (out[8] & 0x3F) | 0x80; // RFC4122 variant
+    }
 
-    // バージョン5（SHA-1）をセット
-    out[6] = (out[6] & 0x0F) | 0x50;
-    // RFC4122 variant
-    out[8] = (out[8] & 0x3F) | 0x80;
+    EVP_MD_CTX_free(ctx);
 }
 
-// 名前空間UUID（例: DNS名前空間）
-#define NAMESPACE_UUID_STR "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
+// UUIDを文字列化（xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx形式）
+void uuid_unparse_lower_evp(const uuid_t in, char *out_str)
+{
+    snprintf(out_str, 37,
+             "%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x",
+             in[0], in[1], in[2], in[3], in[4], in[5], in[6], in[7],
+             in[8], in[9], in[10], in[11], in[12], in[13], in[14], in[15]);
+}
 
 void uuid_from_url(const char *input, char *uuid_str)
 {
-    uuid_t namespace_uuid, out;
-    uuid_parse(NAMESPACE_UUID_STR, namespace_uuid);
+    uuid_t uuid;
 
-    // UUID v5（SHA-1）で生成
-    uuid_generate_sha1(out, namespace_uuid, input, strlen(input)); // this function is only available in Linux (not under macOS)
+    // initialize the uuid with zeros
+    memset(uuid, 0, sizeof(uuid_t));
 
-    uuid_unparse_lower(out, uuid_str);
+    uuid_from_url_evp(input, uuid);
+    uuid_unparse_lower_evp(uuid, uuid_str);
 }
 
 inline const char *denull(const char *str)

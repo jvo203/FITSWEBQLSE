@@ -172,7 +172,7 @@ ifneq ($(SHARE),)
 endif
 
 # `pkg-config --libs libavif` `pkg-config --libs libjpeg`
-LIBS = -L/usr/local/lib `pkg-config --libs glib-2.0` `pkg-config --libs libmicrohttpd` -lmicrohttpd_ws `pkg-config --libs liblz4` `pkg-config --libs cfitsio` `pkg-config --libs wcslib` -lsqlite3 `pkg-config --libs libcurl` -lz -lbz2 -pthread `pkg-config --libs libzmq` `pkg-config --libs libczmq` `pkg-config --libs x265` `pkg-config --libs libpq` `ast_link`
+LIBS = -L/usr/local/lib `pkg-config --libs glib-2.0` `pkg-config --libs libmicrohttpd` -lmicrohttpd_ws `pkg-config --libs liblz4` `pkg-config --libs cfitsio` `pkg-config --libs wcslib` -lsqlite3 `pkg-config --libs libcurl` -lz -lbz2 -pthread `pkg-config --libs libzmq` `pkg-config --libs libczmq` `pkg-config --libs x265` `pkg-config --libs libpq` `ast_link` `pkg-config --libs openssl`
 #-ltar
 
 ifneq ($(UNAME_S),Darwin)
@@ -193,8 +193,7 @@ endif
 ifeq ($(UNAME_S),Darwin)
 	# INC += -I/usr/local/include -I/usr/local/opt/openssl/include -I/usr/local/opt/curl/include
 	# LIBS += -L/usr/local/opt/openssl/lib -L/usr/local/opt/curl/lib -lcurl
-	#MOD += `pkg-config --cflags json-fortran`
-	LIBS += `pkg-config --libs openssl`
+	#MOD += `pkg-config --cflags json-fortran`	
 
 	INC += -I${HOMEBREW_PREFIX}/opt/libpq/include -I${HOMEBREW_PREFIX}/opt/bzip2/include
 	# -I${HOMEBREW_PREFIX}/opt/libtar/include
