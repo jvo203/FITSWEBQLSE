@@ -5795,7 +5795,7 @@ contains
       call make_histogram(hist, data, pmin, pmax)
 
       pmedian = hist_median(data, pmin, pmax, 2) ! a two-pass median estimation
-      print *, 'pmin =', pmin, 'pmax =', pmax, 'hist. median =', pmedian
+      print *, 'plane:', plane, 'pmin =', pmin, 'pmax =', pmax, 'hist. median =', pmedian
 
       ! pmedian = median(data)
       ! print *, '50th quantile (median) = ', pmedian
@@ -5823,8 +5823,8 @@ contains
       if (countP > 0) madP = madP/real(countP)
       if (countN > 0) madN = madN/real(countN)
 
-      print *, 'image pixels range pmin = ', pmin, ', pmax = ', pmax, ', median = ', pmedian
-      print *, 'mad = ', mad, ', madP = ', madP, ', madN = ', madN
+      print *, 'plane:', plane, 'image pixels range pmin = ', pmin, ', pmax = ', pmax, ', median = ', pmedian
+      print *, 'plane:', plane, 'mad = ', mad, ', madP = ', madP, ', madN = ', madN
 
       ! ALMAWebQL v2 - style
       u = 7.5
@@ -5892,7 +5892,7 @@ contains
          end block
       end if
 
-      print *, 'flux: ', tone%flux, ', black = ', black, ', white = ', white, ', sensitivity = ', sensitivity, ',&
+      print *, 'plane:', plane, 'flux: ', tone%flux, ', black = ', black, ', white = ', white, ', sensitivity = ', sensitivity, ',&
       & ratio sensitivity = ', ratio_sensitivity
 
       tone%pmin = pmin
