@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-06-03.1";
+    return "JS2025-06-10.0";
 }
 
 function uuidv4() {
@@ -16147,12 +16147,16 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
 
                     // re-allocate the container arrays
                     if (plane_count > 1) {
-                        fitsContainer = new Array(plane_count);
-                        imageContainer = new Array(plane_count);
+                        if (fitsContainer == null || fitsContainer.length != plane_count) {
+                            console.log("Reallocating fitsContainer and imageContainer arrays for plane_count:", plane_count);
+                            // reallocate the arrays
+                            fitsContainer = new Array(plane_count);
+                            imageContainer = new Array(plane_count);
 
-                        for (let i = 0; i < plane_count; i++) {
-                            fitsContainer[i] = null;
-                            imageContainer[i] = null;
+                            for (let i = 0; i < plane_count; i++) {
+                                fitsContainer[i] = null;
+                                imageContainer[i] = null;
+                            }
                         }
                     }
 
