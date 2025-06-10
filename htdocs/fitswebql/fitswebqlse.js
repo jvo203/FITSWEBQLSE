@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-06-10.0";
+    return "JS2025-06-10.1";
 }
 
 function uuidv4() {
@@ -4605,7 +4605,7 @@ function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, i
     if (va_count == 1) {
         if (index == previous_plane) { // plane_count could be > 1, by default we display the first intensity plane (i.e. Stokes I), and let a user select the other planes from the menu
             if (!streaming) {
-                init_webgl_image_buffers(va_count);
+                init_webgl_image_buffers(previous_plane);//va_count
             }
 
             setup_image_selection();
