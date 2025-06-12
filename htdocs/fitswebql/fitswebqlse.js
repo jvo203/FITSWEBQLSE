@@ -16005,7 +16005,7 @@ async function fetch_spectral_lines(datasetId, freq_start = 0, freq_end = 0) {
     xmlhttp.send();
 };
 
-async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp) {
+async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp, band_lo = NaN, band_hi = NaN) {
     var rect = document.getElementById('mainDiv').getBoundingClientRect();
     var width = Math.round(rect.width - 20);
     var height = Math.round(rect.height - 20);
@@ -16021,6 +16021,9 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
 
     if (add_timestamp)
         url += '&timestamp=' + Date.now();
+
+    if (!Number.isNaN(band_lo) && !Number.isNaN(band_hi))
+        url += '&band_lo=' + band_lo + '&band_hi=' + band_hi;
 
     xmlhttp.onreadystatechange = function () {
         if (xmlhttp.readyState == 4 && xmlhttp.status == 404) {
