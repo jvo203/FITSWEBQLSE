@@ -16065,7 +16065,7 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
 
             console.log("Connection error:", xmlhttp.status, ", re-fetching image after 1 second.");
             setTimeout(function () {
-                fetch_image_spectrum(_datasetId, index, fetch_data, true);
+                fetch_image_spectrum(_datasetId, index, fetch_data, true, band_lo, band_hi);
             }, 1000);
         }
 
@@ -16077,7 +16077,7 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
 
             console.log("Server not ready, long-polling image again after 250ms.");
             setTimeout(function () {
-                fetch_image_spectrum(_datasetId, index, fetch_data, false);
+                fetch_image_spectrum(_datasetId, index, fetch_data, false, band_lo, band_hi);
             }, 250);
         }
 
@@ -18503,10 +18503,10 @@ function change_image_quality() {
     display_hourglass();
 
     if (va_count == 1) {
-        fetch_image_spectrum(datasetId, 1, false, false);
+        fetch_image_spectrum(datasetId, 1, false, false, data_band_lo, data_band_hi);
     } else {
         for (let index = 1; index <= va_count; index++)
-            fetch_image_spectrum(datasetId[index - 1], index, false, false);
+            fetch_image_spectrum(datasetId[index - 1], index, false, false, data_band_lo, data_band_hi);
     }
 }
 
