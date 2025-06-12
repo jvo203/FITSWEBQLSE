@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-06-10.1";
+    return "JS2025-06-12.0";
 }
 
 function uuidv4() {
@@ -15930,7 +15930,7 @@ async function fetch_atomic_spectra(wmin, wmax) {
     return lines;
 }
 
-async function fetch_spectral_lines(datasetId, freq_start, freq_end) {
+async function fetch_spectral_lines(datasetId, freq_start = 0, freq_end = 0) {
     var xmlhttp = new XMLHttpRequest();
 
     //freq_start, freq_end [Hz]
@@ -22087,7 +22087,7 @@ async function mainRenderer() {
         if (va_count == 1) {
             open_websocket_connection(datasetId, 1);
             fetch_image_spectrum(datasetId, 1, true, false);
-            fetch_spectral_lines(datasetId, 0, 0);
+            fetch_spectral_lines(datasetId);
             poll_progress(datasetId, 1);
         }
         else {
