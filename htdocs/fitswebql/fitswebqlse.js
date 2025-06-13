@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-06-12.0";
+    return "JS2025-06-13.0";
 }
 
 function uuidv4() {
@@ -18499,12 +18499,22 @@ function change_image_quality() {
 
     display_hourglass();
 
-    if (va_count == 1) {
+    /*if (va_count == 1) {
         fetch_image_spectrum(datasetId, 1, false, false);
     } else {
         for (let index = 1; index <= va_count; index++)
             fetch_image_spectrum(datasetId[index - 1], index, false, false);
-    }
+    }*/
+
+    // use the WebSocket connection to fetch the images
+    // this functionality takes into account the user-adjustable frequency bounds
+
+    image_count = 0;
+    viewport_count = 0;
+    spectrum_count = 0;
+
+    for (let index = 1; index <= va_count; index++)
+        cube_refresh(index);
 }
 
 function change_intensity_threshold(refresh) {
