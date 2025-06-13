@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-06-13.0";
+    return "JS2025-06-13.1";
 }
 
 function uuidv4() {
@@ -962,6 +962,7 @@ function plot_hds_spectrum(data, mask, bmin, bmax, index) {
 }
 
 function plot_spectrum(dataArray) {
+    console.log("plot_spectrum():", dataArray);
     /*try {
       if (d3.select("#pvline").attr("opacity") > 0.0)
         return;
@@ -6594,7 +6595,7 @@ async function open_websocket_connection(_datasetId, index) {
                             var res = WASM.decompressZFPspectrum(plane_count, spectrum_len, frame);
                             const spectrum = WASM.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
 
-                            // console.log("spectrum size: ", spectrum.length, spectrum, "elapsed: ", elapsed, "[ms]");
+                            console.log("spectrum size: ", spectrum.length, spectrum, "elapsed: ", elapsed, "[ms]");
 
                             if (spectrum.length > 0) {
                                 // attach the spectrum as either "mean" or "integrated"
@@ -6604,6 +6605,7 @@ async function open_websocket_connection(_datasetId, index) {
                                     for (let i = 0; i < plane_count; i++) {
                                         // slice the spectrum into <spectrum_len> chunks
                                         let spectrum_i = spectrum.slice(i * spectrum_len, (i + 1) * spectrum_len);
+                                        console.log("i:", i, "spectrum_i:", spectrum_i, "length:", spectrum_i.length);
 
                                         fitsContainer[i].depth = spectrum_i.length;
 
