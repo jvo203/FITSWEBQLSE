@@ -6836,6 +6836,8 @@ void write_histogram(int fd, const int *hist, int n)
 
 void write_spectrum(int fd, int no_planes, const float *spectrum, int n, int precision)
 {
+    printf("[C] write_spectrum: no_planes: %d, n: %d, precision: %d\n", no_planes, n, precision);
+
     uchar *compressed;
     // ZFP variables
     zfp_type data_type = zfp_type_float;

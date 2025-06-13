@@ -11965,7 +11965,7 @@ contains
 
          threshold = req%dx/2
 
-         print *, 'ws_image_spectrum_request::spectrum length:', size(spectrum,1),&
+         print *, 'ws_image_spectrum_request::spectrum length:', size(spectrum, 1), size(spectrum, 2),&
          & 'max_planes:', max_planes, 'threshold:', threshold
 
          if (size(spectrum, 1) .gt. threshold) then
