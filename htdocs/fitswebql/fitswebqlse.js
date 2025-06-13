@@ -6591,11 +6591,11 @@ async function open_websocket_connection(_datasetId, index) {
 
                         // ZFP decoder part
                         waitForModuleReady().then(() => {
-                            console.log("FITS spectrum length:", spectrum_len);
-                            var res = WASM.decompressZFPspectrum(plane_count, spectrum_len, frame);
+                            console.log("FITS spectrum length:", spectrum_len, "plane_count:", plane_count, "frame.length:", frame.length);
+                            const res = WASM.decompressZFPspectrum(plane_count, spectrum_len, frame);
                             const spectrum = WASM.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
 
-                            console.log("spectrum size: ", spectrum.length, spectrum, "elapsed: ", elapsed, "[ms]");
+                            console.log("spectrum size: ", spectrum.length, "res[1]:", res[1], spectrum, "elapsed: ", elapsed, "[ms]");
 
                             if (spectrum.length > 0) {
                                 // attach the spectrum as either "mean" or "integrated"
