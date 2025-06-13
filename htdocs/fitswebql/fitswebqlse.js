@@ -6398,10 +6398,10 @@ async function open_websocket_connection(_datasetId, index) {
 
                             if (i == previous_plane) {
                                 console.log("previous_plane:", previous_plane, "tone_mapping:", tone_mapping);
-                                let currentFlux = document.getElementById('flux' + index).value;
+                                let currentFlux = document.getElementById('flux' + i).value;
 
                                 if (currentFlux != tone_mapping.flux) {
-                                    document.getElementById('flux' + index).value = tone_mapping.flux;
+                                    document.getElementById('flux' + i).value = tone_mapping.flux;
                                 }
                             }
 
@@ -6553,10 +6553,10 @@ async function open_websocket_connection(_datasetId, index) {
                         }
 
                         //refresh the histogram
-                        redraw_histogram(index);
+                        redraw_histogram(previous_plane);
 
                         // refresh tone mapping
-                        change_tone_mapping(index, true);
+                        change_tone_mapping(previous_plane, true);
 
                         if (composite_view) {
                             if (image_count == va_count)
