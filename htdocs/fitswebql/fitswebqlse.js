@@ -6518,7 +6518,7 @@ async function open_websocket_connection(_datasetId, index) {
                                         process_polarisation(index, img_width, img_height, polarisation.intensity, polarisation.angle, polarisation.mask);
                                     }
 
-                                    //console.log("frame_intensity:", frame_intensity, "frame_angle:", frame_angle, 'pol_width:', pol_width, 'pol_height:', pol_height, 'pol_target:', pol_target);
+                                    // console.log("frame_intensity:", frame_intensity, "frame_angle:", frame_angle, 'pol_width:', pol_width, 'pol_height:', pol_height, 'pol_target:', pol_target);
 
                                     var res = WASM.decompressZFPimage(pol_width, pol_height, 1, frame_intensity);
                                     const intensity = WASM.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
