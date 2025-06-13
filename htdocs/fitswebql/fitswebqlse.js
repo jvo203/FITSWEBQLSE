@@ -12186,9 +12186,11 @@ function x_axis_mouseenter(offset) {
     // clear the legend
     if (va_count == 1) {
         var elem = d3.select("#legend"); elem.attr("opacity", 0);
+        let index = parseInt(document.getElementById('intensity_plane').value);
+
 
         // Clear the legend canvas
-        var image = imageContainer[va_count - 1];
+        var image = imageContainer[index - 1];// va_count - 1
         var gl = image.legend_gl;
 
         gl.clearColor(0, 0, 0, 0);
