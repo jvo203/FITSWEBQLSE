@@ -187,7 +187,9 @@ struct buffer
 
     // std::cout << "[decompressZFP1D] " << bytes.size() << " bytes." << std::endl;
 
-    if (spectrumBuffer != NULL && spectrumLength != length)
+    size_t spectrum_size = size_t(length) * size_t(plane_count);
+
+    if (spectrumBuffer != NULL && spectrumLength != spectrum_size)
     {
         free(spectrumBuffer);
 
@@ -197,7 +199,7 @@ struct buffer
 
     if (spectrumBuffer == NULL)
     {
-        spectrumLength = size_t(length) * size_t(plane_count);
+        spectrumLength = spectrum_size;
         spectrumBuffer = (float *)calloc(spectrumLength, sizeof(float));
     }
 
