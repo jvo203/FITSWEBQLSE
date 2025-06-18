@@ -7083,8 +7083,25 @@ void write_image_spectrum(int fd, int no_planes, struct image_tone_mapping_type 
     // compress 2D or 3D pixels with ZFP
     if (no_planes > 1)
     {
-        zfp_stream_set_rate(zfp, 8.0, data_type, 3, zfp_false); // 3D
-        // zfp_stream_set_accuracy(zfp, 0.0001); // accuracy for 3D data
+        // automatic quality switching based on the precision passed from FORTRAN
+        // (only for polarisation datasets)
+        if (precision == 16)
+        {
+            // highest quality
+            zfp_stream_set_accuracy(zfp, 1.0E-4); // accuracy for 3D data
+        }
+        else if (precision == 11)
+        {
+            // medium quality
+            zfp_stream_set_rate(zfp, 8.0, data_type, 3, zfp_false); // 3D
+        }
+        else // 8 or other
+        {
+            // lowest quality
+            // zfp_stream_set_precision(zfp, precision);
+            zfp_stream_set_precision(zfp, 11);
+        };
+
         field = zfp_field_3d((void *)pixels, data_type, nx, ny, nz);
     }
     else
