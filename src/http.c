@@ -7077,17 +7077,21 @@ void write_image_spectrum(int fd, int no_planes, struct image_tone_mapping_type 
         printf("|%f,%d", pixels[i], mask[i]);
     printf("\n");*/
 
-    // compress 2D or 3D pixels with ZFP
-    if (no_planes > 1)
-        field = zfp_field_3d((void *)pixels, data_type, nx, ny, nz);
-    else
-        field = zfp_field_2d((void *)pixels, data_type, nx, ny);
-
     // allocate metadata for a compressed stream
     zfp = zfp_stream_open(NULL);
 
-    // zfp_stream_set_rate(zfp, 8.0, data_type, 2, 0);
-    zfp_stream_set_precision(zfp, precision);
+    // compress 2D or 3D pixels with ZFP
+    if (no_planes > 1)
+    {
+        zfp_stream_set_rate(zfp, 8.0, data_type, 3, zfp_false); // 3D
+        // zfp_stream_set_accuracy(zfp, 0.0001); // accuracy for 3D data
+        field = zfp_field_3d((void *)pixels, data_type, nx, ny, nz);
+    }
+    else
+    {
+        zfp_stream_set_precision(zfp, precision);
+        field = zfp_field_2d((void *)pixels, data_type, nx, ny);
+    };
 
     // allocate buffer for compressed data
     bufsize = zfp_stream_maximum_size(zfp, field);
