@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-06-13.1";
+    return "JS2025-06-18.0";
 }
 
 function uuidv4() {
@@ -6636,7 +6636,12 @@ async function open_websocket_connection(_datasetId, index) {
                                 if (va_count == 1) {
                                     setup_axes();
 
-                                    var index = parseInt(document.getElementById('intensity_plane').value);
+                                    try {
+                                        var index = parseInt(document.getElementById('intensity_plane').value);
+                                    } catch (e) {
+                                        var index = va_count;
+                                    }
+
                                     let fitsData = fitsContainer[index - 1];
 
                                     //plot_spectrum([spectrum]);
@@ -10978,7 +10983,12 @@ function display_preferences(index) {
 }
 
 function change_intensity_plane() {
-    var index = parseInt(document.getElementById('intensity_plane').value);
+    try {
+        var index = parseInt(document.getElementById('intensity_plane').value);
+    } catch (e) {
+        var index = va_count;
+    }
+
     console.log("change_intensity_plane: index = ", index);
 
     // clear the existing image WebGL buffers
@@ -12188,8 +12198,12 @@ function x_axis_mouseenter(offset) {
     // clear the legend
     if (va_count == 1) {
         var elem = d3.select("#legend"); elem.attr("opacity", 0);
-        let index = parseInt(document.getElementById('intensity_plane').value);
 
+        try {
+            var index = parseInt(document.getElementById('intensity_plane').value);
+        } catch (e) {
+            var index = va_count;
+        }
 
         // Clear the legend canvas
         var image = imageContainer[index - 1];// va_count - 1
