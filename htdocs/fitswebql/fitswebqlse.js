@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-06-18.0";
+    return "JS2025-06-26.0";
 }
 
 function uuidv4() {
@@ -21944,7 +21944,7 @@ async function mainRenderer() {
             .attr("id", "PolarisationCanvas")
             .attr("width", width)
             .attr("height", height)
-            .attr('style', 'position: fixed; left: 10px; top: 10px; z-index: 52');// mix-blend-mode: difference;
+            .attr('style', 'position: fixed; left: 10px; top: 10px; z-index: 52; mix-blend-mode: difference');// mix-blend-mode: difference;
 
         d3.select("#mainDiv").append("svg")
             .attr("id", "BackgroundSVG")
@@ -21968,7 +21968,7 @@ async function mainRenderer() {
             .attr("id", "PolarisationViewport")
             .attr("width", width)
             .attr("height", height)
-            .attr('style', 'position: fixed; left: 10px; top: 10px; z-index: 56');
+            .attr('style', 'position: fixed; left: 10px; top: 10px; z-index: 56; mix-blend-mode: difference;');
 
         d3.select("#mainDiv").append("svg")
             .attr("id", "BackSVG")
