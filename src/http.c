@@ -164,7 +164,7 @@ extern void *download_request(void *req);   // a FORTRAN subroutine
 extern void *viewport_request(void *req);   // a FORTRAN subroutine
 extern void *cluster_pv_request(void *req); // a FORTRAN subroutine
 void download_response(int fd, const char *filename);
-void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *end, int no_planes, int *status, float *frame_min, float *frame_max, float *frame_median, float *mean_spectrum, float *integrated_spectrum);
+void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *end, int *no_planes, int *status, float *frame_min, float *frame_max, float *frame_median, float *mean_spectrum, float *integrated_spectrum);
 void *fetch_inner_dimensions(void *ptr);
 void *fetch_video_frame(void *ptr);
 void *fetch_global_statistics(void *ptr);
@@ -5981,7 +5981,7 @@ WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
     return realsize;
 }
 
-void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *end, int no_planes, int *status, float *frame_min, float *frame_max, float *frame_median, float *mean_spectrum, float *integrated_spectrum)
+void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *end, int *no_planes, int *status, float *frame_min, float *frame_max, float *frame_median, float *mean_spectrum, float *integrated_spectrum)
 {
     int progress;
 
@@ -6033,8 +6033,11 @@ void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *
         // the starting offset <idx>
         post_size += sizeof(int);
 
+        // no_planes
+        post_size += sizeof(int);
+
         // include five floating-point arrays too ... for the range [start, end]
-        post_size += 5 * progress * sizeof(float);
+        post_size += 5 * (*no_planes) * progress * sizeof(float);
     }
 
     // assume a catastrophic error
@@ -6057,6 +6060,10 @@ void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *
             // idx
             memcpy(post_buffer + offset, &idx, sizeof(idx));
             offset += sizeof(idx);
+
+            // no_planes
+            memcpy(post_buffer + offset, no_planes, sizeof(*no_planes));
+            offset += sizeof(*no_planes);
 
             // frame_min
             memcpy(post_buffer + offset, &(frame_min[idx]), progress * sizeof(float));

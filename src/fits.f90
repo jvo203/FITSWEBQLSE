@@ -763,8 +763,8 @@ module fits
 
          type(c_ptr), value :: root
          character(kind=c_char), intent(in) :: datasetid(*)
-         integer(c_int), value :: len, no_planes
-         integer(c_int) :: start, end, status
+         integer(c_int), value :: len
+         integer(c_int) :: start, end, no_planes, status
          type(c_ptr), value, intent(in) :: frame_min, frame_max, frame_median
          type(c_ptr), value, intent(in) :: mean_spectrum, integrated_spectrum
 
