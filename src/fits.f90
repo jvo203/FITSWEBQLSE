@@ -755,7 +755,7 @@ module fits
          type(c_ptr), intent(in), value :: arg   ! a pointer to type(pv_request_t)
       end subroutine fetch_pv_diagram
 
-      subroutine fetch_channel_range(root, datasetid, len, start, end, status,&
+      subroutine fetch_channel_range(root, datasetid, len, start, end, no_planes, status,&
       &frame_min, frame_max, frame_median,&
       &mean_spectrum, integrated_spectrum) BIND(C, name='fetch_channel_range')
          use, intrinsic :: ISO_C_BINDING
@@ -763,7 +763,7 @@ module fits
 
          type(c_ptr), value :: root
          character(kind=c_char), intent(in) :: datasetid(*)
-         integer(c_int), value :: len
+         integer(c_int), value :: len, no_planes
          integer(c_int) :: start, end, status
          type(c_ptr), value, intent(in) :: frame_min, frame_max, frame_median
          type(c_ptr), value, intent(in) :: mean_spectrum, integrated_spectrum
@@ -4972,7 +4972,7 @@ contains
                ! submit work completed in the previous step (<num_per_node>)
                ! fetch the range from the root node via HTTP
                ! a C function defined in http.c
-               call fetch_channel_range(root, item%datasetid, size(item%datasetid), start, end, status,&
+               call fetch_channel_range(root, item%datasetid, size(item%datasetid), start, end, max_planes, status,&
                &c_loc(item%frame_min), c_loc(item%frame_max), c_loc(item%frame_median),&
                &c_loc(item%mean_spectrum), c_loc(item%integrated_spectrum))
             end if

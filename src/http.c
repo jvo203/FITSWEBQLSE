@@ -164,7 +164,7 @@ extern void *download_request(void *req);   // a FORTRAN subroutine
 extern void *viewport_request(void *req);   // a FORTRAN subroutine
 extern void *cluster_pv_request(void *req); // a FORTRAN subroutine
 void download_response(int fd, const char *filename);
-void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *end, int *status, float *frame_min, float *frame_max, float *frame_median, float *mean_spectrum, float *integrated_spectrum);
+void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *end, int no_planes, int *status, float *frame_min, float *frame_max, float *frame_median, float *mean_spectrum, float *integrated_spectrum);
 void *fetch_inner_dimensions(void *ptr);
 void *fetch_video_frame(void *ptr);
 void *fetch_global_statistics(void *ptr);
@@ -5981,7 +5981,7 @@ WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
     return realsize;
 }
 
-void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *end, int *status, float *frame_min, float *frame_max, float *frame_median, float *mean_spectrum, float *integrated_spectrum)
+void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *end, int no_planes, int *status, float *frame_min, float *frame_max, float *frame_median, float *mean_spectrum, float *integrated_spectrum)
 {
     int progress;
 
