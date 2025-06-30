@@ -6037,7 +6037,7 @@ void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *
         post_size += sizeof(int);
 
         // include five floating-point arrays too ... for the range [start, end]
-        post_size += 5 * (*no_planes) * progress * sizeof(float);
+        post_size += (*no_planes) * 5 * progress * sizeof(float);
     }
 
     // assume a catastrophic error
