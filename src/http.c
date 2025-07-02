@@ -6070,25 +6070,37 @@ void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *
             memcpy(post_buffer + offset, no_planes, sizeof(*no_planes));
             offset += sizeof(*no_planes);
 
+            // frame_min
             for (int i = 0; i < (*no_planes); i++)
             {
-                // frame_min
                 memcpy(post_buffer + offset, &(frame_min[i * stride + idx]), progress * sizeof(float));
                 offset += progress * sizeof(float);
+            }
 
-                // frame_max
+            // frame_max
+            for (int i = 0; i < (*no_planes); i++)
+            {
                 memcpy(post_buffer + offset, &(frame_max[i * stride + idx]), progress * sizeof(float));
                 offset += progress * sizeof(float);
+            }
 
-                // frame_median
+            // frame_median
+            for (int i = 0; i < (*no_planes); i++)
+            {
                 memcpy(post_buffer + offset, &(frame_median[i * stride + idx]), progress * sizeof(float));
                 offset += progress * sizeof(float);
+            }
 
-                // mean_spectrum
+            // mean_spectrum
+            for (int i = 0; i < (*no_planes); i++)
+            {
                 memcpy(post_buffer + offset, &(mean_spectrum[i * stride + idx]), progress * sizeof(float));
                 offset += progress * sizeof(float);
+            }
 
-                // integrated_spectrum
+            // integrated_spectrum
+            for (int i = 0; i < (*no_planes); i++)
+            {
                 memcpy(post_buffer + offset, &(integrated_spectrum[i * stride + idx]), progress * sizeof(float));
                 offset += progress * sizeof(float);
             }
