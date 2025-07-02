@@ -3531,13 +3531,12 @@ contains
 
    end subroutine update_timestamp
 
-   ! void submit_channel_range(void *ptr, int idx, int progress, float *frame_min, float *frame_max, float *frame_median, float *mean_spectrum, float *integrated_spectrum);
-   subroutine submit_channel_range(ptr, idx, N, frame_min, frame_max, frame_median,&
+   ! void submit_channel_range(void *ptr, int idx, int progress, int no_planes, float *frame_min, float *frame_max, float *frame_median, float *mean_spectrum, float *integrated_spectrum);
+   subroutine submit_channel_range(ptr, idx, N, no_planes, frame_min, frame_max, frame_median,&
    &mean_spectrum, integrated_spectrum) BIND(C, name='submit_channel_range')
       type(C_PTR), intent(in), value :: ptr
-      integer(c_int), intent(in), value :: idx, N
-      real(kind=c_float), dimension(*), intent(in) :: frame_min, frame_max, frame_median
-      real(kind=c_float), dimension(*), intent(in) :: mean_spectrum, integrated_spectrum
+      integer(c_int), intent(in), value :: idx, N, no_planes
+      real(kind=c_float), dimension(*), intent(in) :: frame_min, frame_max, frame_median, mean_spectrum, integrated_spectrum
 
       type(dataset), pointer :: item
       integer :: plane
@@ -3547,15 +3546,66 @@ contains
       if (.not. c_associated(ptr)) return
       call c_f_pointer(ptr, item)
 
-      ! fix the plane index before deciding how to proceed
-      plane = 1
+      if( size(item%frame_min, 2) .ne. no_planes .or. &
+         size(item%frame_max, 2) .ne. no_planes .or. &
+         size(item%frame_median, 2) .ne. no_planes .or. &
+         size(item%mean_spectrum, 2) .ne. no_planes .or. &
+         size(item%integrated_spectrum, 2) .ne. no_planes ) then
+         print *, "submit_channel_range: invalid number of planes:", no_planes
+         return
+      end if
+
+      if (idx + N - 1 > size(item%frame_min, 1)) then
+         print *, "submit_channel_range::frame_min index out of bounds:", idx, "N:", N,&
+         & "size:", size(item%frame_min, 1)
+         return
+      end if
+
+      if (idx + N - 1 > size(item%frame_max, 1)) then
+         print *, "submit_channel_range::frame_max index out of bounds:", idx, "N:", N,&
+         & "size:", size(item%frame_max, 1)
+         return
+      end if
+
+      if (idx + N - 1 > size(item%frame_median, 1)) then
+         print *, "submit_channel_range::frame_median index out of bounds:", idx, "N:", N,&
+         & "size:", size(item%frame_median, 1)
+         return
+      end if
+
+      if (idx + N - 1 > size(item%mean_spectrum, 1)) then
+         print *, "submit_channel_range::mean_spectrum index out of bounds:", idx, "N:", N,&
+         & "size:", size(item%mean_spectrum, 1)
+         return
+      end if
+
+      if (idx + N - 1 > size(item%integrated_spectrum, 1)) then
+         print *, "submit_channel_range::integrated_spectrum index out of bounds:", idx, "N:", N,&
+         & "size:", size(item%integrated_spectrum, 1)
+         return
+      end if
 
       ! no need for a mutex as no other thread will be accessing this array range (unless a dataset is being deleted ...)
-      item%frame_min(idx:idx + N - 1, plane) = frame_min(1:N)
-      item%frame_max(idx:idx + N - 1, plane) = frame_max(1:N)
-      item%frame_median(idx:idx + N - 1, plane) = frame_median(1:N)
-      item%mean_spectrum(idx:idx + N - 1, plane) = mean_spectrum(1:N)
-      item%integrated_spectrum(idx:idx + N - 1, plane) = integrated_spectrum(1:N)
+
+      do plane = 1, no_planes
+         item%frame_min(idx:idx + N - 1, plane) = frame_min(1+(no_planes-1)*N:no_planes*N) ! was 1:N
+      end do
+
+      do plane = 1, no_planes
+         item%frame_max(idx:idx + N - 1, plane) = frame_max(1+(no_planes-1)*N:no_planes*N) ! was 1:N
+      end do
+
+      do plane = 1, no_planes
+         item%frame_median(idx:idx + N - 1, plane) = frame_median(1+(no_planes-1)*N:no_planes*N) ! was 1:N
+      end do
+
+      do plane = 1, no_planes
+         item%mean_spectrum(idx:idx + N - 1, plane) = mean_spectrum(1+(no_planes-1)*N:no_planes*N) ! was 1:N
+      end do
+
+      do plane = 1, no_planes
+         item%integrated_spectrum(idx:idx + N - 1, plane) = integrated_spectrum(1+(no_planes-1)*N:no_planes*N) ! was 1:N
+      end do
 
    end subroutine submit_channel_range
 

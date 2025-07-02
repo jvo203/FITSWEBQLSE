@@ -193,7 +193,7 @@ extern float get_progress(void *item);
 extern float get_elapsed(void *item);
 extern void get_frequency_range(void *item, double *freq_start_ptr, double *freq_end_ptr);
 extern void inherent_image_dimensions_C(void *item, int *width, int *height);
-extern void submit_channel_range(void *ptr, int idx, int progress, float *frame_min, float *frame_max, float *frame_median, float *mean_spectrum, float *integrated_spectrum);
+extern void submit_channel_range(void *ptr, int idx, int progress, int no_planes, float *frame_min, float *frame_max, float *frame_median, float *mean_spectrum, float *integrated_spectrum);
 
 static size_t parse2stream(void *ptr, size_t size, size_t nmemb, void *user);
 static size_t parse2file(void *ptr, size_t size, size_t nmemb, void *user);
@@ -2219,7 +2219,7 @@ static enum MHD_Result on_http_connection(void *cls,
 
             // submit the POST data arrays to FORTRAN
             if (*progress > 0)
-                submit_channel_range(item, *idx, *progress, frame_min, frame_max, frame_median, mean_spectrum, integrated_spectrum);
+                submit_channel_range(item, *idx, *progress, *no_planes, frame_min, frame_max, frame_median, mean_spectrum, integrated_spectrum);
 
             int start, end, status;
 
