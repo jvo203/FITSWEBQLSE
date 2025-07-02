@@ -3546,6 +3546,8 @@ contains
       if (.not. c_associated(ptr)) return
       call c_f_pointer(ptr, item)
 
+      print *, "submit_channel_range: idx:", idx, "progress (N):", N, "no_planes:", no_planes
+
       if( size(item%frame_min, 2) .ne. no_planes .or. &
          size(item%frame_max, 2) .ne. no_planes .or. &
          size(item%frame_median, 2) .ne. no_planes .or. &
