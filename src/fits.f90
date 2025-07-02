@@ -3546,7 +3546,7 @@ contains
       if (.not. c_associated(ptr)) return
       call c_f_pointer(ptr, item)
 
-      print *, "submit_channel_range: idx:", idx, "progress (N):", N, "no_planes:", no_planes
+      ! print *, "submit_channel_range: idx:", idx, "progress (N):", N, "no_planes:", no_planes
 
       if( size(item%frame_min, 2) .ne. no_planes .or. &
          size(item%frame_max, 2) .ne. no_planes .or. &
@@ -4747,8 +4747,6 @@ contains
          call set_progress(item, int(0, kind=8), int(naxes(3), kind=8))
       end if
 
-      call set_header_status(item, .true.)
-
       print *, 'BITPIX:', bitpix, 'NAXIS:', naxis, 'NAXES:', naxes
       print *, '#no. pixels:', naxes(1)*naxes(2)
 
@@ -4792,6 +4790,8 @@ contains
 
       ! calculate the range for each image
       if (naxis .eq. 1 .or. naxis .eq. 2 .or. naxes(3) .eq. 1) then
+         call set_header_status(item, .true.)
+
          ! read a 2D image on the root node only
          ! client nodes can skip 2D images
          if (c_associated(root)) then
@@ -4892,46 +4892,10 @@ contains
 
          print *, "<read_fits_file> max_threads:", max_threads, "cluster_size:", cluster_size, "max_planes:", max_planes
 
-         if (.not. allocated(thread_units)) then
-            allocate (thread_units(max_threads))
-            thread_units = -1
-
-            ! open the thread-local FITS file if necessary
-            do i = 1, max_threads
-               if (thread_units(i) .eq. -1) then
-                  ! The STATUS parameter must always be initialized.
-                  status = 0
-
-                  rc = c_pthread_mutex_lock(file_unit_mtx)
-
-                  ! Get an unused Logical Unit Number to use to open the FITS file.
-                  call ftgiou(unit, status)
-
-                  if (status .ne. 0) then
-                     rc = c_pthread_mutex_unlock(file_unit_mtx)
-                     cycle
-                  end if
-
-                  ! open the FITS file, with read - only access.The returned BLOCKSIZE
-                  ! parameter is obsolete and should be ignored.
-                  readwrite = 0
-                  call ftopen(unit, filename, readwrite, blocksize, status)
-
-                  rc = c_pthread_mutex_unlock(file_unit_mtx)
-
-                  if (status .ne. 0) then
-                     print *, 'thread ', i, ': error opening '//filename
-                     cycle
-                  end if
-
-                  thread_units(i) = unit
-               end if
-            end do
-         end if
-
          ! initially the whole range
          start = 1
          end = naxes(3)
+         total_per_node = 0
 
          if (allocated(item%compressed)) deallocate (item%compressed)
          allocate (item%compressed(start:end, max_planes))
@@ -4975,9 +4939,46 @@ contains
          item%frame_max = -1.0E30
          item%frame_median = ieee_value(0.0, ieee_quiet_nan)
 
-         total_per_node = 0
-
          print *, '<read_fits_file> cube array allocations completed'
+         call set_header_status(item, .true.)
+
+         ! allocate the thread-local FITS file units
+         if (.not. allocated(thread_units)) then
+            allocate (thread_units(max_threads))
+            thread_units = -1
+
+            ! open the thread-local FITS file if necessary
+            do i = 1, max_threads
+               if (thread_units(i) .eq. -1) then
+                  ! The STATUS parameter must always be initialized.
+                  status = 0
+
+                  rc = c_pthread_mutex_lock(file_unit_mtx)
+
+                  ! Get an unused Logical Unit Number to use to open the FITS file.
+                  call ftgiou(unit, status)
+
+                  if (status .ne. 0) then
+                     rc = c_pthread_mutex_unlock(file_unit_mtx)
+                     cycle
+                  end if
+
+                  ! open the FITS file, with read - only access.The returned BLOCKSIZE
+                  ! parameter is obsolete and should be ignored.
+                  readwrite = 0
+                  call ftopen(unit, filename, readwrite, blocksize, status)
+
+                  rc = c_pthread_mutex_unlock(file_unit_mtx)
+
+                  if (status .ne. 0) then
+                     print *, 'thread ', i, ': error opening '//filename
+                     cycle
+                  end if
+
+                  thread_units(i) = unit
+               end if
+            end do
+         end if
 
          !$omp PARALLEL DEFAULT(SHARED) SHARED(item)&
          !$omp& SHARED(thread_units, group, naxis, naxes, nullval)&
