@@ -2080,6 +2080,7 @@ static enum MHD_Result on_http_connection(void *cls,
 
         int *progress = NULL;
         int *idx = NULL;
+        int *no_planes = NULL;
 
         size_t offset = 0;
         size_t expected_size = sizeof(int);
@@ -2132,25 +2133,29 @@ static enum MHD_Result on_http_connection(void *cls,
             offset += sizeof(int);
             (*idx)++; // convert a C index into a FORTRAN array index
 
+            // no_planes
+            no_planes = (int *)(data + offset);
+            offset += sizeof(int);
+
             // frame_min
             frame_min = (float *)(data + offset);
-            offset += (*progress) * sizeof(float);
+            offset += (*progress) * (*no_planes) * sizeof(float);
 
             // frame_max
             frame_max = (float *)(data + offset);
-            offset += (*progress) * sizeof(float);
+            offset += (*progress) * (*no_planes) * sizeof(float);
 
             // frame_median
             frame_median = (float *)(data + offset);
-            offset += (*progress) * sizeof(float);
+            offset += (*progress) * (*no_planes) * sizeof(float);
 
             // mean_spectrum
             mean_spectrum = (float *)(data + offset);
-            offset += (*progress) * sizeof(float);
+            offset += (*progress) * (*no_planes) * sizeof(float);
 
             // integrated_spectrum
             integrated_spectrum = (float *)(data + offset);
-            offset += (*progress) * sizeof(float);
+            offset += (*progress) * (*no_planes) * sizeof(float);
         }
 
         char *datasetId = strrchr(url, '/');
