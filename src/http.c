@@ -2105,7 +2105,30 @@ static enum MHD_Result on_http_connection(void *cls,
         offset += sizeof(int);
 
         if (*progress > 0)
-            expected_size += sizeof(int) + 5 * (*progress) * sizeof(float);
+        {
+            expected_size += 2 * sizeof(int);
+
+            // re-check the size of the buffer
+            if (_ptr->len < expected_size)
+            {
+                free(_ptr->buf);
+                free(_ptr);
+
+                *ptr = NULL;
+                return http_bad_request(connection);
+            }
+
+            // idx
+            idx = (int *)(data + offset);
+            offset += sizeof(int);
+            (*idx)++; // convert a C index into a FORTRAN array index
+
+            // no_planes
+            no_planes = (int *)(data + offset);
+            offset += sizeof(int);
+
+            expected_size += 5 * (*progress) * (*no_planes) * sizeof(float);
+        }
 
         // re-check the size of the buffer
         if (_ptr->len != expected_size)
@@ -2128,15 +2151,6 @@ static enum MHD_Result on_http_connection(void *cls,
 
         if (*progress > 0)
         {
-            // idx
-            idx = (int *)(data + offset);
-            offset += sizeof(int);
-            (*idx)++; // convert a C index into a FORTRAN array index
-
-            // no_planes
-            no_planes = (int *)(data + offset);
-            offset += sizeof(int);
-
             // frame_min
             frame_min = (float *)(data + offset);
             offset += (*progress) * (*no_planes) * sizeof(float);
