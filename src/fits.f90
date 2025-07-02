@@ -4977,6 +4977,8 @@ contains
 
          total_per_node = 0
 
+         print *, '<read_fits_file> cube array allocations completed'
+
          !$omp PARALLEL DEFAULT(SHARED) SHARED(item)&
          !$omp& SHARED(thread_units, group, naxis, naxes, nullval)&
          !$omp& PRIVATE(tid, start, end, frame, num_per_node, anynull, status)&
