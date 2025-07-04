@@ -3032,7 +3032,7 @@ static enum MHD_Result on_http_connection(void *cls,
         calculate_global_statistics_C(item, median, sumP, countP, sumN, countN, first, last);
         // printf("[C] calculate_global_statistics_C sumP = %f, countP = %ld, sumN = %f, countN = %ld\n", sumP, countP, sumN, countN);
 
-        mjson_printf(mjson_print_dynamic_buf, &json, "{%Q:[%.*g,%.*g,%.*g,%.*g],%Q:[%ld,%ld,%ld,%ld],%Q:%.*g,%Q:%ld}", "sumP", 12, sumP[0], 12, sumP[1], 12, sumP[2], 12, sumP[3], "countP", countP[0], countP[1], countP[2], countP[3], "sumN", 12, sumN, "countN", countN);
+        mjson_printf(mjson_print_dynamic_buf, &json, "{%Q:[%.*g,%.*g,%.*g,%.*g],%Q:[%ld,%ld,%ld,%ld],%Q:[%.*g,%.*g,%.*g,%.*g],%Q:[%ld,%ld,%ld,%ld]}", "sumP", 12, sumP[0], 12, sumP[1], 12, sumP[2], 12, sumP[3], "countP", countP[0], countP[1], countP[2], countP[3], "sumN", 12, sumN[0], 12, sumN[1], 12, sumN[2], 12, sumN[3], "countN", countN[0], countN[1], countN[2], countN[3]);
 
         // the response will be freed by libmicrohttpd
         struct MHD_Response *response = MHD_create_response_from_buffer(strlen(json), (void *)json, MHD_RESPMEM_MUST_FREE);
