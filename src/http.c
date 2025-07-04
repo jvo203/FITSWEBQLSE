@@ -7926,7 +7926,7 @@ void *fetch_global_statistics(void *ptr)
     {
         GString *url = g_string_new("http://");
         g_string_append_printf(url, "%s:", (char *)iterator->data);
-        g_string_append_printf(url, "%" PRIu16 "/statistics/%.*s?median=%f&first=%d&last=%d", options.http_port, (int)len, datasetid, req->dmedian, req->first, req->last);
+        g_string_append_printf(url, "%" PRIu16 "/statistics/%.*s?median[0]=%f&median[1]=%f&median[2]=%f&median[3]=%f&first=%d&last=%d", options.http_port, (int)len, datasetid, req->dmedian[0], req->dmedian[1], req->dmedian[2], req->dmedian[3], req->first, req->last);
         // printf("[C] URL: '%s'\n", url->str);
 
         // set the individual URL
