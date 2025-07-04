@@ -138,11 +138,11 @@ struct mad_req
 {
     char *datasetid;
     int len;
-    float dmedian;
-    float sumP;
-    int64_t countP;
-    float sumN;
-    int64_t countN;
+    float dmedian[4];
+    float sumP[4];
+    int64_t countP[4];
+    float sumN[4];
+    int64_t countN[4];
     int first, last;
 };
 
