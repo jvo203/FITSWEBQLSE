@@ -3262,16 +3262,16 @@ contains
             max_planes = size(item%compressed, 2)
 
             do k = 1, max_planes
+               if (allocated(item%frame_min)) item%dmin(k) = minval(item%frame_min(:, k))
+               if (allocated(item%frame_max)) item%dmax(k) = maxval(item%frame_max(:, k))
+               if (allocated(item%frame_median)) item%dmedian(k) = &
+               &median(pack(item%frame_median(:, k),.not. ieee_is_nan(item%frame_median(:, k)))) ! extract non-NaN values
 
                print *, 'processing plane:', k, 'of', max_planes
                print *, 'frame_min:', item%frame_min(1:10, k)
                print *, 'frame_max:', item%frame_max(1:10, k)
                print *, 'frame_median:', item%frame_median(1:10, k)
-
-               if (allocated(item%frame_min)) item%dmin(k) = minval(item%frame_min(:, k))
-               if (allocated(item%frame_max)) item%dmax(k) = maxval(item%frame_max(:, k))
-               if (allocated(item%frame_median)) item%dmedian(k) = &
-               &median(pack(item%frame_median(:, k),.not. ieee_is_nan(item%frame_median(:, k)))) ! extract non-NaN values
+               print *, 'dmin:', item%dmin(k), 'dmax:', item%dmax(k), 'dmedian:', item%dmedian(k)
             end do
 
             ! launch a pthread, passing the FORTRAN <item> dataset via a C pointer
