@@ -7879,7 +7879,7 @@ void *fetch_global_statistics(void *ptr)
 
     struct mad_req *req = (struct mad_req *)ptr;
 
-    printf("[C] calling fetch_global_statistics across the cluster for '%.*s' with median = %f for the frame range [%d,%d]\n", req->len, req->datasetid, req->dmedian, req->first, req->last);
+    printf("[C] calling fetch_global_statistics across the cluster for '%.*s' with median = [%f,%f,%f,%f] for the frame range [%d,%d]\n", req->len, req->datasetid, req->dmedian[0], req->dmedian[1], req->dmedian[2], req->dmedian[3], req->first, req->last);
 
     int i;
     GSList *iterator = NULL;
