@@ -3262,6 +3262,12 @@ contains
             max_planes = size(item%compressed, 2)
 
             do k = 1, max_planes
+
+               print *, 'processing plane:', k, 'of', max_planes
+               print *, 'frame_min:', item%frame_min(:, k)
+               print *, 'frame_max:', item%frame_max(:, k)
+               print *, 'frame_median:', item%frame_median(:, k)
+
                if (allocated(item%frame_min)) item%dmin(k) = minval(item%frame_min(:, k))
                if (allocated(item%frame_max)) item%dmax(k) = maxval(item%frame_max(:, k))
                if (allocated(item%frame_median)) item%dmedian(k) = &
