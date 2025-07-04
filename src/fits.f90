@@ -3552,7 +3552,7 @@ contains
       if (.not. c_associated(ptr)) return
       call c_f_pointer(ptr, item)
 
-      ! print *, "submit_channel_range: idx:", idx, "progress (N):", N, "no_planes:", no_planes
+      print *, "submit_channel_range: idx:", idx, "progress (N):", N, "no_planes:", no_planes
 
       if( size(item%frame_min, 2) .ne. no_planes .or. &
          size(item%frame_max, 2) .ne. no_planes .or. &
@@ -3596,23 +3596,23 @@ contains
       ! no need for a mutex as no other thread will be accessing this array range (unless a dataset is being deleted ...)
 
       do plane = 1, no_planes
-         item%frame_min(idx:idx + N - 1, plane) = frame_min(1+(no_planes-1)*N:no_planes*N) ! was 1:N
+         item%frame_min(idx:idx + N - 1, plane) = frame_min(1+(plane-1)*N:plane*N) ! was 1:N
       end do
 
       do plane = 1, no_planes
-         item%frame_max(idx:idx + N - 1, plane) = frame_max(1+(no_planes-1)*N:no_planes*N) ! was 1:N
+         item%frame_max(idx:idx + N - 1, plane) = frame_max(1+(plane-1)*N:plane*N) ! was 1:N
       end do
 
       do plane = 1, no_planes
-         item%frame_median(idx:idx + N - 1, plane) = frame_median(1+(no_planes-1)*N:no_planes*N) ! was 1:N
+         item%frame_median(idx:idx + N - 1, plane) = frame_median(1+(plane-1)*N:plane*N) ! was 1:N
       end do
 
       do plane = 1, no_planes
-         item%mean_spectrum(idx:idx + N - 1, plane) = mean_spectrum(1+(no_planes-1)*N:no_planes*N) ! was 1:N
+         item%mean_spectrum(idx:idx + N - 1, plane) = mean_spectrum(1+(plane-1)*N:plane*N) ! was 1:N
       end do
 
       do plane = 1, no_planes
-         item%integrated_spectrum(idx:idx + N - 1, plane) = integrated_spectrum(1+(no_planes-1)*N:no_planes*N) ! was 1:N
+         item%integrated_spectrum(idx:idx + N - 1, plane) = integrated_spectrum(1+(plane-1)*N:plane*N) ! was 1:N
       end do
 
    end subroutine submit_channel_range
