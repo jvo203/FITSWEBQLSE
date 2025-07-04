@@ -8006,10 +8006,10 @@ void *fetch_global_statistics(void *ptr)
             // parse the JSON response
             if (response_code == 200)
             {
-                // printf("%lu bytes retrieved\n", (unsigned long)chunks[idx].size);
-                // printf("cURL response: %s\n", chunks[idx].memory);
+                printf("%lu bytes retrieved\n", (unsigned long)chunks[idx].size);
+                printf("cURL response: %s\n", chunks[idx].memory);
 
-                double val;
+                /*double val;
 
                 if (mjson_get_number(chunks[idx].memory, chunks[idx].size, "$.sumP", &val))
                     req->sumP += (float)val;
@@ -8021,7 +8021,7 @@ void *fetch_global_statistics(void *ptr)
                     req->sumN += (float)val;
 
                 if (mjson_get_number(chunks[idx].memory, chunks[idx].size, "$.countN", &val))
-                    req->countN += (int64_t)val;
+                    req->countN += (int64_t)val;*/
             }
         }
     }
