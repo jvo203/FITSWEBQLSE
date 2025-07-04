@@ -8009,19 +8009,59 @@ void *fetch_global_statistics(void *ptr)
                 printf("%lu bytes retrieved\n", (unsigned long)chunks[idx].size);
                 printf("cURL response: %s\n", chunks[idx].memory);
 
-                /*double val;
+                double val;
 
-                if (mjson_get_number(chunks[idx].memory, chunks[idx].size, "$.sumP", &val))
-                    req->sumP += (float)val;
+                // sumP
+                if (mjson_get_number(chunks[idx].memory, chunks[idx].size, "$.sumP[0]", &val))
+                    req->sumP[0] += (float)val;
 
-                if (mjson_get_number(chunks[idx].memory, chunks[idx].size, "$.countP", &val))
-                    req->countP += (int64_t)val;
+                if (mjson_get_number(chunks[idx].memory, chunks[idx].size, "$.sumP[1]", &val))
+                    req->sumP[1] += (float)val;
 
-                if (mjson_get_number(chunks[idx].memory, chunks[idx].size, "$.sumN", &val))
-                    req->sumN += (float)val;
+                if (mjson_get_number(chunks[idx].memory, chunks[idx].size, "$.sumP[2]", &val))
+                    req->sumP[2] += (float)val;
 
-                if (mjson_get_number(chunks[idx].memory, chunks[idx].size, "$.countN", &val))
-                    req->countN += (int64_t)val;*/
+                if (mjson_get_number(chunks[idx].memory, chunks[idx].size, "$.sumP[3]", &val))
+                    req->sumP[3] += (float)val;
+
+                // countP
+                if (mjson_get_number(chunks[idx].memory, chunks[idx].size, "$.countP[0]", &val))
+                    req->countP[0] += (int64_t)val;
+
+                if (mjson_get_number(chunks[idx].memory, chunks[idx].size, "$.countP[1]", &val))
+                    req->countP[1] += (int64_t)val;
+
+                if (mjson_get_number(chunks[idx].memory, chunks[idx].size, "$.countP[2]", &val))
+                    req->countP[2] += (int64_t)val;
+
+                if (mjson_get_number(chunks[idx].memory, chunks[idx].size, "$.countP[3]", &val))
+                    req->countP[3] += (int64_t)val;
+
+                // sumN
+                if (mjson_get_number(chunks[idx].memory, chunks[idx].size, "$.sumN[0]", &val))
+                    req->sumN[0] += (float)val;
+
+                if (mjson_get_number(chunks[idx].memory, chunks[idx].size, "$.sumN[1]", &val))
+                    req->sumN[1] += (float)val;
+
+                if (mjson_get_number(chunks[idx].memory, chunks[idx].size, "$.sumN[2]", &val))
+                    req->sumN[2] += (float)val;
+
+                if (mjson_get_number(chunks[idx].memory, chunks[idx].size, "$.sumN[3]", &val))
+                    req->sumN[3] += (float)val;
+
+                // countN
+                if (mjson_get_number(chunks[idx].memory, chunks[idx].size, "$.countN[0]", &val))
+                    req->countN[0] += (int64_t)val;
+
+                if (mjson_get_number(chunks[idx].memory, chunks[idx].size, "$.countN[1]", &val))
+                    req->countN[1] += (int64_t)val;
+
+                if (mjson_get_number(chunks[idx].memory, chunks[idx].size, "$.countN[2]", &val))
+                    req->countN[2] += (int64_t)val;
+
+                if (mjson_get_number(chunks[idx].memory, chunks[idx].size, "$.countN[3]", &val))
+                    req->countN[3] += (int64_t)val;
             }
         }
     }
