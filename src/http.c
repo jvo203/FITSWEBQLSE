@@ -2965,8 +2965,9 @@ static enum MHD_Result on_http_connection(void *cls,
 
     if (strstr(url, "/statistics/") != NULL)
     {
-        float median;
+        float median[4];
         int first, last;
+        char *median_str = NULL;
 
         char *datasetId = strrchr(url, '/');
 
@@ -2976,12 +2977,33 @@ static enum MHD_Result on_http_connection(void *cls,
         if (datasetId == NULL)
             return http_bad_request(connection);
 
-        char *median_str = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "median");
+        median_str = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "median[0]");
 
         if (median_str == NULL)
             return http_bad_request(connection);
         else
-            median = atof(median_str);
+            median[0] = atof(median_str);
+
+        median_str = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "median[1]");
+
+        if (median_str == NULL)
+            return http_bad_request(connection);
+        else
+            median[1] = atof(median_str);
+
+        median_str = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "median[2]");
+
+        if (median_str == NULL)
+            return http_bad_request(connection);
+        else
+            median[2] = atof(median_str);
+
+        median_str = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "median[3]");
+
+        if (median_str == NULL)
+            return http_bad_request(connection);
+        else
+            median[3] = atof(median_str);
 
         char *first_str = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "first");
 
@@ -3004,10 +3026,10 @@ static enum MHD_Result on_http_connection(void *cls,
             return http_not_found(connection);
 
         char *json = NULL;
-        float sumP, sumN;
-        int64_t countP, countN;
+        float sumP[4], sumN[4];
+        int64_t countP[4], countN[4];
 
-        calculate_global_statistics_C(item, &median, &sumP, &countP, &sumN, &countN, first, last);
+        calculate_global_statistics_C(item, median, sumP, countP, sumN, countN, first, last);
         // printf("[C] calculate_global_statistics_C sumP = %f, countP = %ld, sumN = %f, countN = %ld\n", sumP, countP, sumN, countN);
 
         mjson_printf(mjson_print_dynamic_buf, &json, "{%Q:%.*g,%Q:%ld,%Q:%.*g,%Q:%ld}", "sumP", 12, sumP, "countP", countP, "sumN", 12, sumN, "countN", countN);
