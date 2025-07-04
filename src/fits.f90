@@ -3264,9 +3264,9 @@ contains
             do k = 1, max_planes
 
                print *, 'processing plane:', k, 'of', max_planes
-               print *, 'frame_min:', item%frame_min(:, k)
-               print *, 'frame_max:', item%frame_max(:, k)
-               print *, 'frame_median:', item%frame_median(:, k)
+               print *, 'frame_min:', item%frame_min(1:10, k)
+               print *, 'frame_max:', item%frame_max(1:10, k)
+               print *, 'frame_median:', item%frame_median(1:10, k)
 
                if (allocated(item%frame_min)) item%dmin(k) = minval(item%frame_min(:, k))
                if (allocated(item%frame_max)) item%dmax(k) = maxval(item%frame_max(:, k))
