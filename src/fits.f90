@@ -3266,12 +3266,6 @@ contains
                if (allocated(item%frame_max)) item%dmax(k) = maxval(item%frame_max(:, k))
                if (allocated(item%frame_median)) item%dmedian(k) = &
                &median(pack(item%frame_median(:, k),.not. ieee_is_nan(item%frame_median(:, k)))) ! extract non-NaN values
-
-               print *, 'processing plane:', k, 'of', max_planes
-               print *, 'frame_min:', item%frame_min(1:10, k)
-               print *, 'frame_max:', item%frame_max(1:10, k)
-               print *, 'frame_median:', item%frame_median(1:10, k)
-               print *, 'dmin:', item%dmin(k), 'dmax:', item%dmax(k), 'dmedian:', item%dmedian(k)
             end do
 
             ! launch a pthread, passing the FORTRAN <item> dataset via a C pointer
@@ -3552,7 +3546,7 @@ contains
       if (.not. c_associated(ptr)) return
       call c_f_pointer(ptr, item)
 
-      print *, "submit_channel_range: idx:", idx, "progress (N):", N, "no_planes:", no_planes
+      ! print *, "submit_channel_range: idx:", idx, "progress (N):", N, "no_planes:", no_planes
 
       if( size(item%frame_min, 2) .ne. no_planes .or. &
          size(item%frame_max, 2) .ne. no_planes .or. &
