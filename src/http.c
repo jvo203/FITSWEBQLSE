@@ -3025,6 +3025,8 @@ static enum MHD_Result on_http_connection(void *cls,
         if (item == NULL)
             return http_not_found(connection);
 
+        printf("[C] calculate_global_statistics_C median = [%.*g, %.*g, %.*g, %.*g], first = %d, last = %d\n", 12, median[0], 12, median[1], 12, median[2], 12, median[3], first, last);
+
         char *json = NULL;
         float sumP[4], sumN[4];
         int64_t countP[4], countN[4];
@@ -7948,8 +7950,8 @@ void *fetch_global_statistics(void *ptr)
     {
         GString *url = g_string_new("http://");
         g_string_append_printf(url, "%s:", (char *)iterator->data);
-        g_string_append_printf(url, "%" PRIu16 "/statistics/%.*s?median[0]=%f&median[1]=%f&median[2]=%f&median[3]=%f&first=%d&last=%d", options.http_port, (int)len, datasetid, req->dmedian[0], req->dmedian[1], req->dmedian[2], req->dmedian[3], req->first, req->last);
-        // printf("[C] URL: '%s'\n", url->str);
+        g_string_append_printf(url, "%" PRIu16 "/statistics/%.*s?median[0]=%.*g&median[1]=%.*g&median[2]=%.*g&median[3]=%.*g&first=%d&last=%d", options.http_port, (int)len, datasetid, 12, req->dmedian[0], 12, req->dmedian[1], 12, req->dmedian[2], 12, req->dmedian[3], req->first, req->last);
+        printf("[C] URL: '%s'\n", url->str);
 
         // set the individual URL
         curl_easy_setopt(handles[i], CURLOPT_URL, url->str);
