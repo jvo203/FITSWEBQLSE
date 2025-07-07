@@ -3025,7 +3025,7 @@ static enum MHD_Result on_http_connection(void *cls,
         if (item == NULL)
             return http_not_found(connection);
 
-        printf("[C] calculate_global_statistics_C median = [%.*g, %.*g, %.*g, %.*g], first = %d, last = %d\n", 12, median[0], 12, median[1], 12, median[2], 12, median[3], first, last);
+        // printf("[C] calculate_global_statistics_C median = [%.*g, %.*g, %.*g, %.*g], first = %d, last = %d\n", 12, median[0], 12, median[1], 12, median[2], 12, median[3], first, last);
 
         char *json = NULL;
         float sumP[4], sumN[4];
@@ -7903,7 +7903,7 @@ void *fetch_global_statistics(void *ptr)
 
     struct mad_req *req = (struct mad_req *)ptr;
 
-    printf("[C] calling fetch_global_statistics across the cluster for '%.*s' with median = [%f,%f,%f,%f] for the frame range [%d,%d]\n", req->len, req->datasetid, req->dmedian[0], req->dmedian[1], req->dmedian[2], req->dmedian[3], req->first, req->last);
+    printf("[C] calling fetch_global_statistics across the cluster for '%.*s' with median = [%.*g,%.*g,%.*g,%.*g] for the frame range [%d,%d]\n", req->len, req->datasetid, 12, req->dmedian[0], 12, req->dmedian[1], 12, req->dmedian[2], 12, req->dmedian[3], req->first, req->last);
 
     int i;
     GSList *iterator = NULL;
@@ -7951,7 +7951,7 @@ void *fetch_global_statistics(void *ptr)
         GString *url = g_string_new("http://");
         g_string_append_printf(url, "%s:", (char *)iterator->data);
         g_string_append_printf(url, "%" PRIu16 "/statistics/%.*s?median[0]=%.*g&median[1]=%.*g&median[2]=%.*g&median[3]=%.*g&first=%d&last=%d", options.http_port, (int)len, datasetid, 12, req->dmedian[0], 12, req->dmedian[1], 12, req->dmedian[2], 12, req->dmedian[3], req->first, req->last);
-        printf("[C] URL: '%s'\n", url->str);
+        // printf("[C] URL: '%s'\n", url->str);
 
         // set the individual URL
         curl_easy_setopt(handles[i], CURLOPT_URL, url->str);
@@ -8009,7 +8009,7 @@ void *fetch_global_statistics(void *ptr)
             if (response_code == 200)
             {
                 printf("%lu bytes retrieved\n", (unsigned long)chunks[idx].size);
-                printf("cURL response: %s\n", chunks[idx].memory);
+                // printf("cURL response: %s\n", chunks[idx].memory);
 
                 double val;
 
