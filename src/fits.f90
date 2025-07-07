@@ -6972,12 +6972,13 @@ contains
       type(dataset), pointer :: item
       integer(kind=c_int), intent(in), value :: width, height, fd
 
-      real(kind=c_float), dimension(:, :), allocatable, target :: pixels
+      real(kind=c_float), dimension(:, :, :), allocatable, target :: pixels
       logical(kind=c_bool), dimension(:, :), allocatable, target :: mask
+      integer :: i, max_planes
 
-      type(resize_task_t), target :: task
-      type(c_ptr) :: task_pid
-      integer(kind=c_int) :: rc
+      type(resize_task_t), target :: task(4)
+      type(c_ptr) :: task_pid(4)
+      integer(kind=c_int) :: task_rc(4), rc
 
       real :: scale, s1, s2
       integer(kind=c_size_t) :: written
@@ -6988,11 +6989,14 @@ contains
       if (.not. allocated(item%pixels)) return
       if (.not. allocated(item%mask)) return
 
+      ! obtain max_planes from the third dimension of item%pixels
+      max_planes = size(item%pixels, 3)
+
       ! check the image dimensions; downscaling may not be necessary
       if ((width .lt. item%naxes(1)) .or. (height .lt. item%naxes(2))) then
          ! downscale item%pixels and item%mask into pixels, mask
 
-         allocate (pixels(width, height))
+         allocate (pixels(width, height, max_planes))
          allocate (mask(width, height))
 
          ! s1 and s2 should be pretty much the same (within a rounding error)
@@ -7000,31 +7004,33 @@ contains
          s2 = real(height)/real(item%naxes(2))
          scale = 0.5*(s1 + s2)
 
-         task%pSrc = c_loc(item%pixels)
-         task%srcWidth = item%naxes(1)
-         task%srcHeight = item%naxes(2)
+         do i = 1, max_planes
+            task(i)%pSrc = c_loc(item%pixels(:, :, i))
+            task(i)%srcWidth = item%naxes(1)
+            task(i)%srcHeight = item%naxes(2)
 
-         task%pDest = c_loc(pixels)
-         task%dstWidth = width
-         task%dstHeight = height
+            task(i)%pDest = c_loc(pixels(:, :, i))
+            task(i)%dstWidth = width
+            task(i)%dstHeight = height
 
-         if (scale .gt. 0.2) then
-            task%numLobes = 3
-            ! call resizeLanczos(c_loc(item%pixels), item%naxes(1), item%naxes(2), c_loc(pixels), width, height, 3)
-         else
-            task%numLobes = 0
-            ! call resizeSuper(c_loc(item%pixels), item%naxes(1), item%naxes(2), c_loc(pixels), width, height)
-         end if
+            if (scale .gt. 0.2) then
+               task%numLobes = 3
+            else
+               task%numLobes = 0
+            end if
 
-         ! launch a pthread to resize pixels
-         task_pid = my_pthread_create(start_routine=c_funloc(launch_resize_task), arg=c_loc(task), rc=rc)
+            ! launch a pthread to resize pixels
+            task_pid(i) = my_pthread_create(start_routine=c_funloc(launch_resize_task), arg=c_loc(task), rc=task_rc(i))
+         end do
 
          ! Boolean mask: the naive Nearest-Neighbour method
          call resizeNearest(c_loc(item%mask), item%naxes(1), item%naxes(2), c_loc(mask), width, height)
          ! call resizeMask(item%mask, item%naxes(1), item%naxes(2), mask, width, height)
 
-         ! join a thread
-         rc = my_pthread_join(task_pid)
+         ! join pixels thread(s)
+         do i = 1, max_planes
+            rc = my_pthread_join(task_pid(i))
+         end do
 
          ! send pixels
          written = chunked_write(fd, c_loc(pixels), sizeof(pixels))
