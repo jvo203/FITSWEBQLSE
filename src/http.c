@@ -8836,7 +8836,10 @@ void *fetch_image(void *ptr)
             if (response_code == 200)
             {
                 size_t plane_size = req->width * req->height;
-                size_t expected = (1 + sizeof(float)) * plane_size;
+                size_t pixels_size = plane_size * req->no_planes;
+                size_t mask_size = plane_size;
+
+                size_t expected = sizeof(float) * pixels_size + sizeof(bool) * mask_size;
                 size_t received = chunks[idx].size;
 
                 printf("[C] pixels/mask received: %zu, expected: %zu bytes.\n", received, expected);
@@ -8844,15 +8847,16 @@ void *fetch_image(void *ptr)
                 if (received == expected)
                 {
                     const float *pixels = (float *)&(chunks[idx].memory[0]);
-                    const bool *mask = (bool *)&(chunks[idx].memory[sizeof(float) * plane_size]);
+                    const bool *mask = (bool *)&(chunks[idx].memory[sizeof(float) * pixels_size]);
 
                     // gather pixels / mask
 #pragma GCC ivdep
-                    for (size_t i = 0; i < plane_size; i++)
-                    {
+                    for (size_t i = 0; i < pixels_size; i++)
                         req->pixels[i] += pixels[i];
+
+#pragma GCC ivdep
+                    for (size_t i = 0; i < mask_size; i++)
                         req->mask[i] |= mask[i];
-                    }
                 }
             }
         }
