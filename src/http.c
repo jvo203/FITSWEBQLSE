@@ -8730,7 +8730,7 @@ void *fetch_image(void *ptr)
 
     struct image_req *req = (struct image_req *)ptr;
 
-    printf("[C] calling fetch_image across the cluster for '%.*s' with {W:%d,H:%d}\n", req->len, req->datasetid, req->width, req->height);
+    printf("[C] calling fetch_image across the cluster for '%.*s' with {W:%d,H:%d,P:%d}\n", req->len, req->datasetid, req->width, req->height, req->no_planes);
 
     int i;
     GSList *iterator = NULL;

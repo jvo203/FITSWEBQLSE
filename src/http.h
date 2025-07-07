@@ -162,6 +162,7 @@ struct image_req
     bool *restrict mask;
     int width;
     int height;
+    int no_planes;
 };
 
 struct video_fetch

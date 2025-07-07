@@ -350,6 +350,7 @@ module fits
       type(c_ptr) :: mask
       integer(c_int) :: width
       integer(c_int) :: height
+      integer(c_int) :: no_planes
    end type image_req_t
 
    type, bind(C) :: image_spectrum_request_t
@@ -6884,6 +6885,7 @@ contains
          image_req%mask = c_loc(mask)
          image_req%width = img_width
          image_req%height = img_height
+         image_req%no_planes = max_planes
 
          ! launch a pthread
          pid = my_pthread_create(start_routine=c_funloc(fetch_image), arg=c_loc(image_req), rc=rc)
