@@ -7020,7 +7020,7 @@ contains
             end if
 
             ! launch a pthread to resize pixels
-            task_pid(i) = my_pthread_create(start_routine=c_funloc(launch_resize_task), arg=c_loc(task), rc=task_rc(i))
+            task_pid(i) = my_pthread_create(start_routine=c_funloc(launch_resize_task), arg=c_loc(task(i)), rc=task_rc(i))
          end do
 
          ! Boolean mask: the naive Nearest-Neighbour method
