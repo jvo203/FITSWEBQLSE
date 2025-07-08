@@ -2506,7 +2506,7 @@ static enum MHD_Result on_http_connection(void *cls,
 
         // pass the write end of the pipe to Fortran
         // the binary response data will be generated in Fortran
-        // printf("[C] calling viewport_request with the pipe file descriptor %d\n", pipefd[1]);
+        // printf("[C] calling download_request with the pipe file descriptor %d\n", pipefd[1]);
 
         // got all the data, prepare a request structure and pass it to FORTRAN
         struct download_request *req = (struct download_request *)malloc(sizeof(struct download_request));
@@ -8580,7 +8580,7 @@ void *fetch_realtime_image_spectrum(void *ptr)
     {
         GString *url = g_string_new("http://");
         g_string_append_printf(url, "%s:", (char *)iterator->data);
-        g_string_append_printf(url, "%" PRIu16 "/viewport/%.*s?x1=%d&y1=%d&x2=%d&y2=%d&frame_start=%f&frame_end=%f&ref_freq=%f&median=%f", options.http_port, (int)len, datasetid, req->x1, req->y1, req->x2, req->y2, req->frame_start, req->frame_end, req->ref_freq, req->median);
+        g_string_append_printf(url, "%" PRIu16 "/viewport/%.*s?x1=%d&y1=%d&x2=%d&y2=%d&plane=%d&frame_start=%f&frame_end=%f&ref_freq=%f&median[0]=%.*g&median[1]=%.*g&median[2]=%.*g&median[3]=%.*g", options.http_port, (int)len, datasetid, req->x1, req->y1, req->x2, req->y2, req->plane, req->frame_start, req->frame_end, req->ref_freq, 12, req->median[0], 12, req->median[1], 12, req->median[2], 12, req->median[3]);
         g_string_append_printf(url, "&image=%s", req->image ? "true" : "false");                            // image
         g_string_append_printf(url, "&beam=%s", req->beam == circle ? "circle" : "square");                 // beam
         g_string_append_printf(url, "&intensity=%s", req->intensity == integrated ? "integrated" : "mean"); // intensity
