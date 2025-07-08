@@ -9381,7 +9381,7 @@ contains
 
       print *, 'viewport_request for ', item%datasetid,&
       &', dx:', req%dx, ', image:', req%image, ', quality:', req%quality, ', x1:', req%x1, &
-      &', y1:', req%y1, ', x2:', req%x2, ', y2:', req%y2, ', width:', req%width, &
+      &', y1:', req%y1, ', x2:', req%x2, ', y2:', req%y2, ', plane:', req%plane, ', width:', req%width, &
       &', height', req%height, ', beam:', req%beam, ', intensity:', req%intensity,&
       &', frame_start:', req%frame_start, ', frame_end:', req%frame_end, ', ref_freq:', &
          req%ref_freq, ', seq_id:', req%seq_id, ', timestamp:', req%timestamp, ', fd:', req%fd, &
