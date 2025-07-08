@@ -3219,12 +3219,14 @@ static enum MHD_Result on_http_connection(void *cls,
 
     if (strstr(url, "/viewport/") != NULL)
     {
-        int x1, y1, x2, y2;
+        int x1, y1, x2, y2, plane;
         double frame_start, frame_end, ref_freq;
-        float median;
+        float median[4];
         bool image;
         enum zoom_shape beam;
         enum intensity_mode intensity;
+
+        char *median_str = NULL;
 
         int status;
         int pipefd[2];
@@ -3266,6 +3268,13 @@ static enum MHD_Result on_http_connection(void *cls,
         else
             y2 = atoi(y2str);
 
+        char *plane_str = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "plane");
+
+        if (plane_str == NULL)
+            return http_bad_request(connection);
+        else
+            plane = atoi(plane_str);
+
         char *frame_start_str = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "frame_start");
 
         if (frame_start_str == NULL)
@@ -3287,14 +3296,44 @@ static enum MHD_Result on_http_connection(void *cls,
         else
             ref_freq = atof(ref_freq_str);
 
-        char *median_str = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "median");
+        median_str = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "median[0]");
 
         if (median_str == NULL)
             return http_bad_request(connection);
         else
         {
             // check for a NaN value, if not NaN parse the string
-            median = strcmp(median_str, "nan") == 0 ? NAN : atof(median_str);
+            median[0] = strcmp(median_str, "nan") == 0 ? NAN : atof(median_str);
+        }
+
+        median_str = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "median[1]");
+
+        if (median_str == NULL)
+            return http_bad_request(connection);
+        else
+        {
+            // check for a NaN value, if not NaN parse the string
+            median[1] = strcmp(median_str, "nan") == 0 ? NAN : atof(median_str);
+        }
+
+        median_str = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "median[2]");
+
+        if (median_str == NULL)
+            return http_bad_request(connection);
+        else
+        {
+            // check for a NaN value, if not NaN parse the string
+            median[2] = strcmp(median_str, "nan") == 0 ? NAN : atof(median_str);
+        }
+
+        median_str = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "median[3]");
+
+        if (median_str == NULL)
+            return http_bad_request(connection);
+        else
+        {
+            // check for a NaN value, if not NaN parse the string
+            median[3] = strcmp(median_str, "nan") == 0 ? NAN : atof(median_str);
         }
 
         char *image_str = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "image");
@@ -3374,6 +3413,7 @@ static enum MHD_Result on_http_connection(void *cls,
             req->x2 = x2;
             req->y1 = y1;
             req->y2 = y2;
+            req->plane = plane;
             req->width = 0;
             req->height = 0;
             req->beam = beam;
@@ -3381,10 +3421,10 @@ static enum MHD_Result on_http_connection(void *cls,
             req->frame_start = frame_start;
             req->frame_end = frame_end;
             req->ref_freq = ref_freq;
-            req->median[0] = median;
-            req->median[0] = median;
-            req->median[1] = median;
-            req->median[2] = median;
+            req->median[0] = median[0];
+            req->median[0] = median[1];
+            req->median[1] = median[2];
+            req->median[2] = median[3];
             req->seq_id = 0;
             req->timestamp = 0.0;
 
@@ -8584,7 +8624,7 @@ void *fetch_realtime_image_spectrum(void *ptr)
         g_string_append_printf(url, "&image=%s", req->image ? "true" : "false");                            // image
         g_string_append_printf(url, "&beam=%s", req->beam == circle ? "circle" : "square");                 // beam
         g_string_append_printf(url, "&intensity=%s", req->intensity == integrated ? "integrated" : "mean"); // intensity
-        // printf("[C] URL: '%s'\n", url->str);
+        printf("[C] URL: '%s'\n", url->str);
 
         // set the individual URL
         curl_easy_setopt(handles[i], CURLOPT_URL, url->str);
