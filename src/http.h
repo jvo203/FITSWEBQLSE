@@ -237,12 +237,13 @@ struct http_image_spectrum_request
     int y1;
     int x2;
     int y2;
+    int plane;
     enum zoom_shape beam;
     enum intensity_mode intensity;
     double frame_start;
     double frame_end;
     double ref_freq;
-    float median;
+    float median[4];
 
     // output
     float *restrict pixels;

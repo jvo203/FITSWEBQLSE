@@ -7716,6 +7716,8 @@ contains
       cluster_req%median = ieee_value(0.0, ieee_quiet_nan) ! unused
 
       ! outputs
+      cluster_req%spectrum = c_loc(cluster_spectrum)
+
       if (req%image) then
          cluster_req%pixels = c_loc(pixels)
          cluster_req%mask = c_loc(mask)
@@ -7723,7 +7725,6 @@ contains
          cluster_req%pixels = c_null_ptr
          cluster_req%mask = c_null_ptr
       end if
-      cluster_req%spectrum = c_loc(cluster_spectrum)
 
       cluster_req%dimx = dimx
       cluster_req%dimy = dimy
