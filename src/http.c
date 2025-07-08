@@ -3422,9 +3422,9 @@ static enum MHD_Result on_http_connection(void *cls,
             req->frame_end = frame_end;
             req->ref_freq = ref_freq;
             req->median[0] = median[0];
-            req->median[0] = median[1];
-            req->median[1] = median[2];
-            req->median[2] = median[3];
+            req->median[1] = median[1];
+            req->median[2] = median[2];
+            req->median[3] = median[3];
             req->seq_id = 0;
             req->timestamp = 0.0;
 
@@ -8624,7 +8624,7 @@ void *fetch_realtime_image_spectrum(void *ptr)
         g_string_append_printf(url, "&image=%s", req->image ? "true" : "false");                            // image
         g_string_append_printf(url, "&beam=%s", req->beam == circle ? "circle" : "square");                 // beam
         g_string_append_printf(url, "&intensity=%s", req->intensity == integrated ? "integrated" : "mean"); // intensity
-        printf("[C] URL: '%s'\n", url->str);
+        // printf("[C] URL: '%s'\n", url->str);
 
         // set the individual URL
         curl_easy_setopt(handles[i], CURLOPT_URL, url->str);
