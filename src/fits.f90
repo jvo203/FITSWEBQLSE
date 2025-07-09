@@ -9356,8 +9356,8 @@ contains
       logical :: valid
 
       ! OpenMP thread-local variables
-      real(c_float) :: thread_sumP, thread_sumN
-      integer(c_int64_t) :: thread_countP, thread_countN
+      real(c_float) :: thread_sumP(4), thread_sumN(4)
+      integer(c_int64_t) :: thread_countP(4), thread_countN(4)
 
       ! output variables
       real(kind=c_float), allocatable, target :: pixels(:)
