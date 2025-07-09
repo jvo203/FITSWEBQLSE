@@ -1329,8 +1329,8 @@ module fits
          implicit none
 
          integer(c_int), value, intent(in) :: fd
-         real(c_float), intent(in) :: sumP, sumN
-         integer(c_int64_t), intent(in) :: countP, countN
+         real(c_float), intent(in) :: sumP(4), sumN(4)
+         integer(c_int64_t), intent(in) :: countP(4), countN(4)
       end subroutine write_partial_statistics
 
       ! void write_statistics(int fd, float *dmin, float *dmax, float *dmedian, float *dmadN, float *dmadP)
