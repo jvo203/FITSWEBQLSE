@@ -8683,8 +8683,9 @@ void *fetch_realtime_image_spectrum(void *ptr)
                 // printf("[C] fetch_realtime_image_spectrum received %zu bytes.\n", chunks[idx].size);
 
                 size_t spectrum_size = req->length * sizeof(float);
-                size_t pixels_size = req->dimx * req->dimy * sizeof(float);
-                size_t mask_size = req->dimx * req->dimy * sizeof(uint8);
+                size_t plane_size = req->dimx * req->dimy;
+                size_t pixels_size = plane_size * req->no_planes * sizeof(float);
+                size_t mask_size = plane_size * sizeof(uint8);
 
                 size_t offset = 0;
 
@@ -8706,8 +8707,6 @@ void *fetch_realtime_image_spectrum(void *ptr)
                 // are there pixels and a mask?
                 if (chunks[idx].size >= offset + pixels_size + mask_size)
                 {
-                    size_t plane_size = req->dimx * req->dimy;
-
                     const float *restrict pixels = (float *)&(chunks[idx].memory[offset]);
                     offset += pixels_size;
 
@@ -8716,11 +8715,12 @@ void *fetch_realtime_image_spectrum(void *ptr)
 
                     // gather pixels / mask
 #pragma GCC ivdep
-                    for (size_t i = 0; i < plane_size; i++)
-                    {
+                    for (size_t i = 0; i < plane_size * req->no_planes; i++)
                         req->pixels[i] += pixels[i];
+
+#pragma GCC ivdep
+                    for (size_t i = 0; i < plane_size; i++)
                         req->mask[i] |= mask[i];
-                    }
                 }
 
                 // do we have partial statistics too ?
