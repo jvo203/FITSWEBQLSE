@@ -254,10 +254,10 @@ struct http_image_spectrum_request
     int dimy;
     int length;
 
-    float sumP;
-    float sumN;
-    int64_t countP;
-    int64_t countN;
+    float sumP[4];
+    float sumN[4];
+    int64_t countP[4];
+    int64_t countN[4];
 
     bool valid;
 };

@@ -371,8 +371,8 @@ module fits
       integer(c_int) :: dimx
       integer(c_int) :: dimy
       integer(c_int) :: length
-      real(c_float) :: sumP, sumN
-      integer(c_int64_t) :: countP, countN
+      real(c_float) :: sumP(4), sumN(4)
+      integer(c_int64_t) :: countP(4), countN(4)
       logical(kind=c_bool) :: valid
    end type image_spectrum_request_t
 

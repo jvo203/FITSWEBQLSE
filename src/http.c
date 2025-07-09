@@ -8724,26 +8724,29 @@ void *fetch_realtime_image_spectrum(void *ptr)
                 }
 
                 // do we have partial statistics too ?
-                if (chunks[idx].size == offset + 2 * sizeof(float) + 2 * sizeof(int64_t))
+                if (chunks[idx].size == offset + 4 * (2 * sizeof(float) + 2 * sizeof(int64_t)))
                 {
                     printf("[C] /viewport/<statistics>::OK.\n");
 
                     const float *sumP = (float *)&(chunks[idx].memory[offset]);
-                    offset += sizeof(float);
+                    offset += 4 * sizeof(float);
 
                     const int64_t *countP = (int64_t *)&(chunks[idx].memory[offset]);
-                    offset += sizeof(int64_t);
+                    offset += 4 * sizeof(int64_t);
 
                     const float *sumN = (float *)&(chunks[idx].memory[offset]);
-                    offset += sizeof(float);
+                    offset += 4 * sizeof(float);
 
                     const int64_t *countN = (int64_t *)&(chunks[idx].memory[offset]);
-                    offset += sizeof(int64_t);
+                    offset += 4 * sizeof(int64_t);
 
-                    req->sumP += *sumP;
-                    req->countP += *countP;
-                    req->sumN += *sumN;
-                    req->countN += *countN;
+                    for (int i = 0; i < 4; i++)
+                    {
+                        req->sumP[i] += sumP[i];
+                        req->countP[i] += countP[i];
+                        req->sumN[i] += sumN[i];
+                        req->countN[i] += countN[i];
+                    }
                 }
             }
         }
