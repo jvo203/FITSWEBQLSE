@@ -368,9 +368,12 @@ module fits
       type(c_ptr) :: pixels
       type(c_ptr) :: mask
       type(c_ptr) :: spectrum
+
       integer(c_int) :: dimx
       integer(c_int) :: dimy
       integer(c_int) :: length
+      integer(c_int) :: no_planes
+
       real(c_float) :: sumP(4), sumN(4)
       integer(c_int64_t) :: countP(4), countN(4)
       logical(kind=c_bool) :: valid
@@ -7403,6 +7406,7 @@ contains
       cluster_req%dimx = dimx
       cluster_req%dimy = dimy
       cluster_req%length = size(cluster_spectrum)
+      cluster_req%no_planes = 1
       cluster_req%sumP = 0.0 ! unused
       cluster_req%sumN = 0.0 ! unused
       cluster_req%countP = 0 ! unused
@@ -7729,6 +7733,7 @@ contains
       cluster_req%dimx = dimx
       cluster_req%dimy = dimy
       cluster_req%length = size(cluster_spectrum)
+      cluster_req%no_planes = max_planes
       cluster_req%sumP = 0.0 ! unused
       cluster_req%sumN = 0.0 ! unused
       cluster_req%countP = 0 ! unused
@@ -11843,6 +11848,7 @@ contains
       cluster_req%dimx = dimx
       cluster_req%dimy = dimy
       cluster_req%length = size(cluster_spectrum)
+      cluster_req%no_planes = max_planes
       cluster_req%sumP = 0.0
       cluster_req%sumN = 0.0
       cluster_req%countP = 0

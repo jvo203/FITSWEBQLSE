@@ -253,6 +253,7 @@ struct http_image_spectrum_request
     int dimx;
     int dimy;
     int length;
+    int no_planes;
 
     float sumP[4];
     float sumN[4];
