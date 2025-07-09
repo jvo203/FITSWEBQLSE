@@ -6914,11 +6914,10 @@ void write_elapsed(int fd, const float *elapsed)
 
 void write_partial_statistics(int fd, const float *sumP, const int64_t *countP, const float *sumN, const int64_t *countN)
 {
-    chunked_write(fd, (const char *)sumP, sizeof(float));
-    chunked_write(fd, (const char *)countP, sizeof(int64_t));
-
-    chunked_write(fd, (const char *)sumN, sizeof(float));
-    chunked_write(fd, (const char *)countN, sizeof(int64_t));
+    chunked_write(fd, (const char *)sumP, 4 * sizeof(float));
+    chunked_write(fd, (const char *)countP, 4 * sizeof(int64_t));
+    chunked_write(fd, (const char *)sumN, 4 * sizeof(float));
+    chunked_write(fd, (const char *)countN, 4 * sizeof(int64_t));
 }
 
 void write_statistics(int fd, float *dmin, float *dmax, float *dmedian, float *dmadN, float *dmadP)
