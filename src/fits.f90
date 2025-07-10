@@ -9565,6 +9565,7 @@ contains
             written = chunked_write(req%fd, c_loc(mask), sizeof(mask))
 
             ! send partial statistics
+            ! print *, 'writing partial statistics:', thread_sumP, thread_countP, thread_sumN, thread_countN
             call write_partial_statistics(req%fd, thread_sumP, thread_countP, thread_sumN, thread_countN)
          end if
       end if
