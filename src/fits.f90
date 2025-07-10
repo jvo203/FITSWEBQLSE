@@ -11771,6 +11771,11 @@ contains
       ! get the range of the cube planes
       call get_spectrum_range(item, req%frame_start, req%frame_end, req%ref_freq, first, last)
 
+      ! fully initialise the all polarisation planes (up to four values), even if some of them are not going to be used
+      dmin = 0.0
+      dmax = 0.0
+      dmedian = 0.0
+
       do k = 1, max_planes
          dmin(k) = minval(item%frame_min(first:last, k))
          dmax(k) = maxval(item%frame_max(first:last, k))
@@ -11944,6 +11949,7 @@ contains
          img_width = floor(scale*item%naxes(1))
          img_height = floor(scale*item%naxes(2))
 
+         print *, "downscaled image dimensions:", img_width, img_height
          allocate (view_pixels(img_width, img_height, max_planes))
          allocate (view_mask(img_width, img_height))
 
@@ -12040,12 +12046,9 @@ contains
          deallocate (view_pixels)
          deallocate (view_mask)
 
-         call write_histogram(req%fd, c_loc(hist), size(hist)) ! there is no need to pass <max_planes> as the receiving side knows it
+         call write_histogram(req%fd, c_loc(hist), NBINS * max_planes) ! there is no need to pass <max_planes> as the receiving side knows it
 
          threshold = req%dx/2
-
-         print *, 'ws_image_spectrum_request::spectrum length:', size(spectrum, 1), size(spectrum, 2),&
-         & 'max_planes:', max_planes, 'threshold:', threshold
 
          if (size(spectrum, 1) .gt. threshold) then
             ! allocate the reduced spectrum

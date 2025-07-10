@@ -847,6 +847,7 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                 req->x2 = -1;
                 req->y1 = -1;
                 req->y2 = -1;
+                req->plane = 0;
                 req->width = 0;
                 req->height = 0;
                 req->beam = square;
