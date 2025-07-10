@@ -11829,6 +11829,7 @@ contains
       cluster_req%y1 = req%y1
       cluster_req%x2 = req%x2
       cluster_req%y2 = req%y2
+      cluster_req%plane = 0 ! the cluster spectrum should be returned for all planes
       cluster_req%beam = req%beam
       cluster_req%intensity = req%intensity
       cluster_req%frame_start = req%frame_start

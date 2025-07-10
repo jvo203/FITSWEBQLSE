@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-06-26.0";
+    return "JS2025-07-10.0";
 }
 
 function uuidv4() {
@@ -12698,7 +12698,7 @@ function x_axis_move(offset) {
                         wsConn[0].send(JSON.stringify(request));
                 } else for (let index = 0; index < va_count; index++) {
                     var request = {
-                        type: "video",
+                        type: "video2",
                         frame: freq,
                         plane: previous_plane,
                         key: false,
@@ -17088,7 +17088,7 @@ function videoTimeout(freq) {
             wsConn[0].send(JSON.stringify(request));
     } else for (let index = 0; index < va_count; index++) {
         var request = {
-            type: "video",
+            type: "video2",
             frame: freq,
             plane: previous_plane,
             key: true,

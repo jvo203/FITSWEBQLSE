@@ -8623,7 +8623,7 @@ void *fetch_realtime_image_spectrum(void *ptr)
         g_string_append_printf(url, "&image=%s", req->image ? "true" : "false");                            // image
         g_string_append_printf(url, "&beam=%s", req->beam == circle ? "circle" : "square");                 // beam
         g_string_append_printf(url, "&intensity=%s", req->intensity == integrated ? "integrated" : "mean"); // intensity
-        // printf("[C] URL: '%s'\n", url->str);
+        printf("[C] URL: '%s'\n", url->str);
 
         // set the individual URL
         curl_easy_setopt(handles[i], CURLOPT_URL, url->str);
