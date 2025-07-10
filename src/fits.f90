@@ -9471,7 +9471,7 @@ contains
          pixels = 0.0
          mask = .false.
 
-         allocate (thread_pixels(npixels, max_threads, max_planes))
+         allocate (thread_pixels(npixels, max_planes, max_threads))
          allocate (thread_mask(npixels, max_threads))
 
          thread_pixels = 0.0
