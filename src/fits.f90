@@ -9349,7 +9349,7 @@ contains
 
       integer :: first, last, length
 
-      integer :: max_threads, frame, tid, plane, max_planes, k
+      integer :: max_threads, frame, tid, plane, no_planes, max_planes, k
       integer(kind=8) :: npixels
       integer(c_int) :: x1, x2, y1, y2, width, height, average
       real(c_float) :: cx, cy, r, r2
@@ -9368,7 +9368,7 @@ contains
       ! output variables
       real(kind=c_float), allocatable, target :: pixels(:, :)
       logical(kind=c_bool), allocatable, target :: mask(:)
-      real(kind=c_float), dimension(:), allocatable, target :: spectrum
+      real(kind=c_float), dimension(:, :), allocatable, target :: spectrum
 
       integer :: dimx, dimy
       integer(kind=c_size_t) :: written
@@ -9411,6 +9411,13 @@ contains
 
       ! get max_planes
       max_planes = size(item%compressed, 2)
+
+      ! decide on the number of planes for the spectrum
+      if (req%plane .eq. 0) then
+         no_planes = max_planes
+      else
+         no_planes = 1
+      end if
 
       plane = max(req%plane, 1)
       plane = min(plane, max_planes)
@@ -9455,7 +9462,7 @@ contains
       end_y = 1 + (y2 - 1)/DIM
 
       ! allocate and zero-out the spectrum
-      allocate (spectrum(first:last))
+      allocate (spectrum(first:last, no_planes))
       spectrum = 0.0
 
       call get_cdelt3(item, cdelt3)
@@ -9505,13 +9512,13 @@ contains
 
          if (.not. req%image) then
             if (req%beam .eq. square) then
-               spectrum(frame) = viewport_spectrum_rect(c_loc(item%compressed(frame, plane)%ptr),&
+               spectrum(frame, 1) = viewport_spectrum_rect(c_loc(item%compressed(frame, plane)%ptr),&
                &width, height, item%frame_min(frame, plane), item%frame_max(frame, plane),&
                &x1 - 1, x2 - 1, y1 - 1, y2 - 1, average, cdelt3)
             end if
 
             if (req%beam .eq. circle) then
-               spectrum(frame) = viewport_spectrum_circle(c_loc(item%compressed(frame, plane)%ptr),&
+               spectrum(frame, 1) = viewport_spectrum_circle(c_loc(item%compressed(frame, plane)%ptr),&
                &width, height, item%frame_min(frame, plane), item%frame_max(frame, plane), &
                &x1 - 1, x2 - 1, y1 - 1, y2 - 1, cx - 1, cy - 1, r2, average, cdelt3)
             end if
@@ -9534,7 +9541,12 @@ contains
                   &x1 - req%x1, y1 - req%y1, cx - 1, cy - 1, r2, average, cdelt3)
                end if
 
-               if (k .eq. plane) spectrum(frame) = spec
+               ! switch between a single and full-spectrum mode
+               if (no_planes .eq. 1) then
+                  if (k .eq. plane) spectrum(frame, 1) = spec
+               else
+                  spectrum(frame, k) = spec
+               end if
             end do
          end if
 
@@ -11843,6 +11855,8 @@ contains
       cluster_req%median = dmedian
 
       ! outputs
+      cluster_req%spectrum = c_loc(cluster_spectrum)
+
       if (req%image) then
          cluster_req%pixels = c_loc(pixels)
          cluster_req%mask = c_loc(mask)
@@ -11850,7 +11864,6 @@ contains
          cluster_req%pixels = c_null_ptr
          cluster_req%mask = c_null_ptr
       end if
-      cluster_req%spectrum = c_loc(cluster_spectrum)
 
       cluster_req%dimx = dimx
       cluster_req%dimy = dimy
