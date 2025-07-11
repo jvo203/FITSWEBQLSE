@@ -7810,9 +7810,8 @@ contains
       ! reduce the pixels/mask locally
       if (req%image) then
          do tid = 1, max_threads
-            ! disabled during debugging
-            !pixels(:, :, :) = pixels(:, :, :) + thread_pixels(:, :, :, tid)
-            !mask(:, :) = mask(:, :) .or. thread_mask(:, :, tid)
+            pixels(:, :, :) = pixels(:, :, :) + thread_pixels(:, :, :, tid)
+            mask(:, :) = mask(:, :) .or. thread_mask(:, :, tid)
          end do
       end if
 
@@ -9437,8 +9436,6 @@ contains
       dimy = abs(req%y2 - req%y1) + 1
       npixels = dimx*dimy
 
-      print *, "viewport_request :: dimx, dimy, npixels", dimx, dimy, npixels
-
       ! sanity checks
       x1 = max(1, req%x1)
       y1 = max(1, req%y1)
@@ -9534,16 +9531,16 @@ contains
                spec = 0.0
 
                if (req%beam .eq. square) then
-                  spec = viewport_image_spectrum_rect(c_loc(item%compressed(frame, plane)%ptr),&
-                  &width, height, item%frame_min(frame, plane), item%frame_max(frame, plane),&
+                  spec = viewport_image_spectrum_rect(c_loc(item%compressed(frame, k)%ptr),&
+                  &width, height, item%frame_min(frame, k), item%frame_max(frame, k),&
                   &c_loc(thread_pixels(:, k, tid)), c_loc(thread_mask(:, tid)), dimx, &
                   &x1 - 1, x2 - 1, y1 - 1, y2 - 1, x1 - req%x1, y1 - req%y1, average, cdelt3, req%median(k),&
                   &thread_sumP(k), thread_countP(k), thread_sumN(k), thread_countN(k))
                end if
 
                if (req%beam .eq. circle) then
-                  spec = viewport_image_spectrum_circle(c_loc(item%compressed(frame, plane)%ptr),&
-                  &width, height, item%frame_min(frame, plane), item%frame_max(frame, plane), c_loc(thread_pixels(:, k, tid)),&
+                  spec = viewport_image_spectrum_circle(c_loc(item%compressed(frame, k)%ptr),&
+                  &width, height, item%frame_min(frame, k), item%frame_max(frame, k), c_loc(thread_pixels(:, k, tid)),&
                   & c_loc(thread_mask(:, tid)), dimx, x1 - 1, x2 - 1, y1 - 1, y2 - 1, &
                   &x1 - req%x1, y1 - req%y1, cx - 1, cy - 1, r2, average, cdelt3)
                end if
