@@ -9541,7 +9541,7 @@ contains
                   &x1 - req%x1, y1 - req%y1, cx - 1, cy - 1, r2, average, cdelt3)
                end if
 
-               ! switch between a single and full-spectrum mode
+               ! switch between a single and all-planes full-spectrum mode
                if (no_planes .eq. 1) then
                   if (k .eq. plane) spectrum(frame, 1) = spec
                else
