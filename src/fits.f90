@@ -9413,10 +9413,14 @@ contains
       max_planes = size(item%compressed, 2)
 
       ! decide on the number of planes for the spectrum
-      if (req%plane .eq. 0) then
-         no_planes = max_planes
-      else
+      if (.not. req%image) then
          no_planes = 1
+      else
+         if (req%plane .eq. 0) then
+            no_planes = max_planes
+         else
+            no_planes = 1
+         end if
       end if
 
       plane = max(req%plane, 1)
