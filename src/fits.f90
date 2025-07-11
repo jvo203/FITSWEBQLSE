@@ -7810,8 +7810,9 @@ contains
       ! reduce the pixels/mask locally
       if (req%image) then
          do tid = 1, max_threads
-            pixels(:, :, :) = pixels(:, :, :) + thread_pixels(:, :, :, tid)
-            mask(:, :) = mask(:, :) .or. thread_mask(:, :, tid)
+            ! disabled during debugging
+            !pixels(:, :, :) = pixels(:, :, :) + thread_pixels(:, :, :, tid)
+            !mask(:, :) = mask(:, :) .or. thread_mask(:, :, tid)
          end do
       end if
 
@@ -9435,6 +9436,8 @@ contains
       dimx = abs(req%x2 - req%x1) + 1
       dimy = abs(req%y2 - req%y1) + 1
       npixels = dimx*dimy
+
+      print *, "viewport_request :: dimx, dimy, npixels", dimx, dimy, npixels
 
       ! sanity checks
       x1 = max(1, req%x1)

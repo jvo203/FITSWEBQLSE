@@ -8687,6 +8687,8 @@ void *fetch_realtime_image_spectrum(void *ptr)
                 size_t pixels_size = plane_size * req->no_planes * sizeof(float);
                 size_t mask_size = plane_size * sizeof(uint8);
 
+                printf("[C] fetch_realtime_image_spectrum :: dimx = %d, dimy = %d, plane_size = %zu, no_planes = %d, length = %d\n", req->dimx, req->dimy, plane_size, req->no_planes, req->length);
+
                 size_t offset = 0;
 
                 // do we have the spectrum?
