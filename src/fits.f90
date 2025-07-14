@@ -109,6 +109,22 @@ module fits
       real(kind=8) :: t1
    end type polarisation_request_f
 
+   type, bind(c) :: polarisation_fetch_f
+      ! input
+      type(c_ptr) :: datasetid
+      integer(c_int) :: len
+      integer(c_int) :: frame
+      integer(c_int) :: pol_xmin, pol_xmax
+      integer(c_int) :: pol_ymin, pol_ymax
+      integer(c_int) :: pol_target
+
+      ! output
+      integer(kind=c_int) :: width, height
+
+      ! to be filled in C
+      type(C_PTR) :: intensity, angle
+   end type polarisation_fetch_f
+
    type :: video_response_f
       type(C_PTR) :: session
       integer(c_int) :: seq_id
