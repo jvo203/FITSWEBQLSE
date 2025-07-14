@@ -9226,6 +9226,45 @@ contains
 
    end subroutine DownsizePolarization
 
+   subroutine PreallocatePolarization(width, height, pol_xmin, pol_ymin, pol_xmax, pol_ymax,&
+   & pol_target, pol_intensity, pol_angle, xmin, xmax, ymin, ymax, range)
+      implicit none
+
+      integer, intent(in) :: width, height
+      integer, intent(in) :: pol_xmin, pol_ymin, pol_xmax, pol_ymax, pol_target
+      real(kind=c_float), dimension(:,:), allocatable, intent(out) :: pol_intensity, pol_angle
+      integer, intent(out) :: xmin, xmax, ymin, ymax, range
+
+      integer :: dimx, dimy
+      real :: range_x, range_y
+
+      xmin = max(1, pol_xmin)
+      ymin = max(1, pol_ymin)
+      xmax = min(width, pol_xmax)
+      ymax = min(height, pol_ymax)
+
+      print *, 'PreallocatePolarization: xmin:', xmin, 'xmax:', xmax, 'ymin:', ymin, 'ymax:', ymax
+
+      dimx = abs(xmax - xmin) + 1
+      dimy = abs(ymax - ymin) + 1
+
+      range_x = real(dimx)/real(pol_target)
+      range_y = real(dimy)/real(pol_target)
+
+      range = max(1, floor(max(range_x, range_y)))
+
+      print *, 'PreallocatePolarization: dimx:', dimx, 'dimy:', dimy, 'range:', range
+
+      ! allocate the output arrays
+      allocate (pol_intensity(1+(xmax - xmin)/range, 1+(ymax - ymin)/range))
+      allocate (pol_angle(1+(xmax - xmin)/range, 1+(ymax - ymin)/range))
+
+      ! clear the output arrays
+      pol_intensity = 0.0
+      pol_angle = 0.0
+
+   end subroutine PreallocatePolarization
+
    subroutine DownsizePolarizationSIMD(pixels, mask, width, height, pol_xmin, pol_ymin, pol_xmax, pol_ymax,&
    & pol_target, pol_intensity, pol_angle)
       implicit none
@@ -9236,11 +9275,10 @@ contains
       integer, intent(in) :: pol_xmin, pol_ymin, pol_xmax, pol_ymax, pol_target
       real(kind=c_float), dimension(:,:), allocatable, intent(out) :: pol_intensity, pol_angle
 
-      integer :: xmin, xmax, ymin, ymax, dimx, dimy
+      integer :: xmin, xmax, ymin, ymax
       integer :: max_threads, max_planes, i, j, ii, jj
 
       integer :: range, min_count, total_count
-      real :: range_x, range_y
 
       real :: intensity, angle
       integer :: x0, y0
@@ -9252,37 +9290,17 @@ contains
       max_planes = size(pixels, 3)
       if (max_planes .lt. 3) return
 
-      xmin = max(1, pol_xmin)
-      ymin = max(1, pol_ymin)
-      xmax = min(width, pol_xmax)
-      ymax = min(height, pol_ymax)
+      call PreallocatePolarization(width, height, pol_xmin, pol_ymin, pol_xmax, pol_ymax,&
+      & pol_target, pol_intensity, pol_angle, xmin, xmax, ymin, ymax, range)
 
-      print *, 'DownsizePolarizationSIMD: xmin:', xmin, 'xmax:', xmax, 'ymin:', ymin, 'ymax:', ymax, 'max_planes:', max_planes
-
-      c_stride = size(pixels, 1)
-      c_offset = size(pixels, 1) * size(pixels, 2)
-      print *, 'DownsizePolarizationSIMD: c_stride:', c_stride, 'c_offset:', c_offset
-
-      dimx = abs(xmax - xmin) + 1
-      dimy = abs(ymax - ymin) + 1
-
-      range_x = real(dimx)/real(pol_target)
-      range_y = real(dimy)/real(pol_target)
-
-      range = max(1, floor(max(range_x, range_y)))
       min_count = nint(0.75*range**2)
 
-      ! print the width X height of the input pixels and mask
-      print *, 'DownsizePolarizationSIMD: width:', width, 'height:', height, 'dimx:', dimx, 'dimy:', dimy,&
+      print *, 'DownsizePolarizationSIMD: xmin:', xmin, 'xmax:', xmax, 'ymin:', ymin, 'ymax:', ymax, 'max_planes:', max_planes,&
       & 'range:', range, 'min_count:', min_count
 
-      ! allocate the output arrays
-      allocate (pol_intensity(1+(xmax - xmin)/range, 1+(ymax - ymin)/range))
-      allocate (pol_angle(1+(xmax - xmin)/range, 1+(ymax - ymin)/range))
-
-      ! clear the output arrays
-      pol_intensity = 0.0
-      pol_angle = 0.0
+      c_stride = width
+      c_offset = width * height
+      print *, 'DownsizePolarizationSIMD: c_stride:', c_stride, 'c_offset:', c_offset
 
       ! re-set the counter
       total_count = 0
@@ -10238,6 +10256,7 @@ contains
 
       integer(kind=c_int) :: x1, x2, y1, y2, dimx, dimy, width, height, precision
       integer :: k, max_planes, max_threads
+      integer :: xmin, xmax, ymin, ymax, range
 
       real(kind=c_float) :: spectrum ! the actual value will be ignored, it's not needed for polarisation
       real(kind=8) :: cdelt3
@@ -10268,47 +10287,50 @@ contains
       height = req%item%naxes(2)
 
       ! TO-DO (a cluster version): if a frame has not been found it needs to be fetched from the cluster
-      if (.not. associated(req%item%compressed(req%frame, max_planes)%ptr)) return
+      if (.not. associated(req%item%compressed(req%frame, max_planes)%ptr)) then
+         call PreallocatePolarization(dimx, dimy, req%pol_xmin, req%pol_ymin, req%pol_xmax, req%pol_ymax,&
+         & req%pol_target, intensity, angle, xmin, xmax, ymin, ymax, range)
+      else
+         call get_cdelt3(req%item, cdelt3)
+         ! set dmedian to IEEE NaN to signal no need to do statistics
+         dmedian = ieee_value(0.0, ieee_quiet_nan)
 
-      call get_cdelt3(req%item, cdelt3)
-      ! set dmedian to IEEE NaN to signal no need to do statistics
-      dmedian = ieee_value(0.0, ieee_quiet_nan)
+         ! allocate the pixels and masks
+         allocate (pixels(dimx, dimy, max_planes))
+         allocate (thread_mask(dimx, dimy, max_planes))
+         allocate (mask(dimx, dimy))
 
-      ! allocate the pixels and masks
-      allocate (pixels(dimx, dimy, max_planes))
-      allocate (thread_mask(dimx, dimy, max_planes))
-      allocate (mask(dimx, dimy))
+         pixels = 0.0
+         thread_mask = .false.
+         mask = .false.
 
-      pixels = 0.0
-      thread_mask = .false.
-      mask = .false.
+         ! an OpenMP parallel region
+         !$omp PARALLEL DEFAULT(SHARED) SHARED(req, pixels, thread_mask, dmedian)&
+         !$omp& PRIVATE(k, spectrum, sumP, countP, sumN, countN)
+         !$omp DO
+         do k = 1, max_planes
+            ! print *, 'tid:', 1 + OMP_GET_THREAD_NUM(), '; plane:', k
+            ! skip frames for which there is no data on this node
+            if (.not. associated(req%item%compressed(req%frame, k)%ptr)) cycle
 
-      ! an OpenMP parallel region
-      !$omp PARALLEL DEFAULT(SHARED) SHARED(req, pixels, thread_mask, dmedian)&
-      !$omp& PRIVATE(k, spectrum, sumP, countP, sumN, countN)
-      !$omp DO
-      do k = 1, max_planes
-         ! print *, 'tid:', 1 + OMP_GET_THREAD_NUM(), '; plane:', k
-         ! skip frames for which there is no data on this node
-         if (.not. associated(req%item%compressed(req%frame, k)%ptr)) cycle
+            ! the image is square (rectangular)
+            spectrum = viewport_image_spectrum_rect(c_loc(req%item%compressed(req%frame, k)%ptr),&
+            &width, height, req%item%frame_min(req%frame, k), req%item%frame_max(req%frame, k),&
+            &c_loc(pixels(:, :, k)), c_loc(thread_mask(:, :, k)), dimx, &
+            &x1 - 1, x2 - 1, y1 - 1, y2 - 1, 0, 0, 0, cdelt3,&
+            &dmedian, sumP, countP, sumN, countN)
 
-         ! the image is square (rectangular)
-         spectrum = viewport_image_spectrum_rect(c_loc(req%item%compressed(req%frame, k)%ptr),&
-         &width, height, req%item%frame_min(req%frame, k), req%item%frame_max(req%frame, k),&
-         &c_loc(pixels(:, :, k)), c_loc(thread_mask(:, :, k)), dimx, &
-         &x1 - 1, x2 - 1, y1 - 1, y2 - 1, 0, 0, 0, cdelt3,&
-         &dmedian, sumP, countP, sumN, countN)
+            ! reduce the mask here in a critical section
+            !$omp critical
+            mask(:, :) = mask(:, :) .or. thread_mask(:, :, k)
+            !$omp end critical
+         end do
+         !$omp END DO
+         !$omp END PARALLEL
 
-         ! reduce the mask here in a critical section
-         !$omp critical
-         mask(:, :) = mask(:, :) .or. thread_mask(:, :, k)
-         !$omp end critical
-      end do
-      !$omp END DO
-      !$omp END PARALLEL
-
-      call DownsizePolarizationSIMD(pixels, mask, dimx, dimy, req%pol_xmin, req%pol_ymin, req%pol_xmax, req%pol_ymax,&
-      & req%pol_target, intensity, angle)
+         call DownsizePolarizationSIMD(pixels, mask, dimx, dimy, req%pol_xmin, req%pol_ymin, req%pol_xmax, req%pol_ymax,&
+         & req%pol_target, intensity, angle)
+      end if
 
       ! end the timer
       t2 = omp_get_wtime()
