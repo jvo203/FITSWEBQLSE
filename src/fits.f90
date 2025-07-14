@@ -9252,10 +9252,10 @@ contains
       max_planes = size(pixels, 3)
       if (max_planes .lt. 3) return
 
-      xmin = max(lbound(pixels, 1), pol_xmin)
-      xmax = min(ubound(pixels, 1), pol_xmax)
-      ymin = max(lbound(pixels, 2), pol_ymin)
-      ymax = min(ubound(pixels, 2), pol_ymax)
+      xmin = max(1, pol_xmin)
+      ymin = max(1, pol_ymin)
+      xmax = min(width, pol_xmax)
+      ymax = min(height, pol_ymax)
 
       print *, 'DownsizePolarizationSIMD: xmin:', xmin, 'xmax:', xmax, 'ymin:', ymin, 'ymax:', ymax, 'max_planes:', max_planes
 
