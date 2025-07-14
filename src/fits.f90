@@ -10325,8 +10325,13 @@ contains
          precision = ZFP_LOW_PRECISION
       end if
 
-      call write_ws_polarisation(req%session, req%seq_id, req%timestamp, elapsed,&
-      & size(intensity, 1), size(intensity, 2), req%pol_target, c_loc(intensity), c_loc(angle), precision)
+      if (allocated(intensity) .and. allocated(angle)) then
+         call write_ws_polarisation(req%session, req%seq_id, req%timestamp, elapsed,&
+         & size(intensity, 1), size(intensity, 2), req%pol_target, c_loc(intensity), c_loc(angle), precision)
+      else
+         print *, 'polarisation_request_simd: intensity and / or angle is not allocated!'
+      end if
+
 
       ! end the timer
       t2 = omp_get_wtime()
