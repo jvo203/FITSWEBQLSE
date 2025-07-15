@@ -311,6 +311,21 @@ module fits
 
    end type video_req_f
 
+   type, bind(c) :: polarisation_req_f
+      ! input
+      integer(c_int) :: frame
+
+      ! polarisation
+      integer(c_int) :: pol_xmin, pol_xmax
+      integer(c_int) :: pol_ymin, pol_ymax
+      integer(c_int) :: pol_target
+
+      ! output
+      integer(kind=c_int) :: fd
+      type(C_PTR) :: ptr
+
+   end type polarisation_req_f
+
    !type fp16
    !    integer(kind=2), dimension(:, :), pointer :: ptr
    !end type fp16
