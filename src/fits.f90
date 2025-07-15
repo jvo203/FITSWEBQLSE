@@ -10269,8 +10269,7 @@ contains
       if (.not. c_associated(arg)) return
       call c_f_pointer(arg, resp)
 
-      ! disabled during debugging
-      ! call write_ws_video(resp%session, resp%seq_id, resp%timestamp, resp%elapsed, c_loc(resp%pixels), c_loc(resp%mask))
+      call write_ws_video(resp%session, resp%seq_id, resp%timestamp, resp%elapsed, c_loc(resp%pixels), c_loc(resp%mask))
 
       ! deallocate the pixels/mask
       deallocate (resp%pixels)
