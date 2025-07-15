@@ -206,6 +206,24 @@ struct video_req
     void *ptr;
 };
 
+struct polarisation_fetch
+{
+    char *datasetid;
+    int len;
+
+    // inputs
+    int frame;
+    int pol_xmin, pol_xmax;
+    int pol_ymin, pol_ymax;
+    int pol_target;
+
+    // output
+    int width;
+    int height;
+    float *restrict intensity;
+    float *restrict angle;
+};
+
 struct http_pv_diagram_request
 {
     char *datasetid;
