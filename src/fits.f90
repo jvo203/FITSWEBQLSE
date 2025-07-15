@@ -10276,6 +10276,8 @@ contains
       integer :: xmin, xmax, ymin, ymax, range
 
       type(polarisation_fetch_f), allocatable, target :: fetch_req
+      type(c_ptr) :: pid
+      integer(kind=c_int) :: rc
 
       real(kind=c_float) :: spectrum ! the actual value will be ignored, it's not needed for polarisation
       real(kind=8) :: cdelt3
@@ -10305,7 +10307,7 @@ contains
       width = req%item%naxes(1)
       height = req%item%naxes(2)
 
-      ! TO-DO (a cluster version): if a frame has not been found it needs to be fetched from the cluster
+      ! if a frame has not been found it needs to be fetched from the cluster
       if (.not. associated(req%item%compressed(req%frame, max_planes)%ptr)) then
          allocate (fetch_req)
 
@@ -10325,6 +10327,12 @@ contains
          fetch_req%height = size(intensity, 2)
          fetch_req%intensity = c_loc(intensity)
          fetch_req%angle = c_loc(angle)
+
+         ! launch a pthread
+         pid = my_pthread_create(start_routine=c_funloc(fetch_polarisation), arg=c_loc(fetch_req), rc=rc)
+
+         ! join a thread
+         rc = my_pthread_join(pid)
       else
          call get_cdelt3(req%item, cdelt3)
          ! set dmedian to IEEE NaN to signal no need to do statistics
