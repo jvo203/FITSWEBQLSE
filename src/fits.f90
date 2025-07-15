@@ -762,6 +762,13 @@ module fits
          type(c_ptr), intent(in), value :: arg   ! a pointer to type(video_fetch_f)
       end subroutine fetch_video_frame
 
+      recursive subroutine fetch_polarisation(arg) BIND(C)
+         use, intrinsic :: ISO_C_BINDING
+         implicit none
+
+         type(c_ptr), intent(in), value :: arg   ! a pointer to type(polarisation_fetch_f)
+      end subroutine fetch_polarisation
+
       recursive subroutine fetch_realtime_image_spectrum(arg) BIND(C)
          use, intrinsic :: ISO_C_BINDING
          implicit none
