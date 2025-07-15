@@ -160,6 +160,7 @@ void *decompress_ZIP(void *user);
 void *decompress_BZIP2(void *user);
 void *decompress_read(void *user);
 extern void *video_request(void *req);
+extern void *polarisation_request(void *req);
 extern void *download_request(void *req);   // a FORTRAN subroutine
 extern void *viewport_request(void *req);   // a FORTRAN subroutine
 extern void *cluster_pv_request(void *req); // a FORTRAN subroutine
