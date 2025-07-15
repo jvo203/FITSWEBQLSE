@@ -206,6 +206,17 @@ struct video_req
     void *ptr;
 };
 
+struct polarisation_req
+{
+    int frame;
+    int pol_xmin, pol_xmax;
+    int pol_ymin, pol_ymax;
+    int pol_target;
+
+    int fd; // pipe file descriptor
+    void *ptr;
+};
+
 struct polarisation_fetch
 {
     char *datasetid;

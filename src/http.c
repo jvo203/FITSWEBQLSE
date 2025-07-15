@@ -3890,6 +3890,127 @@ static enum MHD_Result on_http_connection(void *cls,
         return ret;
     }
 
+    if (strstr(url, "/polarisation/") != NULL)
+    {
+        int frame, target;
+        int xmin, xmax, ymin, ymax;
+
+        int status;
+        int pipefd[2];
+        pthread_t tid;
+
+        char *datasetId = strrchr(url, '/');
+        if (datasetId == NULL)
+            return http_bad_request(connection);
+
+        datasetId++; // skip the slash character
+
+        char *frameStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "frame");
+        if (frameStr == NULL)
+            return http_bad_request(connection);
+
+        frame = atoi(frameStr);
+
+        // xmin, xmax, ymin, ymax
+        char *xminStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "xmin");
+        if (xminStr == NULL)
+            return http_bad_request(connection);
+
+        xmin = atoi(xminStr);
+
+        char *xmaxStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "xmax");
+        if (xmaxStr == NULL)
+            return http_bad_request(connection);
+
+        xmax = atoi(xmaxStr);
+
+        char *yminStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "ymin");
+        if (yminStr == NULL)
+            return http_bad_request(connection);
+
+        ymin = atoi(yminStr);
+
+        char *ymaxStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "ymax");
+        if (ymaxStr == NULL)
+            return http_bad_request(connection);
+
+        ymax = atoi(ymaxStr);
+
+        // target
+        char *targetStr = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "target");
+        if (targetStr == NULL)
+            return http_bad_request(connection);
+
+        target = atoi(targetStr);
+
+        void *item = get_dataset(datasetId);
+
+        if (item == NULL)
+            return http_not_found(connection);
+
+        // open a pipe
+        status = pipe(pipefd);
+
+        if (0 != status)
+            return http_internal_server_error(connection);
+
+        // create a response from a pipe by passing the read end of the pipe
+        struct MHD_Response *response = MHD_create_response_from_pipe(pipefd[0]);
+
+        if (NULL == response)
+        {
+            close(pipefd[1]);
+            return http_internal_server_error(connection);
+        }
+
+        // add headers
+        MHD_add_response_header(response, "Cache-Control", "no-cache");
+        MHD_add_response_header(response, "Cache-Control", "no-store");
+        MHD_add_response_header(response, "Pragma", "no-cache");
+        MHD_add_response_header(response, "Content-Type", "application/octet-stream");
+
+        // queue the response
+        enum MHD_Result ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
+        MHD_destroy_response(response);
+
+        // the code below should be run in a separate thread
+        // otherwise libmicrohttpd will not have a chance to read from the pipe
+
+        // pass the write end of the pipe to Fortran
+        // the binary response data will be generated in Fortran
+        printf("[C] calling polarisation_request with the pipe file descriptor %d\n", pipefd[1]);
+
+        struct polarisation_req *req = malloc(sizeof(struct polarisation_req));
+
+        if (req != NULL)
+        {
+            req->frame = frame;
+            req->pol_xmin = xmin;
+            req->pol_xmax = xmax;
+            req->pol_ymin = ymin;
+            req->pol_ymax = ymax;
+            req->pol_target = target;
+
+            req->fd = pipefd[1];
+            req->ptr = item;
+
+            // create and detach the thread
+            int stat = pthread_create(&tid, NULL, &polarisation_request, req);
+
+            if (stat == 0)
+                pthread_detach(tid);
+            else
+            {
+                close(pipefd[1]);
+                free(req);
+            }
+        }
+        else
+            close(pipefd[1]);
+
+        return ret;
+    }
+
     // WebQL main entry page
     if (strstr(url, "FITSWebQL.html") != NULL)
     {
