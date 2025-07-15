@@ -113,6 +113,7 @@ module fits
       ! input
       type(c_ptr) :: datasetid
       integer(c_int) :: len
+
       integer(c_int) :: frame
       integer(c_int) :: pol_xmin, pol_xmax
       integer(c_int) :: pol_ymin, pol_ymax
@@ -10274,6 +10275,8 @@ contains
       integer :: k, max_planes, max_threads
       integer :: xmin, xmax, ymin, ymax, range
 
+      type(polarisation_fetch_f), allocatable, target :: fetch_req
+
       real(kind=c_float) :: spectrum ! the actual value will be ignored, it's not needed for polarisation
       real(kind=8) :: cdelt3
       real(kind=c_float) :: dmedian, sumP, sumN ! unneeded
@@ -10304,8 +10307,24 @@ contains
 
       ! TO-DO (a cluster version): if a frame has not been found it needs to be fetched from the cluster
       if (.not. associated(req%item%compressed(req%frame, max_planes)%ptr)) then
+         allocate (fetch_req)
+
          call PreallocatePolarization(dimx, dimy, req%pol_xmin, req%pol_ymin, req%pol_xmax, req%pol_ymax,&
          & req%pol_target, intensity, angle, xmin, xmax, ymin, ymax, range)
+
+         fetch_req%datasetid = c_loc(req%item%datasetid)
+         fetch_req%len = size(req%item%datasetid)
+         fetch_req%frame = req%frame
+         fetch_req%pol_xmin = req%pol_xmin
+         fetch_req%pol_xmax = req%pol_xmax
+         fetch_req%pol_ymin = req%pol_ymin
+         fetch_req%pol_ymax = req%pol_ymax
+         fetch_req%pol_target = req%pol_target
+
+         fetch_req%width = size(intensity, 1)
+         fetch_req%height = size(intensity, 2)
+         fetch_req%intensity = c_loc(intensity)
+         fetch_req%angle = c_loc(angle)
       else
          call get_cdelt3(req%item, cdelt3)
          ! set dmedian to IEEE NaN to signal no need to do statistics
