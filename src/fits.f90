@@ -10282,6 +10282,72 @@ contains
 
    end subroutine send_ws_video
 
+   recursive subroutine polarisation_request(user) BIND(C, name='polarisation_request')
+      use :: unix_pthread
+      use, intrinsic :: iso_c_binding
+      implicit none
+
+      type(C_PTR), intent(in), value :: user
+
+      type(dataset), pointer :: item
+      type(polarisation_req_f), pointer :: req
+
+      real(kind=c_float), allocatable, target :: pixels(:, :, :)
+      logical(kind=c_bool), allocatable, target :: thread_mask(:, :, :), mask(:,:)
+      real(kind=c_float), dimension(:,:), allocatable, target :: intensity, angle
+
+      integer(kind=c_int) :: x1, x2, y1, y2, dimx, dimy, width, height
+      integer :: k, max_planes, max_threads
+      integer :: xmin, xmax, ymin, ymax, range
+
+      real(kind=c_float) :: spectrum ! the actual value will be ignored, it's not needed for polarisation
+      real(kind=8) :: cdelt3
+      real(kind=c_float) :: dmedian, sumP, sumN ! unneeded
+      integer(c_int64_t) :: countP, countN ! unneeded
+
+      integer(kind=c_size_t) :: written
+
+      if (.not. c_associated(user)) return
+      call c_f_pointer(user, req)
+
+      if (.not. c_associated(req%ptr)) return
+      call c_f_pointer(req%ptr, item)
+
+      if (.not. allocated(item%compressed)) goto 10000
+
+      max_planes = size(item%compressed, 2)
+
+      if (.not. associated(item%compressed(req%frame, max_planes)%ptr)) goto 10000
+      ! OK, we've got the frame in question
+
+      ! set the viewport to the whole image
+      x1 = 1
+      y1 = 1
+      x2 = item%naxes(1)
+      y2 = item%naxes(2)
+
+      dimx = abs(x2 - x1) + 1
+      dimy = abs(y2 - y1) + 1
+
+      width = item%naxes(1)
+      height = item%naxes(2)
+
+      if (req%fd .ne. -1) then
+         if (allocated(intensity) .and. allocated(angle)) then
+            ! send the intensity and angle arrays via a Unix pipe
+            written = chunked_write(req%fd, c_loc(intensity), sizeof(intensity))
+            written = chunked_write(req%fd, c_loc(angle), sizeof(angle))
+         end if
+      end if
+
+      ! clean up
+10000 nullify (item)
+      if (req%fd .ne. -1) call close_pipe(req%fd)
+      nullify (req) ! disassociate the FORTRAN pointer from the C memory region
+      call free(user) ! release C memory
+
+   end subroutine polarisation_request
+
    recursive subroutine polarisation_request_simd(arg) BIND(C)
       use omp_lib
       use, intrinsic :: iso_c_binding
