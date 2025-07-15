@@ -10332,6 +10332,46 @@ contains
       width = item%naxes(1)
       height = item%naxes(2)
 
+      call get_cdelt3(item, cdelt3)
+      ! set dmedian to IEEE NaN to signal no need to do statistics
+      dmedian = ieee_value(0.0, ieee_quiet_nan)
+
+      ! allocate the pixels and masks
+      allocate (pixels(dimx, dimy, max_planes))
+      allocate (thread_mask(dimx, dimy, max_planes))
+      allocate (mask(dimx, dimy))
+
+      pixels = 0.0
+      thread_mask = .false.
+      mask = .false.
+
+      ! an OpenMP parallel region
+      !$omp PARALLEL DEFAULT(SHARED) SHARED(req, pixels, thread_mask, dmedian)&
+      !$omp& PRIVATE(k, spectrum, sumP, countP, sumN, countN)
+      !$omp DO
+      do k = 1, max_planes
+         ! print *, 'tid:', 1 + OMP_GET_THREAD_NUM(), '; plane:', k
+         ! skip frames for which there is no data on this node
+         if (.not. associated(item%compressed(req%frame, k)%ptr)) cycle
+
+         ! the image is square (rectangular)
+         spectrum = viewport_image_spectrum_rect(c_loc(item%compressed(req%frame, k)%ptr),&
+         &width, height, item%frame_min(req%frame, k), item%frame_max(req%frame, k),&
+         &c_loc(pixels(:, :, k)), c_loc(thread_mask(:, :, k)), dimx, &
+         &x1 - 1, x2 - 1, y1 - 1, y2 - 1, 0, 0, 0, cdelt3,&
+         &dmedian, sumP, countP, sumN, countN)
+
+         ! reduce the mask here in a critical section
+         !$omp critical
+         mask(:, :) = mask(:, :) .or. thread_mask(:, :, k)
+         !$omp end critical
+      end do
+      !$omp END DO
+      !$omp END PARALLEL
+
+      call DownsizePolarizationSIMD(pixels, mask, dimx, dimy, req%pol_xmin, req%pol_ymin, req%pol_xmax, req%pol_ymax,&
+      & req%pol_target, intensity, angle)
+
       if (req%fd .ne. -1) then
          if (allocated(intensity) .and. allocated(angle)) then
             ! send the intensity and angle arrays via a Unix pipe
