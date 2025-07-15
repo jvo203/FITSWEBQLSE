@@ -167,6 +167,7 @@ void download_response(int fd, const char *filename);
 void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *end, int *no_planes, int stride, int *status, float *frame_min, float *frame_max, float *frame_median, float *mean_spectrum, float *integrated_spectrum);
 void *fetch_inner_dimensions(void *ptr);
 void *fetch_video_frame(void *ptr);
+void *fetch_polarisation(void *ptr);
 void *fetch_global_statistics(void *ptr);
 void *fetch_image(void *ptr);
 void *fetch_realtime_image_spectrum(void *ptr);
@@ -8257,6 +8258,155 @@ void *fetch_video_frame(void *ptr)
                     }
 
                     req->valid = true;
+                }
+            }
+        }
+    }
+
+    /* remove the transfers and cleanup the handles */
+    for (i = 0; i < handle_count; i++)
+    {
+        curl_multi_remove_handle(multi_handle, handles[i]);
+        curl_easy_cleanup(handles[i]);
+        free(chunks[i].memory);
+    }
+
+    curl_multi_cleanup(multi_handle);
+
+    pthread_exit(NULL);
+}
+
+void *fetch_polarisation(void *ptr)
+{
+    if (ptr == NULL)
+        pthread_exit(NULL);
+
+    struct polarisation_fetch *req = (struct polarisation_fetch *)ptr;
+
+    printf("[C] calling fetch_polarisation across the cluster for '%.*s', frame %d\n", req->len, req->datasetid, req->frame);
+
+    int i;
+    GSList *iterator = NULL;
+
+    g_mutex_lock(&cluster_mtx);
+
+    int handle_count = g_slist_length(cluster);
+
+    if (handle_count == 0)
+    {
+        printf("[C] aborting fetch_polarisation (no cluster nodes found)\n");
+
+        g_mutex_unlock(&cluster_mtx);
+        pthread_exit(NULL);
+    };
+
+    CURL *handles[handle_count];
+    struct MemoryStruct chunks[handle_count];
+    CURLM *multi_handle;
+
+    int still_running = 1; /* keep number of running handles */
+
+    CURLMsg *msg;  /* for picking up messages with the transfer status */
+    int msgs_left; /* how many messages are left */
+
+    /* Allocate one CURL handle per transfer */
+    for (i = 0; i < handle_count; i++)
+    {
+        handles[i] = curl_easy_init();
+
+        chunks[i].memory = malloc(1);
+        chunks[i].size = 0;
+        chunks[i].memory[0] = 0;
+    }
+
+    /* init a multi stack */
+    multi_handle = curl_multi_init();
+
+    // html-encode the datasetid
+    char datasetid[2 * req->len];
+    size_t len = mg_url_encode(req->datasetid, req->len, datasetid, sizeof(datasetid) - 1);
+
+    for (i = 0, iterator = cluster; iterator; iterator = iterator->next)
+    {
+        GString *url = g_string_new("http://");
+        g_string_append_printf(url, "%s:", (char *)iterator->data);
+        g_string_append_printf(url, "%" PRIu16 "/polarisation/%.*s", options.http_port, (int)len, datasetid);
+        g_string_append_printf(url, "?frame=%d&xmin=%d&xmax=%d&ymin=%d&ymax=%d&target=%d", req->frame, req->pol_xmin, req->pol_xmax, req->pol_ymin, req->pol_ymax, req->pol_target);
+        printf("[C] URL: '%s'\n", url->str);
+
+        // set the individual URL
+        curl_easy_setopt(handles[i], CURLOPT_URL, url->str);
+
+        /* send all data to this function  */
+        curl_easy_setopt(handles[i], CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
+
+        /* we pass our 'chunk' struct to the callback function */
+        curl_easy_setopt(handles[i], CURLOPT_WRITEDATA, (void *)&(chunks[i]));
+
+        // add the individual transfer
+        curl_multi_add_handle(multi_handle, handles[i]);
+
+        g_string_free(url, TRUE);
+
+        // move on to the next cluster node
+        i++;
+    }
+
+    g_mutex_unlock(&cluster_mtx);
+
+    /* Wait for the transfers */
+    while (still_running)
+    {
+        CURLMcode mc = curl_multi_perform(multi_handle, &still_running);
+
+        if (still_running)
+            /* wait for activity, timeout or "nothing" */
+            mc = curl_multi_poll(multi_handle, NULL, 0, 1000, NULL);
+
+        if (mc)
+            break;
+    }
+
+    while ((msg = curl_multi_info_read(multi_handle, &msgs_left)))
+    {
+        if (msg->msg == CURLMSG_DONE)
+        {
+            int idx;
+            /* Find out which handle this message is about */
+            for (idx = 0; idx < handle_count; idx++)
+            {
+                int found = (msg->easy_handle == handles[idx]);
+                if (found)
+                    break;
+            }
+
+            long response_code = 0;
+            curl_easy_getinfo(msg->easy_handle, CURLINFO_RESPONSE_CODE, &response_code);
+
+            printf("[C] HTTP transfer #%d completed; cURL status %d, HTTP code %ld.\n", idx + 1, msg->data.result, response_code);
+
+            // copy the polarisation intensity & angle
+            if (response_code == 200)
+            {
+                size_t plane_size = req->width * req->height;
+                size_t expected = 2 * sizeof(float) * plane_size;
+                size_t received = chunks[idx].size;
+
+                printf("[C] intensity/angle received: %zu, expected: %zu bytes.\n", received, expected);
+
+                if (received == expected)
+                {
+                    if (req->intensity != NULL)
+                    {
+                        const float *intensity = (float *)&(chunks[idx].memory[0]);
+                        memcpy(req->intensity, intensity, plane_size * sizeof(float));
+                    }
+
+                    if (req->angle != NULL)
+                    {
+                        const float *angle = (float *)&(chunks[idx].memory[sizeof(float) * plane_size]);
+                        memcpy(req->angle, angle, plane_size * sizeof(float));
+                    }
                 }
             }
         }
