@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := wasm
-VERSION = 25.07.18.0
+VERSION = 25.07.18.1
 
 ZFP = zfp-1.0.0
 ZFP_SRC := $(wildcard $(ZFP)/src/*.c)
@@ -23,7 +23,7 @@ LDFLAGS=-lz --llvm-lto 1
 
 .PHONY=clean
 
-EMFLAGS=--bind -msimd128
+EMFLAGS=--bind -msimd128 -mavx2
 EMFLAGS+=-s ALLOW_MEMORY_GROWTH=1 -s INITIAL_MEMORY=128MB -s MAXIMUM_MEMORY=4GB -sMALLOC=mimalloc
 # SharedArrayBuffer, needed by WASM PTHREADS, is not yet widely supported in web browsers
 #EMFLAGS+=-pthread -s PTHREAD_POOL_SIZE=4
