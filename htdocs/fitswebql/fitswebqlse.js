@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-07-11.0";
+    return "JS2025-07-18.0";
 }
 
 function uuidv4() {
@@ -6835,7 +6835,28 @@ async function open_websocket_connection(_datasetId, index) {
                             var filename;
 
                             if (va_count == 1) {
-                                filename = datasetId + ".csv";
+                                if (polarisation != null) {
+                                    let Stokes = ["I", "Q", "U", "V"];
+
+                                    // get the intensity plane string from "intensity_plane" select element
+                                    try {
+                                        var plane_index = parseInt(document.getElementById('intensity_plane').value);
+                                    } catch (e) {
+                                        var plane_index = va_count;
+                                    }
+                                    let fitsData = fitsContainer[plane_index - 1];
+
+                                    if (fitsData.is_stokes) {
+                                        var intensity_plane = "Stokes" + Stokes[plane_index - 1];
+                                    } else {
+                                        var intensity_plane = "Plane" + String(plane_index);
+                                    }
+
+                                    // remove any spaces from the intensity plane string
+                                    filename = datasetId + "_" + intensity_plane + ".csv";
+                                } else {
+                                    filename = datasetId + ".csv";
+                                }
                             } else {
                                 filename = datasetId[index - 1] + ".csv";
                             };
@@ -11098,7 +11119,7 @@ function display_histogram(index, initPlanes = true) {
                 if (fitsData.is_stokes) {
                     intensity_string += "<option value=" + (i + 1) + ">Stokes " + Stokes[i] + "</option>";
                 } else {
-                    intensity_string += "<option value=" + (i + 1) + ">Plane " + str(i + 1) + "</option>";
+                    intensity_string += "<option value=" + (i + 1) + ">Plane " + String(i + 1) + "</option>";
                 }
             }
 
