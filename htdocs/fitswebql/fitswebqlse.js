@@ -6847,9 +6847,9 @@ async function open_websocket_connection(_datasetId, index) {
                                     let fitsData = fitsContainer[plane_index - 1];
 
                                     if (fitsData.is_stokes) {
-                                        var intensity_plane = "Stokes" + Stokes[plane_index - 1];
+                                        var intensity_plane = "Stokes-" + Stokes[plane_index - 1];
                                     } else {
-                                        var intensity_plane = "Plane" + String(plane_index);
+                                        var intensity_plane = "Plane-" + String(plane_index);
                                     }
 
                                     // remove any spaces from the intensity plane string

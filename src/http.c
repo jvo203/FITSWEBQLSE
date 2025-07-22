@@ -204,7 +204,7 @@ size_t chunked_write_with_chunk(int fd, const char *src, size_t n, size_t chunk)
 void write_json(int fd, GString *json);
 void write_header(int fd, const char *header_str, int str_len);
 void write_elapsed(int fd, const float *elapsed);
-void write_csv_comments(int fd, int plane, int no_planes, const char *ra, const char *dec, double lng, double lat, int beam, double beam_width, double beam_height, float cx, float cy, int dimx, int dimy, double deltaV, double ref_freq, const char *specsys);
+void write_csv_comments(int fd, int plane, bool is_stokes, int no_planes, const char *ra, const char *dec, double lng, double lat, int beam, double beam_width, double beam_height, float cx, float cy, int dimx, int dimy, double deltaV, double ref_freq, const char *specsys);
 void write_csv_row(int fd, int channel, double f, double v, float intensity, int intensity_type, bool rest, const char *bunit, bool has_velocity, bool header);
 void write_partial_statistics(int fd, const float *sumP, const int64_t *countP, const float *sumN, const int64_t *countN);
 void write_statistics(int fd, float *dmin, float *dmax, float *dmedian, float *dmadN, float *dmadP);
@@ -7976,7 +7976,7 @@ void write_csv_row(int fd, int channel, double f, double v, float intensity, int
     }
 }
 
-void write_csv_comments(int fd, int plane, int no_planes, const char *ra, const char *dec, double lng, double lat, int beam, double beam_width, double beam_height, float cx, float cy, int dimx, int dimy, double deltaV, double ref_freq, const char *specsys)
+void write_csv_comments(int fd, int plane, bool is_stokes, int no_planes, const char *ra, const char *dec, double lng, double lat, int beam, double beam_width, double beam_height, float cx, float cy, int dimx, int dimy, double deltaV, double ref_freq, const char *specsys)
 {
     char line[1024];
     char ra_key[32], ra_value[32];
@@ -7993,7 +7993,20 @@ void write_csv_comments(int fd, int plane, int no_planes, const char *ra, const 
     // polarisation plane index
     if (no_planes > 1)
     {
-        snprintf(line, sizeof(line) - 1, "# polarisation index: #%d out of 1-%d\n", plane, no_planes);
+        // define a Stokes parameter array
+        const char *stokes_planes[] = {"I", "Q", "U", "V"};
+
+        if (!is_stokes)
+            snprintf(line, sizeof(line) - 1, "# polarisation parameter: #%d out of 1-%d\n", plane, no_planes);
+        else
+        {
+            // Stokes parameters are indexed from 1 to 4
+            if (plane < 1 || plane > 4)
+                snprintf(line, sizeof(line) - 1, "# Stokes parameter: #%d out of 1-%d\n", plane, no_planes);
+            else
+                snprintf(line, sizeof(line) - 1, "# Stokes parameter: %s\n", stokes_planes[plane - 1]);
+        }
+
         chunked_write(fd, line, strlen(line));
     }
 

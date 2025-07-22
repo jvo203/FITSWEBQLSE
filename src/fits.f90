@@ -719,12 +719,13 @@ module fits
 
       end subroutine closefd
 
-      subroutine write_csv_comments(fd, plane, no_planes, ra, dec, lng, lat, beam, beam_width, beam_height,&
+      subroutine write_csv_comments(fd, plane, is_stokes, no_planes, ra, dec, lng, lat, beam, beam_width, beam_height,&
       &cx, cy, dimx, dimy, deltaV, ref_freq, specsys) BIND(C, name='write_csv_comments')
          use, intrinsic :: ISO_C_BINDING
          implicit none
 
          integer(c_int), value, intent(in) :: fd, plane, no_planes
+         logical(kind=c_bool), value :: is_stokes
          type(c_ptr), value :: ra, dec
          real(kind=c_double), value :: lng, lat
          integer(c_int), value :: beam
@@ -7560,8 +7561,9 @@ contains
 
       ! write the CSV header lines (prepended by #)
       if (req%fd .ne. -1) then
-         call write_csv_comments(req%fd, plane, max_planes, req%ra, req%dec, lng, lat, req%beam, beam_width, beam_height,&
-         &cx, cy, dimx, dimy, req%deltaV, req%ref_freq, trim(item%specsys)//c_null_char)
+         call write_csv_comments(req%fd, plane, logical(item%is_stokes, kind=c_bool), max_planes, req%ra, req%dec,&
+         & lng, lat, req%beam, beam_width, beam_height, cx, cy, dimx, dimy, req%deltaV, req%ref_freq,&
+         & trim(item%specsys)//c_null_char)
       end if
 
       ! force a CSV header output
