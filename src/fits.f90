@@ -9371,7 +9371,10 @@ contains
          IERR = WCSPIH(hdr, NKEYRC, RELAX, CTRL, NREJECT, NWCS, WCSP(i))
          print *, i, 'WCSPIH: ', IERR, NREJECT, NWCS
 
-         IF (IERR .NE. 0) goto 11000
+         IF (IERR .NE. 0) then
+            print *, 'DownsizePolarizationSIMD: WCSPIH error, exiting...'
+            goto 11000
+         END IF
       end do
 
       ! loop over the pixels and mask
