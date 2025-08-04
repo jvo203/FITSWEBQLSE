@@ -6959,7 +6959,7 @@ contains
          call inherent_image_dimensions_from_mask(mask, inner_width, inner_height, xmin, xmax, ymin, ymax)
 
          ! obtain the polarisation intensity and angle
-         call DownsizePolarizationSIMD(pixels, mask, img_width, img_height, xmin, ymin, xmax, ymax, 50, intensity, angle)
+         call DownsizePolarizationSIMD(item%hdr, pixels, mask, img_width, img_height, xmin, ymin, xmax, ymax, 50, intensity, angle)
 
          ! send the polarisation data
          call write_polarisation(fd, size(intensity, 1), size(intensity, 2), 50, c_loc(intensity), c_loc(angle), precision)
@@ -7338,7 +7338,7 @@ contains
       real(kind=8) :: cdelt3
 
       ! WCS
-      integer :: NKEYRC, RELAX, CTRL, NREJECT, STATUS, IERR, NWCS ! WCSP(2)
+      integer :: NKEYRC, RELAX, CTRL, NREJECT, STATUS, IERR, NWCS
       type(C_PTR) :: WCSP
       real(kind=c_double), parameter :: deg2rad = 0.0174532925199432957692369076848861271344287188854172545609719144017d0
       real(kind=c_double), parameter :: rad2deg = 57.2957795130823208767981548141051703324054724665643215491602438614d0
@@ -9306,10 +9306,11 @@ contains
 
    end subroutine PreallocatePolarization
 
-   subroutine DownsizePolarizationSIMD(pixels, mask, width, height, pol_xmin, pol_ymin, pol_xmax, pol_ymax,&
+   subroutine DownsizePolarizationSIMD(hdr, pixels, mask, width, height, pol_xmin, pol_ymin, pol_xmax, pol_ymax,&
    & pol_target, pol_intensity, pol_angle)
       implicit none
 
+      character(kind=c_char), dimension(:), intent(in) :: hdr
       real(c_float), dimension(:, :, :), intent(in), contiguous, target :: pixels
       logical(kind=c_bool), dimension(:, :), intent(in), contiguous, target :: mask
       integer, intent(in) :: width, height
@@ -9323,6 +9324,10 @@ contains
 
       real :: intensity, angle
       integer :: x0, y0
+
+      ! WCS
+      integer :: NKEYRC, RELAX, CTRL, NREJECT, STATUS, IERR, NWCS
+      type(C_PTR), dimension(:), allocatable :: WCSP
 
       ! SPMD C interface
       real(kind=c_float), target :: res(2)
@@ -9348,6 +9353,26 @@ contains
 
       ! get #physical cores (ignore HT)
       max_threads = get_max_threads()
+
+      ! allocate the WCSP array
+      allocate (WCSP(max_threads))
+
+      ! WCSLIB
+      NKEYRC = (size(hdr) - 1)/80
+
+      RELAX = 2**20 - 1 ! WCSHDR_all
+      CTRL = 2
+      IERR = 0
+
+      ! init all the WCSP members
+      WCSP = c_null_ptr
+
+      do i = 1, max_threads
+         IERR = WCSPIH(hdr, NKEYRC, RELAX, CTRL, NREJECT, NWCS, WCSP(i))
+         print *, i, 'WCSPIH: ', IERR, NREJECT, NWCS
+
+         IF (IERR .NE. 0) goto 11000
+      end do
 
       ! loop over the pixels and mask
       !$omp PARALLEL DEFAULT(SHARED) SHARED(pol_intensity, pol_angle, min_count, range)&
@@ -9391,6 +9416,11 @@ contains
       end do
       !$omp END DO
       !$omp END PARALLEL
+
+      ! Free the WCSPRM structs and the memory allocated for them.
+11000 do i = 1, max_threads
+         STATUS = WCSVFREE(NWCS, WCSP(i))
+      end do
 
       print *, 'DownsizePolarizationSIMD: total_count:', total_count, 'max_threads:', max_threads
 
@@ -10370,7 +10400,7 @@ contains
       !$omp END DO
       !$omp END PARALLEL
 
-      call DownsizePolarizationSIMD(pixels, mask, dimx, dimy, req%pol_xmin, req%pol_ymin, req%pol_xmax, req%pol_ymax,&
+      call DownsizePolarizationSIMD(item%hdr, pixels, mask, dimx, dimy, req%pol_xmin, req%pol_ymin, req%pol_xmax, req%pol_ymax,&
       & req%pol_target, intensity, angle)
 
       if (req%fd .ne. -1) then
@@ -10501,8 +10531,8 @@ contains
          !$omp END DO
          !$omp END PARALLEL
 
-         call DownsizePolarizationSIMD(pixels, mask, dimx, dimy, req%pol_xmin, req%pol_ymin, req%pol_xmax, req%pol_ymax,&
-         & req%pol_target, intensity, angle)
+         call DownsizePolarizationSIMD(req%item%hdr, pixels, mask, dimx, dimy, req%pol_xmin, req%pol_ymin,&
+         & req%pol_xmax, req%pol_ymax, req%pol_target, intensity, angle)
       end if
 
       ! end the timer
@@ -12250,7 +12280,7 @@ contains
             call inherent_image_dimensions_from_mask(view_mask, inner_width, inner_height, xmin, xmax, ymin, ymax)
 
             ! obtain the polarisation intensity and angle
-            call DownsizePolarizationSIMD(view_pixels, view_mask, img_width, img_height,&
+            call DownsizePolarizationSIMD(item%hdr, view_pixels, view_mask, img_width, img_height,&
             & xmin, ymin, xmax, ymax, 50, intensity, angle)
 
             ! send the polarisation data
