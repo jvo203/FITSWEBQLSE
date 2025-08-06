@@ -9481,8 +9481,8 @@ contains
 
          call pix2sky(wcsp, x+cos(angle), y+sin(angle), ra1, dec1)
          delta = ra1 - ra0
+         ! print *, 'bisect: angle:', angle * rad2deg, ' delta:', delta
 
-         !print *, 'bisect: angle:', angle * rad2deg, ' delta:', delta
          if (sign(1.0, delta1) .eq. sign(1.0, delta)) then
             angle1 = angle
          else
