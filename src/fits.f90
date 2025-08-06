@@ -9446,18 +9446,52 @@ contains
       real(kind=c_double), parameter :: rad2deg = 57.2957795130823208767981548141051703324054724665643215491602438614d0
 
       ! define a stopping accuracy
-      real, parameter :: accuracy = 0.5 * deg2rad ! degrees in radians
+      real, parameter :: accuracy = 0.25 * deg2rad ! degrees in radians
 
-      real :: angle, dx, dy, theta
-
+      real :: angle, angle1, angle2
       real(kind=c_double) :: ra0, dec0, ra1, dec1
+      real :: delta, delta1, delta2
 
       call pix2sky(wcsp, x, y, ra0, dec0)
 
       print *, 'get_northern_direction: x=', x, ' y=', y, ' ra0:', ra0, ' dec0:', dec0
 
-      ! by default return +90 degrees in radians
-      angle = 90 * deg2rad
+      angle1 = 0 * deg2rad
+      angle2 = 180 * deg2rad
+
+      ! get the initial delta1 and delta2
+      call pix2sky(wcsp, x+cos(angle1), y+sin(angle1), ra1, dec1)
+      delta1 = ra1 - ra0
+      print *, 'get_northern_direction: angle1:', angle1, ' delta1:', delta1
+
+      call pix2sky(wcsp, x+cos(angle2), y+sin(angle2), ra1, dec1)
+      delta2 = ra1 - ra0
+      print *, 'get_northern_direction: angle2:', angle2, ' delta2:', delta2
+
+      ! verify that the signs differ, if not return the mid-point
+      if (sign(1.0, delta1) .eq. sign(1.0, delta2)) then
+         print *, 'get_northern_direction: angles do not differ in sign, returning the default +90 degrees'
+         angle = 90 * deg2rad
+         return
+      end if
+
+      ! bisect the angle between angle1 and angle2, seeking the change in sign in delta
+      do while (abs(angle2 - angle1) > accuracy)
+         angle = 0.5*(angle1 + angle2)
+
+         call pix2sky(wcsp, x+cos(angle), y+sin(angle), ra1, dec1)
+         delta = ra1 - ra0
+
+         !print *, 'bisect: angle:', angle * rad2deg, ' delta:', delta
+         if (sign(1.0, delta1) .eq. sign(1.0, delta)) then
+            angle1 = angle
+         else
+            angle2 = angle
+         end if
+      end do
+
+      angle = 0.5*(angle1 + angle2)
+      print *, 'bisect: angle:', angle * rad2deg
 
    end function get_northern_direction
 
