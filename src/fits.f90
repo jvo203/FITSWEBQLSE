@@ -9433,22 +9433,31 @@ contains
 
    end subroutine DownsizePolarizationSIMD
 
-   function get_northern_direction(wcs, x, y) result(angle)
+   function get_northern_direction(wcsp, x, y) result(angle)
       implicit none
 
-      type(c_ptr), intent(inout) :: wcs
+      type(c_ptr), intent(inout) :: wcsp
       real(kind=c_float), intent(in) :: x, y
 
       ! define a constant for pi
       real, parameter :: pi = 3.14159265358979323846
 
-      ! define a stopping accuracy: 0.5 deg in radians
-      real, parameter :: accuracy = 0.5 * pi / 180.0
+      real(kind=c_double), parameter :: deg2rad = 0.0174532925199432957692369076848861271344287188854172545609719144017d0
+      real(kind=c_double), parameter :: rad2deg = 57.2957795130823208767981548141051703324054724665643215491602438614d0
 
-      real :: angle
+      ! define a stopping accuracy
+      real, parameter :: accuracy = 0.5 * deg2rad ! degrees in radians
+
+      real :: angle, dx, dy, theta
+
+      real(kind=c_double) :: ra0, dec0, ra1, dec1
+
+      call pix2sky(wcsp, x, y, ra0, dec0)
+
+      print *, 'get_northern_direction: x=', x, ' y=', y, ' ra0:', ra0, ' dec0:', dec0
 
       ! by default return +90 degrees in radians
-      angle = pi / 2
+      angle = 90 * deg2rad
 
    end function get_northern_direction
 
