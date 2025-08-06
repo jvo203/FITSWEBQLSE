@@ -9454,7 +9454,7 @@ contains
 
       call pix2sky(wcsp, x, y, ra0, dec0)
 
-      print *, 'get_northern_direction: x=', x, ' y=', y, ' ra0:', ra0, ' dec0:', dec0
+      ! print *, 'get_northern_direction: x=', x, ' y=', y, ' ra0:', ra0, ' dec0:', dec0
 
       angle1 = 0 * deg2rad
       angle2 = 180 * deg2rad
@@ -9462,11 +9462,11 @@ contains
       ! get the initial delta1 and delta2
       call pix2sky(wcsp, x+cos(angle1), y+sin(angle1), ra1, dec1)
       delta1 = ra1 - ra0
-      print *, 'get_northern_direction: angle1:', angle1, ' delta1:', delta1
+      ! print *, 'get_northern_direction: angle1:', angle1, ' delta1:', delta1
 
       call pix2sky(wcsp, x+cos(angle2), y+sin(angle2), ra1, dec1)
       delta2 = ra1 - ra0
-      print *, 'get_northern_direction: angle2:', angle2, ' delta2:', delta2
+      ! print *, 'get_northern_direction: angle2:', angle2, ' delta2:', delta2
 
       ! verify that the signs differ, if not return the mid-point
       if (sign(1.0, delta1) .eq. sign(1.0, delta2)) then
@@ -9491,7 +9491,7 @@ contains
       end do
 
       angle = 0.5*(angle1 + angle2)
-      print *, 'bisect: angle:', angle * rad2deg
+      ! print *, 'bisect: angle:', angle * rad2deg
 
    end function get_northern_direction
 
