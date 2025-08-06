@@ -9308,6 +9308,7 @@ contains
 
    subroutine DownsizePolarizationSIMD(hdr, pixels, mask, width, height, pol_xmin, pol_ymin, pol_xmax, pol_ymax,&
    & pol_target, pol_intensity, pol_angle)
+      use omp_lib
       implicit none
 
       character(kind=c_char), dimension(:), intent(in) :: hdr
@@ -9318,7 +9319,7 @@ contains
       real(kind=c_float), dimension(:,:), allocatable, intent(out) :: pol_intensity, pol_angle
 
       integer :: xmin, xmax, ymin, ymax
-      integer :: max_threads, max_planes, i, j, ii, jj
+      integer :: max_threads, max_planes, i, j, ii, jj, tid
 
       integer :: range, min_count, total_count
 
@@ -9407,8 +9408,11 @@ contains
 
                ! fill-in the output arrays
                if (x0 .ge. 1 .and. x0 .le. size(pol_intensity, 1) .and. y0 .ge. 1 .and. y0 .le. size(pol_intensity, 2)) then
+                  ! get a current OpenMP thread (starting from 0 as in C)
+                  tid = 1 + OMP_GET_THREAD_NUM()
+
                   pol_intensity(x0, y0) = intensity
-                  pol_angle(x0, y0) = angle
+                  pol_angle(x0, y0) = angle + get_northern_direction(WCSP(tid), real(i), real(j))
 
                   total_count = total_count + 1
                   ! print *, 'DownsizePolarizationSIMD: x:', x0, 'y:', y0, 'intensity:', intensity, 'angle:', angle
@@ -9428,6 +9432,25 @@ contains
       print *, 'DownsizePolarizationSIMD: total_count:', total_count, 'max_threads:', max_threads
 
    end subroutine DownsizePolarizationSIMD
+
+   function get_northern_direction(wcs, x, y) result(angle)
+      implicit none
+
+      type(c_ptr), intent(inout) :: wcs
+      real(kind=c_float), intent(in) :: x, y
+
+      ! define a constant for pi
+      real, parameter :: pi = 3.14159265358979323846
+
+      ! define a stopping accuracy: 0.5 deg in radians
+      real, parameter :: accuracy = 0.5 * pi / 180.0
+
+      real :: angle
+
+      ! by default return +90 degrees in radians
+      angle = pi / 2
+
+   end function get_northern_direction
 
    recursive subroutine viewport_request(user) BIND(C, name='viewport_request')
       use omp_lib
