@@ -7939,7 +7939,7 @@ contains
                rc = my_pthread_join(task_pid(k))
             end do
 
-            json = DownsizeJSONPolarization(view_pixels, view_mask, req%width, req%height, req%beam)
+            json = DownsizeJSONPolarization(item%hdr, view_pixels, view_mask, req%width, req%height, req%beam)
 
             ! end the timer
             call system_clock(finish_t)
@@ -7949,7 +7949,7 @@ contains
             &req%width, req%height, c_loc(view_pixels(:, :, plane)), c_loc(view_mask), precision)
          else
             ! no need for downsizing
-            json = DownsizeJSONPolarization(pixels, mask, dimx, dimy, req%beam)
+            json = DownsizeJSONPolarization(item%hdr, pixels, mask, dimx, dimy, req%beam)
 
             ! end the timer
             call system_clock(finish_t)
@@ -8967,7 +8967,7 @@ contains
             rc = my_pthread_join(task_pid(i))
          end do
 
-         json = DownsizeJSONPolarization(view_pixels, view_mask, req%width, req%height, req%beam)
+         json = DownsizeJSONPolarization(item%hdr, view_pixels, view_mask, req%width, req%height, req%beam)
 
          ! end the timer
          t2 = omp_get_wtime()
@@ -8977,7 +8977,7 @@ contains
          &req%width, req%height, c_loc(view_pixels(:, :, plane)), c_loc(view_mask), precision)
       else
          ! no need for downsizing
-         json = DownsizeJSONPolarization(pixels, mask, dimx, dimy, req%beam)
+         json = DownsizeJSONPolarization(item%hdr, pixels, mask, dimx, dimy, req%beam)
 
          ! end the timer
          t2 = omp_get_wtime()
@@ -8995,9 +8995,10 @@ contains
       print *, "handle_viewport_request elapsed time:", elapsed, '[ms]'
    end subroutine realtime_viewport_request
 
-   type(C_PTR) function DownsizeJSONPolarization(pixels, mask, width, height, beam)
+   type(C_PTR) function DownsizeJSONPolarization(hdr, pixels, mask, width, height, beam)
       implicit none
 
+      character(kind=c_char), dimension(:), intent(in) :: hdr
       real(c_float), dimension(:, :, :), intent(in) :: pixels
       logical(kind=c_bool), dimension(:, :), intent(in) :: mask
       integer, intent(in) :: width, height
@@ -9012,6 +9013,10 @@ contains
       real :: tmp, tmpA, tmpI, tmpQ, tmpU, tmpV
       real :: intensity, angle, x0, y0
       type(C_PTR) :: json
+
+      ! WCS
+      integer :: NKEYRC, RELAX, CTRL, NREJECT, STATUS, IERR, NWCS
+      type(C_PTR) :: WCSP
 
       ! a default return value
       DownsizeJSONPolarization = c_null_ptr
@@ -9036,6 +9041,18 @@ contains
 
       print *, 'DownsizeJSONPolarization: xmin:', xmin, 'xmax:', xmax, 'ymin:', ymin, 'ymax:', ymax,&
       & 'max_planes:', max_planes, 'range:', range, 'min_count:', min_count, 'radius:', radius
+
+      ! WCSLIB
+      NKEYRC = (size(hdr) - 1)/80
+
+      RELAX = 2**20 - 1 ! WCSHDR_all
+      CTRL = 2
+      IERR = 0
+
+      IERR = WCSPIH(hdr, NKEYRC, RELAX, CTRL, NREJECT, NWCS, WCSP)
+      print *, i, 'WCSPIH: ', IERR, NREJECT, NWCS
+
+      IF (IERR .NE. 0) WCSP = c_null_ptr
 
       total_count = 0
 
@@ -9124,6 +9141,8 @@ contains
       call end_json(json)
 
       DownsizeJSONPolarization = json
+
+      STATUS = WCSVFREE(NWCS, WCSP)
 
       print *, 'DownsizeJSONPolarization: total_count:', total_count
 
