@@ -9471,6 +9471,13 @@ contains
       real(kind=c_double) :: ra0, dec0, ra1, dec1
       real :: delta, delta1, delta2
 
+      ! check if wcsp is associated (not null), otherwise return the default angle
+      if (.not. c_associated(wcsp)) then
+         print *, 'get_northern_direction: wcsp is not associated, returning the default +90 degrees'
+         angle = 90 * deg2rad
+         return
+      end if
+
       call pix2sky(wcsp, x, y, ra0, dec0)
 
       ! print *, 'get_northern_direction: x=', x, ' y=', y, ' ra0:', ra0, ' dec0:', dec0
