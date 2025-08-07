@@ -9465,7 +9465,7 @@ contains
       real(kind=c_double), parameter :: rad2deg = 57.2957795130823208767981548141051703324054724665643215491602438614d0
 
       ! define a stopping accuracy
-      real, parameter :: accuracy = 0.25 * deg2rad ! degrees in radians
+      real, parameter :: accuracy = 0.5 * deg2rad ! degrees in radians
 
       real :: angle, angle1, angle2
       real(kind=c_double) :: ra0, dec0, ra1, dec1
