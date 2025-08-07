@@ -9121,7 +9121,7 @@ contains
 
             if (count .ge. min_count) then
                intensity = intensity/real(count)
-               angle = angle/real(count)
+               angle = angle/real(count) + get_northern_direction(WCSP, real(i), real(j))
 
                x0 = real(i) + 0.5*real(range) - xmin ! 0-based indexing
                y0 = real(j) + 0.5*real(range) - ymin ! 0-based indexing
