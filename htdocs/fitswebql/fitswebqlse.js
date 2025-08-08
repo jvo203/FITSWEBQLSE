@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-08-08.0";
+    return "JS2025-08-08.2";
 }
 
 function uuidv4() {
@@ -4383,8 +4383,17 @@ function process_polarisation_image(index, pol_width, pol_height, pol_target, in
 
     plot_polarisation(field, mean, std, xScale, yScale, grid_spacing, "PolarisationCanvas");
 
+    /*polarisation.pol_width = pol_width;
+    polarisation.pol_height = pol_height;*/
     polarisation.mean = mean;
     polarisation.std = std;
+
+    /*return {
+        pol_width: pol_width,
+        pol_height: pol_height,
+        mean: mean,
+        std: std
+    };*/
 }
 
 function process_polarisation(index, pol_width, pol_height, intensity, angle, mask) {
