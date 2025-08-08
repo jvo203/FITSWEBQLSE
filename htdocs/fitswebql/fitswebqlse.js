@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-08-06.0";
+    return "JS2025-08-08.0";
 }
 
 function uuidv4() {
@@ -4150,6 +4150,8 @@ function DownsizePolarisation(srcI, srcA, mask, sw, sh, range, xmin = 0, ymin = 
                     I /= count;
                     A /= count;
 
+                    console.log("i:", i, "j:", j);
+
                     mag_mean += I;
                     mag_std += I * I;
                     mag_count++;
@@ -4299,7 +4301,7 @@ function plot_polarisation(field, mean, std, xScale, yScale, spacing, canvasId) 
     for (let item of field) {
         // add 90 degrees to the angle (the angle is measured from the North Pole anti-clockwise)
         // the reflection of the angle around the x-axis (FITS to computer graphics inverted Y axis) is handled by the inverted yScale function
-        let angle = item.A; // was + Math.PI / 2; // the North Pole direction is now being handled server - side in Fortran
+        let angle = item.A; // was + Math.PI / 2; // the North Pole direction is now being handled server-side in Fortran
         let mag = (item.I - mean) / (std * Math.sqrt(2.0)); // normalise the intensity
 
         let x = item.x;
@@ -4380,6 +4382,9 @@ function process_polarisation_image(index, pol_width, pol_height, pol_target, in
     const grid_spacing = 2 * range;
 
     plot_polarisation(field, mean, std, xScale, yScale, grid_spacing, "PolarisationCanvas");
+
+    polarisation.mean = mean;
+    polarisation.std = std;
 }
 
 function process_polarisation(index, pol_width, pol_height, intensity, angle, mask) {
@@ -6515,9 +6520,9 @@ async function open_websocket_connection(_datasetId, index) {
                                     polarisation.pol_height = img_height;
                                     console.log("polarisation:", polarisation);
 
-                                    if (polarisation != null) {
+                                    /*if (polarisation != null) {
                                         process_polarisation(index, img_width, img_height, polarisation.intensity, polarisation.angle, polarisation.mask);
-                                    }
+                                    }*/
 
                                     // console.log("frame_intensity:", frame_intensity, "frame_angle:", frame_angle, 'pol_width:', pol_width, 'pol_height:', pol_height, 'pol_target:', pol_target);
 
@@ -16649,9 +16654,9 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                 polarisation.pol_height = img_height;
                                 console.log("polarisation:", polarisation);
 
-                                if (polarisation != null) {
+                                /*if (polarisation != null) {
                                     process_polarisation(index, img_width, img_height, polarisation.intensity, polarisation.angle, polarisation.mask);
-                                }
+                                }*/
 
                                 //console.log("frame_intensity:", frame_intensity, "frame_angle:", frame_angle, 'pol_width:', pol_width, 'pol_height:', pol_height, 'pol_target:', pol_target);
 
