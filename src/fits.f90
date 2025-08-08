@@ -9051,7 +9051,7 @@ contains
         IERR = 0
 
         IERR = WCSPIH(hdr, NKEYRC, RELAX, CTRL, NREJECT, NWCS, WCSP)
-        print *, i, 'WCSPIH: ', IERR, NREJECT, NWCS
+        print *, 'WCSPIH: ', IERR, NREJECT, NWCS
 
         IF (IERR .NE. 0) WCSP = c_null_ptr
 
