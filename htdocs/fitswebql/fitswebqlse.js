@@ -4400,7 +4400,7 @@ function process_polarisation_image(index, pol_width, pol_height, pol_target, in
     };*/
 }
 
-function process_polarisation(index, pol_width, pol_height, intensity, angle, mask) {
+function process_polarisation_deprecated(index, pol_width, pol_height, intensity, angle, mask) {
     console.log("process_polarisation pol_width:", pol_width, "pol_height:", pol_height);
 
     // get the image rectangle
