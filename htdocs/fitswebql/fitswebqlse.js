@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-08-18.0";
+    return "JS2025-08-19.0";
 }
 
 function uuidv4() {
@@ -4093,6 +4093,8 @@ function DownsizeImagePolarisation(srcI, srcA, sw, sh, target, scale, xmin, ymin
 
 function DownsizePolarisation(srcI, srcA, mask, sw, sh, range, xmin = 0, ymin = 0, xmax = sw - 1, ymax = sh - 1, circular = false) {
     console.log("DownsizePolarisation", sw, sh, range, xmin, ymin, xmax, ymax, circular);
+
+    let fitsData = fitsContainer[previous_plane - 1];
 
     let di = range;
     let dj = range;
