@@ -4094,7 +4094,18 @@ function DownsizeImagePolarisation(srcI, srcA, sw, sh, target, scale, xmin, ymin
 function DownsizePolarisation(srcI, srcA, mask, sw, sh, range, xmin = 0, ymin = 0, xmax = sw - 1, ymax = sh - 1, circular = false) {
     console.log("DownsizePolarisation", sw, sh, range, xmin, ymin, xmax, ymax, circular);
 
-    let fitsData = fitsContainer[previous_plane - 1];
+    let index = previous_plane;
+    let fitsData = fitsContainer[index - 1];
+    let image = imageContainer[index - 1];
+    let image_bounding_dims = image.image_bounding_dims;
+
+    // get the element with id = "image_rectangle"
+    let rect = d3.select("#image_rectangle");
+    console.log("image_rectangle:", rect);
+
+    const ax = (image_bounding_dims.width - 1) / (parseFloat(rect.attr("width")) - 0);
+    const ay = (image_bounding_dims.height - 1) / (parseFloat(rect.attr("height")) - 0);
+    console.log("image_bounding_dims:", image_bounding_dims, "ax:", ax, "ay:", ay);
 
     let di = range;
     let dj = range;
