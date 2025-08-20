@@ -4097,15 +4097,6 @@ function DownsizePolarisation(srcI, srcA, mask, sw, sh, range, xmin = 0, ymin = 
     let index = previous_plane;
     let fitsData = fitsContainer[index - 1];
     let image = imageContainer[index - 1];
-    let image_bounding_dims = image.image_bounding_dims;
-
-    // get the element with id = "image_rectangle"
-    let rect = d3.select("#image_rectangle");
-    console.log("image_rectangle:", rect);
-
-    const ax = (image_bounding_dims.width - 1) / (parseFloat(rect.attr("width")) - 0);
-    const ay = (image_bounding_dims.height - 1) / (parseFloat(rect.attr("height")) - 0);
-    console.log("image_bounding_dims:", image_bounding_dims, "ax:", ax, "ay:", ay);
 
     let di = range;
     let dj = range;
@@ -4163,7 +4154,10 @@ function DownsizePolarisation(srcI, srcA, mask, sw, sh, range, xmin = 0, ymin = 
                     I /= count;
                     A /= count;
 
-                    console.log("i:", i, "j:", j);
+                    let orig_x = i * (fitsData.width - 1) / (image.width - 1);
+                    let orig_y = j * (fitsData.height - 1) / (image.height - 1);
+
+                    //console.log("i:", i, "j:", j, "orig_x:", orig_x, "orig_y:", orig_y);
 
                     mag_mean += I;
                     mag_std += I * I;
