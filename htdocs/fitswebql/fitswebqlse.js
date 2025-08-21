@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-08-20.0";
+    return "JS2025-08-21.0";
 }
 
 function uuidv4() {
@@ -4156,8 +4156,9 @@ function DownsizePolarisation(srcI, srcA, mask, sw, sh, range, xmin = 0, ymin = 
 
                     let orig_x = i * (fitsData.width - 1) / (image.width - 1);
                     let orig_y = j * (fitsData.height - 1) / (image.height - 1);
+                    let world = pix2sky(fitsData, orig_x, orig_y);
 
-                    //console.log("i:", i, "j:", j, "orig_x:", orig_x, "orig_y:", orig_y);
+                    //console.log("i:", i, "j:", j, "orig_x:", orig_x, "orig_y:", orig_y, "world:", world);
 
                     mag_mean += I;
                     mag_std += I * I;
