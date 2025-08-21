@@ -80,6 +80,13 @@ function sky2pix(wcs, ra, dec) {
     return [pixcrd[0] - 0.5, pixcrd[1] - 0.5];
 }
 
+function get_northern_direction(wcs, x, y) {
+    const deg2rad = 0.0174532925199432957692369076848861271344287188854172545609719144017;
+    const rad2deg = 57.2957795130823208767981548141051703324054724665643215491602438614;
+
+    return pix2sky(wcs, x, y); // [degrees]
+}
+
 function erf(x) {
     // constants
     var a1 = 0.254829592;
@@ -4156,9 +4163,9 @@ function DownsizePolarisation(srcI, srcA, mask, sw, sh, range, xmin = 0, ymin = 
 
                     let orig_x = i * (fitsData.width - 1) / (image.width - 1);
                     let orig_y = j * (fitsData.height - 1) / (image.height - 1);
-                    let world = pix2sky(fitsData, orig_x, orig_y);
+                    let north = get_northern_direction(fitsData, orig_x, orig_y);
 
-                    //console.log("i:", i, "j:", j, "orig_x:", orig_x, "orig_y:", orig_y, "world:", world);
+                    console.log("i:", i, "j:", j, "orig_x:", orig_x, "orig_y:", orig_y, "north:", north);
 
                     mag_mean += I;
                     mag_std += I * I;
