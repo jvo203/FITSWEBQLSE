@@ -1,7 +1,5 @@
 using LibPQ, Tables
 
-const FITS_LINE = 2880
-
 function connect_db(db_name)
     user = String(UInt8.([106])) * String(UInt8.([118])) * String(UInt8.([111]))
     password = user * String(UInt8.([33]))
@@ -54,10 +52,10 @@ function verify_dataset(datasetid, file_size, path)
         return false
     end
 
-    # try to read the first <FITS_LINE> bytes
+    # try to read the first 80 bytes
     open(src) do io
-        buf = read(io, FITS_LINE)
-        println("Read first $(FITS_LINE) bytes of dataset $(datasetid): $(String(buf))")
+        buf = read(io, 80)
+        println("Read first 80 bytes of dataset $(datasetid): $(String(buf))")
     end
 
     println(
