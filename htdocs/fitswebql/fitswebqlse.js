@@ -84,7 +84,45 @@ function get_northern_direction(wcs, x, y) {
     const deg2rad = 0.0174532925199432957692369076848861271344287188854172545609719144017;
     const rad2deg = 57.2957795130823208767981548141051703324054724665643215491602438614;
 
-    return pix2sky(wcs, x, y); // [degrees]
+    let angle = 90 * deg2rad;
+
+    // define a stopping criterion
+    const accuracy = 0.5 * deg2rad;
+
+    let world = pix2sky(wcs, x, y); // [degrees]
+    let ra0 = world[0] * deg2rad;
+    let dec0 = world[1] * deg2rad;
+
+    let angle1 = 0 * deg2rad;
+    let angle2 = 180 * deg2rad;
+
+    // get the initial delta1 and delta2
+    let world1 = pix2sky(wcs, x + Math.cos(angle1), y + Math.sin(angle1));
+    let world2 = pix2sky(wcs, x + Math.cos(angle2), y + Math.sin(angle2));
+
+    let delta1 = world1[0] - ra0;
+    let delta2 = world2[0] - ra0;
+
+    // verify that the signs differ, if not return the mid-point
+    if (delta1 * delta2 < 0) {
+        return angle;
+    }
+
+    // bisect the angle between angle1 and angle2, seeking the change in sign in delta
+    while (Math.abs(angle2 - angle1) > accuracy) {
+        angle = (angle1 + angle2) / 2;
+
+        let world = pix2sky(wcs, x + Math.cos(angle), y + Math.sin(angle));
+        let delta = world[0] - ra0;
+
+        if (delta * delta1 < 0) {
+            angle2 = angle;
+        } else {
+            angle1 = angle;
+        }
+    }
+
+    return (angle1 + angle2) / 2;
 }
 
 function erf(x) {
