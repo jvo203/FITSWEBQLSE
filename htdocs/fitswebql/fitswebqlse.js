@@ -90,8 +90,7 @@ function get_northern_direction(wcs, x, y) {
     const accuracy = 0.5 * deg2rad;
 
     let world = pix2sky(wcs, x, y); // [degrees]
-    let ra0 = world[0] * deg2rad;
-    let dec0 = world[1] * deg2rad;
+    let ra0 = world[0];
 
     let angle1 = 0 * deg2rad;
     let angle2 = 180 * deg2rad;
@@ -4199,17 +4198,16 @@ function DownsizePolarisation(srcI, srcA, mask, sw, sh, range, xmin = 0, ymin = 
                     I /= count;
                     A /= count;
 
-                    let orig_x = i * (fitsData.width - 1) / (image.width - 1);
-                    let orig_y = j * (fitsData.height - 1) / (image.height - 1);
-                    let north = get_northern_direction(fitsData, orig_x, orig_y);
-
-                    console.log("i:", i, "j:", j, "orig_x:", orig_x, "orig_y:", orig_y, "north:", north);
-
                     mag_mean += I;
                     mag_std += I * I;
                     mag_count++;
 
-                    field.push({ x: x0, y: y0, I: I, A: A });
+                    let orig_x = i * (fitsData.width - 1) / (image.width - 1);
+                    let orig_y = j * (fitsData.height - 1) / (image.height - 1);
+                    let north = get_northern_direction(fitsData, orig_x, orig_y);
+                    // console.log("i:", i, "j:", j, "orig_x:", orig_x, "orig_y:", orig_y, "north:", north);
+
+                    field.push({ x: x0, y: y0, I: I, A: A + north });
                 }
             }
         }
