@@ -4290,13 +4290,13 @@ contains
       ! progress is being handled differently for URL-based datasets
       ! the total is now given by the number of pixels in the FITS file
       if (naxis .eq. 1) then
-         npixels = naxes(1)
+         npixels = int(naxes(1), kind=8)
       else if (naxis .eq. 2) then
-         npixels = naxes(1)*naxes(2)
+         npixels = int(naxes(1), kind=8)*int(naxes(2), kind=8)
       else if (naxis .eq. 3) then
-         npixels = naxes(1)*naxes(2)*naxes(3)
+         npixels = int(naxes(1), kind=8)*int(naxes(2), kind=8)*int(naxes(3), kind=8)
       else if (naxis .eq. 4) then
-         npixels = naxes(1)*naxes(2)*naxes(3)*naxes(4)
+         npixels = int(naxes(1), kind=8)*int(naxes(2), kind=8)*int(naxes(3), kind=8)*int(naxes(4), kind=8)
       else
          npixels = 0
       end if
