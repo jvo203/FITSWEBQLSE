@@ -948,6 +948,8 @@ void scan_fits_data(struct FITSDownloadStream *stream)
 
     if (item != NULL)
         update_progress_C(item, (int)work_size); // <size_t> used to get downcasted to int
+    else
+        printf("[C] scan_fits_data: get_dataset(%d) returned NULL.\n", stream->datasetid);
 
     // call itself again to process any leftovers
     return scan_fits_data(stream);
@@ -5224,30 +5226,30 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
     }
 
     // FITSWebQL main JavaScript + CSS
-    if (options.local)
+    // if (options.local)
     {
         // local version
         g_string_append(html, "<script src=\"fitswebqlse.js?" VERSION_STRING "\"></script>\n");
         g_string_append(html, "<link rel=\"stylesheet\" href=\"fitswebqlse.css?" VERSION_STRING "\"/>\n");
     }
-    else
+    /*else
     {
         // server version: use automatically minified files served from the CDN
         g_string_append(html, "<script src=\"https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@" STR(VERSION_MAJOR) "." STR(VERSION_MINOR) "." STR(VERSION_SUB) "/htdocs/fitswebql/fitswebqlse.min.js\"></script>\n");
         g_string_append(html, "<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@" STR(VERSION_MAJOR) "." STR(VERSION_MINOR) "." STR(VERSION_SUB) "/htdocs/fitswebql/fitswebqlse.min.css\"/>\n");
-    }
+    }*/
 
     // Asynchronous WebAssembly JS+WASM
-    if (options.local)
+    // if (options.local)
     {
         // local version
         g_string_append(html, "<script async type=\"text/javascript\" src=\"client." WASM_VERSION ".js\"></script>\n");
     }
-    else
+    /*else
     {
         // server version: use the CDN version of WASM files
         g_string_append(html, "<script async type=\"text/javascript\" src=\"https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@" STR(VERSION_MAJOR) "." STR(VERSION_MINOR) "." STR(VERSION_SUB) "/htdocs/fitswebql/client." WASM_VERSION ".js\"></script>\n");
-    }
+    }*/
 
     // HTML content
     g_string_append(html, "<title>FITSWEBQLSE</title></head><body>\n");
