@@ -9620,7 +9620,7 @@ contains
       ! obtain viewport dimensions (even going beyond the dims of pixels&mask)
       dimx = abs(req%x2 - req%x1) + 1
       dimy = abs(req%y2 - req%y1) + 1
-      npixels = dimx*dimy
+      npixels = int(dimx, kind=8)*int(dimy, kind=8)
 
       ! sanity checks
       x1 = max(1, req%x1)
@@ -11578,7 +11578,7 @@ contains
       pmax = -1.0E30
 
       ! pixels statistics and image tone mapping transformation
-      npixels = img_width*img_height
+      npixels = int(img_width, kind=8)*int(img_height, kind=8)
       call array_stat(c_loc(pixels), pmin, pmax, pmean, npixels)
       pstd = array_std(c_loc(pixels), pmean, npixels)
       call standardise_array(c_loc(pixels), pmean, pstd, npixels)
@@ -11908,7 +11908,7 @@ contains
       pmax = -1.0E30
 
       ! pixels statistics and image tone mapping transformation
-      npixels = width*height
+      npixels = int(width, kind=8)*int(height, kind=8)
       call array_stat(c_loc(pixels), pmin, pmax, pmean, npixels)
       pstd = array_std(c_loc(pixels), pmean, npixels)
       call standardise_array(c_loc(pixels), pmean, pstd, npixels)
