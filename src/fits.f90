@@ -4536,7 +4536,7 @@ contains
       dmax = -1.0E30
 
       ! allocate the buffer
-      npixels = naxes(1)*naxes(2)
+      npixels = int(naxes(1), kind=8)*int(naxes(2), kind=8)
 
       ! by default compressed is dimension(naxes(1)/DIM, naxes(2)/DIM)
       cn = naxes(1)/DIM
