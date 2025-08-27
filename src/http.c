@@ -5225,7 +5225,11 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
         g_string_append(html, "</script>\n");
     }
 
-    // FITSWebQL main JavaScript + CSS
+// FITSWebQL main JavaScript + CSS
+#ifdef DEBUG
+    g_string_append(html, "<script src=\"fitswebqlse.js?" VERSION_STRING "\"></script>\n");
+    g_string_append(html, "<link rel=\"stylesheet\" href=\"fitswebqlse.css?" VERSION_STRING "\"/>\n");
+#else
     if (options.local)
     {
         // local version
@@ -5238,8 +5242,13 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
         g_string_append(html, "<script src=\"https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@" STR(VERSION_MAJOR) "." STR(VERSION_MINOR) "." STR(VERSION_SUB) "/htdocs/fitswebql/fitswebqlse.min.js\"></script>\n");
         g_string_append(html, "<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@" STR(VERSION_MAJOR) "." STR(VERSION_MINOR) "." STR(VERSION_SUB) "/htdocs/fitswebql/fitswebqlse.min.css\"/>\n");
     }
+#endif
 
-    // Asynchronous WebAssembly JS+WASM
+// Asynchronous WebAssembly JS+WASM
+#ifdef DEBUG
+    // local version
+    g_string_append(html, "<script async type=\"text/javascript\" src=\"client." WASM_VERSION ".js\"></script>\n");
+#else
     if (options.local)
     {
         // local version
@@ -5250,6 +5259,7 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
         // server version: use the CDN version of WASM files
         g_string_append(html, "<script async type=\"text/javascript\" src=\"https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@" STR(VERSION_MAJOR) "." STR(VERSION_MINOR) "." STR(VERSION_SUB) "/htdocs/fitswebql/client." WASM_VERSION ".js\"></script>\n");
     }
+#endif
 
     // HTML content
     g_string_append(html, "<title>FITSWEBQLSE</title></head><body>\n");
