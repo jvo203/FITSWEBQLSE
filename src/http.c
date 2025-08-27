@@ -949,7 +949,7 @@ void scan_fits_data(struct FITSDownloadStream *stream)
     if (item != NULL)
         update_progress_C(item, (int)work_size); // <size_t> used to get downcasted to int
     else
-        printf("[C] scan_fits_data: get_dataset(%d) returned NULL.\n", stream->datasetid);
+        printf("[C] scan_fits_data: get_dataset(%s) returned NULL.\n", stream->datasetid);
 
     // call itself again to process any leftovers
     return scan_fits_data(stream);
