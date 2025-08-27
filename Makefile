@@ -165,7 +165,7 @@ endif
 MOD =
 # -I/usr/local/include/star
 # -I/home/chris/zfp/include
-DEF = -DNODEBUG -DHAVE_ZLIB -DPOLL -DNODIRECT
+DEF = -DDEBUG -DHAVE_ZLIB -DPOLL -DNODIRECT
 
 ifneq ($(SHARE),)
 	DEF += -DSHARE='"$(SHARE)"'
