@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-09-02.0";
+    return "JS2025-09-02.1";
 }
 
 function uuidv4() {
@@ -7970,6 +7970,14 @@ function display_gridlines(index = previous_plane) {
         strokeColour = fillColour;
     }
 
+    const deg2rad = 0.0174532925199432957692369076848861271344287188854172545609719144017;
+    const rad2deg = 57.2957795130823208767981548141051703324054724665643215491602438614;
+
+    // define a stopping criterion
+    const accuracy = 0.5 * deg2rad;
+
+    const delta = 0.1; // gridlines sampling granularity
+
     // Add the X Axis
     if (fitsData.depth > 1) {
         var xAxis = d3.axisBottom(x)
@@ -7985,11 +7993,17 @@ function display_gridlines(index = previous_plane) {
 
                 tmp = image_bounding_dims.x1 + d * (image_bounding_dims.width - 1);
                 orig_x = tmp * fitsData.width / image.width;
-                tmp = image_bounding_dims.y1 + (image_bounding_dims.width - 1);
+                tmp = image_bounding_dims.y1 + (image_bounding_dims.height - 1);
                 orig_y = tmp * fitsData.height / image.height;
 
                 let world = pix2sky(fitsData, orig_x, orig_y);
                 let radec = [world[0] / toDegrees, world[1] / toDegrees];
+
+                // curved gridlines
+                let ra0 = world[0] * deg2rad;
+
+                // vary tmp_y from y_offset + height to y_offset inclusive with a delta step
+                // re-use the ds3.js scale y
 
                 if (fitsData.CTYPE1.indexOf("RA") > -1) {
                     if (coordsFmt == 'DMS')
