@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-01-20.0";
+    return "JS2025-09-02.0";
 }
 
 function uuidv4() {
@@ -7102,7 +7102,7 @@ function display_gridlines() {
 
                 tmp = image_bounding_dims.x1 + d * (image_bounding_dims.width - 1);
                 orig_x = tmp * fitsData.width / image.width;
-                tmp = image_bounding_dims.y1 + (image_bounding_dims.width - 1);
+                tmp = image_bounding_dims.y1 + (image_bounding_dims.height - 1);
                 orig_y = tmp * fitsData.height / image.height;
 
                 let world = pix2sky(fitsData, orig_x, orig_y);
@@ -7246,7 +7246,8 @@ function display_cd_gridlines() {
         return;
 
     //scale
-    var gridScale = inverse_CD_matrix
+    const arcmins = 60;
+    var gridScale = inverse_CD_matrix(arcmins, arcmins);
     var angle = gridScale[2] * Math.sign(gridScale[0]);
 
     var label_angle = -45;
