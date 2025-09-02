@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-08-25.0";
+    return "JS2025-09-02.0";
 }
 
 function uuidv4() {
@@ -8129,7 +8129,8 @@ function display_cd_gridlines() {
         return;
 
     //scale
-    var gridScale = inverse_CD_matrix
+    const arcmins = 60;
+    var gridScale = inverse_CD_matrix(arcmins, arcmins);
     var angle = gridScale[2] * Math.sign(gridScale[0]);
 
     var label_angle = -45;
