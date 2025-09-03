@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-09-02.1";
+    return "JS2025-09-03.0";
 }
 
 function uuidv4() {
@@ -8000,10 +8000,31 @@ function display_gridlines(index = previous_plane) {
                 let radec = [world[0] / toDegrees, world[1] / toDegrees];
 
                 // curved gridlines
+                const path = d3.path();
                 let ra0 = world[0] * deg2rad;
 
                 // vary tmp_y from y_offset + height to y_offset inclusive with a delta step
                 // re-use the ds3.js scale y
+                let ticks = y.ticks();
+
+                ticks.forEach(function (tmp_y) {
+                    let dec = sky2pix(fitsData, ra0, tmp_y);
+                    path.moveTo(x(0), y(dec[1]));
+                    path.lineTo(x(1), y(dec[1]));
+                });
+
+                console.log(path.toString());
+
+                svg.append("path")
+                    .attr("class", "gridlines")
+                    .attr("d", path)
+                    .style("fill", "red")
+                    .style("stroke", strokeColour)
+                    .style("stroke-width", 1.0)
+                    .attr("opacity", 1.0)
+                    .attr("transform", "translate(0," + (y_offset) + ")");
+
+                // end of curved gridlines
 
                 if (fitsData.CTYPE1.indexOf("RA") > -1) {
                     if (coordsFmt == 'DMS')
