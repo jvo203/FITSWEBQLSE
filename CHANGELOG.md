@@ -1,3 +1,7 @@
+## [5.1.17] - 2025-09-03
+
+* backported various minor bug fixes from the _*develop*_ branch
+
 ## [5.1.16] - 2025-01-20
 
 * made the C / Fortran code work with a changed API in the x265 library _*v4.1 and higher*_
