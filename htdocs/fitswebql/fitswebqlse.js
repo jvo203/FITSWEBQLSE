@@ -8003,9 +8003,8 @@ function display_gridlines(index = previous_plane) {
                 const path = d3.path();
                 const ra0 = world[0] * deg2rad;
 
-                // vary tmp_y from y_offset + height to y_offset inclusive with a delta step
-                // re-use the ds3.js scale y
-                let ticks = y.ticks();
+                // go through the ticks in a reverse order
+                let ticks = y.ticks().reverse(); // [1.0, ..., 0.0]
 
                 // move to the starting point
                 path.moveTo(x(d), y(ticks[0]));
@@ -8015,6 +8014,10 @@ function display_gridlines(index = previous_plane) {
                 //const ra0 = world0[0] * deg2rad;
 
                 ticks.forEach(function (tmp_y) {
+                    if (tmp_y < 0.5) return;
+                    tmp = image_bounding_dims.y1 + tmp_y * (image_bounding_dims.height - 1);
+                    orig_y = tmp * fitsData.height / image.height;
+
                     //let dec = sky2pix(fitsData, ra0, tmp_y);                    
                     //path.lineTo(x(1), y(dec[1]));
                     path.lineTo(x(d), y(tmp_y));
@@ -8029,7 +8032,6 @@ function display_gridlines(index = previous_plane) {
                     .style("stroke", strokeColour)
                     .style("stroke-width", 1.0)
                     .attr("opacity", 1.0);
-                //.attr("transform", "translate(0," + (y_offset) + ")");
 
                 // end of curved gridlines
 
