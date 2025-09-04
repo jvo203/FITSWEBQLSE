@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-09-03.0";
+    return "JS2025-09-04.0";
 }
 
 function uuidv4() {
@@ -8001,16 +8001,23 @@ function display_gridlines(index = previous_plane) {
 
                 // curved gridlines
                 const path = d3.path();
-                let ra0 = world[0] * deg2rad;
+                const ra0 = world[0] * deg2rad;
 
                 // vary tmp_y from y_offset + height to y_offset inclusive with a delta step
                 // re-use the ds3.js scale y
                 let ticks = y.ticks();
 
+                // move to the starting point
+                path.moveTo(x(d), y(ticks[0]));
+
+                // find out the ra0 that this starting point corresponds to
+                //let world0 = pix2sky(fitsData, orig_x, image_bounding_dims.y1 * fitsData.height / image.height);
+                //const ra0 = world0[0] * deg2rad;
+
                 ticks.forEach(function (tmp_y) {
-                    let dec = sky2pix(fitsData, ra0, tmp_y);
-                    path.moveTo(x(0), y(dec[1]));
-                    path.lineTo(x(1), y(dec[1]));
+                    //let dec = sky2pix(fitsData, ra0, tmp_y);                    
+                    //path.lineTo(x(1), y(dec[1]));
+                    path.lineTo(x(d), y(tmp_y));
                 });
 
                 console.log(path.toString());
@@ -8021,8 +8028,8 @@ function display_gridlines(index = previous_plane) {
                     .style("fill", "red")
                     .style("stroke", strokeColour)
                     .style("stroke-width", 1.0)
-                    .attr("opacity", 1.0)
-                    .attr("transform", "translate(0," + (y_offset) + ")");
+                    .attr("opacity", 1.0);
+                //.attr("transform", "translate(0," + (y_offset) + ")");
 
                 // end of curved gridlines
 
