@@ -8013,12 +8013,12 @@ function display_gridlines(index = previous_plane) {
                     tmp = image_bounding_dims.y1 + tmp_y * (image_bounding_dims.height - 1);
                     orig_y = tmp * fitsData.height / image.height;
 
-                    // given a new orig_y, find the corresponding x that gives the same ra0
+                    // given a new orig_y, find the corresponding new_x that gives the same ra0
                     // use a simple iterative method to find the root
                     let lower_x = image_bounding_dims.x1;
                     let upper_x = image_bounding_dims.x1 + (image_bounding_dims.width - 1);
 
-                    // verify that the root is bracketed, if not lineTo NaN,NaN and return
+                    // verify that the root is bracketed, if not lineTo (NaN,NaN) and return
                     orig_x = lower_x * fitsData.width / image.width;
                     let world = pix2sky(fitsData, orig_x, orig_y);
                     let ra_lower = world[0] * deg2rad;
