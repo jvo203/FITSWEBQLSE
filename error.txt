@@ -44,3 +44,22 @@ Tue, 15 Apr 2025 23:37:15 JST	130.62.64.226	Mozilla/5.0 (Macintosh; Intel Mac OS
 Tue, 15 Apr 2025 23:41:20 JST	130.62.64.226	Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3 Safari/605.1.15	GET	http://jvo.nao.ac.jp/skynode/do/download/hds/public/file/PIPE-1.0_1d_nrmwec_fsclmo_HDSA00141935.fits	HTTP/1.1	PIPE-1.0_1d_nrmwec_fsclmo_HDSA00141935
 
 [C] 'ALMA01148383' does not exist.
+
+[C] inserted ALMB00134832 into the hash table
+ cache directory: /ssd/cache
+ trying a cache file: /ssd/cache/ALMB00134832
+ cache directory: /data/cache
+ trying a cache file: /data/cache/ALMB00134832
+ max_threads:           8 depth:         110
+ [load_cube] #frames:          16
+[C] received a timeout request for ALMB00134772, error status: 0.
+ cache directory: /ssd/cache
+ trying a cache file: /ssd/cache/ALMB00134772
+ cache directory: /data/cache
+ trying a cache file: /data/cache/ALMB00134772
+ deleting ALMB00134772; cache dir: /data/cache/ALMB00134772, status           0 , bSuccess T
+ error deserialising channel          25 from a data file @IT� $��M�
+�)� : P��C��������k���D1��D?�wCQ���D�~�~�>�D?�wC"���nҵ��D��������"���nҵ@��>�D������DD�������D
+ error deserialising channel          43 from a data file ���E� $��M�A$�����5 : P��C��������k���D1��D?�wCQ���D�~�~�>�D?�wC"���nҵ��D��������"���nҵ@��>                                                       �D������DD�������D
+
+on grid81
