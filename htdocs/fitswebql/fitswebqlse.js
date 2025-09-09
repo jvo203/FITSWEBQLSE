@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-09-05.0";
+    return "JS2025-09-09.0";
 }
 
 function uuidv4() {
@@ -7977,7 +7977,7 @@ function display_gridlines(index = previous_plane) {
     // define a stopping criterion
     const accuracy = 0.5 * deg2rad;
     const max_iter = 20;
-    const no_ticks = 50;
+    const no_ticks = 2;//50;
 
     const delta = 0.1; // gridlines sampling granularity
 
@@ -8128,7 +8128,7 @@ function display_gridlines(index = previous_plane) {
                 // SVG path (piecewise linear segments)
                 const path = d3.path();
 
-                // go through the ticks in a reverse order
+                // go through the ticks
                 let ticks = y.ticks(no_ticks); // [0.0, ..., 1.0]
 
                 // move to the starting point
@@ -8237,9 +8237,7 @@ function display_gridlines(index = previous_plane) {
         var yAxis = d3.axisLeft(y)
             .tickSize(width)
             .tickFormat(function (d) {
-                if (d == 0.0 || d == 1.0)
-                    return "";
-
+                console.log("y tick:", d, y(d));
                 var image = imageContainer[index - 1];
                 var image_bounding_dims = image.image_bounding_dims;
 
@@ -8252,6 +8250,94 @@ function display_gridlines(index = previous_plane) {
 
                 let world = pix2sky(fitsData, orig_x, orig_y);
                 let radec = [world[0] / toDegrees, world[1] / toDegrees];
+
+                // curved gridlines
+                const dec0 = world[1] * deg2rad;
+                console.log("dec0:", dec0);
+
+                // SVG path (piecewise linear segments)
+                const path = d3.path();
+
+                // go through the ticks in a reverse order
+                let ticks = x.ticks(no_ticks).reverse(); // [1.0, ..., 0.0]                
+
+                // move to the starting point
+                path.moveTo(x(ticks[0]), y(d));
+
+                ticks.forEach(function (tmp_x) {
+                    tmp = image_bounding_dims.x1 + tmp_x * (image_bounding_dims.width - 1);
+                    orig_x = tmp * fitsData.width / image.width;
+
+                    // given a new orig_x, find the corresponding new_y that gives the same dec0
+                    // use a simple iterative method to find the root
+                    let lower_y = image_bounding_dims.y1;
+                    let upper_y = image_bounding_dims.y1 + (image_bounding_dims.height - 1);
+
+                    // verify that the root is bracketed, if not lineTo (NaN,NaN) and return
+                    orig_y = lower_y * fitsData.height / image.height;
+                    let world = pix2sky(fitsData, orig_x, orig_y);
+                    let dec_lower = world[1] * deg2rad;
+                    let diff_lower = dec_lower - dec0;
+
+                    orig_y = upper_y * fitsData.height / image.height;
+                    world = pix2sky(fitsData, orig_x, orig_y);
+                    let dec_upper = world[1] * deg2rad;
+                    let diff_upper = dec_upper - dec0;
+
+                    console.log("dec_lower:", dec_lower, "dec_upper:", dec_upper);
+                    console.log("diff_lower:", diff_lower, "diff_upper:", diff_upper);
+
+                    if (diff_lower * diff_upper > 0) {
+                        console.log("display_gridlines: root not bracketed");
+                        path.lineTo(x(tmp_x), y(d));
+                        return;
+                    }
+
+                    let new_y = 0.5 * (lower_y + upper_y);
+
+                    let count = 0;
+                    while (count < max_iter) {
+                        orig_y = new_y * fitsData.height / image.height;
+                        let world = pix2sky(fitsData, orig_x, orig_y);
+                        let dec = world[1] * deg2rad;
+                        let diff = dec - dec0;
+
+                        /*if (Math.abs(diff) < accuracy)
+                            break;*/
+
+                        if (diff > 0)
+                            lower_y = new_y;
+                        else
+                            upper_y = new_y;
+
+                        new_y = 0.5 * (lower_y + upper_y);
+                        count++;
+                    }
+
+                    // given new_y, find the corresponding screen y
+                    let screen_y = (new_y - image_bounding_dims.y1) / (image_bounding_dims.height - 1);
+                    console.log("screen_y:", screen_y, y(screen_y));
+                    //path.lineTo(x(tmp_x), y(screen_y));
+                });
+
+                // complete the path
+                path.closePath();
+                console.log("dec path (d):", d, path.toString());
+
+                svg.append("path")
+                    .attr("class", "gridlines")
+                    .attr("d", path)
+                    .style("fill", "red")
+                    .style("stroke", strokeColour)
+                    .style("stroke-width", 1.0)
+                    //.style("stroke-dasharray", "5,5")
+                    .attr("opacity", 0.75);
+
+                // end of curved gridlines
+
+                if (d == 0.0 || d == 1.0)
+                    return "";
+
                 return RadiansPrintDMS(radec[1]);
             });
 
