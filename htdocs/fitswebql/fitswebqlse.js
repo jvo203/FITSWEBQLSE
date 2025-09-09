@@ -7977,7 +7977,7 @@ function display_gridlines(index = previous_plane) {
     // define a stopping criterion
     const accuracy = 0.5 * deg2rad;
     const max_iter = 20;
-    const no_ticks = 2;//50;
+    const no_ticks = 50;
 
     const delta = 0.1; // gridlines sampling granularity
 
@@ -8237,7 +8237,7 @@ function display_gridlines(index = previous_plane) {
         var yAxis = d3.axisLeft(y)
             .tickSize(width)
             .tickFormat(function (d) {
-                console.log("y tick:", d, y(d));
+                //console.log("y tick:", d, y(d));
                 var image = imageContainer[index - 1];
                 var image_bounding_dims = image.image_bounding_dims;
 
@@ -8253,7 +8253,7 @@ function display_gridlines(index = previous_plane) {
 
                 // curved gridlines
                 const dec0 = world[1] * deg2rad;
-                console.log("dec0:", dec0);
+                //console.log("dec0:", dec0);
 
                 // SVG path (piecewise linear segments)
                 const path = d3.path();
@@ -8284,10 +8284,10 @@ function display_gridlines(index = previous_plane) {
                     let dec_upper = world[1] * deg2rad;
                     let diff_upper = dec_upper - dec0;
 
-                    console.log("dec_lower:", dec_lower, "dec_upper:", dec_upper);
-                    console.log("diff_lower:", diff_lower, "diff_upper:", diff_upper);
+                    /*console.log("dec_lower:", dec_lower, "dec_upper:", dec_upper);
+                    console.log("diff_lower:", diff_lower, "diff_upper:", diff_upper);*/
 
-                    if (diff_lower * diff_upper > 0) {
+                    if (diff_lower * diff_upper >= 0) {
                         console.log("display_gridlines: root not bracketed");
                         path.lineTo(x(tmp_x), y(d));
                         return;
@@ -8305,7 +8305,7 @@ function display_gridlines(index = previous_plane) {
                         /*if (Math.abs(diff) < accuracy)
                             break;*/
 
-                        if (diff > 0)
+                        if (diff < 0)
                             lower_y = new_y;
                         else
                             upper_y = new_y;
@@ -8316,13 +8316,12 @@ function display_gridlines(index = previous_plane) {
 
                     // given new_y, find the corresponding screen y
                     let screen_y = (new_y - image_bounding_dims.y1) / (image_bounding_dims.height - 1);
-                    console.log("screen_y:", screen_y, y(screen_y));
-                    //path.lineTo(x(tmp_x), y(screen_y));
+                    //console.log("screen_y:", screen_y, y(screen_y));
+                    path.lineTo(x(tmp_x), y(screen_y));
                 });
 
                 // complete the path
                 path.closePath();
-                console.log("dec path (d):", d, path.toString());
 
                 svg.append("path")
                     .attr("class", "gridlines")
