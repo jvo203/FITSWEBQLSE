@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-09-09.0";
+    return "JS2025-09-10.0";
 }
 
 function uuidv4() {
@@ -8372,6 +8372,10 @@ function display_gridlines(index = previous_plane) {
 }
 
 function display_cd_gridlines() {
+    // testing, throw an error deliberately
+    console.error("deprecated function display_cd_gridlines");
+    throw new Error("deprecated function display_cd_gridlines");
+
     if (va_count > 1 && !composite_view)
         return;
 
