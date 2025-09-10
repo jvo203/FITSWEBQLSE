@@ -8033,7 +8033,7 @@ function display_gridlines(index = previous_plane) {
 
                     if (diff_lower * diff_upper > 0) {
                         console.log("display_gridlines: root not bracketed");
-                        path.lineTo(NaN, NaN);
+                        //path.lineTo(NaN, NaN);
                         return;
                     }
 
@@ -8156,7 +8156,7 @@ function display_gridlines(index = previous_plane) {
 
                     if (diff_lower * diff_upper > 0) {
                         console.log("display_gridlines: root not bracketed");
-                        path.lineTo(NaN, NaN);
+                        //path.lineTo(NaN, NaN);
                         return;
                     }
 
@@ -8289,7 +8289,7 @@ function display_gridlines(index = previous_plane) {
 
                     if (diff_lower * diff_upper >= 0) {
                         console.log("display_gridlines: root not bracketed");
-                        path.lineTo(x(tmp_x), y(d));
+                        //path.lineTo(x(tmp_x), y(d));
                         return;
                     }
 
