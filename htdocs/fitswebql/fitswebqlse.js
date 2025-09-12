@@ -8033,7 +8033,7 @@ function display_gridlines(index = previous_plane) {
 
                     if (diff_lower * diff_upper > 0) {
                         console.log("display_gridlines: root not bracketed");
-                        //path.lineTo(NaN, NaN);
+                        path.lineTo(NaN, NaN);
                         return;
                     }
 
@@ -8153,7 +8153,7 @@ function display_gridlines(index = previous_plane) {
 
                     if (diff_lower * diff_upper > 0) {
                         console.log("display_gridlines: root not bracketed");
-                        //path.lineTo(NaN, NaN);
+                        path.lineTo(NaN, NaN);
                         return;
                     }
 
@@ -8231,9 +8231,6 @@ function display_gridlines(index = previous_plane) {
         var yAxis = d3.axisLeft(y)
             .tickSize(width)
             .tickFormat(function (d) {
-                if (d == 0.0 || d == 1.0)
-                    return "";
-
                 console.log("y tick:", d, y(d));
                 var image = imageContainer[index - 1];
                 var image_bounding_dims = image.image_bounding_dims;
@@ -8287,6 +8284,7 @@ function display_gridlines(index = previous_plane) {
                     if (diff_lower * diff_upper > 0) {
                         console.log("display_gridlines: root not bracketed");
                         //path.lineTo(x(tmp_x), y(d));
+                        path.lineTo(NaN, NaN);
                         return;
                     }
 
@@ -8327,6 +8325,9 @@ function display_gridlines(index = previous_plane) {
                     .attr("opacity", 0.75);
 
                 // end of curved gridlines                
+
+                if (d == 0.0 || d == 1.0)
+                    return "";
 
                 return RadiansPrintDMS(radec[1]);
             });
