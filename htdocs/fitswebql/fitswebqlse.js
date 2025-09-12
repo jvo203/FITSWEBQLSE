@@ -7979,8 +7979,6 @@ function display_gridlines(index = previous_plane) {
     const max_iter = 20;
     const no_ticks = 50;
 
-    const delta = 0.1; // gridlines sampling granularity
-
     // Add the X Axis
     if (fitsData.depth > 1) {
         var xAxis = d3.axisBottom(x)
@@ -8011,6 +8009,9 @@ function display_gridlines(index = previous_plane) {
                 // move to the starting point
                 path.moveTo(x(d), y(ticks[0]));
 
+                // an ending condition
+                let end = false;
+
                 ticks.forEach(function (tmp_y) {
                     tmp = image_bounding_dims.y1 + tmp_y * (image_bounding_dims.height - 1);
                     orig_y = tmp * fitsData.height / image.height;
@@ -8033,7 +8034,8 @@ function display_gridlines(index = previous_plane) {
 
                     if (diff_lower * diff_upper > 0) {
                         console.log("display_gridlines: root not bracketed");
-                        path.lineTo(NaN, NaN);
+                        //path.lineTo(NaN, NaN);
+                        end = true;
                         return;
                     }
 
@@ -8060,7 +8062,9 @@ function display_gridlines(index = previous_plane) {
 
                     // given new_x, find the corresponding screen x
                     let screen_x = (new_x - image_bounding_dims.x1) / (image_bounding_dims.width - 1);
-                    path.lineTo(x(screen_x), y(tmp_y));
+
+                    if (!end)
+                        path.lineTo(x(screen_x), y(tmp_y));
                 });
 
                 svg.append("path")
@@ -8131,6 +8135,9 @@ function display_gridlines(index = previous_plane) {
                 // move to the starting point
                 path.moveTo(x(d), y(ticks[0]));
 
+                // an ending condition
+                let end = false;
+
                 ticks.forEach(function (tmp_y) {
                     tmp = image_bounding_dims.y1 + tmp_y * (image_bounding_dims.height - 1);
                     orig_y = tmp * fitsData.height / image.height;
@@ -8153,7 +8160,8 @@ function display_gridlines(index = previous_plane) {
 
                     if (diff_lower * diff_upper > 0) {
                         console.log("display_gridlines: root not bracketed");
-                        path.lineTo(NaN, NaN);
+                        //path.lineTo(NaN, NaN);
+                        end = true;
                         return;
                     }
 
@@ -8180,7 +8188,9 @@ function display_gridlines(index = previous_plane) {
 
                     // given new_x, find the corresponding screen x
                     let screen_x = (new_x - image_bounding_dims.x1) / (image_bounding_dims.width - 1);
-                    path.lineTo(x(screen_x), y(tmp_y));
+
+                    if (!end)
+                        path.lineTo(x(screen_x), y(tmp_y));
                 });
 
                 svg.append("path")
@@ -8231,7 +8241,6 @@ function display_gridlines(index = previous_plane) {
         var yAxis = d3.axisLeft(y)
             .tickSize(width)
             .tickFormat(function (d) {
-                console.log("y tick:", d, y(d));
                 var image = imageContainer[index - 1];
                 var image_bounding_dims = image.image_bounding_dims;
 
@@ -8247,7 +8256,6 @@ function display_gridlines(index = previous_plane) {
 
                 // curved gridlines
                 const dec0 = world[1] * deg2rad;
-                console.log(world[1], "dec0:", dec0);
 
                 // SVG path (piecewise linear segments)
                 const path = d3.path();
@@ -8257,6 +8265,9 @@ function display_gridlines(index = previous_plane) {
 
                 // move to the starting point
                 path.moveTo(x(ticks[0]), y(d));
+
+                // an ending condition
+                let end = false;
 
                 ticks.forEach(function (tmp_x) {
                     tmp = image_bounding_dims.x1 + tmp_x * (image_bounding_dims.width - 1);
@@ -8278,13 +8289,10 @@ function display_gridlines(index = previous_plane) {
                     let dec_upper = world[1] * deg2rad;
                     let diff_upper = dec_upper - dec0;
 
-                    console.log("dec0:", dec0, "dec_lower:", dec_lower, "dec_upper:", dec_upper);
-                    console.log("diff_lower:", diff_lower, "diff_upper:", diff_upper);
-
                     if (diff_lower * diff_upper > 0) {
                         console.log("display_gridlines: root not bracketed");
-                        //path.lineTo(x(tmp_x), y(d));
-                        path.lineTo(NaN, NaN);
+                        //path.lineTo(NaN, NaN);
+                        end = true;
                         return;
                     }
 
@@ -8312,7 +8320,9 @@ function display_gridlines(index = previous_plane) {
                     // given new_y, find the corresponding screen y
                     let screen_y = (new_y - image_bounding_dims.y1) / (image_bounding_dims.height - 1);
                     //console.log("screen_y:", screen_y, y(screen_y));
-                    path.lineTo(x(tmp_x), y(screen_y));
+
+                    if (!end)
+                        path.lineTo(x(tmp_x), y(screen_y));
                 });
 
                 svg.append("path")
