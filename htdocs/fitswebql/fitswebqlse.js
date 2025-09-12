@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-09-10.0";
+    return "JS2025-09-12.0";
 }
 
 function uuidv4() {
@@ -8063,13 +8063,10 @@ function display_gridlines(index = previous_plane) {
                     path.lineTo(x(screen_x), y(tmp_y));
                 });
 
-                // complete the path
-                path.closePath();
-
                 svg.append("path")
                     .attr("class", "gridlines")
                     .attr("d", path)
-                    .style("fill", "red")
+                    .style("fill", "none")
                     .style("stroke", strokeColour)
                     .style("stroke-width", 1.0)
                     //.style("stroke-dasharray", "5,5")
@@ -8186,13 +8183,10 @@ function display_gridlines(index = previous_plane) {
                     path.lineTo(x(screen_x), y(tmp_y));
                 });
 
-                // complete the path
-                path.closePath();
-
                 svg.append("path")
                     .attr("class", "gridlines")
                     .attr("d", path)
-                    .style("fill", "red")
+                    .style("fill", "none")
                     .style("stroke", strokeColour)
                     .style("stroke-width", 1.0)
                     //.style("stroke-dasharray", "5,5")
@@ -8237,7 +8231,10 @@ function display_gridlines(index = previous_plane) {
         var yAxis = d3.axisLeft(y)
             .tickSize(width)
             .tickFormat(function (d) {
-                //console.log("y tick:", d, y(d));
+                if (d == 0.0 || d == 1.0)
+                    return "";
+
+                console.log("y tick:", d, y(d));
                 var image = imageContainer[index - 1];
                 var image_bounding_dims = image.image_bounding_dims;
 
@@ -8253,7 +8250,7 @@ function display_gridlines(index = previous_plane) {
 
                 // curved gridlines
                 const dec0 = world[1] * deg2rad;
-                //console.log("dec0:", dec0);
+                console.log(world[1], "dec0:", dec0);
 
                 // SVG path (piecewise linear segments)
                 const path = d3.path();
@@ -8284,10 +8281,10 @@ function display_gridlines(index = previous_plane) {
                     let dec_upper = world[1] * deg2rad;
                     let diff_upper = dec_upper - dec0;
 
-                    /*console.log("dec_lower:", dec_lower, "dec_upper:", dec_upper);
-                    console.log("diff_lower:", diff_lower, "diff_upper:", diff_upper);*/
+                    console.log("dec0:", dec0, "dec_lower:", dec_lower, "dec_upper:", dec_upper);
+                    console.log("diff_lower:", diff_lower, "diff_upper:", diff_upper);
 
-                    if (diff_lower * diff_upper >= 0) {
+                    if (diff_lower * diff_upper > 0) {
                         console.log("display_gridlines: root not bracketed");
                         //path.lineTo(x(tmp_x), y(d));
                         return;
@@ -8320,22 +8317,16 @@ function display_gridlines(index = previous_plane) {
                     path.lineTo(x(tmp_x), y(screen_y));
                 });
 
-                // complete the path
-                path.closePath();
-
                 svg.append("path")
                     .attr("class", "gridlines")
                     .attr("d", path)
-                    .style("fill", "red")
+                    .style("fill", "none")
                     .style("stroke", strokeColour)
                     .style("stroke-width", 1.0)
                     //.style("stroke-dasharray", "5,5")
                     .attr("opacity", 0.75);
 
-                // end of curved gridlines
-
-                if (d == 0.0 || d == 1.0)
-                    return "";
+                // end of curved gridlines                
 
                 return RadiansPrintDMS(radec[1]);
             });
