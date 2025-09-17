@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-09-16.0";
+    return "JS2025-09-17.0";
 }
 
 function uuidv4() {
@@ -7919,6 +7919,15 @@ function display_scale_info(index = previous_plane) {
 }
 
 
+// Example: Spherical separation
+function angularSeparation(ra1, dec1, ra2, dec2) {
+    // the inputs are already in radians    
+    let deltaRA = ra2 - ra1;
+    let cosSep = Math.sin(dec1) * Math.sin(dec2) + Math.cos(dec1) * Math.cos(dec2) * Math.cos(deltaRA);
+    let sep = Math.acos(cosSep);
+    return sep; // in radians
+}
+
 function display_gridlines(index = previous_plane) {
     if (va_count > 1 && !composite_view)
         return;
@@ -8113,7 +8122,7 @@ function display_gridlines(index = previous_plane) {
         var xAxis = d3.axisTop(x)
             .tickSize(height)
             .tickFormat(function (d) {
-                //if (d != 0.5) return;
+                if (d != 0.5) return; // debugging
                 var image = imageContainer[index - 1];
                 var image_bounding_dims = image.image_bounding_dims;
 
@@ -8125,14 +8134,15 @@ function display_gridlines(index = previous_plane) {
                 let radec = [world[0] / toDegrees, world[1] / toDegrees];
 
                 // curved gridlines
-                const ra0 = (world[0] + 0) * deg2rad;
-                console.log("xAxis tickFormat d =", d, "ra0 =", ra0);
+                const ra0 = world[0] * deg2rad;
+                const dec0 = world[1] * deg2rad;
+                console.log("xAxis tickFormat d =", d, "ra0 =", ra0, "dec0 =", dec0);
 
                 // SVG path (piecewise linear segments)
                 const path = d3.path();
 
                 // go through the ticks
-                let ticks = y.ticks(no_ticks); // [0.0, ..., 1.0]
+                let ticks = y.ticks(5); // [0.0, ..., 1.0]
 
                 // move to the starting point
                 path.moveTo(x(d), y(ticks[0]));
@@ -8152,13 +8162,15 @@ function display_gridlines(index = previous_plane) {
                     // verify that the root is bracketed, if not lineTo (NaN,NaN) and return
                     orig_x = lower_x * fitsData.width / image.width;
                     let world = pix2sky(fitsData, orig_x, orig_y);
-                    let ra_lower = (world[0] + 0) * deg2rad;
+                    let ra_lower = world[0] * deg2rad;
                     let diff_lower = ra_lower - ra0;
+                    //let diff_lower = angularSeparation(ra_lower, world[1] * deg2rad, ra0, dec0);
 
                     orig_x = upper_x * fitsData.width / image.width;
                     world = pix2sky(fitsData, orig_x, orig_y);
-                    let ra_upper = (world[0] + 0) * deg2rad;
+                    let ra_upper = world[0] * deg2rad;
                     let diff_upper = ra_upper - ra0;
+                    //let diff_upper = angularSeparation(ra_upper, world[1] * deg2rad, ra0, dec0);
                     console.log("y =", tmp_y, "orig_y =", orig_y, "ra_lower =", ra_lower, "ra_upper =", ra_upper, "diff_lower =", diff_lower, "diff_upper =", diff_upper);
 
                     if (diff_lower * diff_upper > 0) {
@@ -8174,7 +8186,7 @@ function display_gridlines(index = previous_plane) {
                     while (count < max_iter) {
                         orig_x = new_x * fitsData.width / image.width;
                         let world = pix2sky(fitsData, orig_x, orig_y);
-                        let ra = (world[0] + 0) * deg2rad;
+                        let ra = world[0] * deg2rad;
                         let diff = ra - ra0;
 
                         /*if (Math.abs(diff) < accuracy)
@@ -8322,7 +8334,6 @@ function display_gridlines(index = previous_plane) {
 
                     // given new_y, find the corresponding screen y
                     let screen_y = (new_y - image_bounding_dims.y1) / (image_bounding_dims.height - 1);
-                    //console.log("screen_y:", screen_y, y(screen_y));
 
                     if (!end)
                         path.lineTo(x(tmp_x), y(screen_y));
