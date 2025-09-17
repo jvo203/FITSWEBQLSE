@@ -8163,14 +8163,29 @@ function display_gridlines(index = previous_plane) {
                     orig_x = lower_x * fitsData.width / image.width;
                     let world = pix2sky(fitsData, orig_x, orig_y);
                     let ra_lower = world[0] * deg2rad;
-                    let diff_lower = ra_lower - ra0;
-                    //let diff_lower = angularSeparation(ra_lower, world[1] * deg2rad, ra0, dec0);
 
                     orig_x = upper_x * fitsData.width / image.width;
                     world = pix2sky(fitsData, orig_x, orig_y);
                     let ra_upper = world[0] * deg2rad;
+
+                    // detect a meridian crossing
+                    //if (Math.abs(diff_lower - diff_upper) > Math.PI) {
+                    if (ra_lower < ra_upper) {
+                        console.log("meridian crossing detected");
+                        //ra_lower += 2 * Math.PI;
+                        //diff_lower += 2 * Math.PI;
+                        /*if (diff_lower < 0) // lower is smaller, so add 2pi
+                            diff_lower += 2 * Math.PI;
+                        else
+                            diff_upper += 2 * Math.PI;*/
+                    }
+
+                    let diff_lower = ra_lower - ra0;
+                    //let diff_lower = angularSeparation(ra_lower, world[1] * deg2rad, ra0, dec0);
+
                     let diff_upper = ra_upper - ra0;
-                    //let diff_upper = angularSeparation(ra_upper, world[1] * deg2rad, ra0, dec0);
+                    //let diff_upper = angularSeparation(ra_upper, world[1] * deg2rad, ra0, dec0);                    
+
                     console.log("y =", tmp_y, "orig_y =", orig_y, "ra_lower =", ra_lower, "ra_upper =", ra_upper, "diff_lower =", diff_lower, "diff_upper =", diff_upper);
 
                     if (diff_lower * diff_upper > 0) {
