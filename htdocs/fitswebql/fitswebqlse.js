@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-09-17.0";
+    return "JS2025-09-18.0";
 }
 
 function uuidv4() {
@@ -8122,7 +8122,7 @@ function display_gridlines(index = previous_plane) {
         var xAxis = d3.axisTop(x)
             .tickSize(height)
             .tickFormat(function (d) {
-                if (d != 0.5) return; // debugging
+                //if (d != 0.5) return; // debugging
                 var image = imageContainer[index - 1];
                 var image_bounding_dims = image.image_bounding_dims;
 
