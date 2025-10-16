@@ -1018,7 +1018,7 @@ function plot_hds_spectrum(data, mask, bmin, bmax, index) {
 }
 
 function plot_spectrum(dataArray) {
-    console.log("plot_spectrum():", dataArray);
+    //console.log("plot_spectrum():", dataArray);
     /*try {
       if (d3.select("#pvline").attr("opacity") > 0.0)
         return;
