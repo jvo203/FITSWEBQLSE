@@ -8810,7 +8810,7 @@ function zoom_beam(index = previous_plane) {
             .attr("opacity", opacity);
 
         var image_bounding_dims = imageContainer[index - 1].image_bounding_dims;
-        var clipSize = Math.min(image_bounding_dims.width - 1, image_bounding_dims.height - 1) / zoom_scale;
+        var clipSize = get_clip_size(image_bounding_dims.width - 1, image_bounding_dims.height - 1);
 
         var elem = d3.select("#image_rectangle");
         var canvas_width = parseFloat(elem.attr("width"));
@@ -15790,7 +15790,7 @@ function setup_image_selection(plane_index = previous_plane) {
             var image_bounding_dims = imageContainer[plane_index - 1].image_bounding_dims;
             var scale = get_image_scale(width, height, image_bounding_dims.width, image_bounding_dims.height);
 
-            var clipSize = Math.min(image_bounding_dims.width - 1, image_bounding_dims.height - 1) / zoom_scale;
+            var clipSize = get_clip_size(image_bounding_dims.width - 1, image_bounding_dims.height - 1);
             var sel_width = Math.floor(clipSize * scale);
             var sel_height = Math.floor(clipSize * scale);
 
@@ -17671,7 +17671,7 @@ function imageTimeout() {
     x = clamp(x, image_bounding_dims.x1, image_bounding_dims.x1 + image_bounding_dims.width - 1);
     y = clamp(y, image_bounding_dims.y1, image_bounding_dims.y1 + image_bounding_dims.height - 1);
 
-    var clipSize = Math.min(image_bounding_dims.width - 1, image_bounding_dims.height - 1) / zoom_scale;
+    var clipSize = get_clip_size(image_bounding_dims.width - 1, image_bounding_dims.height - 1);
     var sel_width = Math.floor(clipSize * scale);
     var sel_height = Math.floor(clipSize * scale);
 
