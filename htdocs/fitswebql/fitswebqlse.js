@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-09-18.0";
+    return "JS2025-10-16.0";
 }
 
 function uuidv4() {
@@ -369,6 +369,17 @@ function get_pv_image_scale(width, height, img_width, img_height) {
 
         return scale;
     }
+}
+
+function get_clip_size(width, height) {
+    // legacy code (does not work well with extremely non-square images)
+    // return Math.min(width, height) / zoom_scale;
+
+    // an arithmetic mean of width and height
+    return (width + height) / (2.0 * zoom_scale);
+
+    // a geometric mean of width and height
+    // return Math.sqrt(width * height) / zoom_scale;
 }
 
 function get_spectrum_direction(fitsData) {
