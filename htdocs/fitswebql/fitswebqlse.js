@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-10-16.0";
+    return "JS2025-10-16.1";
 }
 
 function uuidv4() {
@@ -4154,6 +4154,13 @@ function DownsizePolarisation(srcI, srcA, mask, sw, sh, range, xmin = 0, ymin = 
     let fitsData = fitsContainer[index - 1];
     let image = imageContainer[index - 1];
 
+    //let orig_x = i * (fitsData.width - 1) / (image.width - 1);
+    //let orig_y = j * (fitsData.height - 1) / (image.height - 1);
+    const orig_x = (fitsData.width - 1) / 2;
+    const orig_y = (fitsData.height - 1) / 2;
+    const north = get_northern_direction(fitsData, orig_x, orig_y);
+    console.log("DownsizePolarisation orig_x:", orig_x, "orig_y:", orig_y, "north:", north, "radians");
+
     let di = range;
     let dj = range;
     let min_count = 0.75 * di * dj;
@@ -4213,11 +4220,6 @@ function DownsizePolarisation(srcI, srcA, mask, sw, sh, range, xmin = 0, ymin = 
                     mag_mean += I;
                     mag_std += I * I;
                     mag_count++;
-
-                    let orig_x = i * (fitsData.width - 1) / (image.width - 1);
-                    let orig_y = j * (fitsData.height - 1) / (image.height - 1);
-                    let north = get_northern_direction(fitsData, orig_x, orig_y);
-                    // console.log("i:", i, "j:", j, "orig_x:", orig_x, "orig_y:", orig_y, "north:", north);
 
                     field.push({ x: x0, y: y0, I: I, A: A + north });
                 }
