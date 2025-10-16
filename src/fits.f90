@@ -6959,8 +6959,8 @@ contains
          call inherent_image_dimensions_from_mask(mask, inner_width, inner_height, xmin, xmax, ymin, ymax)
 
          ! obtain the polarisation intensity and angle
-         call DownsizePolarizationSIMD(item%hdr, pixels, mask, img_width, img_height, xmin, ymin, xmax, ymax, 50,&
-         & intensity, angle)
+         call DownsizePolarizationSIMD(item%hdr, item%naxes(1), item%naxes(2), pixels, mask, img_width, img_height, xmin,&
+         &ymin, xmax, ymax, 50, intensity, angle)
 
          ! send the polarisation data
          call write_polarisation(fd, size(intensity, 1), size(intensity, 2), 50, c_loc(intensity), c_loc(angle), precision)
@@ -7940,7 +7940,8 @@ contains
                rc = my_pthread_join(task_pid(k))
             end do
 
-            json = DownsizeJSONPolarization(item%hdr, view_pixels, view_mask, req%width, req%height, req%beam)
+            json = DownsizeJSONPolarization(item%hdr, item%naxes(1), item%naxes(2), view_pixels, view_mask, req%width, &
+            &req%height, req%beam)
 
             ! end the timer
             call system_clock(finish_t)
@@ -7950,7 +7951,7 @@ contains
             &req%width, req%height, c_loc(view_pixels(:, :, plane)), c_loc(view_mask), precision)
          else
             ! no need for downsizing
-            json = DownsizeJSONPolarization(item%hdr, pixels, mask, dimx, dimy, req%beam)
+            json = DownsizeJSONPolarization(item%hdr, item%naxes(1), item%naxes(2), pixels, mask, dimx, dimy, req%beam)
 
             ! end the timer
             call system_clock(finish_t)
@@ -8968,7 +8969,8 @@ contains
             rc = my_pthread_join(task_pid(i))
          end do
 
-         json = DownsizeJSONPolarization(item%hdr, view_pixels, view_mask, req%width, req%height, req%beam)
+         json = DownsizeJSONPolarization(item%hdr, item%naxes(1), item%naxes(2), view_pixels, view_mask, req%width, &
+         &req%height, req%beam)
 
          ! end the timer
          t2 = omp_get_wtime()
@@ -8978,7 +8980,7 @@ contains
          &req%width, req%height, c_loc(view_pixels(:, :, plane)), c_loc(view_mask), precision)
       else
          ! no need for downsizing
-         json = DownsizeJSONPolarization(item%hdr, pixels, mask, dimx, dimy, req%beam)
+         json = DownsizeJSONPolarization(item%hdr, item%naxes(1), item%naxes(2), pixels, mask, dimx, dimy, req%beam)
 
          ! end the timer
          t2 = omp_get_wtime()
@@ -8996,13 +8998,13 @@ contains
       print *, "handle_viewport_request elapsed time:", elapsed, '[ms]'
    end subroutine realtime_viewport_request
 
-   type(C_PTR) function DownsizeJSONPolarization(hdr, pixels, mask, width, height, beam)
+   type(C_PTR) function DownsizeJSONPolarization(hdr, fits_width, fits_height, pixels, mask, width, height, beam)
       implicit none
 
       character(kind=c_char), dimension(:), intent(in) :: hdr
       real(c_float), dimension(:, :, :), intent(in) :: pixels
       logical(kind=c_bool), dimension(:, :), intent(in) :: mask
-      integer, intent(in) :: width, height
+      integer, intent(in) :: fits_width, fits_height, width, height
       integer(kind(circle)), intent(in) :: beam
 
       integer :: xmin, xmax, ymin, ymax, max_planes, i, j, ii, jj
@@ -9012,7 +9014,7 @@ contains
       integer :: range, count, min_count, total_count
 
       real :: tmp, tmpA, tmpI, tmpQ, tmpU, tmpV
-      real :: intensity, angle, x0, y0
+      real :: intensity, angle, x0, y0, fits_angle
       type(C_PTR) :: json
 
       ! WCS
@@ -9054,6 +9056,9 @@ contains
       print *, 'WCSPIH: ', IERR, NREJECT, NWCS
 
       IF (IERR .NE. 0) WCSP = c_null_ptr
+
+      fits_angle = get_northern_direction(WCSP, 0.5*real(fits_width), 0.5*real(fits_height)/2)
+      print *, 'fits_angle [rad]:', fits_angle
 
       total_count = 0
 
@@ -9122,7 +9127,7 @@ contains
 
             if (count .ge. min_count) then
                intensity = intensity/real(count)
-               angle = angle/real(count) + get_northern_direction(WCSP, real(i), real(j))
+               angle = angle/real(count) + fits_angle
 
                x0 = real(i) + 0.5*real(range) - xmin ! 0-based indexing
                y0 = real(j) + 0.5*real(range) - ymin ! 0-based indexing
@@ -9325,15 +9330,15 @@ contains
 
    end subroutine PreallocatePolarization
 
-   subroutine DownsizePolarizationSIMD(hdr, pixels, mask, width, height, pol_xmin, pol_ymin, pol_xmax, pol_ymax,&
-   & pol_target, pol_intensity, pol_angle)
+   subroutine DownsizePolarizationSIMD(hdr, fits_width, fits_height, pixels, mask, width, height, pol_xmin, &
+   &pol_ymin, pol_xmax, pol_ymax, pol_target, pol_intensity, pol_angle)
       use omp_lib
       implicit none
 
       character(kind=c_char), dimension(:), intent(in) :: hdr
       real(c_float), dimension(:, :, :), intent(in), contiguous, target :: pixels
       logical(kind=c_bool), dimension(:, :), intent(in), contiguous, target :: mask
-      integer, intent(in) :: width, height
+      integer, intent(in) :: fits_width, fits_height, width, height
       integer, intent(in) :: pol_xmin, pol_ymin, pol_xmax, pol_ymax, pol_target
       real(kind=c_float), dimension(:, :), allocatable, intent(out) :: pol_intensity, pol_angle
 
@@ -9342,13 +9347,12 @@ contains
 
       integer :: range, min_count, total_count
 
-      real :: intensity, angle
+      real :: intensity, angle, fits_angle
       integer :: x0, y0
 
       ! WCS
-      integer :: NKEYRC, RELAX, CTRL, NREJECT, STATUS, IERR
-      integer, dimension(:), allocatable :: NWCS
-      type(C_PTR), dimension(:), allocatable :: WCSP
+      integer :: NKEYRC, RELAX, CTRL, NREJECT, STATUS, IERR, NWCS
+      type(C_PTR) :: WCSP
 
       ! SPMD C interface
       real(kind=c_float), target :: res(2)
@@ -9375,10 +9379,6 @@ contains
       ! get #physical cores (ignore HT)
       max_threads = get_max_threads()
 
-      ! allocate the WCS arrays
-      allocate (WCSP(max_threads))
-      allocate (NWCS(max_threads))
-
       ! WCSLIB
       NKEYRC = (size(hdr) - 1)/80
 
@@ -9386,22 +9386,17 @@ contains
       CTRL = 2
       IERR = 0
 
-      ! init all the WCSP members
-      WCSP = c_null_ptr
+      IERR = WCSPIH(hdr, NKEYRC, RELAX, CTRL, NREJECT, NWCS, WCSP)
+      print *, 'WCSPIH: ', IERR, NREJECT, NWCS
 
-      do i = 1, max_threads
-         IERR = WCSPIH(hdr, NKEYRC, RELAX, CTRL, NREJECT, NWCS(i), WCSP(i))
-         print *, i, 'WCSPIH: ', IERR, NREJECT, NWCS(i)
+      IF (IERR .NE. 0) WCSP = c_null_ptr
 
-         IF (IERR .NE. 0) then
-            print *, 'DownsizePolarizationSIMD: WCSPIH error, exiting...'
-            goto 11000
-         END IF
-      end do
+      fits_angle = get_northern_direction(WCSP, 0.5*real(fits_width), 0.5*real(fits_height)/2)
+      print *, 'fits_angle [rad]:', fits_angle
 
       ! loop over the pixels and mask
       !$omp PARALLEL DEFAULT(SHARED) SHARED(pol_intensity, pol_angle, min_count, range)&
-      !$omp& SHARED(pixels, mask) PRIVATE(i, j)&
+      !$omp& SHARED(pixels, mask, fits_angle) PRIVATE(i, j)&
       !$omp& PRIVATE(x0, y0, intensity, angle, c_count, res)&
       !$omp& REDUCTION(+:total_count)&
       !$omp& NUM_THREADS (max_threads)
@@ -9433,7 +9428,7 @@ contains
                   tid = 1 + OMP_GET_THREAD_NUM()
 
                   pol_intensity(x0, y0) = intensity
-                  pol_angle(x0, y0) = angle + get_northern_direction(WCSP(tid), real(i), real(j))
+                  pol_angle(x0, y0) = angle + fits_angle
 
                   total_count = total_count + 1
                   ! print *, 'DownsizePolarizationSIMD: x:', x0, 'y:', y0, 'intensity:', intensity, 'angle:', angle
@@ -9445,10 +9440,7 @@ contains
       !$omp END DO
       !$omp END PARALLEL
 
-      ! Free the WCSPRM structs and the memory allocated for them.
-11000 do i = 1, max_threads
-         STATUS = WCSVFREE(NWCS(i), WCSP(i))
-      end do
+      STATUS = WCSVFREE(NWCS, WCSP)
 
       print *, 'DownsizePolarizationSIMD: total_count:', total_count, 'max_threads:', max_threads
 
@@ -10497,8 +10489,8 @@ contains
       !$omp END DO
       !$omp END PARALLEL
 
-      call DownsizePolarizationSIMD(item%hdr, pixels, mask, dimx, dimy, req%pol_xmin, req%pol_ymin, req%pol_xmax, req%pol_ymax,&
-      & req%pol_target, intensity, angle)
+      call DownsizePolarizationSIMD(item%hdr, item%naxes(1), item%naxes(2), pixels, mask, dimx, dimy, req%pol_xmin,&
+      &req%pol_ymin, req%pol_xmax, req%pol_ymax, req%pol_target, intensity, angle)
 
       if (req%fd .ne. -1) then
          if (allocated(intensity) .and. allocated(angle)) then
@@ -10628,8 +10620,8 @@ contains
          !$omp END DO
          !$omp END PARALLEL
 
-         call DownsizePolarizationSIMD(req%item%hdr, pixels, mask, dimx, dimy, req%pol_xmin, req%pol_ymin,&
-         & req%pol_xmax, req%pol_ymax, req%pol_target, intensity, angle)
+         call DownsizePolarizationSIMD(req%item%hdr, req%item%naxes(1), req%item%naxes(2), pixels, mask, dimx, dimy, &
+         &req%pol_xmin, req%pol_ymin, req%pol_xmax, req%pol_ymax, req%pol_target, intensity, angle)
       end if
 
       ! end the timer
@@ -12375,8 +12367,8 @@ contains
             call inherent_image_dimensions_from_mask(view_mask, inner_width, inner_height, xmin, xmax, ymin, ymax)
 
             ! obtain the polarisation intensity and angle
-            call DownsizePolarizationSIMD(item%hdr, view_pixels, view_mask, img_width, img_height,&
-            & xmin, ymin, xmax, ymax, 50, intensity, angle)
+            call DownsizePolarizationSIMD(item%hdr, item%naxes(1), item%naxes(2), view_pixels, view_mask, img_width,&
+            &img_height, xmin, ymin, xmax, ymax, 50, intensity, angle)
 
             ! send the polarisation data
             call write_polarisation(req%fd, size(intensity, 1), size(intensity, 2), 50,&
