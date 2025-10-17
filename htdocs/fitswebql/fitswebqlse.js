@@ -8433,237 +8433,6 @@ function display_gridlines(index = previous_plane) {
     }
 }
 
-function display_cd_gridlines() {
-    // testing, throw an error deliberately
-    console.error("deprecated function display_cd_gridlines");
-    throw new Error("deprecated function display_cd_gridlines");
-
-    if (va_count > 1 && !composite_view)
-        return;
-
-    let fitsData = fitsContainer[va_count - 1];
-
-    if (fitsData == null)
-        return;
-
-    //scale
-    const arcmins = 60;
-    var gridScale = inverse_CD_matrix(arcmins, arcmins);
-    var angle = gridScale[2] * Math.sign(gridScale[0]);
-
-    var label_angle = -45;
-
-    if (Math.sign(angle) != 0)
-        label_angle *= Math.sign(angle);
-
-    for (let i = 0; i < gridScale.length; i++)
-        if (isNaN(gridScale[i]))
-            throw "CD matrix is not available";
-
-    if (!has_image)
-        return;
-
-    try {
-        d3.select("#gridlines").remove();
-    }
-    catch (e) {
-    }
-
-    var elem = d3.select("#image_rectangle");
-    var width = parseFloat(elem.attr("width"));
-    var height = parseFloat(elem.attr("height"));
-
-    var x_offset = parseFloat(elem.attr("x"));
-    var y_offset = parseFloat(elem.attr("y"));
-
-    var x = d3.scaleLinear()
-        .range([0, width])
-        .domain([-1, 1]);
-
-    var y = d3.scaleLinear()
-        .range([height, 0])
-        .domain([-1, 1]);
-
-    var svg = d3.select("#BackgroundSVG");
-
-    svg = svg.append("g")
-        .attr("id", "gridlines")
-        .attr("opacity", 1.0);
-
-    let fillColour = 'white';
-    let strokeColour = 'white';
-
-    if (theme == 'light') {
-        fillColour = 'gray';
-        strokeColour = 'gray';
-    }
-
-    if (colourmap == "greyscale" || colourmap == "negative") {
-        fillColour = "#C4A000";
-        strokeColour = fillColour;
-    }
-
-    // Add the X Axis
-    if (fitsData.depth > 1) {
-        var xAxis = d3.axisBottom(x)
-            .tickSize(height)
-            .tickFormat(function (d) {
-                if (d == -1.0 || d == 1.0)
-                    return "";
-
-                var image = imageContainer[va_count - 1];
-                var image_bounding_dims = image.image_bounding_dims;
-
-                var dx = d * Math.cos(angle / toDegrees);
-                var dy = d * Math.sin(angle / toDegrees);
-
-                //convert dx, dy to a 0 .. 1 range
-                var tmpx = image_bounding_dims.x1 + (dx + 1) / 2 * (image_bounding_dims.width - 1);
-                var tmpy = image_bounding_dims.y1 + (dy + 1) / 2 * (image_bounding_dims.height - 1);
-
-                var orig_x = tmpx * fitsData.width / image.width;
-                var orig_y = tmpy * fitsData.height / image.height;
-
-                let world = pix2sky(fitsData, orig_x, orig_y);
-                let radec = [world[0] / toDegrees, world[1] / toDegrees];
-
-                if (fitsData.CTYPE1.indexOf("RA") > -1) {
-                    if (coordsFmt == 'DMS')
-                        return RadiansPrintDMS(radec[0]);
-                    else
-                        return RadiansPrintHMS(radec[0]);
-                } else {
-                    return RadiansPrintDMS(radec[0]);
-                }
-            });
-
-        svg.append("g")
-            .attr("class", "gridlines")
-            .attr("id", "ra_axis")
-            .style("fill", fillColour)
-            .style("stroke", strokeColour)
-            .style("stroke-width", 1.0)
-            .attr("opacity", 1.0)
-            .attr("transform", "translate(" + (x_offset) + "," + (y_offset) + ")" + ' rotate(' + angle + ' ' + (width / 2) + ' ' + (height / 2) + ')')
-            .call(xAxis)
-            .selectAll("text")
-            .attr("y", 0)
-            .attr("x", 0)
-            .style("fill", fillColour)
-            //.attr("dx", "-1.0em")
-            //.attr("dy", "1.0em")
-            .attr("transform", "rotate(" + label_angle + ")")
-            .style("text-anchor", "middle");
-    }
-    else {
-        var xAxis = d3.axisTop(x)
-            .tickSize(height)
-            .tickFormat(function (d) {
-                if (d == -1.0 || d == 1.0)
-                    return "";
-
-                var image = imageContainer[va_count - 1];
-                var image_bounding_dims = image.image_bounding_dims;
-
-                var dx = d * Math.cos(angle / toDegrees);
-                var dy = d * Math.sin(angle / toDegrees);
-
-                //convert dx, dy to a 0 .. 1 range
-                var tmpx = image_bounding_dims.x1 + (dx + 1) / 2 * (image_bounding_dims.width - 1);
-                var tmpy = image_bounding_dims.y1 + (dy + 1) / 2 * (image_bounding_dims.height - 1);
-
-                var orig_x = tmpx * fitsData.width / image.width;
-                var orig_y = tmpy * fitsData.height / image.height;
-
-                let world = pix2sky(fitsData, orig_x, orig_y);
-                let radec = [world[0] / toDegrees, world[1] / toDegrees];
-
-                if (fitsData.CTYPE1.indexOf("RA") > -1) {
-                    if (coordsFmt == 'DMS')
-                        return RadiansPrintDMS(radec[0]);
-                    else
-                        return RadiansPrintHMS(radec[0]);
-                } else {
-                    return RadiansPrintDMS(radec[0]);
-                }
-            });
-
-        svg.append("g")
-            .attr("class", "gridlines")
-            .attr("id", "ra_axis")
-            .style("fill", fillColour)
-            .style("stroke", strokeColour)
-            .style("stroke-width", 1.0)
-            .attr("opacity", 1.0)
-            .attr("transform", "translate(" + (x_offset) + "," + (height + y_offset) + ")" + ' rotate(' + angle + ' ' + (width / 2) + ' ' + (- height / 2) + ')')
-            .call(xAxis)
-            .selectAll("text")
-            .attr("y", 0)
-            .attr("x", 0)
-            .style("fill", fillColour)
-            //.attr("dx", ".35em")
-            //.attr("dy", ".35em")
-            .attr("transform", "rotate(" + label_angle + ")")
-            .style("text-anchor", "middle");
-    }
-
-    // Add the Y Axis
-    {
-        var yAxis = d3.axisLeft(y)
-            .tickSize(width)
-            .tickFormat(function (d) {
-                if (d == -1.0 || d == 1.0)
-                    return "";
-
-                var image = imageContainer[va_count - 1];
-                var image_bounding_dims = image.image_bounding_dims;
-
-                var dx = d * Math.sin(angle / toDegrees);
-                var dy = d * Math.cos(angle / toDegrees);
-
-                //convert dx, dy to a 0 .. 1 range
-                var tmpx = image_bounding_dims.x1 + (dx + 1) / 2 * (image_bounding_dims.width - 1);
-                var tmpy = image_bounding_dims.y1 + (dy + 1) / 2 * (image_bounding_dims.height - 1);
-
-                var orig_x = tmpx * fitsData.width / image.width;
-                var orig_y = tmpy * fitsData.height / image.height;
-
-                let world = pix2sky(fitsData, orig_x, orig_y);
-                let radec = [world[0] / toDegrees, world[1] / toDegrees];
-                return RadiansPrintDMS(radec[1]);
-            });
-
-        svg.append("g")
-            .attr("class", "gridlines")
-            .attr("id", "dec_axis")
-            .style("fill", fillColour)
-            .style("stroke", strokeColour)
-            .style("stroke-width", 1.0)
-            .attr("opacity", 1.0)
-            .attr("transform", " translate(" + (width - 0 + x_offset) + "," + (y_offset) + ")" + ' rotate(' + angle + ' ' + (- width / 2) + ' ' + (height / 2) + ')')
-            .call(yAxis)
-            .selectAll("text")
-            .attr("y", 0)
-            .attr("x", 0)
-            .style("fill", fillColour)
-            .attr("dx", ".35em")
-            //.attr("dy", "-0.35em")
-            //.attr("transform", "rotate(-45)")
-            .style("text-anchor", "start");//was end, dx -.35, dy 0
-    }
-
-    if (va_count == 1 || composite_view) {
-        var htmlStr = displayGridlines ? '<span class="fas fa-check-square"></span> lon/lat grid lines' : '<span class="far fa-square"></span> lon/lat grid lines';
-        d3.select("#displayGridlines").html(htmlStr);
-
-        var elem = d3.select("#gridlines");
-        if (displayGridlines)
-            elem.attr("opacity", 1);
-        else
-            elem.attr("opacity", 0);
-    }
-}
-
 function display_beam() {
     if (va_count > 1 && !composite_view)
         return;
@@ -10184,10 +9953,9 @@ function change_coords_fmt() {
             d3.select("#ra").text(raText);
 
             try {
-                display_cd_gridlines();
-            }
-            catch (err) {
                 display_gridlines();
+            }
+            catch (_) {
             };
         }
     }
@@ -17015,10 +16783,9 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                 display_histogram(index);
 
                                 try {
-                                    display_cd_gridlines();
-                                }
-                                catch (err) {
                                     display_gridlines();
+                                }
+                                catch (_) {
                                 };
 
                                 display_beam();
