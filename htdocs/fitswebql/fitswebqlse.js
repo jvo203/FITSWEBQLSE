@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-10-16.1";
+    return "JS2025-10-17.0";
 }
 
 function uuidv4() {
@@ -7941,6 +7941,26 @@ function angularSeparation(ra1, dec1, ra2, dec2) {
     return sep; // in radians
 }
 
+function angle_difference(ra, ra0, meridian) {
+    // baseline case: no meridian crossing
+    if (!meridian) {
+        return ra - ra0;
+    };
+
+    // are they on opposite sides of the meridian?
+    if (Math.abs(ra - ra0) > Math.PI) {
+        // crossing detected
+        if (ra > ra0) {
+            return ra - (ra0 + 2 * Math.PI);;
+        } else {
+            return (ra + 2 * Math.PI) - ra0;
+        }
+    } else {
+        // no crossing
+        return ra - ra0;
+    }
+}
+
 function display_gridlines(index = previous_plane) {
     if (va_count > 1 && !composite_view)
         return;
@@ -8047,12 +8067,21 @@ function display_gridlines(index = previous_plane) {
                     orig_x = lower_x * fitsData.width / image.width;
                     let world = pix2sky(fitsData, orig_x, orig_y);
                     let ra_lower = world[0] * deg2rad;
-                    let diff_lower = ra_lower - ra0;
 
                     orig_x = upper_x * fitsData.width / image.width;
                     world = pix2sky(fitsData, orig_x, orig_y);
                     let ra_upper = world[0] * deg2rad;
-                    let diff_upper = ra_upper - ra0;
+
+                    let meridian_crossing = false;
+
+                    // detect a meridian crossing                    
+                    if (ra_lower < ra_upper) {
+                        //console.log("meridian crossing detected");
+                        meridian_crossing = true;
+                    }
+
+                    let diff_lower = angle_difference(ra_lower, ra0, meridian_crossing);
+                    let diff_upper = angle_difference(ra_upper, ra0, meridian_crossing);
 
                     if (diff_lower * diff_upper > 0) {
                         console.log("display_gridlines: root not bracketed");
@@ -8068,7 +8097,7 @@ function display_gridlines(index = previous_plane) {
                         orig_x = new_x * fitsData.width / image.width;
                         let world = pix2sky(fitsData, orig_x, orig_y);
                         let ra = world[0] * deg2rad;
-                        let diff = ra - ra0;
+                        let diff = angle_difference(ra, ra0, meridian_crossing);
 
                         /*if (Math.abs(diff) < accuracy)
                             break;*/
@@ -8135,7 +8164,6 @@ function display_gridlines(index = previous_plane) {
         var xAxis = d3.axisTop(x)
             .tickSize(height)
             .tickFormat(function (d) {
-                //if (d != 0.5) return; // debugging
                 var image = imageContainer[index - 1];
                 var image_bounding_dims = image.image_bounding_dims;
 
@@ -8149,13 +8177,12 @@ function display_gridlines(index = previous_plane) {
                 // curved gridlines
                 const ra0 = world[0] * deg2rad;
                 const dec0 = world[1] * deg2rad;
-                console.log("xAxis tickFormat d =", d, "ra0 =", ra0, "dec0 =", dec0);
 
                 // SVG path (piecewise linear segments)
                 const path = d3.path();
 
                 // go through the ticks
-                let ticks = y.ticks(5); // [0.0, ..., 1.0]
+                let ticks = y.ticks(no_ticks); // [0.0, ..., 1.0]
 
                 // move to the starting point
                 path.moveTo(x(d), y(ticks[0]));
@@ -8181,25 +8208,16 @@ function display_gridlines(index = previous_plane) {
                     world = pix2sky(fitsData, orig_x, orig_y);
                     let ra_upper = world[0] * deg2rad;
 
-                    // detect a meridian crossing
-                    //if (Math.abs(diff_lower - diff_upper) > Math.PI) {
+                    let meridian_crossing = false;
+
+                    // detect a meridian crossing                    
                     if (ra_lower < ra_upper) {
-                        console.log("meridian crossing detected");
-                        //ra_lower += 2 * Math.PI;
-                        //diff_lower += 2 * Math.PI;
-                        /*if (diff_lower < 0) // lower is smaller, so add 2pi
-                            diff_lower += 2 * Math.PI;
-                        else
-                            diff_upper += 2 * Math.PI;*/
+                        //console.log("meridian crossing detected");
+                        meridian_crossing = true;
                     }
 
-                    let diff_lower = ra_lower - ra0;
-                    //let diff_lower = angularSeparation(ra_lower, world[1] * deg2rad, ra0, dec0);
-
-                    let diff_upper = ra_upper - ra0;
-                    //let diff_upper = angularSeparation(ra_upper, world[1] * deg2rad, ra0, dec0);                    
-
-                    console.log("y =", tmp_y, "orig_y =", orig_y, "ra_lower =", ra_lower, "ra_upper =", ra_upper, "diff_lower =", diff_lower, "diff_upper =", diff_upper);
+                    let diff_lower = angle_difference(ra_lower, ra0, meridian_crossing);
+                    let diff_upper = angle_difference(ra_upper, ra0, meridian_crossing);
 
                     if (diff_lower * diff_upper > 0) {
                         console.log("display_gridlines: root not bracketed");
@@ -8215,7 +8233,7 @@ function display_gridlines(index = previous_plane) {
                         orig_x = new_x * fitsData.width / image.width;
                         let world = pix2sky(fitsData, orig_x, orig_y);
                         let ra = world[0] * deg2rad;
-                        let diff = ra - ra0;
+                        let diff = angle_difference(ra, ra0, meridian_crossing);
 
                         /*if (Math.abs(diff) < accuracy)
                             break;*/
