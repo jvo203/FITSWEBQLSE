@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-10-17.0";
+    return "JS2025-10-17.1";
 }
 
 function uuidv4() {
@@ -8024,7 +8024,7 @@ function display_gridlines(index = previous_plane) {
     // Add the X Axis
     if (fitsData.depth > 1) {
         var xAxis = d3.axisBottom(x)
-            .tickSize(height) // scheduled to be set to 0 (no straight gridlines)
+            .tickSize(0) // height
             .tickFormat(function (d) {
                 var image = imageContainer[index - 1];
                 var image_bounding_dims = image.image_bounding_dims;
@@ -8083,7 +8083,7 @@ function display_gridlines(index = previous_plane) {
                     let diff_lower = angle_difference(ra_lower, ra0, meridian_crossing);
                     let diff_upper = angle_difference(ra_upper, ra0, meridian_crossing);
 
-                    if (diff_lower * diff_upper > 0) {
+                    if (diff_lower * diff_upper >= 0) {
                         console.log("display_gridlines: root not bracketed");
                         //path.lineTo(NaN, NaN);
                         end = true;
@@ -8124,7 +8124,7 @@ function display_gridlines(index = previous_plane) {
                     .style("fill", "none")
                     .style("stroke", strokeColour)
                     .style("stroke-width", 1.0)
-                    //.style("stroke-dasharray", "5,5")
+                    .style("stroke-dasharray", "5,5")
                     .attr("opacity", 0.75);
 
                 // end of curved gridlines
@@ -8162,7 +8162,7 @@ function display_gridlines(index = previous_plane) {
     }
     else {
         var xAxis = d3.axisTop(x)
-            .tickSize(height)
+            .tickSize(0) // height
             .tickFormat(function (d) {
                 var image = imageContainer[index - 1];
                 var image_bounding_dims = image.image_bounding_dims;
@@ -8219,7 +8219,7 @@ function display_gridlines(index = previous_plane) {
                     let diff_lower = angle_difference(ra_lower, ra0, meridian_crossing);
                     let diff_upper = angle_difference(ra_upper, ra0, meridian_crossing);
 
-                    if (diff_lower * diff_upper > 0) {
+                    if (diff_lower * diff_upper >= 0) {
                         console.log("display_gridlines: root not bracketed");
                         //path.lineTo(NaN, NaN);
                         end = true;
@@ -8260,7 +8260,7 @@ function display_gridlines(index = previous_plane) {
                     .style("fill", "none")
                     .style("stroke", strokeColour)
                     .style("stroke-width", 1.0)
-                    //.style("stroke-dasharray", "5,5")
+                    .style("stroke-dasharray", "5,5")
                     .attr("opacity", 0.75);
 
                 // end of curved gridlines
@@ -8300,7 +8300,7 @@ function display_gridlines(index = previous_plane) {
     // Add the Y Axis
     {
         var yAxis = d3.axisLeft(y)
-            .tickSize(width)
+            .tickSize(0) // width
             .tickFormat(function (d) {
                 var image = imageContainer[index - 1];
                 var image_bounding_dims = image.image_bounding_dims;
@@ -8350,7 +8350,7 @@ function display_gridlines(index = previous_plane) {
                     let dec_upper = world[1] * deg2rad;
                     let diff_upper = dec_upper - dec0;
 
-                    if (diff_lower * diff_upper > 0) {
+                    if (diff_lower * diff_upper >= 0) {
                         console.log("display_gridlines: root not bracketed");
                         //path.lineTo(NaN, NaN);
                         end = true;
@@ -8391,7 +8391,7 @@ function display_gridlines(index = previous_plane) {
                     .style("fill", "none")
                     .style("stroke", strokeColour)
                     .style("stroke-width", 1.0)
-                    //.style("stroke-dasharray", "5,5")
+                    .style("stroke-dasharray", "5,5")
                     .attr("opacity", 0.75);
 
                 // end of curved gridlines                
