@@ -7931,16 +7931,6 @@ function display_scale_info(index = previous_plane) {
             .text("N");
 }
 
-
-// Example: Spherical separation
-function angularSeparation(ra1, dec1, ra2, dec2) {
-    // the inputs are already in radians    
-    let deltaRA = ra2 - ra1;
-    let cosSep = Math.sin(dec1) * Math.sin(dec2) + Math.cos(dec1) * Math.cos(dec2) * Math.cos(deltaRA);
-    let sep = Math.acos(cosSep);
-    return sep; // in radians
-}
-
 function angle_difference(ra, ra0, meridian) {
     // baseline case: no meridian crossing
     if (!meridian) {
