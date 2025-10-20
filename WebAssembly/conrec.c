@@ -84,7 +84,9 @@ void line(float *buffer, int width, int height, int x0, int y0, int x1, int y1, 
 
 // this is a simple line drawing algorithm that draws a line between two points
 // downloaded from https://joshbeam.com/articles/simple_line_drawing/
-void draw_line(unsigned char *buffer, int width, int height, float x1, float y1, float x2, float y2, unsigned char r, unsigned char g, unsigned char b, unsigned char a)
+// void draw_line(unsigned char *buffer, int width, int height, float x1, float y1, float x2, float y2, unsigned char r, unsigned char g, unsigned char b, unsigned char a)
+// unused, kept for reference
+void draw_line(float *buffer, int width, int height, float x1, float y1, float x2, float y2, float r, float g, float b, float a)
 {
     float xdiff = (x2 - x1);
     float ydiff = (y2 - y1);
