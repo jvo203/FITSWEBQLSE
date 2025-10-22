@@ -687,15 +687,15 @@ module fits
          integer(c_size_t), value, intent(in) :: frame_size
       end function write_array
 
-      ! int read_frame(int fd, void *dst, int frame, int plane, size_t frame_size)
-      integer(c_int) function read_frame(fd, dst, frame, plane, frame_size)&
+      ! int read_frame(int fd, void *dst, int frame, int plane, size_t frame_size, int no_planes)
+      integer(c_int) function read_frame(fd, dst, frame, plane, frame_size, no_planes)&
       &BIND(C, name='read_frame')
          use, intrinsic :: ISO_C_BINDING
          implicit none
 
          integer(c_int), value, intent(in) :: fd
          type(c_ptr), value :: dst
-         integer(c_int), value, intent(in) :: frame, plane
+         integer(c_int), value, intent(in) :: frame, plane, no_planes
          integer(c_size_t), value, intent(in) :: frame_size
       end function read_frame
 
@@ -3034,7 +3034,7 @@ contains
             ! print *, 'sizeof(compressed_frame) = ', array_size, 'bytes'
 
             ! read the compressed data
-            ios = read_frame(data_unit, c_loc(item%compressed(frame, k)%ptr(:, :)), i - 1, k - 1, array_size)
+            ios = read_frame(data_unit, c_loc(item%compressed(frame, k)%ptr(:, :)), i - 1, k - 1, array_size, max_planes)
 
             ! abort upon a read error
             if (ios .ne. 0) then
