@@ -7885,7 +7885,6 @@ contains
          call system_clock(finish_t)
          elapsed = 1000.0*real(finish_t - start_t)/real(crate) ! [ms]
 
-         print *, 'spectrum size:', size(spectrum), 'spectrum:', spectrum
          call write_ws_spectrum(req%session, req%seq_id, req%timestamp, elapsed,&
          &c_loc(spectrum), size(spectrum), precision)
       end if
