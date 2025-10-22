@@ -7655,12 +7655,12 @@ contains
       call c_f_pointer(req%ptr, item)
 
       ! ifort
-      print *, 'realtime_image_spectrum for ', item%datasetid,&
-      &', dx:', req%dx, ', image:', req%image, ', quality:', req%quality, ', x1:', req%x1, &
-      &', y1:', req%y1, ', x2:', req%x2, ', y2:', req%y2, ', plane:', req%plane, ', width:', req%width, &
-      &', height', req%height, ', beam:', req%beam, ', intensity:', req%intensity,&
-      &', frame_start:', req%frame_start, ', frame_end:', req%frame_end, ', ref_freq:', &
-      & req%ref_freq, ', seq_id:', req%seq_id, ', timestamp:', req%timestamp, ', fd:', req%fd
+      !print *, 'realtime_image_spectrum for ', item%datasetid,&
+      !&', dx:', req%dx, ', image:', req%image, ', quality:', req%quality, ', x1:', req%x1, &
+      !&', y1:', req%y1, ', x2:', req%x2, ', y2:', req%y2, ', plane:', req%plane, ', width:', req%width, &
+      !&', height', req%height, ', beam:', req%beam, ', intensity:', req%intensity,&
+      !&', frame_start:', req%frame_start, ', frame_end:', req%frame_end, ', ref_freq:', &
+      !& req%ref_freq, ', seq_id:', req%seq_id, ', timestamp:', req%timestamp, ', fd:', req%fd
 
       ! respond with a 2D viewport if req%image .eq. .true.
       if (.not. allocated(item%compressed)) then
@@ -7692,7 +7692,7 @@ contains
       call get_spectrum_range(item, req%frame_start, req%frame_end, req%ref_freq, first, last)
 
       length = last - first + 1
-      print *, 'first:', first, 'last:', last, 'length:', length, 'depth:', item%naxes(3), 'plane:', plane ! ifort
+      !print *, 'first:', first, 'last:', last, 'length:', length, 'depth:', item%naxes(3), 'plane:', plane ! ifort
 
       ! obtain viewport dimensions (even going beyond the dims of pixels&mask)
       dimx = abs(req%x2 - req%x1) + 1
