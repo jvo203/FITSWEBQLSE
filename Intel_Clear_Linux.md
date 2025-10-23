@@ -20,7 +20,7 @@
 
     wget https://ftpmirror.gnu.org/libmicrohttpd/libmicrohttpd-latest.tar.gz
     tar zxvf libmicrohttpd-latest.tar.gz
-    cd libmicrohttpd-1.0.1
+    cd libmicrohttpd-1.0.2
     export CFLAGS="$CFLAGS -Wno-error=implicit-function-declaration"
     ./configure --enable-experimental
     make
