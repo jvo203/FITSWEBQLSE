@@ -94,7 +94,7 @@ uniform int64 count = reduce_add(partial_count) ;
   if(count > 0)
     {
 
-      mean = sum / (double) count ;
+      mean = sum / (uniform double) count ;
       integrated = sum * cdelt3 ;
     }
   else
@@ -576,7 +576,7 @@ export uniform float viewport_spectrum_rect(uniform struct fixed_block_t compres
     if(count > 0)
     {
         if(average)
-	        return (float)(sum / (double) count) ;
+	        return (float)(sum / (uniform double) count) ;
         else
 	        return (float)(sum * cdelt3) ;
     }
@@ -658,7 +658,7 @@ export uniform float viewport_spectrum_circle(uniform struct fixed_block_t compr
     if(count > 0)
     {
         if(average)
-	        return (float)(sum / (double) count) ;
+	        return (float)(sum / (uniform double) count) ;
         else
 	        return (float)(sum * cdelt3) ;
     }
@@ -778,7 +778,7 @@ export uniform float viewport_image_spectrum_rect(uniform struct fixed_block_t c
     if(count > 0)
     {
         if(average)
-	        return (float)(sum / (double) count) ;
+	        return (float)(sum / (uniform double) count) ;
         else
 	        return (float)(sum * cdelt3) ;
     }
@@ -878,7 +878,7 @@ export uniform float viewport_image_spectrum_circle(uniform struct fixed_block_t
     if(count > 0)
     {
         if(average)
-	        return (float)(sum / (double) count) ;
+	        return (float)(sum / (uniform double) count) ;
         else
 	        return (float)(sum * cdelt3) ;
     }
@@ -1788,7 +1788,7 @@ export void hds_image_spectrum_y(uniform int x1, uniform int x2, uniform float x
     uniform int _count = reduce_add(count) ;
     uniform float _val = reduce_add(val) ;
 
-    outspec[j] = _count > 0 ? _val / (float)_count : 0.0f ;
+    outspec[j] = _count > 0 ? _val / (uniform float)_count : 0.0f ;
     outmask[j] = any(_outmask) ? 1 : 0 ;
     valid[j] = any(_valid) ? 1 : 0 ;
   }
