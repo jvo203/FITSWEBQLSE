@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-10-17.1";
+    return "JS2025-10-29.0";
 }
 
 function uuidv4() {
@@ -16630,7 +16630,7 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                                 throw new Error("histogram_height != plane_count");
                             }
 
-                            // deep-copy the fitsData object for each plane, adding respective histograms                                    
+                            // deep-copy the fitsData object for each plane, adding respective histograms
                             for (let i = 0; i < plane_count; i++) {
                                 fitsContainer[i] = JSON.parse(JSON.stringify(fitsData));
 
@@ -16670,6 +16670,14 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                         display_preferences(index);
 
                         await res;
+
+                        if (plane_count > 1) {
+                            console.log("plane_count > 1, replicating fitsData.index from the first plane to all planes", fitsContainer[0].index);
+                            // replicate fitsData.index from the first plane to all planes
+                            for (let i = 0; i < plane_count; i++) {
+                                fitsContainer[i].index = fitsContainer[0].index;
+                            }
+                        }
 
                         if (index == va_count)
                             display_dataset_info();
