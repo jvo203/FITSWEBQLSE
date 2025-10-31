@@ -5877,12 +5877,11 @@ void *handle_composite_download_request_tar(void *ptr)
             printf("[C] calling mtar_write_file_header [%s]::%zu bytes\n", composite_req->datasetId[i], offset);
 #endif
 
-            // TO-DO: handle 64-bit <size_t> file sizes (right now mtar uses <unsigned int> internally)
             if (offset > 0)
             {
                 // write the partial FITS file to the tar archive
-                mtar_write_file_header(&tar, composite_req->datasetId[i], (unsigned int)offset);
-                mtar_write_data(&tar, buf, (unsigned int)offset);
+                mtar_write_file_header(&tar, composite_req->datasetId[i], offset);
+                mtar_write_data(&tar, buf, offset);
             }
 
             free(buf);
@@ -6135,12 +6134,11 @@ void *handle_composite_download_request_tar_gz(void *ptr)
             printf("[C] calling mtar_write_file_header [%s]::%zu bytes\n", composite_req->datasetId[i], offset);
 #endif
 
-            // TO-DO: handle 64-bit <size_t> file sizes (right now mtar uses <unsigned int> internally)
             if (offset > 0)
             {
                 // write the partial FITS file to the tar archive
-                mtar_write_file_header(&tar, composite_req->datasetId[i], (unsigned int)offset);
-                mtar_write_data(&tar, buf, (unsigned int)offset);
+                mtar_write_file_header(&tar, composite_req->datasetId[i], offset);
+                mtar_write_data(&tar, buf, offset);
             }
 
             free(buf);
