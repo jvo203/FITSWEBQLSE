@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-10-29.0";
+    return "JS2025-10-30.0";
 }
 
 function uuidv4() {
@@ -17872,9 +17872,9 @@ function change_noise_sensitivity(index) {
 
 function partial_fits_size() {
     let frame_bounds = get_frame_bounds(data_band_lo, data_band_hi, va_count - 1);
-    let len = Math.abs(frame_bounds.frame_end - frame_bounds.frame_start) + 1;
+    let frame_count = Math.abs(frame_bounds.frame_end - frame_bounds.frame_start) + 1;
 
-    //console.log("frame_bounds:", frame_bounds, "#frames:", len);
+    //console.log("frame_bounds:", frame_bounds, "#frames:", frame_count, "plane_count:", plane_count);
 
     var offsetx = d3.select("#image_rectangle").attr("x");
     var offsety = d3.select("#image_rectangle").attr("y");
@@ -17909,7 +17909,7 @@ function partial_fits_size() {
 
     let fitsHeader = fitsData.HEADER;
 
-    let partial_size = roundUp(fitsHeader.length, 2880) + len * dimx * dimy * Math.round(Math.abs(fitsData.BITPIX) / 8);
+    let partial_size = roundUp(fitsHeader.length, 2880) + dimx * dimy * frame_count * plane_count * Math.round(Math.abs(fitsData.BITPIX) / 8);
 
     // FITS header/data units come in multiples of 2880 bytes
     return va_count * roundUp(partial_size, 2880);
