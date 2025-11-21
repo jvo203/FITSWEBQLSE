@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := wasm
-VERSION = 25.10.20.0
+VERSION = 25.11.21.0
 
 ZFP = zfp-1.0.0
 ZFP_SRC := $(wildcard $(ZFP)/src/*.c)
@@ -18,7 +18,7 @@ OBJ := $(OBJ:.c=.o)
 INCLUDE = -I./ -I./$(ZFP)/include -I./$(ZFP)/src -I./$(LZ4) -I./$(WCSTOOLS)
 #-I/tmp/system/include
 LIBRARY = /tmp/system/lib
-CXXFLAGS=-std=c++11 -Oz
+CXXFLAGS=-std=c++17 -Oz
 LDFLAGS=-lz --llvm-lto 1
 
 .PHONY=clean
