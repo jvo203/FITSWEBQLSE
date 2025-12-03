@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-12-01.0";
+    return "JS2025-12-03.0";
 }
 
 function uuidv4() {
@@ -7070,7 +7070,7 @@ async function open_websocket_connection(_datasetId, index) {
                             ctx.msImageSmoothingEnabled = false;
                             ctx.imageSmoothingEnabled = false;
 
-                            var ctx2 = c2.getContext("2d");
+                            var ctx2 = c2.getContext("2d"/*, { willReadFrequently: true }*/); // runs out of memory if willReadFrequently is set to true
                             ctx2.webkitImageSmoothingEnabled = false;
                             ctx2.msImageSmoothingEnabled = false;
                             ctx2.imageSmoothingEnabled = false;
@@ -13407,6 +13407,32 @@ function pv_event(event) {
                 resubmit_pv_line();
             });
 
+            // polarisation dropdown (check if "internsity_plane" HTML element exists)
+            // if it does, we are in polarisation mode
+            if (document.getElementById("intensity_plane") != null) {
+                console.log("pv_event:", document.getElementById("intensity_plane"));
+                var pvPolDiv = pvDiv.append("span")
+                    .attr("id", "pv_polarisation_control")
+                    .style("class", "form-group")
+                    .attr("class", "form-horizontal");
+
+                pvPolDiv.append("label")
+                    .attr("for", "pv_intensity_plane")
+                    .attr("class", "pv-label")
+                    .html("display intensity:&nbsp; ");
+
+                // copy the html string from the main intensity plane selector
+                let intensity_string = document.getElementById("intensity_plane").innerHTML;
+                pvPolDiv.append("select")
+                    .attr("id", "pv_intensity_plane")
+                    .attr("onchange", "javascript:change_pv_intensity_plane();")
+                    .html(intensity_string);
+
+                // copy the default value   
+                let intensity_value = document.getElementById("intensity_plane").value;
+                document.getElementById("pv_intensity_plane").value = intensity_value;
+            }
+
             div.append("img")
                 .attr("id", "hourglassPVDiagram")
                 .attr("class", "hourglass")
@@ -13835,6 +13861,20 @@ function pv_event(event) {
         d3.select("#pvmid").attr("opacity", 1.0);
     }
 }
+
+function change_pv_intensity_plane() {
+    let intensity_value = document.getElementById("pv_intensity_plane").value;
+    // copy the value to the main intensity plane selector
+    document.getElementById("intensity_plane").value = intensity_value;
+
+    // call the main intensity plane change function
+    change_intensity_plane();
+
+    // handle the WebGL intensity image change too ...
+
+    resubmit_pv_line();
+}
+
 
 function dragMid(event) {
     event.preventDefault = true;
@@ -18094,10 +18134,12 @@ function pv_contour(left, top, width, height, pvCanvas, flipY, pv_width, pv_heig
                 }
             }
 
+            // x,y attributes should not be needed as we set the width and height of the SVG
+            // to match the P-V diagram canvas size
             d3.select("#PVContourSVG").append("svg")
                 .attr("id", "PVContourPlot")
-                .attr("x", parseFloat(elem.attr("x")))
-                .attr("y", parseFloat(elem.attr("y")))
+                /*.attr("x", parseFloat(elem.attr("x")))
+                .attr("y", parseFloat(elem.attr("y")))*/
                 .attr("width", width)
                 .attr("height", height)
                 .selectAll("path")
