@@ -497,10 +497,9 @@ input[type=number].hover {
     padding-left: 2.5%;
 }
 
-/*select
-{
-    height: 1.6em;
-}*/
+.pv-select {
+    font-size: 1.25em;
+}
 
 ::-moz-selection {
     background: rgba(0, 0, 0, 0.0)

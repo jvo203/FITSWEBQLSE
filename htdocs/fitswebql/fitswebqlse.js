@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-12-03.0";
+    return "JS2025-12-04.0";
 }
 
 function uuidv4() {
@@ -11272,7 +11272,7 @@ function display_histogram(index, initPlanes = true) {
             tmpA.append("label")
                 .attr("for", "intensity_plane")
                 .attr("class", "control-label")
-                .html("display intensity:&nbsp; ");
+                .html("polarisation:&nbsp; ");
 
             tmpA.append("select")
                 .attr("id", "intensity_plane")
@@ -13419,12 +13419,13 @@ function pv_event(event) {
                 pvPolDiv.append("label")
                     .attr("for", "pv_intensity_plane")
                     .attr("class", "pv-label")
-                    .html("display intensity:&nbsp; ");
+                    .html("polarisation:&nbsp; ");
 
                 // copy the html string from the main intensity plane selector
                 let intensity_string = document.getElementById("intensity_plane").innerHTML;
                 pvPolDiv.append("select")
                     .attr("id", "pv_intensity_plane")
+                    .attr("class", "pv-select")
                     .attr("onchange", "javascript:change_pv_intensity_plane();")
                     .html(intensity_string);
 
