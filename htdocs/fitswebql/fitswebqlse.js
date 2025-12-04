@@ -11228,6 +11228,31 @@ function change_intensity_plane() {
 
     // flip the previous plane to the new plane
     previous_plane = index;
+
+    // optionally copy the image from WebGL to the P-V Diagram Canvas    
+    var src_canvas = document.getElementById('HTMLCanvas');
+    var dst_canvas = document.getElementById('PVCanvas');
+
+    if (src_canvas != null && dst_canvas != null) {
+        console.log("change_intensity_plane:: copying the image to the P-V Canvas: index = ", index);
+
+        let src_x = image_gl_viewport[0];
+        let src_y = image_gl_viewport[1];
+        let src_width = image_gl_viewport[2];
+        let src_height = image_gl_viewport[3];
+
+        let dst_width = dst_canvas.width / 2;
+        let dst_height = dst_canvas.height;
+
+        let scale = get_pv_image_scale(dst_width, dst_height, src_width, src_height);
+        let img_width = Math.floor(scale * src_width);
+        let img_height = Math.floor(scale * src_height);
+
+        let context = dst_canvas.getContext('2d');
+
+        // place the image on the left-hand side
+        context.drawImage(src_canvas, src_x, src_y, src_width, src_height, (dst_width - img_width) / 2, (dst_height - img_height) / 2, img_width, img_height);
+    }
 }
 
 function display_histogram(index, initPlanes = true) {
@@ -13455,11 +13480,6 @@ function pv_event(event) {
             var elem = document.getElementById("image_rectangle");
 
             if (elem != null) {
-                /*var src_width = parseFloat(elem.getAttribute("width"));
-                var src_height = parseFloat(elem.getAttribute("height"));
-                var src_x = parseFloat(elem.getAttribute("x"));
-                var src_y = parseFloat(elem.getAttribute("y"));*/
-
                 var src_x = image_gl_viewport[0];
                 var src_y = image_gl_viewport[1];
                 var src_width = image_gl_viewport[2];
@@ -13871,8 +13891,7 @@ function change_pv_intensity_plane() {
     // call the main intensity plane change function
     change_intensity_plane();
 
-    // handle the WebGL intensity image change too ...
-
+    // re-fresh the P-V line (the polarisation intensity plane has changed)
     resubmit_pv_line();
 }
 
