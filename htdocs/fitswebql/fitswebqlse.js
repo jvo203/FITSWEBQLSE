@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2025-12-05.0";
+    return "JS2026-01-06.0";
 }
 
 function uuidv4() {
@@ -20180,7 +20180,7 @@ function setup_help() {
         .text("CREDITS:");
 
     footer.append("p")
-        .text("Software Development Ⓒ Christopher A. Zapart @ NAOJ, 2015 - 2025. JavaScript RA/DEC conversion Ⓒ Robert Martin Ayers, 2009, 2011, 2014.");
+        .text("Software Development Ⓒ Christopher A. Zapart @ NAOJ, 2015 - 2026. JavaScript RA/DEC conversion Ⓒ Robert Martin Ayers, 2009, 2011, 2014.");
 
     footer.append("h3")
         .text("VERSION:");
