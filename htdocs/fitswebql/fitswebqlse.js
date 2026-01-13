@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2026-01-13.0";
+    return "JS2026-01-13.1";
 }
 
 function uuidv4() {
@@ -1309,19 +1309,6 @@ function replot_y_axis() {
     }
 
     d3.select("#ylabel").text(yLabel + ' ' + fitsData.BTYPE.trim() + " " + bunit);
-}
-
-// Inverse Error Function
-function erfinv(x) {
-    // maximum relative error = .00013
-    const a = 0.147;
-
-    if (0 == x) { return 0 };
-
-    const b = 2 / (Math.PI * a) + Math.log(1 - x ** 2) / 2;
-    const sqrt1 = Math.sqrt(b ** 2 - Math.log(1 - x ** 2) / a);
-    const sqrt2 = Math.sqrt(sqrt1 - b);
-    return sqrt2 * Math.sign(x);
 }
 
 function pv_axes(left, top, width, height, vmin, vmax, pmin, pmax, pmean, pstd, x1, y1, x2, y2) {
@@ -4463,51 +4450,6 @@ function process_polarisation_image(index, pol_width, pol_height, pol_target, in
         mean: mean,
         std: std
     };*/
-}
-
-function process_polarisation_deprecated(index, pol_width, pol_height, intensity, angle, mask) {
-    console.log("process_polarisation pol_width:", pol_width, "pol_height:", pol_height);
-
-    // get the image rectangle
-    var rect_elem = d3.select("#image_rectangle");
-    var width = parseFloat(rect_elem.attr("width"));
-    var height = parseFloat(rect_elem.attr("height"));
-    var x = parseFloat(rect_elem.attr("x"));
-    var y = parseFloat(rect_elem.attr("y"));
-    console.log("rect. width:", width, "rect. height:", height, "image x:", x, "image y:", y);
-
-    var image_bounding_dims = imageContainer[index - 1].image_bounding_dims;
-    var scale = get_image_scale(width, height, image_bounding_dims.width, image_bounding_dims.height);
-    var img_width = Math.floor(scale * image_bounding_dims.width);
-    var img_height = Math.floor(scale * image_bounding_dims.height);
-    console.log("scaling by", scale, "new width:", img_width, "new height:", img_height, "orig. width:", image_bounding_dims.width, "orig. height:", image_bounding_dims.height);
-
-    // assume a certain vector field density, i.e. 100 vectors per direction
-    const target = 50;
-    const range_x = image_bounding_dims.width / target;
-    const range_y = image_bounding_dims.height / target;
-    const range = Math.max(1, Math.floor(Math.max(range_x, range_y)));
-    console.log("target field density:", target, "range:", range, "( range_x:", range_x, "range_y:", range_y, ")");
-
-    const resized = DownsizePolarisation(intensity, angle, mask, pol_width, pol_height, range, image_bounding_dims.x1, image_bounding_dims.y1, image_bounding_dims.x2, image_bounding_dims.y1 + (image_bounding_dims.height - 1));
-    console.log("resized:", resized);
-
-    const field = resized.field;
-    const mean = resized.mean;
-    const std = resized.std;
-
-    /*const xScale = d3.scaleLinear().domain([image_bounding_dims.x1, image_bounding_dims.x2]).range([x, x + width]);
-    const yScale = d3.scaleLinear().domain([image_bounding_dims.y1, image_bounding_dims.y1 + (image_bounding_dims.height - 1)]).range([y + height, y]);
-    const grid_spacing = 2 * range;
-    plot_polarisation(field, mean, std, xScale, yScale, grid_spacing, "PolarisationCanvas");*/
-
-    polarisation.field = field;
-    polarisation.xmin = image_bounding_dims.x1;
-    polarisation.xmax = image_bounding_dims.x2;
-    polarisation.ymin = image_bounding_dims.y1;
-    polarisation.ymax = image_bounding_dims.y1 + (image_bounding_dims.height - 1);
-    polarisation.mean = mean;
-    polarisation.std = std;
 }
 
 function validate_vector(vector, width, height, mask) {
@@ -13031,10 +12973,6 @@ function go_to_splatalogue() {
         alert('Please allow popups for this website');
     }
 };
-
-function getMousePos(e) {
-    return { x: e.clientX, y: e.clientY };
-}
 
 function get_zoomed_size(width, height, img_width, img_height) {
     var zoomed_size = Math.max(width / 2, height / 2) / golden_ratio;
@@ -21677,10 +21615,6 @@ function addStylesheetRules(rules) {
         // Insert CSS Rule
         styleSheet.insertRule(selector + '{' + propStr + '}', styleSheet.cssRules.length);
     }
-}
-
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 async function open_3d_view() {
