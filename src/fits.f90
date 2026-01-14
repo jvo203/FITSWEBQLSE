@@ -6150,7 +6150,7 @@ contains
    end subroutine make_histogram
 
    ! a recursive multi-pass histogram-based median
-   recursive function rec_hist_median(X, DMIN, DMAX, HIST, NPASS) result(median)
+   recursive function rec_hist_median(X, DMIN, DMAX, HIST, NPASS) result(med)
       implicit none
 
       real, dimension(:), intent(in), target :: X
@@ -6162,7 +6162,7 @@ contains
 
       ! statistics
       integer :: cumulative, previous_cumulative
-      real :: median, bin_start, bin_end, bin_width
+      real :: med, bin_start, bin_end, bin_width
 
       N = size(X)
 
@@ -6186,9 +6186,9 @@ contains
       bin_width = (DMAX - DMIN)/NBINS
 
       if (NPASS .eq. 1) then
-         median = bin_start + bin_width*(N/2 - previous_cumulative)/HIST(i)
+         med = bin_start + bin_width*(N/2 - previous_cumulative)/HIST(i)
       else
-         median = rec_hist_median(X, bin_start, bin_end, HIST, NPASS - 1)
+         med = rec_hist_median(X, bin_start, bin_end, HIST, NPASS - 1)
       end if
 
    end function rec_hist_median
