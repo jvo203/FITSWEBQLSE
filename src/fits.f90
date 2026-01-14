@@ -3312,6 +3312,11 @@ contains
                &median(pack(item%frame_median(:, k),.not. ieee_is_nan(item%frame_median(:, k)))) ! extract non-NaN values
             end do
 
+            print *, 'frame_min:', item%frame_min
+            print *, 'frame_max:', item%frame_max
+            print *, 'frame_median:', item%frame_median
+            print *, 'dmin:', item%dmin, 'dmax:', item%dmax, 'dmedian:', item%dmedian
+
             ! launch a pthread, passing the FORTRAN <item> dataset via a C pointer
             ! rc = c_pthread_create(thread=pid, &
             !   attr=c_null_ptr, &
