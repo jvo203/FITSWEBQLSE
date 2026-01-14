@@ -3312,10 +3312,10 @@ contains
                &median(pack(item%frame_median(:, k),.not. ieee_is_nan(item%frame_median(:, k)))) ! extract non-NaN values
             end do
 
-            print *, 'frame_min:', item%frame_min
-            print *, 'frame_max:', item%frame_max
-            print *, 'frame_median:', item%frame_median
-            print *, 'dmin:', item%dmin, 'dmax:', item%dmax, 'dmedian:', item%dmedian
+            !print *, 'frame_min:', item%frame_min
+            !print *, 'frame_max:', item%frame_max
+            !print *, 'frame_median:', item%frame_median
+            !print *, 'dmin:', item%dmin, 'dmax:', item%dmax, 'dmedian:', item%dmedian
 
             ! launch a pthread, passing the FORTRAN <item> dataset via a C pointer
             ! rc = c_pthread_create(thread=pid, &
@@ -5156,12 +5156,12 @@ contains
                      mean_spec_val = res(3)
                      int_spec_val = res(4)
 
-                     ! print *, 'frame', frame, 'plane', plane, 'min', frame_min, 'max', frame_max,&
-                     ! & 'mean_spec_val', mean_spec_val, 'int_spec_val', int_spec_val
+                     !print *, 'frame', frame, 'plane', plane, 'min', frame_min, 'max', !frame_max,&
+                     !& 'mean_spec_val', mean_spec_val, 'int_spec_val', int_spec_val
 
                      item%frame_min(frame, plane) = frame_min
                      item%frame_max(frame, plane) = frame_max
-                     ! item%frame_median(frame) = median(pack(thread_buffer, data_mask))
+                     ! item%frame_median(frame, plane) = median(pack(thread_buffer, data_mask))
                      item%frame_median(frame, plane) = hist_median(pack(thread_buffer, data_mask), frame_min, frame_max)
 
                      dmin(plane) = min(dmin(plane), frame_min)
@@ -6191,6 +6191,11 @@ contains
       bin_width = (DMAX - DMIN)/NBINS
 
       if (NPASS .eq. 1) then
+         !if (HIST(i) .eq. 0) then
+         !med = bin_start + 0.5*bin_width
+         !return
+         !end if
+
          med = bin_start + bin_width*(N/2 - previous_cumulative)/HIST(i)
       else
          med = rec_hist_median(X, bin_start, bin_end, HIST, NPASS - 1)
@@ -6199,7 +6204,7 @@ contains
    end function rec_hist_median
 
    ! histogram-based median estimation
-   function hist_median(X, DMIN, DMAX, PASSES) result(median)
+   function hist_median(X, DMIN, DMAX, PASSES) result(med)
       implicit none
 
       real, dimension(:), intent(in), target :: X
@@ -6209,7 +6214,7 @@ contains
 
       integer, allocatable :: hist(:)
       integer :: PCOUNT
-      real :: median
+      real :: med
 
       ! timing
       integer(8) :: start_t, finish_t, crate, cmax
@@ -6218,12 +6223,12 @@ contains
       N = size(X)
 
       if (N .lt. 1) then
-         median = ieee_value(0.0, ieee_quiet_nan)
+         med = ieee_value(0.0, ieee_quiet_nan)
          return
       end if
 
       if (N .eq. 1) then
-         median = X(1)
+         med = X(1)
          return
       end if
 
@@ -6236,13 +6241,18 @@ contains
       ! start the timer
       call system_clock(count=start_t, count_rate=crate, count_max=cmax)
 
-      median = rec_hist_median(X, DMIN, DMAX, hist, PCOUNT)
+      med = rec_hist_median(X, DMIN, DMAX, hist, PCOUNT)
+
+      ! check if the med value is finite, otherwise fall back to simple median
+      if (.not. ieee_is_finite(med)) then
+         med = median(X)
+      end if
 
       ! end the timer
       call system_clock(finish_t)
       elapsed = real(finish_t - start_t)/real(crate)
 
-      ! print *, 'histogram elapsed time:', 1000*elapsed, ' [ms]', '; median:', median
+      ! print *, 'histogram elapsed time:', 1000*elapsed, ' [ms]', '; median:', med
 
    end function hist_median
 
