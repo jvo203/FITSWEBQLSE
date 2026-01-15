@@ -5555,7 +5555,7 @@ void *forward_fitswebql_request(void *ptr)
         curl_easy_setopt(handles[i], CURLOPT_URL, url->str);
 
         // ignore the response body
-        curl_easy_setopt(handles[i], CURLOPT_NOBODY, 1);
+        curl_easy_setopt(handles[i], CURLOPT_NOBODY, 1L);
 
         // add the individual transfer
         curl_multi_add_handle(multi_handle, handles[i]);
