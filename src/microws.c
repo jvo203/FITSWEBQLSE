@@ -1800,9 +1800,10 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                 int bitrate = 1000;
                 bool keyframe = false;
                 int fill = 0;
+                int seq_id = -1;
                 double frame = 0.0;
                 double ref_freq = 0.0;
-                int seq_id = -1;
+                int plane = 1;
                 float timestamp = 0.0;
 
                 for (off = 0; (off = mjson_next(frame_data, (int)frame_len, off, &koff, &klen, &voff, &vlen, &vtype)) != 0;)
@@ -1838,6 +1839,10 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                     // 'frame'
                     if (strncmp(frame_data + koff, "\"frame\"", klen) == 0)
                         frame = atof2(frame_data + voff, vlen);
+
+                    // 'plane'
+                    if (strncmp(frame_data + koff, "\"plane\"", klen) == 0)
+                        plane = atoi2(frame_data + voff, vlen);
 
                     // 'ref_freq'
                     if (strncmp(frame_data + koff, "\"ref_freq\"", klen) == 0)
@@ -1937,6 +1942,7 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                     // RGB
                     req->ptr[req->va_count] = item;
                     req->frame[req->va_count] = frame_idx;
+                    req->plane[req->va_count] = plane;
                     req->dmin[req->va_count] = _session->dmin[0];
                     req->dmax[req->va_count] = _session->dmax[0];
                     req->dmedian[req->va_count] = _session->dmedian[0];

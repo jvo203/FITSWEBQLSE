@@ -10755,9 +10755,9 @@ contains
             tone%slope = tone%sensitivity
 
             ! ifort
-            print *, 'composite_video_request_simd [', item%datasetid, ']::frame:', req%frame(tid), &
-            & ' plane:', req%plane(tid), ' dmin:', tone%dmin, ' dmax:', tone%dmax, ' dmedian:', tone%dmedian, &
-            & ' black:', tone%black, ' white:', tone%white
+            ! print *, 'composite_video_request_simd [', item%datasetid, ']::frame:', req%frame(tid), &
+            ! & ' plane:', req%plane(tid), ' dmin:', tone%dmin, ' dmax:', tone%dmax, ' dmedian:', tone%dmedian, &
+            ! & ' black:', tone%black, ' white:', tone%white
 
             ! if a frame has not been found it needs to be fetched from the cluster
             if (.not. associated(item%compressed(req%frame(tid), req%plane(tid))%ptr)) then
