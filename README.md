@@ -1,5 +1,5 @@
 # FITSWEBQLSE STATUS: _*STABLE*_ (March 2024 ~)
-In **stable** operation and maintenance, receiving occasional bug fixes, tweaks and optimisations as well as new features.
+In **stable** operation and maintenance, receiving bug fixes, tweaks and optimisations as well as new features (for example _*Stokes IQUV polarisation*_ support for ALMA FITS cubes).
 
 # Breaking Through the 1TB Barrier
 
