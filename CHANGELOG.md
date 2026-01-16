@@ -1,3 +1,11 @@
+## [5.2.0] - 2026-01-??
+
+* added _*Stokes IQUV*_ polarisation support for ALMA FITS cubes
+* implemented non-linear (curved) RA/DEC gridlines as and where applicable (i.e. in the polar regions)
+* fixed Nobeyama 45M support for sparse FITS datasets with few _*non-NaN*_ pixels (in particular calculating the median value used for image tone mapping)
+
+---
+
 ## [5.1.17] - 2025-09-03
 
 * backported various minor bug fixes from the _*develop*_ branch
