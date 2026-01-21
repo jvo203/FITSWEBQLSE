@@ -5291,12 +5291,12 @@ contains
    end subroutine printerror
 
    ! extern void process_frame(void *item, int frame, int plane, float *data, float *pixels, bool *mask, int64_t npixels);
-   subroutine process_frame(ptr, frame, plane, data, cpixels, cmask, npixels) BIND(C, name='process_frame')
+   subroutine process_frame(ptr, frame, plane, data, cpixels, cmask, npixels, noplanes) BIND(C, name='process_frame')
       type(C_PTR), intent(in), value :: ptr
-      integer(kind=c_int), intent(in), value :: frame, plane
+      integer(kind=c_int), intent(in), value :: frame, plane, noplanes
       integer(kind=c_int64_t), intent(in), value :: npixels
       real(kind=c_float), intent(in), target :: data(npixels)
-      real(kind=c_float), intent(inout), target :: cpixels(npixels)
+      real(kind=c_float), intent(inout), target :: cpixels(npixels, noplanes)
       logical(kind=c_bool), intent(inout), target :: cmask(npixels)
 
       ! auxiliary arrays
@@ -5333,7 +5333,17 @@ contains
          max_planes = 1
       end if
 
-      print *, item%datasetid, "::process_frame:", frame, plane, npixels, max_planes
+      print *, item%datasetid, "::process_frame:", frame, plane, npixels, max_planes, noplanes
+
+      ! cross-check max_planes and noplanes
+      if (noplanes .ne. max_planes) then
+         print *, 'process_frame: noplanes mismatch:', noplanes, 'expected:', max_planes
+         call set_error_status(item, .true.)
+
+         ! unlock the loading mutex
+         rc = c_pthread_mutex_unlock(item%loading_mtx)
+         return
+      end if
 
       ! first process the frame irrespective whether or not it is 2D or 3D
 
@@ -5344,7 +5354,7 @@ contains
 
       res = (/frame_min, frame_max, 0.0, 0.0/)
 
-      call make_image_spectrumF32(c_loc(data), c_loc(cpixels), c_loc(cmask), &
+      call make_image_spectrumF32(c_loc(data), c_loc(cpixels(:, plane)), c_loc(cmask), &
       &c_loc(data_mask), item%ignrval, item%datamin, item%datamax, cdelt3, c_loc(res), npixels)
 
       frame_min = res(1)
