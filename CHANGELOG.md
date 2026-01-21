@@ -2,7 +2,7 @@
 
 * added _*Stokes IQUV*_ polarisation support for ALMA FITS cubes
 * implemented non-linear (curved) RA/DEC gridlines as and where applicable (i.e. in the polar regions)
-* fixed Nobeyama 45M support for sparse FITS datasets with few _*non-NaN*_ pixels (in particular calculating the median value used in image tone mapping)
+* fixed Nobeyama 45M support for sparse FITS datasets with few _*non-NaN*_ pixels (calculating image statistics)
 * updated the _*microtar*_ C library with the patch supporting bigger than 4GB tar archives
 
 ---
