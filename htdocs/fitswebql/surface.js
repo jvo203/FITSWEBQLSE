@@ -44,16 +44,18 @@ function meshFunction(x, y, p0) {
         z = mean_pixel - 127;
     }
     else {
-        imageFrame = imageContainer[va_count - 1];
+        let index = previous_plane;
+
+        imageFrame = imageContainer[index - 1];
         image_bounding_dims = imageFrame.image_bounding_dims;
 
         let tone_mapping = imageFrame.tone_mapping;
         let black = tone_mapping.black;
         let white = tone_mapping.white;
         let median = tone_mapping.median;
-        let noise_sensitivity = document.getElementById('sensitivity' + va_count).value;
+        let noise_sensitivity = document.getElementById('sensitivity' + index).value;
         let multiplier = get_noise_sensitivity(noise_sensitivity);
-        let flux = document.getElementById('flux' + va_count).value;
+        let flux = document.getElementById('flux' + index).value;
 
         let xcoord = Math.round(image_bounding_dims.x1 + (1 - x) * (image_bounding_dims.width - 1));
         let ycoord = Math.round(image_bounding_dims.y1 + (1 - y) * (image_bounding_dims.height - 1));
@@ -61,7 +63,7 @@ function meshFunction(x, y, p0) {
         let pixel = ycoord * imageFrame.width + xcoord;
         let raw = imageFrame.pixels[pixel];
         // <raw> needs to be transformed into a pixel range in [0, 255] via the tone mapping function
-        pixel = get_tone_mapping(raw, flux, black, white, median, multiplier, va_count);
+        pixel = get_tone_mapping(raw, flux, black, white, median, multiplier, index);
         z = pixel - 127;
         //console.log(xcoord, ycoord, "raw:", raw, "pixel:", pixel, "z:", z);
     }
@@ -97,16 +99,18 @@ function colourFunction(x, y) {
             rgb[index - 1] = Math.round(get_tone_mapping(raw, flux, black, white, median, multiplier, index));
         }
     } else {
-        imageFrame = imageContainer[va_count - 1];
+        let index = previous_plane;
+
+        imageFrame = imageContainer[index - 1];
         image_bounding_dims = imageFrame.image_bounding_dims;
 
         let tone_mapping = imageFrame.tone_mapping;
         let black = tone_mapping.black;
         let white = tone_mapping.white;
         let median = tone_mapping.median;
-        let noise_sensitivity = document.getElementById('sensitivity' + va_count).value;
+        let noise_sensitivity = document.getElementById('sensitivity' + index).value;
         let multiplier = get_noise_sensitivity(noise_sensitivity);
-        let flux = document.getElementById('flux' + va_count).value;
+        let flux = document.getElementById('flux' + index).value;
 
         let aspect = image_bounding_dims.height / image_bounding_dims.width;
         let xcoord = Math.round(image_bounding_dims.x1 + ((1 - x) - 0.5) * (image_bounding_dims.width - 1));
@@ -114,7 +118,7 @@ function colourFunction(x, y) {
         let pixel = ycoord * imageFrame.width + xcoord;
 
         let raw = imageFrame.pixels[pixel];
-        pixel = Math.round(get_tone_mapping(raw, flux, black, white, median, multiplier, va_count));
+        pixel = Math.round(get_tone_mapping(raw, flux, black, white, median, multiplier, index));
         rgb = [pixel, pixel, pixel];
     }
 
