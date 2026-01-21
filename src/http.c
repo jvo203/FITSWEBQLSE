@@ -845,7 +845,7 @@ bool scan_fits_header(struct FITSDownloadStream *stream)
 
 void scan_fits_data(struct FITSDownloadStream *stream)
 {
-    if (stream->frame == stream->naxes[2] * stream->naxes[3])
+    if (((stream->frame % stream->naxes[2]) == 0) && (stream->plane > stream->naxes[3]))
     {
         printf("[C] scan_fits_data:\tend of the stream.\n");
         return; // there is no more work to do
@@ -927,6 +927,14 @@ void scan_fits_data(struct FITSDownloadStream *stream)
 
         if (item != NULL)
             process_frame(item, stream->frame, stream->plane, stream->data, stream->pixels, stream->mask, (int64_t)stream->pixels_per_frame);
+
+        // check if we need to advance to the next plane
+        if ((stream->naxes[3] > 1) && ((stream->frame % stream->naxes[2]) == 0))
+        {
+            stream->frame = 0;
+            stream->plane++;
+            printf("[C] scan_fits_data:\tadvancing to plane %d.\n", stream->plane);
+        }
 
         // reset the frame data
         for (size_t i = 0; i < stream->pixels_per_frame; i++)

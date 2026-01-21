@@ -5401,7 +5401,7 @@ contains
       end if
 
       ! check if it's the last frame
-      if (frame .eq. item%naxes(3)) then
+      if (frame .eq. item%naxes(3) .and. plane .eq. max_planes) then
          item%pixels = reshape(cpixels, (/item%naxes(1), item%naxes(2), max_planes/))
          item%mask = reshape(cmask, item%naxes(1:2))
 
