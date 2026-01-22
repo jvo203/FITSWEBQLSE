@@ -18398,9 +18398,19 @@ function load_region() {
     console.log("loading a ds9 region file");
 
     // a user-selected ds9 region file
-    const file = document.querySelector("#regionFile").files[0];
+    var file = document.querySelector("#regionFile").files[0];
+    console.log("load region file:", file);
+
+    // check if the regionFile variable is not null
+    if (!file) {
+        console.log("No file selected, trying regionFileAlt.", regionFile);
+        file = regionFile;
+    }
 
     if (!file) return;
+
+    // copy the file to the global variable regionFile
+    regionFile = file;
 
     // file name
     let file_name = file.name;
