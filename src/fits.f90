@@ -2497,7 +2497,6 @@ contains
 
       ! check for a mismatch in the magic number
       if (magic .ne. MAGIC_NUMBER) then
-         ! if (.true.) then ! ignore the magic number for the time being, remove any existing cache (on-going work on polarisation)
          print *, 'error: magic number mismatch in ', trim(file), ', invalidating cache'
 
          ! delete the file
