@@ -10878,6 +10878,14 @@ function display_preferences(index) {
         })
         .html(htmlStr);
 
+
+    if (realtime_video) {
+        d3.select('#video_fps_control_li').style("display", "block");
+    }
+    else {
+        d3.select('#video_fps_control_li').style("display", "none");
+    }
+
     //----------------------------------------
     var tmpA;
 
@@ -10900,12 +10908,26 @@ function display_preferences(index) {
 
     document.getElementById('image_quality').value = image_quality;
 
-    if (realtime_video) {
-        d3.select('#video_fps_control_li').style("display", "block");
-    }
-    else {
-        d3.select('#video_fps_control_li').style("display", "none");
-    }
+    //----------------------------------------
+    // ds9 marker size: small, medium, large
+    tmpA = prefDropdown.append("li")
+        .attr("id", "marker_size_li")
+        //.style("background-color", "#FFF")
+        .append("a")
+        .style("class", "form-group")
+        .attr("class", "form-horizontal");
+
+    tmpA.append("label")
+        .attr("for", "marker_size")
+        .attr("class", "control-label")
+        .html("ds9 marker size:&nbsp; ");
+
+    tmpA.append("select")
+        .attr("id", "marker_size")
+        .attr("onchange", "javascript:change_marker_size();")
+        .html("<option>small</option><option>medium</option><option>large</option>");
+
+    document.getElementById('marker_size').value = marker_size;
 
     //----------------------------------------
     tmpA = prefDropdown.append("li")
@@ -18686,6 +18708,13 @@ function show_fits_header() {
             $("#fitsHeader").modal("hide");
         }
     }
+}
+
+function change_marker_size() {
+    marker_size = document.getElementById('marker_size').value;
+    localStorage.setItem("marker_size", marker_size);
+
+    // TO-DO: refresh the ds9 markers
 }
 
 function change_image_quality() {
