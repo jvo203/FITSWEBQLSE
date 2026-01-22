@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2026-01-21.0";
+    return "JS2026-01-22.0";
 }
 
 function uuidv4() {
@@ -21834,6 +21834,14 @@ async function mainRenderer() {
     composite_view = (parseInt(votable.getAttribute('data-composite')) == 1) ? true : false;
     // composite_view = false; // an override during development
     console.log("composite view:", composite_view);
+
+    // ds9 marker size
+    if (localStorage.getItem("marker_size") === null) {
+        marker_size = "small";
+        localStorage.setItem("marker_size", marker_size);
+    }
+    else
+        marker_size = localStorage.getItem("marker_size");
 
     optical_view = false;
     spectrum_view = false;
