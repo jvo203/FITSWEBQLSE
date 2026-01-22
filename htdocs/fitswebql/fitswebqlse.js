@@ -18644,12 +18644,25 @@ function display_points(points) {
         let my = parseFloat(rect.attr("y")) - (y - image_bounding_dims.y1 - image_bounding_dims.height + 1) / ay;
         console.log("orig_x:", orig_x, "orig_y:", orig_y, "mx:", mx, "my:", my);
 
+        // chech if any values are NaN
+        if (isNaN(mx) || isNaN(my))
+            continue;
+
+        // by default the marker length is emFontSize / 2 ("small")
+        let marker_len = emFontSize / 2;
+
+        // adjust the marker size based on the user selection
+        if (marker_size == "medium")
+            marker_len *= 2.0;
+        else if (marker_size == "large")
+            marker_len *= 4.0;
+
         // place a circle at the mouse coordinates
         if (shape == "circle") {
             group.append("circle")
                 .attr("cx", mx)
                 .attr("cy", my)
-                .attr("r", emFontSize / 4)
+                .attr("r", marker_len / 2)
                 .attr("fill", "none")
                 .attr("stroke", "red")
                 .attr("stroke-width", 2)
@@ -18660,20 +18673,20 @@ function display_points(points) {
         // make an 'X' mark with the centre at mx, my
         if (shape == "point") {
             group.append("line")
-                .attr("x1", mx - emFontSize / 4)
-                .attr("y1", my - emFontSize / 4)
-                .attr("x2", mx + emFontSize / 4)
-                .attr("y2", my + emFontSize / 4)
+                .attr("x1", mx - marker_len / 2)
+                .attr("y1", my - marker_len / 2)
+                .attr("x2", mx + marker_len / 2)
+                .attr("y2", my + marker_len / 2)
                 .attr("stroke", "red")
                 .attr("stroke-width", 2)
                 .attr("opacity", 0.5)
                 .attr("pointer-events", "none");
 
             group.append("line")
-                .attr("x1", mx - emFontSize / 4)
-                .attr("y1", my + emFontSize / 4)
-                .attr("x2", mx + emFontSize / 4)
-                .attr("y2", my - emFontSize / 4)
+                .attr("x1", mx - marker_len / 2)
+                .attr("y1", my + marker_len / 2)
+                .attr("x2", mx + marker_len / 2)
+                .attr("y2", my - marker_len / 2)
                 .attr("stroke", "red")
                 .attr("stroke-width", 2)
                 .attr("opacity", 0.5)
@@ -18714,7 +18727,8 @@ function change_marker_size() {
     marker_size = document.getElementById('marker_size').value;
     localStorage.setItem("marker_size", marker_size);
 
-    // TO-DO: refresh the ds9 markers
+    // refresh the ds9 markers
+    load_region();
 }
 
 function change_image_quality() {
@@ -21866,7 +21880,7 @@ async function mainRenderer() {
 
     // ds9 marker size
     if (localStorage.getItem("marker_size") === null) {
-        marker_size = "small";
+        marker_size = "medium";
         localStorage.setItem("marker_size", marker_size);
     }
     else
