@@ -572,7 +572,7 @@ static enum MHD_Result get_wcs(struct MHD_Connection *connection, double ra, dou
     // free(from_upper);
     // free(to_upper);
 
-    // source ra, dec in radians
+    // source ra, dec in degrees, convert to radians
     ra1 = ra * AST__DD2R;
     dec1 = dec * AST__DD2R;
 
