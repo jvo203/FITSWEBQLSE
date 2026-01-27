@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2026-01-27.2";
+    return "JS2026-01-27.3";
 }
 
 function uuidv4() {
@@ -20024,16 +20024,19 @@ function setup_help() {
         .html("Open the menu item <i>FITS/import ds9 region</i> and select a region file to import (extension <i>.reg</i>)");
 
     bodyDiv.append("p")
-        .html("A small subset of the DS9 region format is supported to display markers (<i>point</i> or <i>circle</i>) at specified physical or world coordinates (<i>physical</i>, <i>image</i>, <i>fk5</i> or <i>icrs</i>)");
+        .html("Only a small subset of the DS9 region format is supported to display markers (<i>point</i> or <i>circle</i>) at specified physical or world coordinates (only <i>physical</i>, <i>image</i>, <i>fk5</i> and <i>icrs</i> are supported).");
+
+    bodyDiv.append("p")
+        .html("Lines starting with <i>&#35;</i> are treated as comments and ignored.");
 
     bodyDiv.append("p")
         .html("The coordinate system type as well as potentially multiple marker coordinates should be specified <i>one-per-line</i>, i.e.:");
 
     bodyDiv.append("p")
-        .html('<code><div># Region file format: DS9 version 4.1</div><div>global color = green dashlist = 8 3 width = 1 font = "helvetica 10 normal roman" select = 1 highlite = 1 dash = 0 fixed = 0 edit = 1 move = 1 delete=1 include = 1 source = 1</div><div>fk5</div><div>point(248.0952974, -24.4768743) # point = x</div></code>');
+        .html('<code><div># Region file format: DS9 version 4.1</div><div>fk5</div><div>point(248.0952974, -24.4768743) # point = x</div></code>');
 
     bodyDiv.append("p")
-        .html("The JavaScript code splits the file by lines and extracts the coordinates <code>x,y</code> (in degrees) from <code>circle(x,y,r)</code> or <code>point(x,y)</code> entries. The <code>r</code> value will not be used.");
+        .html("The JavaScript code splits the file by lines and extracts the coordinates <code>x,y</code> (in <i>degrees</i>) from <code>circle(x,y,r)</code> or <code>point(x,y)</code> entries. The <code>r</code> value will not be used.");
 
     bodyDiv.append("p")
         .html("File format details: <a class=\"links\" href=\"https://ds9.si.edu/doc/ref/region.html\" target=\"_blank\" style=\"target-new: tab;\"><u>https://ds9.si.edu/doc/ref/region.html</u></a>");
