@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2026-01-26.0";
+    return "JS2026-01-27.1";
 }
 
 function uuidv4() {
@@ -18442,8 +18442,8 @@ function load_region() {
         let region = e.target.result;
         console.log(region);
 
-        // split region into lines
-        let lines = region.split(/\r?\n/);
+        // split region into lowercase lines
+        let lines = region.toLowerCase().split(/\r?\n/);
 
         var coordinate_system = "unknown";
         var points = [];
@@ -20033,7 +20033,7 @@ function setup_help() {
         .html('<code><div># Region file format: DS9 version 4.1</div><div>global color = green dashlist = 8 3 width = 1 font = "helvetica 10 normal roman" select = 1 highlite = 1 dash = 0 fixed = 0 edit = 1 move = 1 delete=1 include = 1 source = 1</div><div>fk5</div><div>point(248.0952974, -24.4768743) # point = x</div></code>');
 
     bodyDiv.append("p")
-        .html("The JavaScript code splits the file by lines and extracts the coordinates x,y from <code>circle(x,y,r)</code> or <code>point(x,y)</code> entries");
+        .html("The JavaScript code splits the file by lines and extracts the coordinates <code>x,y</code> from <code>circle(x,y,r)</code> or <code>point(x,y)</code> entries");
 
     bodyDiv.append("p")
         .html("File format details: <a class=\"links\" href=\"https://ds9.si.edu/doc/ref/region.html\" target=\"_blank\" style=\"target-new: tab;\"><u>https://ds9.si.edu/doc/ref/region.html</u></a>");
