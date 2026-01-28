@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2026-01-27.3";
+    return "JS2026-01-28.0";
 }
 
 function uuidv4() {
@@ -20024,7 +20024,7 @@ function setup_help() {
         .html("Open the menu item <i>FITS/import ds9 region</i> and select a region file to import (extension <i>.reg</i>)");
 
     bodyDiv.append("p")
-        .html("Only a small subset of the DS9 region format is supported to display markers (<i>point</i> or <i>circle</i>) at specified physical or world coordinates (only <i>physical</i>, <i>image</i>, <i>fk5</i> and <i>icrs</i> are supported).");
+        .html("Only a small subset of the DS9 region format is supported to display markers (<i>point</i><code>x</code> or <i>circle</i><code>o</code>) at specified physical or world coordinates (only <i>physical</i>, <i>image</i>, <i>fk5</i> and <i>icrs</i> are supported).");
 
     bodyDiv.append("p")
         .html("Lines starting with <i>&#35;</i> are treated as comments and ignored.");
