@@ -6,7 +6,6 @@ band = "band6"
 name = "concat.ms.cal.mfs.impbcor"
 
 Stokes = ["I", "Q", "U", "V"]
-#Stokes = ["I", "Q", "U", "I"] # for testing
 
 function read_data(filename)
     f = FITS(filename)
@@ -35,7 +34,7 @@ println(size(planes))
 println(planes[1][1:10])
 
 # create a 4D cube from the planes
-cube = cat(planes..., dims=4)
+cube = cat(planes..., dims = 4)
 println("cube:", size(cube))
 println(cube[1:10])
 
@@ -49,5 +48,5 @@ header["NAXIS4"] = size(cube, 4)
 # write the modified header with new data to a new FITS file
 filename = basedir * "/" * target * "." * band * "." * name * ".StokesIQU.fits"
 FITS(filename, "w") do f
-    write(f, cube; header=header)
+    write(f, cube; header = header)
 end
