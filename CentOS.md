@@ -56,6 +56,8 @@ gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.
     make -j16
     sudo make install
 
+    ( debug: cmake -DCMAKE_BUILD_TYPE=Debug ../source )
+
 # 5. libmicrohttpd
 
     ('--enable-experimental' is needed for websocket support, define MICROWS in the Makefile)
