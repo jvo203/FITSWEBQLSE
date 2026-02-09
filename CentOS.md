@@ -58,6 +58,9 @@ gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.
 
     ( debug: cmake -DCMAKE_BUILD_TYPE=Debug ../source )
 
+    a patch needs to be applied that fixes memory access violations:
+    https://bitbucket.org/multicoreware/x265_git/issues/1023/invalid-memory-access-when-encoding
+
 # 5. libmicrohttpd
 
     ('--enable-experimental' is needed for websocket support, define MICROWS in the Makefile)
