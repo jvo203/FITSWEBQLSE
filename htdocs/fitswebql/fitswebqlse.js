@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2026-01-28.0";
+    return "JS2026-02-18.0";
 }
 
 function uuidv4() {
@@ -9802,7 +9802,13 @@ function change_binning() {
     }
     catch (e) { };
 
-    let fitsData = fitsContainer[va_count - 1];
+    try {
+        var index = parseInt(document.getElementById('intensity_plane').value);
+    } catch (e) {
+        var index = va_count;
+    }
+
+    let fitsData = fitsContainer[index - 1];
 
     if (fitsData != null) {
         if (fitsData.depth > 1) {
@@ -21965,6 +21971,7 @@ async function mainRenderer() {
 
         //spectrum
         binning = 1;
+        hanning = 0; // in percent of the width of the spectrum; 0 means no Hanning smoothing
 
         //video
         if (video_fps_control == 'auto')
