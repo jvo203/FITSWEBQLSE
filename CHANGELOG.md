@@ -1,3 +1,7 @@
+## [5.2.1] - 2026-03-??
+
+* recompiled / reduced the WebAssembly size (_*-lto*_)
+
 ## [5.2.0] - 2026-01-30
 
 * added _*Stokes IQUV*_ polarisation support for ALMA FITS cubes
