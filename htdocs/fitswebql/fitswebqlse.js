@@ -10936,25 +10936,48 @@ function display_preferences(index) {
     document.getElementById('marker_size').value = marker_size;
 
     //----------------------------------------
-    tmpA = prefDropdown.append("li")
-        .attr("id", "binning_li")
-        //.style("background-color", "#FFF")
-        .append("a")
-        .style("class", "form-group")
-        .attr("class", "form-horizontal");
+    if (fitsData.depth > 1) {
+        tmpA = prefDropdown.append("li")
+            .attr("id", "binning_li")
+            //.style("background-color", "#FFF")
+            .append("a")
+            .style("class", "form-group")
+            .attr("class", "form-horizontal");
 
-    tmpA.append("label")
-        .attr("for", "binning")
-        .attr("class", "control-label")
-        .html("spectrum binning:&nbsp; ");
+        tmpA.append("label")
+            .attr("for", "binning")
+            .attr("class", "control-label")
+            .html("spectrum binning:&nbsp; ");
 
-    tmpA.append("select")
-        .attr("id", "binning")
-        .attr("onchange", "javascript:change_binning();")
-        .html("<option value='1'>1:1</option><option value='2'>1:2</option><option value='4'>1:4</option><option value='8'>1:8</option><option value='16'>1:16</option>");
+        tmpA.append("select")
+            .attr("id", "binning")
+            .attr("onchange", "javascript:change_binning();")
+            .html("<option value='1'>1:1 (none)</option><option value='2'>1:2</option><option value='4'>1:4</option><option value='8'>1:8</option><option value='16'>1:16</option>");
 
-    document.getElementById('binning').value = binning.toString();
+        document.getElementById('binning').value = binning.toString();
+    }
 
+    //----------------------------------------
+    if (fitsData.depth > 1) {
+        tmpA = prefDropdown.append("li")
+            .attr("id", "hanning_li")
+            //.style("background-color", "#FFF")
+            .append("a")
+            .style("class", "form-group")
+            .attr("class", "form-horizontal");
+
+        tmpA.append("label")
+            .attr("for", "hanning")
+            .attr("class", "control-label")
+            .html("spec. smoothing width:&nbsp; ");
+
+        tmpA.append("select")
+            .attr("id", "hanning")
+            .attr("onchange", "javascript:change_smoothing_width();")
+            .html("<option value='0'>0% (none)</option><option value='1'>1%</option><option value='2'>2%</option><option value='5'>5%</option><option value='10'>10%</option>");
+
+        document.getElementById('hanning').value = hanning.toString();
+    }
 
     //----------------------------------------
     tmpA = prefDropdown.append("li")
