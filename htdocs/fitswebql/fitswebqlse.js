@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2026-02-18.0";
+    return "JS2026-02-19.0";
 }
 
 function uuidv4() {
@@ -9799,6 +9799,48 @@ function enable_autoscale() {
 function change_binning() {
     try {
         binning = parseInt(document.getElementById('binning').value);
+    }
+    catch (e) { };
+
+    try {
+        var index = parseInt(document.getElementById('intensity_plane').value);
+    } catch (e) {
+        var index = va_count;
+    }
+
+    let fitsData = fitsContainer[index - 1];
+
+    if (fitsData != null) {
+        if (fitsData.depth > 1) {
+            if (va_count == 1) {
+                if (intensity_mode == "mean") {
+                    plot_spectrum([fitsData.mean_spectrum]);
+                    replot_y_axis();
+                }
+
+                if (intensity_mode == "integrated") {
+                    plot_spectrum([fitsData.integrated_spectrum]);
+                    replot_y_axis();
+                }
+            }
+            else {
+                if (intensity_mode == "mean") {
+                    plot_spectrum(mean_spectrumContainer);
+                    replot_y_axis();
+                }
+
+                if (intensity_mode == "integrated") {
+                    plot_spectrum(integrated_spectrumContainer);
+                    replot_y_axis();
+                }
+            }
+        }
+    }
+}
+
+function change_smoothing_width() {
+    try {
+        hanning = parseInt(document.getElementById('hanning').value);
     }
     catch (e) { };
 
