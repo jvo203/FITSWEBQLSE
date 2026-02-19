@@ -1,10 +1,11 @@
 ## [5.2.1] - 2026-03-??
 
+* **new**: spectrum smoothing with a _*Hann*_ window (see a menu setting _*Preferences*_ / _*spec. smoothing width*_)
 * recompiled / reduced the WebAssembly size by 3% (_*-lto*_)
 
 ## [5.2.0] - 2026-01-30
 
-* added _*Stokes IQUV*_ polarisation support for ALMA FITS cubes
+*  **new**: _*Stokes IQUV*_ polarisation support for ALMA FITS cubes
 * implemented non-linear (curved) RA/DEC gridlines as and where applicable (i.e. in the polar regions)
 * fixed Nobeyama 45M support for sparse FITS datasets with few _*non-NaN*_ pixels (calculating image statistics)
 * updated the _*microtar*_ C library with the patch supporting bigger than 4GB tar archives

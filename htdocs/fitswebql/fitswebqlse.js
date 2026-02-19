@@ -554,7 +554,7 @@ function get_frame_bounds(lo, hi, index) {
         return get_velocity_bounds(lo, hi, fitsData);
 }
 
-function Hanning_coefficient(i, width) {
+function Hann_window(i, width) {
     return 0.5 * (1 - Math.cos(2 * Math.PI * i / (width - 1)));
 }
 
@@ -564,9 +564,8 @@ function spectrum_smoothing(data, factor) {
 
     var len = data.length;
 
-    // factor is the percent of the data length to use for smoothing
-    var width = Math.floor(len * factor);
-    console.log("Hanning smoothing width:", width, "data length:", len);
+    // factor is the percent of the data length to use for smoothing (an integer between 0 and 100)
+    var width = Math.floor(len * factor / 100);
 
     if (width <= 1)
         return data;
@@ -574,9 +573,21 @@ function spectrum_smoothing(data, factor) {
     // pre-compute the Hanning weights
     var weights = new Array(width);
     for (var i = 0; i < width; i++) {
-        weights[i] = Hanning_coefficient(i, width);
+        weights[i] = Hann_window(i, width);
     }
-    console.log("Hanning weights:", weights);
+
+    return data.map((value, index) => {
+        var sum = 0.0;
+        var weight_sum = 0.0;
+        for (var i = 0; i < width; i++) {
+            var idx = index - Math.floor(width / 2) + i;
+            if (idx >= 0 && idx < len) {
+                sum += data[idx] * weights[i];
+                weight_sum += weights[i];
+            }
+        }
+        return sum / weight_sum;
+    });
 }
 
 function spectrum_binning(data, factor) {
