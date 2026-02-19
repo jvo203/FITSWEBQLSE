@@ -554,6 +554,31 @@ function get_frame_bounds(lo, hi, index) {
         return get_velocity_bounds(lo, hi, fitsData);
 }
 
+function Hanning_coefficient(i, width) {
+    return 0.5 * (1 - Math.cos(2 * Math.PI * i / (width - 1)));
+}
+
+function spectrum_smoothing(data, factor) {
+    if (factor <= 0)
+        return data;
+
+    var len = data.length;
+
+    // factor is the percent of the data length to use for smoothing
+    var width = Math.floor(len * factor);
+    console.log("Hanning smoothing width:", width, "data length:", len);
+
+    if (width <= 1)
+        return data;
+
+    // pre-compute the Hanning weights
+    var weights = new Array(width);
+    for (var i = 0; i < width; i++) {
+        weights[i] = Hanning_coefficient(i, width);
+    }
+    console.log("Hanning weights:", weights);
+}
+
 function spectrum_binning(data, factor) {
     if (factor <= 1)
         return data;
@@ -1124,6 +1149,9 @@ function plot_spectrum(dataArray) {
         let scale = spectrum_scale[index];
 
         data = largestTriangleThreeBuckets(data, dx / 2);
+
+        // smoothing
+        data = spectrum_smoothing(data, hanning);
 
         // binning
         data = spectrum_binning(data, binning);
