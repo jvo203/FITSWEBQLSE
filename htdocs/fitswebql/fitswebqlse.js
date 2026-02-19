@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2026-02-19.1";
+    return "JS2026-02-19.2";
 }
 
 function uuidv4() {
@@ -11055,7 +11055,7 @@ function display_preferences(index) {
         tmpA.append("select")
             .attr("id", "hanning")
             .attr("onchange", "javascript:change_smoothing_width();")
-            .html("<option value='0'>0% (none)</option><option value='1'>1%</option><option value='2'>2%</option><option value='5'>5%</option><option value='10'>10%</option>");
+            .html("<option value='0'>none</option><option value='1'>1%</option><option value='2'>2%</option><option value='5'>5%</option><option value='10'>10%</option>");
 
         document.getElementById('hanning').value = hanning.toString();
     }
