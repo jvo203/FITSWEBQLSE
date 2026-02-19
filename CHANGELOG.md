@@ -1,6 +1,6 @@
 ## [5.2.1] - 2026-03-??
 
-* recompiled / reduced the WebAssembly size (_*-lto*_)
+* recompiled / reduced the WebAssembly size by 3% (_*-lto*_)
 
 ## [5.2.0] - 2026-01-30
 
