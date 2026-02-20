@@ -1007,6 +1007,7 @@ buffer hanning_smoothing(int length, uintptr_t src_ptr, int width)
 
     // pre-compute the Hanning weights
     float *window = (float *)malloc(width * sizeof(float));
+
     if (window == NULL)
     {
         printf("[hanning_smoothing] failed to allocate memory for Hanning window.\n");
