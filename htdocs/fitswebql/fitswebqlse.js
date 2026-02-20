@@ -585,15 +585,11 @@ function spectrum_smoothing(data, factor) {
         const bytes = n * 4;
 
         // 入力バッファをWASMヒープに確保
-        const inPtr = (typeof WASM.malloc === "function") ? WASM.malloc(bytes) : WASM._malloc(bytes);
+        const inPtr = WASM._malloc(bytes);
         WASM.HEAPF32.set(src, inPtr >> 2);
 
         // C++: buffer hanning_smoothing(int length, const float *src, int width)
         const res = WASM.hanning_smoothing(n, inPtr, width);
-
-        // 入力のみ解放（出力はC++側の管理バッファ）
-        if (typeof WASM.free === "function") WASM.free(inPtr);
-        else WASM._free(inPtr);
 
         // embind value_array<buffer> の取り方に両対応
         const outPtr = (res.ptr !== undefined) ? res.ptr : res[0];
@@ -601,6 +597,9 @@ function spectrum_smoothing(data, factor) {
 
         // 出力をコピーしてJS側へ
         const out = WASM.HEAPF32.slice(outPtr >> 2, (outPtr >> 2) + outLen);
+
+        // 入力のみ解放（出力はC++側の管理バッファ）
+        WASM._free(inPtr);
 
         return out;
     } catch (e) {

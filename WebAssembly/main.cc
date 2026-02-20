@@ -970,7 +970,7 @@ void Hann_window(int length, float *window)
         window[i] = 0.5f * (1.0f - cosf(2.0f * M_PI * i / (length - 1)));
 }
 
-buffer hanning_smoothing(int length, const float *src, int width)
+buffer hanning_smoothing(int length, uintptr_t src_ptr, int width)
 {
     buffer wasmBuffer = {0, 0};
 
@@ -1002,6 +1002,8 @@ buffer hanning_smoothing(int length, const float *src, int width)
         // return val(typed_memory_view(spectrumLength, spectrumBuffer));
         return wasmBuffer;
     }
+
+    const float *src = (float *)src_ptr;
 
     // pre-compute the Hanning weights
     float *window = (float *)malloc(width * sizeof(float));
@@ -1070,7 +1072,7 @@ EMSCRIPTEN_BINDINGS(Wrapper)
     function("decompressCompositePVdiagram", &decompressCompositePVdiagram);
     function("decompressLZ4", &decompressLZ4);
     function("decompressLZ4mask", &decompressLZ4mask);
-    function("hanning_smoothing", &hanning_smoothing, allow_raw_pointers());
+    function("hanning_smoothing", &hanning_smoothing);
     function("hevc_init_frame", &hevc_init_frame);
     function("hevc_destroy_frame", &hevc_destroy_frame);
     function("hevc_decode_frame", &hevc_decode_frame);
