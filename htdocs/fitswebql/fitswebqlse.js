@@ -577,7 +577,7 @@ function spectrum_smoothing(data, factor) {
     if (width < 3)
         return data;
 
-    // call WASM buffer hanning_smoothing(int length, const float *src, int width)
+    // call WASM buffer hanning_smoothing(int length, uintptr_t src_ptr, int width)
     try {
         // JS Array -> Float32Array
         const src = (data instanceof Float32Array) ? data : Float32Array.from(data);
@@ -588,7 +588,7 @@ function spectrum_smoothing(data, factor) {
         const inPtr = WASM._malloc(bytes);
         WASM.HEAPF32.set(src, inPtr >> 2);
 
-        // C++: buffer hanning_smoothing(int length, const float *src, int width)
+        // C++: buffer hanning_smoothing(int length, uintptr_t src_ptr, int width)
         const res = WASM.hanning_smoothing(n, inPtr, width);
 
         // embind value_array<buffer> の取り方に両対応
