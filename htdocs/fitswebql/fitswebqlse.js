@@ -570,7 +570,7 @@ function spectrum_smoothing(data, factor) {
     if (width < 3)
         return data;
 
-    // TO-DO: call WASM buffer hanning_smoothing(int length, float *src, int width)
+    // TO-DO: call WASM buffer hanning_smoothing(int length, const float *src, int width)
 
     // pre-compute the Hanning weights
     var weights = new Array(width);

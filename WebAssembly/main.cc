@@ -970,7 +970,7 @@ void Hann_window(int length, float *window)
         window[i] = 0.5f * (1.0f - cosf(2.0f * M_PI * i / (length - 1)));
 }
 
-buffer hanning_smoothing(int length, float *src, int width)
+buffer hanning_smoothing(int length, const float *src, int width)
 {
     buffer wasmBuffer = {0, 0};
 
