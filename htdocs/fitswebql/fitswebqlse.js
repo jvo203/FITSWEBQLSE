@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2026-02-19.2";
+    return "JS2026-02-20.0";
 }
 
 function uuidv4() {
@@ -567,8 +567,10 @@ function spectrum_smoothing(data, factor) {
     // factor is the percent of the data length to use for smoothing (an integer between 0 and 100)
     var width = Math.floor(len * factor / 100);
 
-    if (width <= 1)
+    if (width < 3)
         return data;
+
+    // TO-DO: call WASM buffer hanning_smoothing(int length, float *src, int width)
 
     // pre-compute the Hanning weights
     var weights = new Array(width);

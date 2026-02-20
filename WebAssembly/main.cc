@@ -963,6 +963,88 @@ val sky2pix(int index, double ra, double dec)
     return val(typed_memory_view(coordsLength, coords));
 }
 
+// Hanning smoothing function coefficients
+void Hann_window(int length, float *window)
+{
+    for (int i = 0; i < length; i++)
+        window[i] = 0.5f * (1.0f - cosf(2.0f * M_PI * i / (length - 1)));
+}
+
+buffer hanning_smoothing(int length, float *src, int width)
+{
+    buffer wasmBuffer = {0, 0};
+
+    size_t spectrum_size = size_t(length);
+
+    if (width < 3 || width > length || length <= 0)
+    {
+        printf("[hanning_smoothing] width: %d is not supported. Only width >= 3 is supported.\n", width);
+        return wasmBuffer;
+    }
+
+    if (spectrumBuffer != NULL && spectrumLength != spectrum_size)
+    {
+        free(spectrumBuffer);
+
+        spectrumBuffer = NULL;
+        spectrumLength = 0;
+    }
+
+    if (spectrumBuffer == NULL)
+    {
+        spectrumLength = spectrum_size;
+        spectrumBuffer = (float *)calloc(spectrumLength, sizeof(float));
+    }
+
+    if (spectrumBuffer == NULL)
+    {
+        spectrumLength = 0;
+        // return val(typed_memory_view(spectrumLength, spectrumBuffer));
+        return wasmBuffer;
+    }
+
+    // pre-compute the Hanning weights
+    float *window = (float *)malloc(width * sizeof(float));
+    if (window == NULL)
+    {
+        printf("[hanning_smoothing] failed to allocate memory for Hanning window.\n");
+        // copy the input spectrum to the output buffer without smoothing
+        memcpy(spectrumBuffer, src, length * sizeof(float));
+        return wasmBuffer;
+    }
+
+    Hann_window(width, window);
+
+    // apply the Hanning smoothing
+    int half_width = (width - 1) / 2; // make the window symmetric around the central point
+    for (int i = 0; i < length; i++)
+    {
+        float sum = 0.0f;
+        float weight_sum = 0.0f;
+
+        for (int j = -half_width; j <= half_width; j++)
+        {
+            int idx = i + j;
+
+            if (idx >= 0 && idx < length)
+            {
+                float weight = window[j + half_width];
+                sum += src[idx] * weight;
+                weight_sum += weight;
+            }
+        }
+
+        spectrumBuffer[i] = (weight_sum > 0.0f) ? (sum / weight_sum) : src[i]; // avoid division by zero
+    }
+
+    // free-up the memory
+    free(window);
+
+    wasmBuffer.ptr = (unsigned int)spectrumBuffer;
+    wasmBuffer.size = (unsigned int)spectrumLength;
+    return wasmBuffer;
+}
+
 unsigned int _malloc(unsigned int size)
 {
     return (unsigned int)malloc(size);
@@ -988,6 +1070,7 @@ EMSCRIPTEN_BINDINGS(Wrapper)
     function("decompressCompositePVdiagram", &decompressCompositePVdiagram);
     function("decompressLZ4", &decompressLZ4);
     function("decompressLZ4mask", &decompressLZ4mask);
+    function("hanning_smoothing", &hanning_smoothing, allow_raw_pointers());
     function("hevc_init_frame", &hevc_init_frame);
     function("hevc_destroy_frame", &hevc_destroy_frame);
     function("hevc_decode_frame", &hevc_decode_frame);
