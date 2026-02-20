@@ -567,29 +567,64 @@ function spectrum_smoothing(data, factor) {
     // factor is the percent of the data length to use for smoothing (an integer between 0 and 100)
     var width = Math.floor(len * factor / 100);
 
+    // 奇数化（C++側の対称窓に合わせる）
+    if ((width % 2) === 0)
+        width += 1;
+
+    if (width > len)
+        width = (len % 2 === 0) ? (len - 1) : len;
+
     if (width < 3)
         return data;
 
-    // TO-DO: call WASM buffer hanning_smoothing(int length, const float *src, int width)
+    // call WASM buffer hanning_smoothing(int length, const float *src, int width)
+    try {
+        // JS Array -> Float32Array
+        const src = (data instanceof Float32Array) ? data : Float32Array.from(data);
+        const n = src.length;
+        const bytes = n * 4;
 
-    // pre-compute the Hanning weights
-    var weights = new Array(width);
-    for (var i = 0; i < width; i++) {
-        weights[i] = Hann_window(i, width);
-    }
+        // 入力バッファをWASMヒープに確保
+        const inPtr = (typeof WASM.malloc === "function") ? WASM.malloc(bytes) : WASM._malloc(bytes);
+        WASM.HEAPF32.set(src, inPtr >> 2);
 
-    return data.map((value, index) => {
-        var sum = 0.0;
-        var weight_sum = 0.0;
+        // C++: buffer hanning_smoothing(int length, const float *src, int width)
+        const res = WASM.hanning_smoothing(n, inPtr, width);
+
+        // 入力のみ解放（出力はC++側の管理バッファ）
+        if (typeof WASM.free === "function") WASM.free(inPtr);
+        else WASM._free(inPtr);
+
+        // embind value_array<buffer> の取り方に両対応
+        const outPtr = (res.ptr !== undefined) ? res.ptr : res[0];
+        const outLen = (res.size !== undefined) ? res.size : res[1];
+
+        // 出力をコピーしてJS側へ
+        const out = WASM.HEAPF32.slice(outPtr >> 2, (outPtr >> 2) + outLen);
+
+        return out;
+    } catch (e) {
+        console.log("WASM hanning_smoothing JavaScript fallback:", e);
+
+        // fallback: 既存JS実装
+        var weights = new Array(width);
         for (var i = 0; i < width; i++) {
-            var idx = index - Math.floor(width / 2) + i;
-            if (idx >= 0 && idx < len) {
-                sum += data[idx] * weights[i];
-                weight_sum += weights[i];
-            }
+            weights[i] = Hann_window(i, width);
         }
-        return sum / weight_sum;
-    });
+
+        return data.map((value, index) => {
+            var sum = 0.0;
+            var weight_sum = 0.0;
+            for (var i = 0; i < width; i++) {
+                var idx = index - Math.floor(width / 2) + i;
+                if (idx >= 0 && idx < len) {
+                    sum += data[idx] * weights[i];
+                    weight_sum += weights[i];
+                }
+            }
+            return sum / weight_sum;
+        });
+    }
 }
 
 function spectrum_binning(data, factor) {
