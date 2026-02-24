@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2026-02-20.0";
+    return "JS2026-02-24.0";
 }
 
 function uuidv4() {
@@ -9872,6 +9872,13 @@ function enable_autoscale() {
 };
 
 function change_binning() {
+    // disable hanning smoothing when binning is changed
+    try {
+        hanning = 0;
+        document.getElementById('hanning').value = hanning.toString();
+    }
+    catch (e) { };
+
     try {
         binning = parseInt(document.getElementById('binning').value);
     }
@@ -9914,6 +9921,13 @@ function change_binning() {
 }
 
 function change_smoothing_width() {
+    // disable binning when hanning smoothing is changed
+    try {
+        binning = 1;
+        document.getElementById('binning').value = binning.toString();
+    }
+    catch (e) { };
+
     try {
         hanning = parseInt(document.getElementById('hanning').value);
     }
