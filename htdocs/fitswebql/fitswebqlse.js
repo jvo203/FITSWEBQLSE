@@ -9872,7 +9872,7 @@ function enable_autoscale() {
 };
 
 function change_binning() {
-    // disable hanning smoothing when binning is changed
+    // disable smoothing when binning is changed
     try {
         hanning = 0;
         document.getElementById('hanning').value = hanning.toString();
