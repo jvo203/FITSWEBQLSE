@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2026-02-24.0";
+    return "JS2026-02-27.0";
 }
 
 function uuidv4() {
@@ -558,23 +558,11 @@ function Hann_window(i, width) {
     return 0.5 * (1 - Math.cos(2 * Math.PI * i / (width - 1)));
 }
 
-function spectrum_smoothing(data, factor) {
-    if (factor <= 0)
-        return data;
-
+function spectrum_smoothing(data, width) {
     var len = data.length;
 
-    // factor is the percent of the data length to use for smoothing (an integer between 0 and 100)
-    var width = Math.floor(len * factor / 100);
-
-    // 奇数化（C++側の対称窓に合わせる）
-    if ((width % 2) === 0)
-        width += 1;
-
-    if (width > len)
-        width = (len % 2 === 0) ? (len - 1) : len;
-
-    if (width < 3)
+    // width < 3 では平滑化せず、width >= len では全て同じ値になってしまうため、いずれも平滑化せずに元のデータを返す
+    if (width < 3 || width >= len)
         return data;
 
     // call WASM buffer hanning_smoothing(int length, uintptr_t src_ptr, int width)
@@ -11105,7 +11093,7 @@ function display_preferences(index) {
         tmpA.append("select")
             .attr("id", "hanning")
             .attr("onchange", "javascript:change_smoothing_width();")
-            .html("<option value='0'>none</option><option value='1'>1%</option><option value='2'>2%</option><option value='5'>5%</option><option value='10'>10%</option>");
+            .html("<option value='0'>none</option><option value='3'>3</option><option value='5'>5</option><option value='7'>7</option><option value='9'>9</option>");
 
         document.getElementById('hanning').value = hanning.toString();
     }
