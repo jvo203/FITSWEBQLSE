@@ -11088,7 +11088,7 @@ function display_preferences(index) {
         tmpA.append("label")
             .attr("for", "hanning")
             .attr("class", "control-label")
-            .html("spec. smoothing width:&nbsp; ");
+            .html("hanning #channels:&nbsp; ");
 
         tmpA.append("select")
             .attr("id", "hanning")
