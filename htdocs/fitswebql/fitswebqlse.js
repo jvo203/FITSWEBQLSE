@@ -561,8 +561,10 @@ function Hann_window(i, width) {
 function spectrum_smoothing(data, width) {
     var len = data.length;
 
-    // width < 3 では平滑化せず、width >= len では全て同じ値になってしまうため、いずれも平滑化せずに元のデータを返す
-    if (width < 3 || width >= len)
+    // width < 5 では平滑化せず、width >= len では全て同じ値になってしまうため、いずれも平滑化せずに元のデータを返す
+    // hanning returns the original spectrum if the width is less than 5 or greater than the spectrum length, or if the spectrum length is zero
+    // hanning does not make sense for width==3 because the weights would be [0,1,0] and the smoothed spectrum would be identical to the original spectrum
+    if (width < 5 || width >= len)
         return data;
 
     // call WASM buffer hanning_smoothing(int length, uintptr_t src_ptr, int width)
@@ -11093,7 +11095,7 @@ function display_preferences(index) {
         tmpA.append("select")
             .attr("id", "hanning")
             .attr("onchange", "javascript:change_smoothing_width();")
-            .html("<option value='0'>none</option><option value='3'>3</option><option value='5'>5</option><option value='7'>7</option><option value='9'>9</option>");
+            .html("<option value='0'>none</option><option value='5'>5</option><option value='7'>7</option><option value='9'>9</option>");
 
         document.getElementById('hanning').value = hanning.toString();
     }
