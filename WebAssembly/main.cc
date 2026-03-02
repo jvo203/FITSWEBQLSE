@@ -970,7 +970,7 @@ void Hann_window(int length, float *window)
         window[i] = 0.5f * (1.0f - cosf(2.0f * M_PI * i / (length - 1)));
 }
 
-buffer hanning_smoothing(int length, uintptr_t src_ptr, int width)
+buffer spectrum_smoothing(int length, uintptr_t src_ptr, int width)
 {
     buffer wasmBuffer = {0, 0};
 
@@ -978,7 +978,7 @@ buffer hanning_smoothing(int length, uintptr_t src_ptr, int width)
 
     if (width < 3 || width > length || length <= 0)
     {
-        printf("[hanning_smoothing] width: %d is not supported. Only width >= 3 is supported.\n", width);
+        printf("[spectrum_smoothing] width: %d is not supported. Only width >= 3 is supported.\n", width);
         return wasmBuffer;
     }
 
@@ -1073,7 +1073,7 @@ EMSCRIPTEN_BINDINGS(Wrapper)
     function("decompressCompositePVdiagram", &decompressCompositePVdiagram);
     function("decompressLZ4", &decompressLZ4);
     function("decompressLZ4mask", &decompressLZ4mask);
-    function("hanning_smoothing", &hanning_smoothing);
+    function("spectrum_smoothing", &spectrum_smoothing);
     function("hevc_init_frame", &hevc_init_frame);
     function("hevc_destroy_frame", &hevc_destroy_frame);
     function("hevc_decode_frame", &hevc_decode_frame);

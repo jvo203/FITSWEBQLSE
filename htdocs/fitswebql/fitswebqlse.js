@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2026-02-27.0";
+    return "JS2026-03-02.0";
 }
 
 function uuidv4() {
@@ -558,16 +558,21 @@ function Hann_window(i, width) {
     return 0.5 * (1 - Math.cos(2 * Math.PI * i / (width - 1)));
 }
 
+function Hamming_window(i, width) {
+    return 0.54 - 0.46 * Math.cos(2 * Math.PI * i / (width - 1));
+}
+
 function spectrum_smoothing(data, width) {
     var len = data.length;
 
     // width < 5 では平滑化せず、width >= len では全て同じ値になってしまうため、いずれも平滑化せずに元のデータを返す
     // hanning returns the original spectrum if the width is less than 5 or greater than the spectrum length, or if the spectrum length is zero
     // hanning does not make sense for width==3 because the weights would be [0,1,0] and the smoothed spectrum would be identical to the original spectrum
+    // Hamming returns the original spectrum if the width is less than 3 or greater than or equal to the spectrum length, or if the spectrum length is zero
     if (width < 5 || width >= len)
         return data;
 
-    // call WASM buffer hanning_smoothing(int length, uintptr_t src_ptr, int width)
+    // call WASM buffer spectrum_smoothing(int length, uintptr_t src_ptr, int width)
     try {
         // JS Array -> Float32Array
         const src = (data instanceof Float32Array) ? data : Float32Array.from(data);
@@ -578,8 +583,8 @@ function spectrum_smoothing(data, width) {
         const inPtr = WASM._malloc(bytes);
         WASM.HEAPF32.set(src, inPtr >> 2);
 
-        // C++: buffer hanning_smoothing(int length, uintptr_t src_ptr, int width)
-        const res = WASM.hanning_smoothing(n, inPtr, width);
+        // C++: buffer spectrum_smoothing(int length, uintptr_t src_ptr, int width)
+        const res = WASM.spectrum_smoothing(n, inPtr, width);
 
         // embind value_array<buffer> の取り方に両対応
         const outPtr = (res.ptr !== undefined) ? res.ptr : res[0];
@@ -593,14 +598,14 @@ function spectrum_smoothing(data, width) {
 
         return out;
     } catch (e) {
-        console.log("WASM hanning_smoothing JavaScript fallback:", e);
+        console.log("WASM spectrum_smoothing JavaScript fallback:", e);
 
         // fallback: 既存JS実装
         var weights = new Array(width);
         for (var i = 0; i < width; i++) {
             weights[i] = Hann_window(i, width);
         }
-
+        console.log("spectrum_smoothing: using JavaScript fallback with Hann window, width:", width, "weights:", weights);
         return data.map((value, index) => {
             var sum = 0.0;
             var weight_sum = 0.0;
