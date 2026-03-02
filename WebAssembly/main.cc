@@ -970,6 +970,13 @@ void Hann_window(int length, float *window)
         window[i] = 0.5f * (1.0f - cosf(2.0f * M_PI * i / (length - 1)));
 }
 
+// Hamming smoothing function coefficients
+void Hamming_window(int length, float *window)
+{
+    for (int i = 0; i < length; i++)
+        window[i] = 0.54f - 0.46f * cosf(2.0f * M_PI * i / (length - 1));
+}
+
 buffer spectrum_smoothing(int length, uintptr_t src_ptr, int width)
 {
     buffer wasmBuffer = {0, 0};
@@ -1005,20 +1012,20 @@ buffer spectrum_smoothing(int length, uintptr_t src_ptr, int width)
 
     const float *src = (float *)src_ptr;
 
-    // pre-compute the Hanning weights
+    // pre-compute the Hamming weights
     float *window = (float *)malloc(width * sizeof(float));
 
     if (window == NULL)
     {
-        printf("[hanning_smoothing] failed to allocate memory for Hanning window.\n");
+        printf("[hamming_smoothing] failed to allocate memory for Hamming window.\n");
         // copy the input spectrum to the output buffer without smoothing
         memcpy(spectrumBuffer, src, length * sizeof(float));
         return wasmBuffer;
     }
 
-    Hann_window(width, window);
+    Hamming_window(width, window);
 
-    // apply the Hanning smoothing
+    // apply Hamming smoothing
     int half_width = (width - 1) / 2; // make the window symmetric around the central point
     for (int i = 0; i < length; i++)
     {
