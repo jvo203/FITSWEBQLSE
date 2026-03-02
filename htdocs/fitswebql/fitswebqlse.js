@@ -589,6 +589,11 @@ function spectrum_smoothing(data, width) {
         const outPtr = (res.ptr !== undefined) ? res.ptr : res[0];
         const outLen = (res.size !== undefined) ? res.size : res[1];
 
+        // throw an error if the output pointer is null or the length is zero
+        if (outPtr === 0 || outLen === 0) {
+            throw new Error("WASM spectrum_smoothing failed: output pointer is null or length is zero");
+        }
+
         // 出力をコピーしてJS側へ
         const out = WASM.HEAPF32.slice(outPtr >> 2, (outPtr >> 2) + outLen);
 
