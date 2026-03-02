@@ -1017,7 +1017,7 @@ buffer spectrum_smoothing(int length, uintptr_t src_ptr, int width)
 
     if (window == NULL)
     {
-        printf("[hamming_smoothing] failed to allocate memory for Hamming window.\n");
+        printf("[spectrum_smoothing] failed to allocate memory for the coefficient window.\n");
         // copy the input spectrum to the output buffer without smoothing
         memcpy(spectrumBuffer, src, length * sizeof(float));
         return wasmBuffer;
