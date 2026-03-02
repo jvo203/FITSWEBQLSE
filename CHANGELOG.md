@@ -1,6 +1,6 @@
 ## [5.2.1] - 2026-03-??
 
-* **new**: spectrum smoothing with a _*Hann*_ window (see a menu setting _*Preferences*_ / _*spec. smoothing width*_)
+* **new**: spectrum smoothing with a _*Hann*_ window (see a menu setting _*Preferences*_ / _*hanning #channels*_)
 * recompiled / reduced the WebAssembly size by 3% (_*-lto*_)
 
 ## [5.2.0] - 2026-01-30
