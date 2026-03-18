@@ -1,7 +1,8 @@
-## [5.2.1] - 2026-03-??
+## [5.2.1] - 2026-03-18
 
 * **new**: spectrum smoothing with a _*Hamming*_ window (see a menu setting _*Preferences*_ / _*hamming #channels*_)
 * recompiled / reduced the WebAssembly size by 3% (_*-lto*_)
+* JavaScript: fixed async wait for the _*Module*_ WASM object
 
 ## [5.2.0] - 2026-01-30
 
