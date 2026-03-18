@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2026-03-02.1";
+    return "JS2026-03-18.0";
 }
 
 function uuidv4() {
@@ -21921,13 +21921,16 @@ async function fetch_glsl_shaders() {
 
 // async function to wait until WebAssembly has been compiled
 async function waitForModuleReady() {
+    // Module がロードされるまで待つ
+    while (typeof Module === 'undefined') {
+        await new Promise(r => setTimeout(r, 50));
+    }
     return new Promise((resolve, reject) => {
         Module().then(instance => {
             if (WASM == null) {
                 console.log("WebAssembly compiled successfully.");
                 WASM = instance;
-            };
-
+            }
             resolve();
         }).catch(e => {
             console.error(e);
