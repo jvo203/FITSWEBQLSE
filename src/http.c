@@ -7110,6 +7110,21 @@ void write_spectrum(int fd, int no_planes, const float *spectrum, int n, int pre
         return;
     }
 
+    // debugging: print the first 100 values of the spectrums
+    for (int i = 0; i < n && i < 100; i++)
+        printf("[%d] = %f\t", i, spectrum[i]);
+    printf("\n");
+
+    // count the number of non-zero values in the spectrum n x no_planes
+    int non_zero_count = 0;
+    for (int i = 0; i < n * no_planes; i++)
+    {
+        if (spectrum[i] != 0.0f)
+            non_zero_count++;
+    }
+    printf("[C] write_spectrum: non-zero values count: %d out of %d\n", non_zero_count, n * no_planes);
+    // end of debugging
+
     // 1D or 2D spectrum with ZFP
     if (no_planes > 1)
         field = zfp_field_2d((void *)spectrum, data_type, nx, ny);
