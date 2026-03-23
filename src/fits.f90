@@ -7013,7 +7013,7 @@ contains
             call write_header(fd, 'NULL', 4)
          end if
 
-         ! send FPzip-compressed spectra
+         ! send ZFP-compressed spectra
          print *, 'calling image_spectrum_request subroutine'
 
          ! mean spectrum
