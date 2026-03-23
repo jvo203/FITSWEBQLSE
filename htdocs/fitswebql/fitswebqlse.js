@@ -22538,14 +22538,14 @@ async function mainRenderer() {
 
         if (va_count == 1) {
             open_websocket_connection(datasetId, 1);
-            fetch_image_spectrum(datasetId, 1, true, true); // was false, now true to force the timestamp to be included in the request and thus prevent caching issues
+            fetch_image_spectrum(datasetId, 1, true, false);
             fetch_spectral_lines(datasetId);
             poll_progress(datasetId, 1);
         }
         else {
             for (let index = 1; index <= va_count; index++) {
                 open_websocket_connection(datasetId.rotate(index - 1).join(";"), index);
-                fetch_image_spectrum(datasetId[index - 1], index, true, true); // was false, now true to force the timestamp to be included in the request and thus prevent caching issues with multiple lines
+                fetch_image_spectrum(datasetId[index - 1], index, true, false);
                 poll_progress(datasetId.rotate(index - 1)[0], index);
             }
         }
