@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2026-03-18.0";
+    return "JS2026-03-23.0";
 }
 
 function uuidv4() {
@@ -16441,7 +16441,7 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
 
             console.log("Server not ready, long-polling image again after 250ms.");
             setTimeout(function () {
-                fetch_image_spectrum(_datasetId, index, fetch_data, false);
+                fetch_image_spectrum(_datasetId, index, fetch_data, true);
             }, 250);
         }
 
@@ -22538,14 +22538,14 @@ async function mainRenderer() {
 
         if (va_count == 1) {
             open_websocket_connection(datasetId, 1);
-            fetch_image_spectrum(datasetId, 1, true, false);
+            fetch_image_spectrum(datasetId, 1, true, true); // was false, now true to force the timestamp to be included in the request and thus prevent caching issues
             fetch_spectral_lines(datasetId);
             poll_progress(datasetId, 1);
         }
         else {
             for (let index = 1; index <= va_count; index++) {
                 open_websocket_connection(datasetId.rotate(index - 1).join(";"), index);
-                fetch_image_spectrum(datasetId[index - 1], index, true, false);
+                fetch_image_spectrum(datasetId[index - 1], index, true, true); // was false, now true to force the timestamp to be included in the request and thus prevent caching issues with multiple lines
                 poll_progress(datasetId.rotate(index - 1)[0], index);
             }
         }
