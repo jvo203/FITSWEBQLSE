@@ -3758,22 +3758,6 @@ void write_ws_video(websocket_session *session, const int *seq_id, const float *
         return;
     }
 
-    // debugging: go through the pixels/mask and count the number of non-zero pixels in each plane
-    {
-        size_t plane_size = session->image_width * session->image_height;
-        size_t pixels_count = 0;
-        size_t mask_count = 0;
-        for (size_t i = 0; i < plane_size; i++)
-        {
-            if (pixels[i] > 0)
-                pixels_count++;
-
-            if (mask[i] > 0)
-                mask_count++;
-        }
-        printf("[C] write_ws_video::non-zero pixels_count: %zu, mask_count: %zu\n", pixels_count, mask_count);
-    }
-
     // compress the planes with x265 and pass the response (payload) over to the WebSocket sender
     uint8_t *luma = (uint8_t *)pixels;
     uint8_t *alpha = (uint8_t *)mask;
