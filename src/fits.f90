@@ -4154,7 +4154,7 @@ contains
 100   continue
       j = j + 1
 
-      ! print *, 'Header listing for HDU', j
+      print *, 'Header listing for HDU', j
 
       ! The FTGHSP subroutine returns the number of existing keywords in the
       ! current header data unit(CHDU), not counting the required END keyword,
@@ -4477,8 +4477,9 @@ contains
       !  Determine the size of the data cube
       ! new subroutines (! LL for kind=8)
       call FTGIPR(unit, 4, bitpix, naxis, naxes, status)
+      print *, 'FTGIPR :: bitpix:', bitpix, ' naxis:', naxis, ' naxes:', naxes, ' status:', status
 
-      if (status .ne. 0) then
+      if (status .ne. 0 .or. naxis .eq. 0) then
          ! do this only if naxis is still 0
          call ftmrhd(unit, 1, hdutype, status)
 
