@@ -4333,7 +4333,7 @@ contains
 
       status = 0; call FTGKYS(unit, 'OBJECT', item%object, comment, status)
 
-      ! Subaru HSC also uses 'DATE-AVG' for the observation date, so try that first
+      ! Subaru HSC also uses 'DATE-AVG' for the observation mid-point, so try that first
       status = 0; call FTGKYS(unit, 'DATE-AVG', item%date_obs, comment, status)
 
       status = 0; call FTGKYS(unit, 'DATE-OBS', item%date_obs, comment, status)
