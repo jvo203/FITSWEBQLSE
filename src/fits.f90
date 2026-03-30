@@ -4333,6 +4333,8 @@ contains
 
       status = 0; call FTGKYS(unit, 'OBJECT', item%object, comment, status)
 
+      status = 0; call FTGKYS(unit, 'DATE-AVE', item%date_obs, comment, status)
+
       status = 0; call FTGKYS(unit, 'DATE-OBS', item%date_obs, comment, status)
 
       status = 0; call FTGKYS(unit, 'CUNIT1', item%cunit1, comment, status)
@@ -4430,8 +4432,14 @@ contains
 
       status = 0; call FTGKYS(unit, 'INSTRUME', value, comment, status)
 
+      ! Fall back to HIERARCH variant if not found, or if value is blank
+      if (status .ne. 0 .or. LEN_TRIM(value) .eq. 0) then
+         status = 0
+         call FTGKYS(unit, 'HIERARCH INSTRUMENT', value, comment, status)
+      end if
+
       ! handle the instrument
-      if (status .eq. 0) then
+      if (status .eq. 0 .and. LEN_TRIM(value) .gt. 0) then
          ! first convert the value to lower case
          call lower_case(value)
 
@@ -4440,6 +4448,18 @@ contains
 
             pos = index(value, 'hds')
             if (pos .ne. 0) item%is_spectrum = .true.
+
+            pos = index(value, 'hsc')
+            if (pos .ne. 0) then
+               item%is_optical = .true.
+               item%flux = 'ratio'
+            end if
+
+            pos = index(value, 'hyper suprime-cam')
+            if (pos .ne. 0) then
+               item%is_optical = .true.
+               item%flux = 'ratio'
+            end if
          end block
       end if
 
