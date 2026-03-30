@@ -1,3 +1,7 @@
+## [5.2.2] - 2026-??-??
+
+* **new**: support _*Subaru HSC*_ FITS files
+
 ## [5.2.1] - 2026-03-18
 
 * **new**: spectrum smoothing with a _*Hamming*_ window (see a menu setting _*Preferences*_ / _*hamming #channels*_)
