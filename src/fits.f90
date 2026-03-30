@@ -4234,7 +4234,7 @@ contains
       status = 0; call FTGKYS(unit, 'FRAMEID', item%frameid, comment, status)
 
       ! further examine the datasetid for any hints
-      if (status .eq. 0) then
+      if (status .eq. 0 .and. LEN_TRIM(value) .gt. 0) then
          block
             integer pos
 
@@ -4368,7 +4368,7 @@ contains
       status = 0; call FTGKYS(unit, 'CTYPE4', value, comment, status)
 
       ! handle the Stokes parameters
-      if (status .eq. 0) then
+      if (status .eq. 0 .and. LEN_TRIM(value) .gt. 0) then
          ! first convert the value to lower case
          call lower_case(value)
 
@@ -4384,7 +4384,7 @@ contains
       status = 0; call FTGKYS(unit, 'TELESCOP', value, comment, status)
 
       ! handle the telescope
-      if (status .eq. 0) then
+      if (status .eq. 0 .and. LEN_TRIM(value) .gt. 0) then
          ! first convert the value to lower case
          call lower_case(value)
 
