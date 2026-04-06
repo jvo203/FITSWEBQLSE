@@ -1,6 +1,7 @@
-## [5.2.2] - 2026-??-??
+## [5.2.2] - 2026-04-06
 
-* **new**: support _*Subaru HSC*_ FITS files
+* **new**: support for _*Subaru HSC*_ FITS files (_*corr*_ and _*calexp*_)
+* re-compiled the WebAssembly with a newer Emscripten
 
 ## [5.2.1] - 2026-03-18
 
