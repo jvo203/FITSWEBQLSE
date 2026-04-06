@@ -2,6 +2,7 @@
 
 * **new**: support for _*Subaru HSC*_ FITS files (_*corr*_ and _*calexp*_)
 * improved the _*N-E compass*_ rotation handling and the 60" scale in the client-side JavaScript
+* added an optional _*interface*_ to the _*config.ini*_ file to allow binding the server to a specific network interface
 * re-compiled the WebAssembly with a newer Emscripten
 
 ## [5.2.1] - 2026-03-18
