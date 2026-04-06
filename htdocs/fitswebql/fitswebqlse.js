@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2026-03-23.0";
+    return "JS2026-04-06.0";
 }
 
 function uuidv4() {
@@ -7677,8 +7677,8 @@ function inverse_CD_matrix(arcx, arcy) {
     var RA = CRVAL1 + dx;
     var DEC = CRVAL2 + dy;
 
-    //console.log(RadiansPrintHMS(CRVAL1), RadiansPrintHMS(RA)) ;
-    //console.log(RadiansPrintDMS(CRVAL2), RadiansPrintDMS(DEC)) ;
+    console.log(RadiansPrintHMS(CRVAL1), RadiansPrintHMS(RA));
+    console.log(RadiansPrintDMS(CRVAL2), RadiansPrintDMS(DEC));
 
     var y = (1 - Math.tan(CRVAL2) * Math.cos(dx) / Math.tan(DEC)) / (Math.tan(CRVAL2) + Math.cos(dx) / Math.tan(DEC));
     var x = Math.tan(dx) * Math.cos(CRVAL2) * (1 - y * Math.tan(CRVAL2));
@@ -7687,7 +7687,7 @@ function inverse_CD_matrix(arcx, arcy) {
     x = x * toDegrees;
     y = y * toDegrees;
 
-    //console.log("inverse: x = ", x, "y = ", y);
+    console.log("inverse: x = ", x, "y = ", y);
 
     var CD1_1 = fitsData.CD1_1;
     var CD1_2 = fitsData.CD1_2;
@@ -7714,6 +7714,8 @@ function inverse_CD_matrix(arcx, arcy) {
     DY = DC2_2 * y;
 
     var gridScale = new Array(DX / fitsData.width, Math.sign(CD2_2) * Math.abs(DY) / fitsData.height, theta);
+
+    console.log("grid scale: ", gridScale);
 
     return gridScale;
 }
