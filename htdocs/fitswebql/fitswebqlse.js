@@ -7660,15 +7660,16 @@ function matrix_invert(M) {
     return I;
 }
 
+// arcx and arcy are in arc seconds, and the output gridScale is in degrees per pixel
 function inverse_CD_matrix(arcx, arcy) {
     let fitsData = fitsContainer[va_count - 1];
 
     if (fitsData == null)
         return;
 
-    //convert from arc seconds to radians
-    var dx = (arcx / 86400.0) * 2 * pi;//[s]
-    var dy = (arcy / 3600.0) / toDegrees;//["]
+    //convert from arcseconds to radians
+    var dx = (arcx / 3600.0) / toDegrees;//["] RA
+    var dy = (arcy / 3600.0) / toDegrees;//["] Dec
 
     //convert to radians
     var CRVAL1 = fitsData.CRVAL1 / toDegrees;
@@ -7695,7 +7696,9 @@ function inverse_CD_matrix(arcx, arcy) {
     var CD2_2 = fitsData.CD2_2;
 
     //convert the North/East rotation angle from radians to degrees
-    var theta = Math.atan(CD1_2 / CD1_1) * toDegrees;
+    var theta = Math.atan2(CD1_2, CD1_1) * toDegrees;
+    // use atan()
+    //var theta = Math.atan(CD1_2 / CD1_1) * toDegrees;
 
     var M = [[CD1_1, CD1_2], [CD2_1, CD2_2]];
     var invM = matrix_invert(M);
@@ -7708,12 +7711,7 @@ function inverse_CD_matrix(arcx, arcy) {
     var DX = DC1_1 * x + DC1_2 * y;
     var DY = DC2_1 * x + DC2_2 * y;
 
-    //DX: assume no change in y
-    DX = DC1_1 * x;
-    //DY: assume no change in x
-    DY = DC2_2 * y;
-
-    var gridScale = new Array(DX / fitsData.width, Math.sign(CD2_2) * Math.abs(DY) / fitsData.height, theta);
+    var gridScale = new Array(DX / fitsData.width, DY / fitsData.height, theta);
 
     console.log("grid scale: ", gridScale);
 
@@ -7838,8 +7836,8 @@ function display_scale_info(index = previous_plane) {
     var scale = image.height / image_bounding_dims.height;
 
     //scale
-    var arcmins = 60;
-    var gridScale = inverse_CD_matrix(arcmins, arcmins);
+    var arcsecs = 60;
+    var gridScale = inverse_CD_matrix(arcsecs, arcsecs);
 
     for (let i = 0; i < gridScale.length; i++)
         if (isNaN(gridScale[i]))
@@ -7849,8 +7847,8 @@ function display_scale_info(index = previous_plane) {
         //reduce the scale
         //console.log("Vertical height:", Math.abs(gridScale[1]) * scale);
 
-        arcmins = 10;
-        gridScale = inverse_CD_matrix(arcmins, arcmins);
+        arcsecs = 10;
+        gridScale = inverse_CD_matrix(arcsecs, arcsecs);
 
         for (let i = 0; i < gridScale.length; i++)
             if (isNaN(gridScale[i]))
@@ -7888,7 +7886,7 @@ function display_scale_info(index = previous_plane) {
             .attr("font-size", "1.0em")
             .attr("text-anchor", "middle")
             .attr("stroke", "none")
-            .text(arcmins + "\"");
+            .text(arcsecs + "\"");
     } else {
         var vert = svg.append("g")
             .attr("id", "verticalScale");
@@ -7907,11 +7905,11 @@ function display_scale_info(index = previous_plane) {
             .attr("font-size", "1.0em")
             .attr("text-anchor", "middle")
             .attr("stroke", "none")
-            .text(arcmins + "\"");
+            .text(arcsecs + "\"");
     }
 
     //N-E compass
-    var L = 3 * emFontSize;//*Math.sign(gridScale[0]) ;
+    var L = 3 * emFontSize;//* Math.sign(gridScale[0]);
     var X = 0.02 * width + L + 1.5 * emFontSize;
     var Y = Y - L / 2;
     if (composite_view)
