@@ -229,6 +229,7 @@ int main(int argc, char *argv[])
     // default initial values
     options.http_port = 8080;
     options.ws_port = options.http_port + 1;
+    options.interface = strdup("0.0.0.0");
     options.local = true;
     options.timeout = 15; // [s]
 #if !defined(__APPLE__) || !defined(__MACH__)
@@ -374,7 +375,7 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
-    printf("Browser URL: http://localhost:%" PRIu16 "\n", options.http_port);
+    printf("Browser URL: http://%s:%" PRIu16 "\n", options.interface, options.http_port);
     printf("*** To quit FITSWEBQLSE press Ctrl-C from the command-line terminal or send SIGINT. ***\n");
 
     // Ctrl-C signal handler
@@ -444,6 +445,7 @@ int main(int argc, char *argv[])
     cleanup_fortran();
 
     // release any memory allocated in options
+    free(options.interface);
     free(options.fits_home);
     free(options.cache);
     free(options.logs);
@@ -517,6 +519,11 @@ static int handler(void *user, const char *section, const char *name,
     {
         options->http_port = atoi(value);
         options->ws_port = options->http_port + 1;
+    }
+    else if (MATCH("fitswebql", "interface"))
+    {
+        free(options->interface);
+        options->interface = strdup(value);
     }
     else if (MATCH("postgresql", "host"))
     {

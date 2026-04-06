@@ -47,6 +47,7 @@ typedef struct
     // fitswebql
     uint16_t http_port;
     uint16_t ws_port;
+    char *interface;
     bool local;
     uint32_t timeout;
     char *fits_home;

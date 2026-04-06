@@ -15,6 +15,9 @@
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 #include <pwd.h>
 #include <dirent.h>
 
@@ -5393,13 +5396,31 @@ void start_http()
 {
     signal(SIGPIPE, SIG_IGN); // ignore SIGPIPE
 
+    // bind address from options.interface (default "0.0.0.0")
+    struct sockaddr_in http_addr, ws_addr;
+    memset(&http_addr, 0, sizeof(http_addr));
+    http_addr.sin_family = AF_INET;
+    http_addr.sin_port = htons(options.http_port);
+    if (inet_pton(AF_INET, options.interface, &http_addr.sin_addr) != 1)
+    {
+        fprintf(stderr, "[C] Invalid interface address '%s', falling back to 0.0.0.0\n", options.interface);
+        http_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    }
+
+    memset(&ws_addr, 0, sizeof(ws_addr));
+    ws_addr.sin_family = AF_INET;
+    ws_addr.sin_port = htons(options.ws_port);
+    if (inet_pton(AF_INET, options.interface, &ws_addr.sin_addr) != 1)
+        ws_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+
     // start a µHTTP server
     http_server = MHD_start_daemon(MHD_USE_AUTO | MHD_USE_INTERNAL_POLLING_THREAD | MHD_USE_THREAD_PER_CONNECTION | MHD_USE_ERROR_LOG | MHD_USE_ITC,
-                                   options.http_port,
+                                   0,
                                    &on_client_connect,
                                    NULL,
                                    &on_http_connection,
                                    NULL,
+                                   MHD_OPTION_SOCK_ADDR, (struct sockaddr *)&http_addr,
                                    MHD_OPTION_CONNECTION_TIMEOUT, (unsigned int)120,
                                    MHD_OPTION_END);
 
@@ -5411,11 +5432,12 @@ void start_http()
 
     // start a µHTTP-WS server
     ws_server = MHD_start_daemon(MHD_ALLOW_UPGRADE | MHD_USE_AUTO_INTERNAL_THREAD | MHD_USE_THREAD_PER_CONNECTION | MHD_USE_ERROR_LOG | MHD_USE_ITC,
-                                 options.ws_port,
+                                 0,
                                  NULL,
                                  NULL,
                                  &on_ws_connection,
                                  NULL,
+                                 MHD_OPTION_SOCK_ADDR, (struct sockaddr *)&ws_addr,
                                  MHD_OPTION_CONNECTION_TIMEOUT, (unsigned int)120,
                                  MHD_OPTION_END);
 
