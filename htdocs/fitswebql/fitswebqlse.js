@@ -7688,17 +7688,12 @@ function inverse_CD_matrix(arcx, arcy) {
     x = x * toDegrees;
     y = y * toDegrees;
 
-    console.log("inverse: x = ", x, "y = ", y);
+    //console.log("inverse: x = ", x, "y = ", y);
 
     var CD1_1 = fitsData.CD1_1;
     var CD1_2 = fitsData.CD1_2;
     var CD2_1 = fitsData.CD2_1;
     var CD2_2 = fitsData.CD2_2;
-
-    //convert the North/East rotation angle from radians to degrees
-    var theta = Math.atan2(CD1_2, CD1_1) * toDegrees;
-    // use atan()
-    //var theta = Math.atan(CD1_2 / CD1_1) * toDegrees;
 
     var M = [[CD1_1, CD1_2], [CD2_1, CD2_2]];
     var invM = matrix_invert(M);
@@ -7711,9 +7706,9 @@ function inverse_CD_matrix(arcx, arcy) {
     var DX = DC1_1 * x + DC1_2 * y;
     var DY = DC2_1 * x + DC2_2 * y;
 
-    var gridScale = new Array(DX / fitsData.width, DY / fitsData.height, theta);
+    var gridScale = new Array(DX / fitsData.width, DY / fitsData.height);
 
-    console.log("grid scale: ", gridScale);
+    //console.log("grid scale: ", gridScale);
 
     return gridScale;
 }
@@ -7909,18 +7904,31 @@ function display_scale_info(index = previous_plane) {
     }
 
     //N-E compass
-    var L = 3 * emFontSize;//* Math.sign(gridScale[0]);
-    var X = 0.02 * width + L + 1.5 * emFontSize;
-    var Y = Y - L / 2;
+    var compassL = 3 * emFontSize;
+    var CX = 0.02 * width + compassL + 1.5 * emFontSize;
+    var CY = Y - compassL / 2;
     if (composite_view)
-        X += img_x + img_width;
-    //var Y = 0.01*width + L + emFontSize;
-    //var Y = L + img_y;//Math.max(Y - 1.5 * emFontSize, 0.01 * width + L + emFontSize);
+        CX += img_x + img_width;
 
-    //rotation
+    // Derive East and North direction unit vectors from the CD matrix.
+    // In FITS pixel space (y up): North = invM*(0,1) = (DC1_2, DC2_2),
+    //                              East  = invM*(1,0) = (DC1_1, DC2_1).
+    // The image is displayed with y-flipped (WebGL), so SVG y = -FITS y.
+    var _CD = [[fitsData.CD1_1, fitsData.CD1_2], [fitsData.CD2_1, fitsData.CD2_2]];
+    var _invM = matrix_invert(_CD);
+    var DC1_1 = _invM[0][0], DC1_2 = _invM[0][1];
+    var DC2_1 = _invM[1][0], DC2_2 = _invM[1][1];
+
+    var north_len = Math.sqrt(DC1_2 * DC1_2 + DC2_2 * DC2_2);
+    var nx = DC1_2 / north_len;
+    var ny = -DC2_2 / north_len;  // negate for SVG y-flip
+
+    var east_len = Math.sqrt(DC1_1 * DC1_1 + DC2_1 * DC2_1);
+    var ex = DC1_1 / east_len;
+    var ey = -DC2_1 / east_len;   // negate for SVG y-flip
+
     var compass = svg.append("g")
-        .attr("id", "compass")
-        .attr("transform", 'rotate(' + gridScale[2] * Math.sign(gridScale[0]) + ' ' + X + ' ' + Y + ')');
+        .attr("id", "compass");
 
     var east = compass.append("g")
         .attr("id", "east");
@@ -7929,11 +7937,11 @@ function display_scale_info(index = previous_plane) {
         .attr("marker-end", "url(#arrow)")
         .style("stroke-width", (emStrokeWidth))
         .style("fill", "none")
-        .attr("d", "M" + X + "," + Y + " L" + (X + L * Math.sign(gridScale[0])) + "," + Y);
+        .attr("d", "M" + CX + "," + CY + " L" + (CX + compassL * ex) + "," + (CY + compassL * ey));
 
     east.append("text")
-        .attr("x", (X + L * Math.sign(gridScale[0]) + Math.sign(gridScale[0]) * emFontSize / 2))
-        .attr("y", (Y + emFontSize / 2.5))
+        .attr("x", (CX + compassL * ex + Math.sign(ex) * emFontSize / 2))
+        .attr("y", (CY + compassL * ey + emFontSize / 2.5))
         .attr("font-family", "Monospace")
         .attr("font-size", "1.0em")
         .attr("text-anchor", "middle")
@@ -7943,32 +7951,20 @@ function display_scale_info(index = previous_plane) {
     var north = compass.append("g")
         .attr("id", "north");
 
-    L *= Math.sign(gridScale[1]);
-
     north.append("path")
         .attr("marker-end", "url(#arrow)")
         .style("stroke-width", (emStrokeWidth))
         .style("fill", "none")
-        .attr("d", "M" + X + "," + Y + " L" + X + "," + (Y - L));
+        .attr("d", "M" + CX + "," + CY + " L" + (CX + compassL * nx) + "," + (CY + compassL * ny));
 
-    if (L > 0)
-        north.append("text")
-            .attr("x", (X))
-            .attr("y", (Y - L - emFontSize / 4))
-            .attr("font-family", "Monospace")
-            .attr("font-size", "1.1em")
-            .attr("text-anchor", "middle")
-            .attr("stroke", "none")
-            .text("N");
-    else
-        north.append("text")
-            .attr("x", (X))
-            .attr("y", (Y - L + emFontSize))
-            .attr("font-family", "Monospace")
-            .attr("font-size", "1.0em")
-            .attr("text-anchor", "middle")
-            .attr("stroke", "none")
-            .text("N");
+    north.append("text")
+        .attr("x", (CX + compassL * nx))
+        .attr("y", (CY + compassL * ny + (ny <= 0 ? -emFontSize / 4 : emFontSize)))
+        .attr("font-family", "Monospace")
+        .attr("font-size", "1.1em")
+        .attr("text-anchor", "middle")
+        .attr("stroke", "none")
+        .text("N");
 }
 
 function angle_difference(ra, ra0, meridian) {
