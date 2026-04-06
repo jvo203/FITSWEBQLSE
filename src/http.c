@@ -5405,6 +5405,10 @@ void start_http()
     {
         fprintf(stderr, "[C] Invalid interface address '%s', falling back to 0.0.0.0\n", options.interface);
         http_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+
+        // override the options.interface value to avoid confusion in the log messages
+        free(options.interface);
+        options.interface = strdup("0.0.0.0");
     }
 
     memset(&ws_addr, 0, sizeof(ws_addr));
