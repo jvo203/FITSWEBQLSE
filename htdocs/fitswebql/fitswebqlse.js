@@ -7845,7 +7845,7 @@ function display_scale_info(index = previous_plane) {
         if (isNaN(gridScale[i]))
             throw "NaN gridScale";
 
-    if (Math.abs(gridScale[1]) * scale > 1) {
+    if (Math.abs(gridScale[1]) * scale > 1 || Math.abs(gridScale[0]) * scale > 1) {
         //reduce the scale
         //console.log("Vertical height:", Math.abs(gridScale[1]) * scale);
 
@@ -7859,32 +7859,56 @@ function display_scale_info(index = previous_plane) {
         //console.log("Reduced vertical height:", Math.abs(gridScale[1]) * scale);
     }
 
-    //vertical scale
-    var L = Math.abs(gridScale[1]) * scale * img_height;
+    //scale bar (vertical or horizontal, whichever has the larger pixel extent)
+    var L_vert = Math.abs(gridScale[1]) * scale * img_height;
+    var L_horiz = Math.abs(gridScale[0]) * scale * img_width;
+    var useHorizontal = L_horiz > L_vert;
+
+    var L = useHorizontal ? L_horiz : L_vert;
     var X = 1 * emFontSize;
     if (composite_view)
         X += img_x + img_width;
-    //var Y = L + img_y;//1.75 * emFontSize;
     var Y = img_y + img_height;
 
-    var vert = svg.append("g")
-        .attr("id", "verticalScale");
+    if (useHorizontal) {
+        var horiz = svg.append("g")
+            .attr("id", "horizontalScale");
 
-    vert.append("path")
-        .attr("marker-end", "url(#head)")
-        .attr("marker-start", "url(#head)")
-        .style("stroke-width", (emStrokeWidth))
-        .style("fill", "none")
-        .attr("d", "M" + X + "," + Y + " L" + X + "," + (Y - L));
+        horiz.append("path")
+            .attr("marker-end", "url(#head)")
+            .attr("marker-start", "url(#head)")
+            .style("stroke-width", (emStrokeWidth))
+            .style("fill", "none")
+            .attr("d", "M" + X + "," + Y + " L" + (X + L) + "," + Y);
 
-    vert.append("text")
-        .attr("x", (X + emFontSize))
-        .attr("y", (Y - L / 2 + emFontSize / 3))
-        .attr("font-family", "Monospace")
-        .attr("font-size", "1.0em")
-        .attr("text-anchor", "middle")
-        .attr("stroke", "none")
-        .text(arcmins + "\"");
+        horiz.append("text")
+            .attr("x", (X + L / 2))
+            .attr("y", (Y + emFontSize))
+            .attr("font-family", "Monospace")
+            .attr("font-size", "1.0em")
+            .attr("text-anchor", "middle")
+            .attr("stroke", "none")
+            .text(arcmins + "\"");
+    } else {
+        var vert = svg.append("g")
+            .attr("id", "verticalScale");
+
+        vert.append("path")
+            .attr("marker-end", "url(#head)")
+            .attr("marker-start", "url(#head)")
+            .style("stroke-width", (emStrokeWidth))
+            .style("fill", "none")
+            .attr("d", "M" + X + "," + Y + " L" + X + "," + (Y - L));
+
+        vert.append("text")
+            .attr("x", (X + emFontSize))
+            .attr("y", (Y - L / 2 + emFontSize / 3))
+            .attr("font-family", "Monospace")
+            .attr("font-size", "1.0em")
+            .attr("text-anchor", "middle")
+            .attr("stroke", "none")
+            .text(arcmins + "\"");
+    }
 
     //N-E compass
     var L = 3 * emFontSize;//*Math.sign(gridScale[0]) ;
