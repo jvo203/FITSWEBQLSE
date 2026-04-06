@@ -7814,6 +7814,7 @@ function display_scale_info(index = previous_plane) {
         .style("fill", "none")
         .attr("d", "M-5,-5 L5,0 L-5,5");
 
+    // only display the scale bar and compass for 2D images, not for FITS data cubes
     if (fitsData.depth > 1)
         return;
 
@@ -7833,99 +7834,106 @@ function display_scale_info(index = previous_plane) {
     //scale
     var arcsecs = 60;
     var gridScale = inverse_CD_matrix(arcsecs, arcsecs);
+    var cdMatrixOK = gridScale != null && gridScale.every(v => !isNaN(v));
 
-    for (let i = 0; i < gridScale.length; i++)
-        if (isNaN(gridScale[i]))
-            throw "NaN gridScale";
-
-    if (Math.abs(gridScale[1]) * scale > 1 || Math.abs(gridScale[0]) * scale > 1) {
+    if (cdMatrixOK && (Math.abs(gridScale[1]) * scale > 1 || Math.abs(gridScale[0]) * scale > 1)) {
         //reduce the scale
-        //console.log("Vertical height:", Math.abs(gridScale[1]) * scale);
-
         arcsecs = 10;
         gridScale = inverse_CD_matrix(arcsecs, arcsecs);
-
-        for (let i = 0; i < gridScale.length; i++)
-            if (isNaN(gridScale[i]))
-                throw "NaN gridScale";
-
-        //console.log("Reduced vertical height:", Math.abs(gridScale[1]) * scale);
+        cdMatrixOK = gridScale != null && gridScale.every(v => !isNaN(v));
     }
 
-    //scale bar (vertical or horizontal, whichever has the larger pixel extent)
-    var L_vert = Math.abs(gridScale[1]) * scale * img_height;
-    var L_horiz = Math.abs(gridScale[0]) * scale * img_width;
-    var useHorizontal = L_horiz > L_vert;
+    if (cdMatrixOK) {
+        //scale bar (vertical or horizontal, whichever has the larger pixel extent)
+        var L_vert = Math.abs(gridScale[1]) * scale * img_height;
+        var L_horiz = Math.abs(gridScale[0]) * scale * img_width;
+        var useHorizontal = L_horiz > L_vert;
 
-    var L = useHorizontal ? L_horiz : L_vert;
-    var X = 1 * emFontSize;
-    if (composite_view)
-        X += img_x + img_width;
-    var Y = img_y + img_height;
+        var L = useHorizontal ? L_horiz : L_vert;
+        var X = 1 * emFontSize;
+        if (composite_view)
+            X += img_x + img_width;
+        var Y = img_y + img_height;
 
-    if (useHorizontal) {
-        var horiz = svg.append("g")
-            .attr("id", "horizontalScale");
+        if (useHorizontal) {
+            var horiz = svg.append("g")
+                .attr("id", "horizontalScale");
 
-        horiz.append("path")
-            .attr("marker-end", "url(#head)")
-            .attr("marker-start", "url(#head)")
-            .style("stroke-width", (emStrokeWidth))
-            .style("fill", "none")
-            .attr("d", "M" + X + "," + Y + " L" + (X + L) + "," + Y);
+            horiz.append("path")
+                .attr("marker-end", "url(#head)")
+                .attr("marker-start", "url(#head)")
+                .style("stroke-width", (emStrokeWidth))
+                .style("fill", "none")
+                .attr("d", "M" + X + "," + Y + " L" + (X + L) + "," + Y);
 
-        horiz.append("text")
-            .attr("x", (X + L / 2))
-            .attr("y", (Y + emFontSize))
-            .attr("font-family", "Monospace")
-            .attr("font-size", "1.0em")
-            .attr("text-anchor", "middle")
-            .attr("stroke", "none")
-            .text(arcsecs + "\"");
-    } else {
-        var vert = svg.append("g")
-            .attr("id", "verticalScale");
+            horiz.append("text")
+                .attr("x", (X + L / 2))
+                .attr("y", (Y + emFontSize))
+                .attr("font-family", "Monospace")
+                .attr("font-size", "1.0em")
+                .attr("text-anchor", "middle")
+                .attr("stroke", "none")
+                .text(arcsecs + "\"");
+        } else {
+            var vert = svg.append("g")
+                .attr("id", "verticalScale");
 
-        vert.append("path")
-            .attr("marker-end", "url(#head)")
-            .attr("marker-start", "url(#head)")
-            .style("stroke-width", (emStrokeWidth))
-            .style("fill", "none")
-            .attr("d", "M" + X + "," + Y + " L" + X + "," + (Y - L));
+            vert.append("path")
+                .attr("marker-end", "url(#head)")
+                .attr("marker-start", "url(#head)")
+                .style("stroke-width", (emStrokeWidth))
+                .style("fill", "none")
+                .attr("d", "M" + X + "," + Y + " L" + X + "," + (Y - L));
 
-        vert.append("text")
-            .attr("x", (X + emFontSize))
-            .attr("y", (Y - L / 2 + emFontSize / 3))
-            .attr("font-family", "Monospace")
-            .attr("font-size", "1.0em")
-            .attr("text-anchor", "middle")
-            .attr("stroke", "none")
-            .text(arcsecs + "\"");
+            vert.append("text")
+                .attr("x", (X + emFontSize))
+                .attr("y", (Y - L / 2 + emFontSize / 3))
+                .attr("font-family", "Monospace")
+                .attr("font-size", "1.0em")
+                .attr("text-anchor", "middle")
+                .attr("stroke", "none")
+                .text(arcsecs + "\"");
+        }
     }
 
     //N-E compass
     var compassL = 3 * emFontSize;
     var CX = 0.02 * width + compassL + 1.5 * emFontSize;
-    var CY = Y - compassL / 2;
+    var CY = img_y + img_height - compassL / 2;
     if (composite_view)
         CX += img_x + img_width;
 
-    // Derive East and North direction unit vectors from the CD matrix.
-    // In FITS pixel space (y up): North = invM*(0,1) = (DC1_2, DC2_2),
-    //                              East  = invM*(1,0) = (DC1_1, DC2_1).
-    // The image is displayed with y-flipped (WebGL), so SVG y = -FITS y.
-    var _CD = [[fitsData.CD1_1, fitsData.CD1_2], [fitsData.CD2_1, fitsData.CD2_2]];
-    var _invM = matrix_invert(_CD);
-    var DC1_1 = _invM[0][0], DC1_2 = _invM[0][1];
-    var DC2_1 = _invM[1][0], DC2_2 = _invM[1][1];
+    var nx, ny, ex, ey;
 
-    var north_len = Math.sqrt(DC1_2 * DC1_2 + DC2_2 * DC2_2);
-    var nx = DC1_2 / north_len;
-    var ny = -DC2_2 / north_len;  // negate for SVG y-flip
+    if (cdMatrixOK) {
+        // Derive East and North direction unit vectors from the CD matrix.
+        // In FITS pixel space (y up): North = invM*(0,1) = (DC1_2, DC2_2),
+        //                              East  = invM*(1,0) = (DC1_1, DC2_1).
+        // The image is displayed with y-flipped (WebGL), so SVG y = -FITS y.
+        var _CD = [[fitsData.CD1_1, fitsData.CD1_2], [fitsData.CD2_1, fitsData.CD2_2]];
+        var _invM = matrix_invert(_CD);
+        var DC1_1 = _invM[0][0], DC1_2 = _invM[0][1];
+        var DC2_1 = _invM[1][0], DC2_2 = _invM[1][1];
 
-    var east_len = Math.sqrt(DC1_1 * DC1_1 + DC2_1 * DC2_1);
-    var ex = DC1_1 / east_len;
-    var ey = -DC2_1 / east_len;   // negate for SVG y-flip
+        var north_len = Math.sqrt(DC1_2 * DC1_2 + DC2_2 * DC2_2);
+        nx = DC1_2 / north_len;
+        ny = -DC2_2 / north_len;  // negate for SVG y-flip
+
+        var east_len = Math.sqrt(DC1_1 * DC1_1 + DC2_1 * DC2_1);
+        ex = DC1_1 / east_len;
+        ey = -DC2_1 / east_len;   // negate for SVG y-flip
+    } else {
+        // Fallback: derive North from get_northern_direction at the image centre.
+        // northAngle is in standard math convention in FITS pixel space (y-up).
+        // East is 90° CCW from North (RA increases leftward in sky images).
+        var mx = (fitsData.width - 1) / 2;
+        var my = (fitsData.height - 1) / 2;
+        var northAngle = get_northern_direction(fitsData, mx, my);
+        nx = Math.cos(northAngle);
+        ny = -Math.sin(northAngle);          // SVG y-flip
+        ex = -Math.sin(northAngle);          // 90° CCW from North in FITS pixel space
+        ey = -Math.cos(northAngle);          // SVG y-flip
+    }
 
     var compass = svg.append("g")
         .attr("id", "compass");
