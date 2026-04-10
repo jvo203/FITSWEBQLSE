@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2026-04-06.0";
+    return "JS2026-04-10.0";
 }
 
 function uuidv4() {
@@ -8055,6 +8055,26 @@ function display_gridlines(index = previous_plane) {
     const max_iter = 20;
     const no_ticks = 50;
 
+    // Detect orientation: does RA vary primarily along screen X or screen Y?
+    // If RA varies more along Y, North points sideways and axes should swap.
+    {
+        var _img = imageContainer[index - 1];
+        var _ibd = _img.image_bounding_dims;
+        var _cx = _ibd.x1 + 0.5 * (_ibd.width - 1);
+        var _cy = _ibd.y1 + 0.5 * (_ibd.height - 1);
+        var _ocx = _cx * fitsData.width / _img.width;
+        var _ocy = _cy * fitsData.height / _img.height;
+        var _wc = pix2sky(fitsData, _ocx, _ocy);
+        var _wcx = pix2sky(fitsData, _ocx + 1, _ocy);
+        var _wcy = pix2sky(fitsData, _ocx, _ocy + 1);
+        var _dRA_dx = Math.abs(_wcx[0] - _wc[0]);
+        var _dRA_dy = Math.abs(_wcy[0] - _wc[0]);
+        // handle meridian wrap
+        if (_dRA_dx > 180) _dRA_dx = 360 - _dRA_dx;
+        if (_dRA_dy > 180) _dRA_dy = 360 - _dRA_dy;
+    }
+    var swapped = _dRA_dy > _dRA_dx; // RA varies more along Y → North points sideways
+
     // Add the X Axis
     if (fitsData.depth > 1) {
         var xAxis = d3.axisBottom(x)
@@ -8073,8 +8093,10 @@ function display_gridlines(index = previous_plane) {
                 let world = pix2sky(fitsData, orig_x, orig_y);
                 let radec = [world[0] / toDegrees, world[1] / toDegrees];
 
-                // curved gridlines
+                // curved gridlines: hold RA constant (normal) or DEC constant (swapped)
                 const ra0 = world[0] * deg2rad;
+                const dec0 = world[1] * deg2rad;
+                const coord0 = swapped ? dec0 : ra0;
 
                 // SVG path (piecewise linear segments)
                 const path = d3.path();
@@ -8092,34 +8114,36 @@ function display_gridlines(index = previous_plane) {
                     tmp = image_bounding_dims.y1 + tmp_y * (image_bounding_dims.height - 1);
                     orig_y = tmp * fitsData.height / image.height;
 
-                    // given a new orig_y, find the corresponding new_x that gives the same ra0
-                    // use a simple iterative method to find the root
+                    // given a new orig_y, find the corresponding new_x that gives the same coord0
                     let lower_x = image_bounding_dims.x1;
                     let upper_x = image_bounding_dims.x1 + (image_bounding_dims.width - 1);
 
-                    // verify that the root is bracketed, if not lineTo (NaN,NaN) and return
+                    // verify that the root is bracketed
                     orig_x = lower_x * fitsData.width / image.width;
                     let world = pix2sky(fitsData, orig_x, orig_y);
-                    let ra_lower = world[0] * deg2rad;
+                    let val_lower = swapped ? world[1] * deg2rad : world[0] * deg2rad;
 
                     orig_x = upper_x * fitsData.width / image.width;
                     world = pix2sky(fitsData, orig_x, orig_y);
-                    let ra_upper = world[0] * deg2rad;
+                    let val_upper = swapped ? world[1] * deg2rad : world[0] * deg2rad;
 
                     let meridian_crossing = false;
+                    let diff_lower, diff_upper;
 
-                    // detect a meridian crossing                    
-                    if (ra_lower < ra_upper) {
-                        //console.log("meridian crossing detected");
-                        meridian_crossing = true;
+                    if (swapped) {
+                        diff_lower = val_lower - coord0;
+                        diff_upper = val_upper - coord0;
+                    } else {
+                        // detect a meridian crossing
+                        if (val_lower < val_upper) {
+                            meridian_crossing = true;
+                        }
+                        diff_lower = angle_difference(val_lower, coord0, meridian_crossing);
+                        diff_upper = angle_difference(val_upper, coord0, meridian_crossing);
                     }
-
-                    let diff_lower = angle_difference(ra_lower, ra0, meridian_crossing);
-                    let diff_upper = angle_difference(ra_upper, ra0, meridian_crossing);
 
                     if (diff_lower * diff_upper >= 0) {
                         console.log("display_gridlines: root not bracketed");
-                        //path.lineTo(NaN, NaN);
                         end = true;
                         return;
                     }
@@ -8130,13 +8154,10 @@ function display_gridlines(index = previous_plane) {
                     while (count < max_iter) {
                         orig_x = new_x * fitsData.width / image.width;
                         let world = pix2sky(fitsData, orig_x, orig_y);
-                        let ra = world[0] * deg2rad;
-                        let diff = angle_difference(ra, ra0, meridian_crossing);
+                        let val = swapped ? world[1] * deg2rad : world[0] * deg2rad;
+                        let diff = swapped ? val - coord0 : angle_difference(val, coord0, meridian_crossing);
 
-                        /*if (Math.abs(diff) < accuracy)
-                            break;*/
-
-                        if (diff > 0)
+                        if (diff_lower * diff > 0)
                             lower_x = new_x;
                         else
                             upper_x = new_x;
@@ -8166,7 +8187,9 @@ function display_gridlines(index = previous_plane) {
                 if (d == 0.0 || d == 1.0)
                     return "";
 
-                if (fitsData.CTYPE1.indexOf("RA") > -1) {
+                if (swapped) {
+                    return RadiansPrintDMS(radec[1]);
+                } else if (fitsData.CTYPE1.indexOf("RA") > -1) {
                     if (coordsFmt == 'DMS')
                         return RadiansPrintDMS(radec[0]);
                     else
@@ -8178,7 +8201,7 @@ function display_gridlines(index = previous_plane) {
 
         svg.append("g")
             .attr("class", "gridlines")
-            .attr("id", "ra_axis")
+            .attr("id", swapped ? "dec_axis" : "ra_axis")
             .style("fill", fillColour)
             .style("stroke", strokeColour)
             .style("stroke-width", 1.0)
@@ -8208,9 +8231,10 @@ function display_gridlines(index = previous_plane) {
                 let world = pix2sky(fitsData, orig_x, orig_y);
                 let radec = [world[0] / toDegrees, world[1] / toDegrees];
 
-                // curved gridlines
+                // curved gridlines: hold RA constant (normal) or DEC constant (swapped)
                 const ra0 = world[0] * deg2rad;
                 const dec0 = world[1] * deg2rad;
+                const coord0 = swapped ? dec0 : ra0;
 
                 // SVG path (piecewise linear segments)
                 const path = d3.path();
@@ -8228,34 +8252,36 @@ function display_gridlines(index = previous_plane) {
                     tmp = image_bounding_dims.y1 + tmp_y * (image_bounding_dims.height - 1);
                     orig_y = tmp * fitsData.height / image.height;
 
-                    // given a new orig_y, find the corresponding new_x that gives the same ra0
-                    // use a simple iterative method to find the root
+                    // given a new orig_y, find the corresponding new_x that gives the same coord0
                     let lower_x = image_bounding_dims.x1;
                     let upper_x = image_bounding_dims.x1 + (image_bounding_dims.width - 1);
 
-                    // verify that the root is bracketed, if not lineTo (NaN,NaN) and return
+                    // verify that the root is bracketed
                     orig_x = lower_x * fitsData.width / image.width;
                     let world = pix2sky(fitsData, orig_x, orig_y);
-                    let ra_lower = world[0] * deg2rad;
+                    let val_lower = swapped ? world[1] * deg2rad : world[0] * deg2rad;
 
                     orig_x = upper_x * fitsData.width / image.width;
                     world = pix2sky(fitsData, orig_x, orig_y);
-                    let ra_upper = world[0] * deg2rad;
+                    let val_upper = swapped ? world[1] * deg2rad : world[0] * deg2rad;
 
                     let meridian_crossing = false;
+                    let diff_lower, diff_upper;
 
-                    // detect a meridian crossing                    
-                    if (ra_lower < ra_upper) {
-                        //console.log("meridian crossing detected");
-                        meridian_crossing = true;
+                    if (swapped) {
+                        diff_lower = val_lower - coord0;
+                        diff_upper = val_upper - coord0;
+                    } else {
+                        // detect a meridian crossing
+                        if (val_lower < val_upper) {
+                            meridian_crossing = true;
+                        }
+                        diff_lower = angle_difference(val_lower, coord0, meridian_crossing);
+                        diff_upper = angle_difference(val_upper, coord0, meridian_crossing);
                     }
-
-                    let diff_lower = angle_difference(ra_lower, ra0, meridian_crossing);
-                    let diff_upper = angle_difference(ra_upper, ra0, meridian_crossing);
 
                     if (diff_lower * diff_upper >= 0) {
                         console.log("display_gridlines: root not bracketed");
-                        //path.lineTo(NaN, NaN);
                         end = true;
                         return;
                     }
@@ -8266,13 +8292,10 @@ function display_gridlines(index = previous_plane) {
                     while (count < max_iter) {
                         orig_x = new_x * fitsData.width / image.width;
                         let world = pix2sky(fitsData, orig_x, orig_y);
-                        let ra = world[0] * deg2rad;
-                        let diff = angle_difference(ra, ra0, meridian_crossing);
+                        let val = swapped ? world[1] * deg2rad : world[0] * deg2rad;
+                        let diff = swapped ? val - coord0 : angle_difference(val, coord0, meridian_crossing);
 
-                        /*if (Math.abs(diff) < accuracy)
-                            break;*/
-
-                        if (diff > 0)
+                        if (diff_lower * diff > 0)
                             lower_x = new_x;
                         else
                             upper_x = new_x;
@@ -8302,7 +8325,9 @@ function display_gridlines(index = previous_plane) {
                 if (d == 0.0 || d == 1.0)
                     return "";
 
-                if (fitsData.CTYPE1.indexOf("RA") > -1) {
+                if (swapped) {
+                    return RadiansPrintDMS(radec[1]);
+                } else if (fitsData.CTYPE1.indexOf("RA") > -1) {
                     if (coordsFmt == 'DMS')
                         return RadiansPrintDMS(radec[0]);
                     else
@@ -8314,7 +8339,7 @@ function display_gridlines(index = previous_plane) {
 
         svg.append("g")
             .attr("class", "gridlines")
-            .attr("id", "ra_axis")
+            .attr("id", swapped ? "dec_axis" : "ra_axis")
             .style("fill", fillColour)
             .style("stroke", strokeColour)
             .style("stroke-width", 1.0)
@@ -8349,8 +8374,10 @@ function display_gridlines(index = previous_plane) {
                 let world = pix2sky(fitsData, orig_x, orig_y);
                 let radec = [world[0] / toDegrees, world[1] / toDegrees];
 
-                // curved gridlines
+                // curved gridlines: hold DEC constant (normal) or RA constant (swapped)
+                const ra0 = world[0] * deg2rad;
                 const dec0 = world[1] * deg2rad;
+                const coord0 = swapped ? ra0 : dec0;
 
                 // SVG path (piecewise linear segments)
                 const path = d3.path();
@@ -8368,25 +8395,36 @@ function display_gridlines(index = previous_plane) {
                     tmp = image_bounding_dims.x1 + tmp_x * (image_bounding_dims.width - 1);
                     orig_x = tmp * fitsData.width / image.width;
 
-                    // given a new orig_x, find the corresponding new_y that gives the same dec0
-                    // use a simple iterative method to find the root
+                    // given a new orig_x, find the corresponding new_y that gives the same coord0
                     let lower_y = image_bounding_dims.y1;
                     let upper_y = image_bounding_dims.y1 + (image_bounding_dims.height - 1);
 
-                    // verify that the root is bracketed, if not lineTo (NaN,NaN) and return
+                    // verify that the root is bracketed
                     orig_y = lower_y * fitsData.height / image.height;
                     let world = pix2sky(fitsData, orig_x, orig_y);
-                    let dec_lower = world[1] * deg2rad;
-                    let diff_lower = dec_lower - dec0;
+                    let val_lower = swapped ? world[0] * deg2rad : world[1] * deg2rad;
 
                     orig_y = upper_y * fitsData.height / image.height;
                     world = pix2sky(fitsData, orig_x, orig_y);
-                    let dec_upper = world[1] * deg2rad;
-                    let diff_upper = dec_upper - dec0;
+                    let val_upper = swapped ? world[0] * deg2rad : world[1] * deg2rad;
+
+                    let meridian_crossing = false;
+                    let diff_lower, diff_upper;
+
+                    if (swapped) {
+                        // detect a meridian crossing
+                        if (val_lower < val_upper) {
+                            meridian_crossing = true;
+                        }
+                        diff_lower = angle_difference(val_lower, coord0, meridian_crossing);
+                        diff_upper = angle_difference(val_upper, coord0, meridian_crossing);
+                    } else {
+                        diff_lower = val_lower - coord0;
+                        diff_upper = val_upper - coord0;
+                    }
 
                     if (diff_lower * diff_upper >= 0) {
                         console.log("display_gridlines: root not bracketed");
-                        //path.lineTo(NaN, NaN);
                         end = true;
                         return;
                     }
@@ -8397,13 +8435,10 @@ function display_gridlines(index = previous_plane) {
                     while (count < max_iter) {
                         orig_y = new_y * fitsData.height / image.height;
                         let world = pix2sky(fitsData, orig_x, orig_y);
-                        let dec = world[1] * deg2rad;
-                        let diff = dec - dec0;
+                        let val = swapped ? world[0] * deg2rad : world[1] * deg2rad;
+                        let diff = swapped ? angle_difference(val, coord0, meridian_crossing) : val - coord0;
 
-                        /*if (Math.abs(diff) < accuracy)
-                            break;*/
-
-                        if (diff < 0)
+                        if (diff_lower * diff > 0)
                             lower_y = new_y;
                         else
                             upper_y = new_y;
@@ -8433,12 +8468,23 @@ function display_gridlines(index = previous_plane) {
                 if (d == 0.0 || d == 1.0)
                     return "";
 
-                return RadiansPrintDMS(radec[1]);
+                if (swapped) {
+                    if (fitsData.CTYPE1.indexOf("RA") > -1) {
+                        if (coordsFmt == 'DMS')
+                            return RadiansPrintDMS(radec[0]);
+                        else
+                            return RadiansPrintHMS(radec[0]);
+                    } else {
+                        return RadiansPrintDMS(radec[0]);
+                    }
+                } else {
+                    return RadiansPrintDMS(radec[1]);
+                }
             });
 
         svg.append("g")
             .attr("class", "gridlines")
-            .attr("id", "dec_axis")
+            .attr("id", swapped ? "ra_axis" : "dec_axis")
             .style("fill", fillColour)
             .style("stroke", strokeColour)
             .style("stroke-width", 1.0)
