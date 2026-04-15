@@ -1,3 +1,7 @@
+## [5.2.3] - 2026-04-15
+
+* correctly handle RA/DEC gridlines rotated by 90°
+
 ## [5.2.2] - 2026-04-06
 
 * **new**: support for _*Subaru HSC*_ FITS files (_*corr*_ and _*calexp*_)
