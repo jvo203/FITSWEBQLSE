@@ -12147,6 +12147,10 @@ function setup_axes(plane_index = previous_plane) {
     catch (e) {
     }
 
+    // filter out the moment_map; the spectrum is only defined for mean and integrated moment maps
+    if (moment_map != "mean" && moment_map != "integrated")
+        return;
+
     var svg = d3.select("#BackSVG");
     var width = parseFloat(svg.attr("width"));
     var height = parseFloat(svg.attr("height"));
