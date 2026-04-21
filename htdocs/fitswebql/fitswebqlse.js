@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2026-04-20.0";
+    return "JS2026-04-21.0";
 }
 
 function uuidv4() {
@@ -1367,7 +1367,7 @@ function replot_y_axis() {
     //y-axis label
     var yLabel = "Integrated";
 
-    if (intensity_mode == "mean")
+    if (moment_map == "mean")
         yLabel = "Mean";
 
     let fitsData = fitsContainer[va_count - 1];
@@ -1376,7 +1376,7 @@ function replot_y_axis() {
     if (fitsData.BUNIT != '') {
         bunit = fitsData.BUNIT.trim();
 
-        if (intensity_mode == "integrated" && has_velocity_info)
+        if (moment_map == "integrated" && has_velocity_info)
             bunit += '•km/s';
 
         bunit = "[" + bunit + "]";
@@ -6275,6 +6275,7 @@ function close_websocket_connections() {
 }
 
 async function open_websocket_connection(_datasetId, index) {
+    console.log("open_websocket_connection:", _datasetId, index);
     if ("WebSocket" in window) {
         // make a unique session id
         var session_id = uuidv4();
@@ -6689,12 +6690,13 @@ async function open_websocket_connection(_datasetId, index) {
                         var frame = new Uint8Array(received_msg, offset);
 
                         // ZFP decoder part
+                        console.log("open_websocket_connection #1:", index, fitsContainer);
                         waitForModuleReady().then(() => {
                             console.log("FITS spectrum length:", spectrum_len, "plane_count:", plane_count, "frame.length:", frame.length);
                             const res = WASM.decompressZFPspectrum(plane_count, spectrum_len, frame);
                             const spectrum = WASM.HEAPF32.slice(res[0] / 4, res[0] / 4 + res[1]);
 
-                            console.log("spectrum size: ", spectrum.length, "res[1]:", res[1], spectrum, "elapsed: ", elapsed, "[ms]");
+                            //console.log("spectrum size: ", spectrum.length, "res[1]:", res[1], spectrum, "elapsed: ", elapsed, "[ms]"); // elapsed is undefined at this point
 
                             if (spectrum.length > 0) {
                                 // attach the spectrum as either "mean" or "integrated"
@@ -6708,23 +6710,29 @@ async function open_websocket_connection(_datasetId, index) {
 
                                         fitsContainer[i].depth = spectrum_i.length;
 
-                                        if (intensity_mode == "mean") {
+                                        if (moment_map == "mean") {
                                             fitsContainer[i].mean_spectrum = spectrum_i;
                                         }
 
-                                        if (intensity_mode == "integrated") {
+                                        if (moment_map == "integrated") {
                                             fitsContainer[i].integrated_spectrum = spectrum_i;
                                         }
                                     }
                                 } else {
+                                    try {
+                                        var index = parseInt(document.getElementById('intensity_plane').value);
+                                    } catch (e) {
+                                        var index = va_count;
+                                    }
+
                                     fitsContainer[index - 1].depth = spectrum.length;
 
-                                    if (intensity_mode == "mean") {
+                                    if (moment_map == "mean") {
                                         fitsContainer[index - 1].mean_spectrum = spectrum;
                                         mean_spectrumContainer[index - 1] = spectrum;
                                     }
 
-                                    if (intensity_mode == "integrated") {
+                                    if (moment_map == "integrated") {
                                         fitsContainer[index - 1].integrated_spectrum = spectrum;
                                         integrated_spectrumContainer[index - 1] = spectrum;
                                     }
@@ -6744,11 +6752,11 @@ async function open_websocket_connection(_datasetId, index) {
                                     let fitsData = fitsContainer[index - 1];
 
                                     //plot_spectrum([spectrum]);
-                                    if (intensity_mode == "mean") {
+                                    if (moment_map == "mean") {
                                         plot_spectrum([fitsData.mean_spectrum]);
                                     }
 
-                                    if (intensity_mode == "integrated") {
+                                    if (moment_map == "integrated") {
                                         plot_spectrum([fitsData.integrated_spectrum]);
                                     }
                                 }
@@ -6756,10 +6764,10 @@ async function open_websocket_connection(_datasetId, index) {
                                     if (spectrum_count == va_count) {
                                         setup_axes();
 
-                                        if (intensity_mode == "mean")
+                                        if (moment_map == "mean")
                                             plot_spectrum(mean_spectrumContainer);
 
-                                        if (intensity_mode == "integrated")
+                                        if (moment_map == "integrated")
                                             plot_spectrum(integrated_spectrumContainer);
                                     }
                                 }
@@ -9737,7 +9745,7 @@ function change_spectrum_scale(index) {
 
     spectrum_scale[index - 1] = parseFloat(value);
 
-    change_intensity_mode();
+    change_moment_map();
 }
 
 function change_tone_mapping(index, recursive) {
@@ -9829,7 +9837,7 @@ function cube_refresh(index) {
         width: width,
         height: height,
         quality: image_quality,
-        intensity: intensity_mode,
+        intensity: moment_map,
         frame_start: data_band_lo,
         frame_end: data_band_hi,
         ref_freq: RESTFRQ,
@@ -9968,23 +9976,23 @@ function change_binning() {
     if (fitsData != null) {
         if (fitsData.depth > 1) {
             if (va_count == 1) {
-                if (intensity_mode == "mean") {
+                if (moment_map == "mean") {
                     plot_spectrum([fitsData.mean_spectrum]);
                     replot_y_axis();
                 }
 
-                if (intensity_mode == "integrated") {
+                if (moment_map == "integrated") {
                     plot_spectrum([fitsData.integrated_spectrum]);
                     replot_y_axis();
                 }
             }
             else {
-                if (intensity_mode == "mean") {
+                if (moment_map == "mean") {
                     plot_spectrum(mean_spectrumContainer);
                     replot_y_axis();
                 }
 
-                if (intensity_mode == "integrated") {
+                if (moment_map == "integrated") {
                     plot_spectrum(integrated_spectrumContainer);
                     replot_y_axis();
                 }
@@ -10017,23 +10025,23 @@ function change_smoothing_width() {
     if (fitsData != null) {
         if (fitsData.depth > 1) {
             if (va_count == 1) {
-                if (intensity_mode == "mean") {
+                if (moment_map == "mean") {
                     plot_spectrum([fitsData.mean_spectrum]);
                     replot_y_axis();
                 }
 
-                if (intensity_mode == "integrated") {
+                if (moment_map == "integrated") {
                     plot_spectrum([fitsData.integrated_spectrum]);
                     replot_y_axis();
                 }
             }
             else {
-                if (intensity_mode == "mean") {
+                if (moment_map == "mean") {
                     plot_spectrum(mean_spectrumContainer);
                     replot_y_axis();
                 }
 
-                if (intensity_mode == "integrated") {
+                if (moment_map == "integrated") {
                     plot_spectrum(integrated_spectrumContainer);
                     replot_y_axis();
                 }
@@ -10061,11 +10069,11 @@ function change_zoom_shape() {
     setup_viewports();
 }
 
-function change_intensity_mode() {
-    intensity_mode = document.getElementById('intensity_mode').value;
-    localStorage.setItem("intensity_mode", intensity_mode);
+function change_moment_map() {
+    moment_map = document.getElementById('moment_map').value;
+    sessionStorage.setItem("moment_map", moment_map);
 
-    //console.log("new intensity mode:", intensity_mode);
+    //console.log("new moment map:", moment_map);
 
     display_hourglass();
 
@@ -10140,23 +10148,23 @@ function change_colourmap(index, recursive) {
     if (fitsData != null) {
         if (fitsData.depth > 1) {
             if (va_count == 1) {
-                if (intensity_mode == "mean") {
+                if (moment_map == "mean") {
                     plot_spectrum([fitsData.mean_spectrum]);
                     replot_y_axis();
                 }
 
-                if (intensity_mode == "integrated") {
+                if (moment_map == "integrated") {
                     plot_spectrum([fitsData.integrated_spectrum]);
                     replot_y_axis();
                 }
             }
             else {
-                if (intensity_mode == "mean") {
+                if (moment_map == "mean") {
                     plot_spectrum(mean_spectrumContainer);
                     replot_y_axis();
                 }
 
-                if (intensity_mode == "integrated") {
+                if (moment_map == "integrated") {
                     plot_spectrum(integrated_spectrumContainer);
                     replot_y_axis();
                 }
@@ -11305,21 +11313,21 @@ function display_preferences(index) {
         tmpA = prefDropdown.append("li")
             //.style("background-color", "#FFF")
             .append("a")
-            .attr("id", "intensity_mode_li")
+            .attr("id", "moment_map_li")
             .style("class", "form-group")
             .attr("class", "form-horizontal");
 
         tmpA.append("label")
-            .attr("for", "intensity_mode")
+            .attr("for", "moment_map")
             .attr("class", "control-label")
-            .html("intensity mode:&nbsp; ");
+            .html("moment map:&nbsp; ");
 
         tmpA.append("select")
-            .attr("id", "intensity_mode")
-            .attr("onchange", "javascript:change_intensity_mode();")
-            .html("<option>mean</option><option>integrated</option>");
+            .attr("id", "moment_map")
+            .attr("onchange", "javascript:change_moment_map();")
+            .html("<option value='mean'>mean (-1)</option><option value='integrated'>integrated (0)</option><option value='field'>velocity (1)</option><option value='dispertion'>dispertion (2)</option>");
 
-        document.getElementById('intensity_mode').value = intensity_mode;
+        document.getElementById('moment_map').value = moment_map;
     }
 
     tmpA = prefDropdown.append("li")
@@ -11399,23 +11407,23 @@ function change_intensity_plane() {
             setup_axes(index);
 
             if (va_count == 1) {
-                if (intensity_mode == "mean") {
+                if (moment_map == "mean") {
                     plot_spectrum([fitsData.mean_spectrum]);
                     replot_y_axis();
                 }
 
-                if (intensity_mode == "integrated") {
+                if (moment_map == "integrated") {
                     plot_spectrum([fitsData.integrated_spectrum]);
                     replot_y_axis();
                 }
             }
             else {
-                if (intensity_mode == "mean") {
+                if (moment_map == "mean") {
                     plot_spectrum(mean_spectrumContainer);
                     replot_y_axis();
                 }
 
-                if (intensity_mode == "integrated") {
+                if (moment_map == "integrated") {
                     plot_spectrum(integrated_spectrumContainer);
                     replot_y_axis();
                 }
@@ -12048,10 +12056,10 @@ function composite_data_min_max() {
         let fitsData = fitsContainer[i];
         let scale = spectrum_scale[i];
 
-        if (intensity_mode == "mean")
+        if (moment_map == "mean")
             spectrum = fitsData.mean_spectrum;
 
-        if (intensity_mode == "integrated")
+        if (moment_map == "integrated")
             spectrum = fitsData.integrated_spectrum;
 
         data_min = Math.min(data_min, scale * d3.min(spectrum));
@@ -12107,7 +12115,7 @@ function setup_csv_export(plane_index = previous_plane) {
                 ra: d3.select("#ra").text().toString(),
                 dec: d3.select("#dec").text().toString(),
                 plane: plane_index,
-                intensity: intensity_mode,
+                intensity: moment_map,
                 frame_start: data_band_lo,
                 frame_end: data_band_hi,
                 ref_freq: RESTFRQ,
@@ -12152,10 +12160,10 @@ function setup_axes(plane_index = previous_plane) {
     if (va_count == 1) {
         var spectrum = null;
 
-        if (intensity_mode == "mean")
+        if (moment_map == "mean")
             spectrum = fitsData.mean_spectrum;
 
-        if (intensity_mode == "integrated")
+        if (moment_map == "integrated")
             spectrum = fitsData.integrated_spectrum;
 
         data_min = d3.min(spectrum);
@@ -12326,14 +12334,14 @@ function setup_axes(plane_index = previous_plane) {
         //y-axis label
         var yLabel = "Integrated";
 
-        if (intensity_mode == "mean")
+        if (moment_map == "mean")
             yLabel = "Mean";
 
         var bunit = '';
         if (fitsData.BUNIT != '') {
             bunit = fitsData.BUNIT.trim();
 
-            if (intensity_mode == "integrated" && has_velocity_info)
+            if (moment_map == "integrated" && has_velocity_info)
                 bunit += '•km/s';
 
             bunit = "[" + bunit + "]";
@@ -15634,23 +15642,23 @@ function setup_image_selection(plane_index = previous_plane) {
                 // restore the main image spectrum
                 if (fitsData.depth > 1) {
                     if (va_count == 1) {
-                        if (intensity_mode == "mean") {
+                        if (moment_map == "mean") {
                             plot_spectrum([fitsData.mean_spectrum]);
                             replot_y_axis();
                         }
 
-                        if (intensity_mode == "integrated") {
+                        if (moment_map == "integrated") {
                             plot_spectrum([fitsData.integrated_spectrum]);
                             replot_y_axis();
                         }
                     }
                     else {
-                        if (intensity_mode == "mean") {
+                        if (moment_map == "mean") {
                             plot_spectrum(mean_spectrumContainer);
                             replot_y_axis();
                         }
 
-                        if (intensity_mode == "integrated") {
+                        if (moment_map == "integrated") {
                             plot_spectrum(integrated_spectrumContainer);
                             replot_y_axis();
                         }
@@ -16107,7 +16115,7 @@ function setup_image_selection(plane_index = previous_plane) {
                                     width: _width,
                                     height: _height,
                                     beam: zoom_shape,
-                                    intensity: intensity_mode,
+                                    intensity: moment_map,
                                     frame_start: data_band_lo,
                                     frame_end: data_band_hi,
                                     ref_freq: RESTFRQ,
@@ -16964,10 +16972,10 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                             if (va_count == 1) {
                                 setup_axes();
 
-                                if (intensity_mode == "mean")
+                                if (moment_map == "mean")
                                     plot_spectrum([fitsContainer[index - 1].mean_spectrum]);
 
-                                if (intensity_mode == "integrated")
+                                if (moment_map == "integrated")
                                     plot_spectrum([fitsContainer[index - 1].integrated_spectrum]);
 
                                 if (molecules.length > 0)
@@ -16983,10 +16991,10 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
 
                                     setup_axes();
 
-                                    if (intensity_mode == "mean")
+                                    if (moment_map == "mean")
                                         plot_spectrum(mean_spectrumContainer);
 
-                                    if (intensity_mode == "integrated")
+                                    if (moment_map == "integrated")
                                         plot_spectrum(integrated_spectrumContainer);
 
                                     if (molecules.length > 0)
@@ -17083,7 +17091,7 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                             d3.select("#binning_li").remove();
                             d3.select("#video_fps_control_li").remove();
                             d3.select("#coords_fmt_li").remove();
-                            d3.select("#intensity_mode_li").remove();
+                            d3.select("#moment_map_li").remove();
                             d3.select("#zoom_shape_li").remove();
 
                             let fitsData = fitsContainer[va_count - 1];
@@ -17656,7 +17664,7 @@ function tileTimeout(force = false) {
             width: view_width,
             height: view_height,
             beam: beam,
-            intensity: intensity_mode,
+            intensity: moment_map,
             frame_start: data_band_lo,
             frame_end: data_band_hi,
             ref_freq: RESTFRQ,
@@ -17807,7 +17815,7 @@ function imageTimeout() {
                         y2: _y2 + 1,
                         plane: previous_plane,
                         beam: zoom_shape,
-                        intensity: intensity_mode,
+                        intensity: moment_map,
                         frame_start: data_band_lo,
                         frame_end: data_band_hi,
                         ref_freq: RESTFRQ,
@@ -17872,7 +17880,7 @@ function imageTimeout() {
                     width: _width,
                     height: _height,
                     beam: zoom_shape,
-                    intensity: intensity_mode,
+                    intensity: moment_map,
                     frame_start: data_band_lo,
                     frame_end: data_band_hi,
                     ref_freq: RESTFRQ,
@@ -22085,19 +22093,19 @@ async function mainRenderer() {
     else
         zoom_shape = localStorage.getItem("zoom_shape");
 
-    if (localStorage.getItem("intensity_mode") === null) {
+    if (sessionStorage.getItem("moment_map") === null) {
         console.log("URL parameters:", window.location.search);
 
         //an override for FUGIN
         if (window.location.search.indexOf('fugin') > 0)
-            intensity_mode = "mean";
+            moment_map = "mean";
         else
-            intensity_mode = "integrated";
+            moment_map = "integrated";
 
-        localStorage.setItem("intensity_mode", intensity_mode);
+        sessionStorage.setItem("moment_map", moment_map);
     }
     else
-        intensity_mode = localStorage.getItem("intensity_mode");
+        moment_map = sessionStorage.getItem("moment_map");
 
     if (localStorage.getItem("v5_colourmap") === null) {
         if (theme == 'light')
