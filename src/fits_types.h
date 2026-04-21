@@ -66,7 +66,9 @@ enum zoom_shape
 enum intensity_mode
 {
     mean,
-    integrated
+    integrated,
+    velocity,
+    dispersion
 };
 
 enum image_quality
