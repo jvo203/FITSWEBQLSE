@@ -11325,7 +11325,7 @@ function display_preferences(index) {
         tmpA.append("select")
             .attr("id", "moment_map")
             .attr("onchange", "javascript:change_moment_map();")
-            .html("<option value='mean'>mean (-1)</option><option value='integrated'>integrated (0)</option><option value='field'>velocity (1)</option><option value='dispertion'>dispertion (2)</option>");
+            .html("<option value='mean'>mean (-1)</option><option value='integrated'>integrated (0)</option><option value='velocity'>velocity (1)</option><option value='dispertion'>dispertion (2)</option>");
 
         document.getElementById('moment_map').value = moment_map;
     }

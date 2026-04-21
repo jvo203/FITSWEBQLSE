@@ -40,6 +40,8 @@ module fits
    enum, bind(C)
       enumerator mean
       enumerator integrated
+      enumerator velocity
+      enumerator dispersion
    end enum
 
    enum, bind(C)
@@ -56,7 +58,7 @@ module fits
       integer(c_int) :: x1, y1, x2, y2, plane
       integer(c_int) :: width, height
       integer(kind(circle)) :: beam
-      integer(kind(medium)) :: intensity
+      integer(kind(integrated)) :: intensity
       real(c_double) :: frame_start, frame_end, ref_freq
       real(c_float) :: median(4)
       integer(c_int) :: x, y
@@ -80,7 +82,7 @@ module fits
       type(C_PTR) :: ra, dec
       integer(c_int) :: x1, y1, x2, y2, plane
       integer(kind(circle)) :: beam
-      integer(kind(medium)) :: intensity
+      integer(kind(integrated)) :: intensity
       real(c_double) :: frame_start, frame_end, ref_freq, deltaV
       logical(kind=c_bool) :: rest
       integer(c_int) :: seq_id
@@ -392,7 +394,7 @@ module fits
       logical(kind=c_bool) :: image
       integer(c_int) :: x1, y1, x2, y2, plane
       integer(kind(circle)) :: beam
-      integer(kind(medium)) :: intensity
+      integer(kind(integrated)) :: intensity
       real(c_double) :: frame_start, frame_end, ref_freq
       real(c_float) :: median(4)
 
