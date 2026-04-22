@@ -908,6 +908,14 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                         // integrated
                         if (strncmp(frame_data + voff, "\"integrated\"", vlen) == 0)
                             req->intensity = integrated;
+
+                        // velocity
+                        if (strncmp(frame_data + voff, "\"velocity\"", vlen) == 0)
+                            req->intensity = velocity;
+
+                        // dispersion
+                        if (strncmp(frame_data + voff, "\"dispersion\"", vlen) == 0)
+                            req->intensity = dispersion;
                     }
 
                     // 'frame_start'
@@ -1097,6 +1105,14 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                         // integrated
                         if (strncmp(frame_data + voff, "\"integrated\"", vlen) == 0)
                             req->intensity = integrated;
+
+                        // velocity
+                        if (strncmp(frame_data + voff, "\"velocity\"", vlen) == 0)
+                            req->intensity = velocity;
+
+                        // dispersion
+                        if (strncmp(frame_data + voff, "\"dispersion\"", vlen) == 0)
+                            req->intensity = dispersion;
                     }
 
                     // 'frame_start'
@@ -1348,6 +1364,14 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                         // integrated
                         if (strncmp(frame_data + voff, "\"integrated\"", vlen) == 0)
                             req->intensity = integrated;
+
+                        // velocity
+                        if (strncmp(frame_data + voff, "\"velocity\"", vlen) == 0)
+                            req->intensity = velocity;
+
+                        // dispersion
+                        if (strncmp(frame_data + voff, "\"dispersion\"", vlen) == 0)
+                            req->intensity = dispersion;
                     }
 
                     // 'frame_start'
