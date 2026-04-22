@@ -42,6 +42,7 @@ module fits
       enumerator integrated
       enumerator velocity
       enumerator dispersion
+      enumerator maximum
    end enum
 
    enum, bind(C)

@@ -916,6 +916,10 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                         // dispersion
                         if (strncmp(frame_data + voff, "\"dispersion\"", vlen) == 0)
                             req->intensity = dispersion;
+
+                        // maximum
+                        if (strncmp(frame_data + voff, "\"maximum\"", vlen) == 0)
+                            req->intensity = maximum;
                     }
 
                     // 'frame_start'
@@ -1113,6 +1117,10 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                         // dispersion
                         if (strncmp(frame_data + voff, "\"dispersion\"", vlen) == 0)
                             req->intensity = dispersion;
+
+                        // maximum
+                        if (strncmp(frame_data + voff, "\"maximum\"", vlen) == 0)
+                            req->intensity = maximum;
                     }
 
                     // 'frame_start'
@@ -1372,6 +1380,10 @@ static int parse_received_websocket_stream(websocket_session *session, char *buf
                         // dispersion
                         if (strncmp(frame_data + voff, "\"dispersion\"", vlen) == 0)
                             req->intensity = dispersion;
+
+                        // maximum
+                        if (strncmp(frame_data + voff, "\"maximum\"", vlen) == 0)
+                            req->intensity = maximum;
                     }
 
                     // 'frame_start'

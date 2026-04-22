@@ -68,7 +68,8 @@ enum intensity_mode
     mean,
     integrated,
     velocity,
-    dispersion
+    dispersion,
+    maximum
 };
 
 enum image_quality
