@@ -12155,7 +12155,7 @@ contains
       ! get the range of the cube planes
       call get_spectrum_range(item, req%frame_start, req%frame_end, req%ref_freq, first, last)
 
-      ! fully initialise the all polarisation planes (up to four values), even if some of them are not going to be used
+      ! fully initialise all polarisation planes (up to four values), even if some of them are not going to be used
       dmin = 0.0
       dmax = 0.0
       dmedian = 0.0
