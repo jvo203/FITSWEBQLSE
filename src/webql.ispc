@@ -1910,6 +1910,8 @@ export uniform int polarisation_simd_4(uniform float pixels[], uniform unsigned 
 }
 
 // (moment map) higher moments
+
+// the 1st moment map is the intensity-weighted velocity map, which is used to trace the kinematics of the gas. The 0th moment map is the integrated intensity map, which is used to trace the distribution of the gas. The 2nd moment map is the velocity dispersion map, which is used to trace the turbulence of the gas.
 export void viewport_moment_map_1_rect(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform float pmin, uniform float pmax, uniform float view_I[], uniform float view_Iv[], uniform bool view_mask[], uniform int stride, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform int horizontal, uniform int vertical, uniform double velocity)
 {
     uniform int cn, cm;
