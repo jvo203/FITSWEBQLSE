@@ -1910,7 +1910,7 @@ export uniform int polarisation_simd_4(uniform float pixels[], uniform unsigned 
 }
 
 // (moment map) higher moments
-export uniform float viewport_moment_map_1_rect(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform float pmin, uniform float pmax, uniform float view_pixels[], uniform bool view_mask[], uniform int stride, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform int horizontal, uniform int vertical, uniform double deltav)
+export void viewport_moment_map_1_rect(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform float pmin, uniform float pmax, uniform float view_I[], uniform float view_Iv[], uniform bool view_mask[], uniform int stride, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform int horizontal, uniform int vertical, uniform double velocity)
 {
     uniform int cn, cm;
 
@@ -1932,10 +1932,7 @@ export uniform float viewport_moment_map_1_rect(uniform struct fixed_block_t com
     cm_start = y1 / DIM;
     cm_end = y2 / DIM;
 
-    // print("compressed block range: cn[%,%]; cm[%,%]\n", cn_start, cn_end, cm_start, cm_end);
-
-    varying double partial_sum = 0.0 ;
-    varying unsigned int64 partial_count = 0 ;    
+    // print("compressed block range: cn[%,%]; cm[%,%]\n", cn_start, cn_end, cm_start, cm_end); 
 
     for(uniform int j=cm_start; j<= cm_end; j++)
       for(uniform int i=cn_start; i <= cn_end; i++)
@@ -1977,23 +1974,10 @@ export uniform float viewport_moment_map_1_rect(uniform struct fixed_block_t com
             // recover the original range
             // tmp = pmin + (exp(tmp) - 0.5f)*(pmax - pmin);
 
-            partial_sum += tmp;
-            partial_count += isnan ? 0 : 1;
-
-            view_pixels[offset] += tmp * deltav ;            
-            view_mask[offset] |= isnan ? false : true ;            
+            view_I[offset] += tmp ;
+            view_Iv[offset] += tmp * velocity ;    
+            view_mask[offset] |= isnan ? false : true ;
           }      
         }
       }
-
-    // the final reductions
-    uniform double sum = reduce_add(partial_sum) ;
-    uniform int64 count = reduce_add(partial_count) ;
-
-    if(count > 0)
-    {       
-	    return (float)(sum * deltav) ;
-    }
-    else
-        return 0.0f ;
 }
