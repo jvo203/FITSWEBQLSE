@@ -1908,3 +1908,92 @@ export uniform int polarisation_simd_4(uniform float pixels[], uniform unsigned 
 
     return _count;
 }
+
+// (moment map) higher moments
+export uniform float viewport_moment_map_1_rect(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform float pmin, uniform float pmax, uniform float view_pixels[], uniform bool view_mask[], uniform int stride, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform int horizontal, uniform int vertical, uniform double deltav)
+{
+    uniform int cn, cm;
+
+    cn = width / DIM;
+    cm = height / DIM;
+
+    // the input dimensions might not be divisible by <DIM>
+    if (width % DIM != 0)
+        cn = cn + 1;
+
+    if (height % DIM != 0)
+        cm = cm + 1;
+
+    uniform int cn_start, cn_end;
+    uniform int cm_start, cm_end;
+
+    cn_start = x1 / DIM;
+    cn_end = x2 / DIM;
+    cm_start = y1 / DIM;
+    cm_end = y2 / DIM;
+
+    // print("compressed block range: cn[%,%]; cm[%,%]\n", cn_start, cn_end, cm_start, cm_end);
+
+    varying double partial_sum = 0.0 ;
+    varying unsigned int64 partial_count = 0 ;    
+
+    for(uniform int j=cm_start; j<= cm_end; j++)
+      for(uniform int i=cn_start; i <= cn_end; i++)
+      { 
+        // compressed array entry index
+        uniform int src_idx = j * cn + i;
+
+        uniform int emax = (int)compressed[src_idx].common_exp;
+        varying float scale = ldexp(1.0f, (uniform float)(emax - significant_bits));
+
+        // block coordinate offset (the same for each point in the block)
+        uniform int src_x = i * DIM;
+        uniform int src_y = j * DIM;
+        
+        // fixed-point decompression
+        foreach(k=0 ... BLOCK_SIZE)
+        {          
+          // find out which FORTRAN column the value is located
+          varying int idx = k >> BASE;
+          varying int mask = compressed[src_idx].mask[idx];
+          varying int pos = k & (DIM -1); // k % DIM
+          varying bool isnan = (mask >> pos) & 1;
+
+          // get the coordinates within a DIMxDIM block
+          varying int pixel_x = src_x + pos; // ix = pos
+          varying int pixel_y = src_y + idx; // iy = idx;
+
+          varying int offset_x = pixel_x - x1 + horizontal;
+          varying int offset_y = pixel_y - y1 + vertical;
+          varying int offset = offset_y*stride + offset_x;
+
+          // check if a pixel is not a NaN and if it lies within the viewport window
+          varying bool valid = !isnan && (pixel_x >= x1) && (pixel_x <= x2) && (pixel_y >= y1) && (pixel_y <= y2);          
+
+          cif(valid)
+          {                        
+            varying float tmp = scale * (float)compressed[src_idx].mantissa[k];
+
+            // recover the original range
+            // tmp = pmin + (exp(tmp) - 0.5f)*(pmax - pmin);
+
+            partial_sum += tmp;
+            partial_count += isnan ? 0 : 1;
+
+            view_pixels[offset] += tmp * deltav ;            
+            view_mask[offset] |= isnan ? false : true ;            
+          }      
+        }
+      }
+
+    // the final reductions
+    uniform double sum = reduce_add(partial_sum) ;
+    uniform int64 count = reduce_add(partial_count) ;
+
+    if(count > 0)
+    {       
+	    return (float)(sum * deltav) ;
+    }
+    else
+        return 0.0f ;
+}
