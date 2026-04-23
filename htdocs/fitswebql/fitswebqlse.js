@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2026-04-21.1";
+    return "JS2026-04-23.0";
 }
 
 function uuidv4() {
@@ -10071,7 +10071,7 @@ function change_zoom_shape() {
 
 function change_moment_map() {
     moment_map = document.getElementById('moment_map').value;
-    sessionStorage.setItem("moment_map", moment_map);
+    //sessionStorage.setItem("moment_map", moment_map);
 
     console.log("new moment map:", moment_map);
 
