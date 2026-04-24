@@ -12507,8 +12507,8 @@ contains
       type(image_spectrum_request_f), pointer :: req
 
       ! output variables
-      real(kind=c_float), allocatable, target :: pixels(:), view_pixels(:, :)
-      logical(kind=c_bool), allocatable, target :: mask(:), view_mask(:, :)
+      real(kind=c_float), allocatable, target :: pixels(:), pixels_I(:), pixels_Iv(:), pixels_Iv2(:)
+      logical(kind=c_bool), allocatable, target :: mask(:)
 
       integer :: first, last, length, threshold
       integer :: max_threads, frame, tid
@@ -12566,26 +12566,31 @@ contains
 
       ! we need the viewport too
       allocate (pixels(npixels))
+      allocate (pixels_I(npixels))
       allocate (mask(npixels))
-
       pixels = 0.0
+      pixels_I = 0.0
       mask = .false.
 
       ! allocate thread-local buffers common for all higher moments
       allocate (thread_I(npixels, max_threads))
-      thread_I = 0.0
       allocate (thread_mask(npixels, max_threads))
+      thread_I = 0.0
       thread_mask = .false.
 
       ! velocity / dispersion
       if (req%intensity .eq. velocity .or. req%intensity .eq. dispersion) then
+         allocate (pixels_Iv(npixels))
          allocate (thread_Iv(npixels, max_threads))
+         pixels_Iv = 0.0
          thread_Iv = 0.0
       end if
 
       ! dispersion
       if (req%intensity .eq. dispersion) then
+         allocate (pixels_Iv2(npixels))
          allocate (thread_Iv2(npixels, max_threads))
+         pixels_Iv2 = 0.0
          thread_Iv2 = 0.0
       end if
 
@@ -12619,6 +12624,21 @@ contains
       end do
       !$omp END DO
       !$omp END PARALLEL
+
+      ! reduce the thread-local buffers
+      if (req%intensity .eq. velocity) then
+         do tid = 1, max_threads
+            pixels_I(:) = pixels_I(:) + thread_I(:, tid)
+            pixels_Iv(:) = pixels_Iv(:) + thread_Iv(:, tid)
+            mask(:) = mask(:) .or. thread_mask(:, tid)
+         end do
+
+         ! M1
+         pixels(:) = pixels_Iv(:)/pixels_I(:)
+
+         ! adjust the mask (account for division by zero and NaNs in the velocity map)
+         mask(:) = mask(:) .and. (pixels_I(:) .ne. 0.0) .and. ieee_is_finite(pixels(:))
+      end if
 
       ! during development simply close the request without sending anything
       if (req%fd .ne. -1) call close_pipe(req%fd)
