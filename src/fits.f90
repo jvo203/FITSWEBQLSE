@@ -12571,16 +12571,23 @@ contains
       pixels = 0.0
       mask = .false.
 
-      ! allocate thread-local buffers
+      ! allocate thread-local buffers common for all higher moments
       allocate (thread_I(npixels, max_threads))
-      allocate (thread_Iv(npixels, max_threads))
-      allocate (thread_Iv2(npixels, max_threads))
-      allocate (thread_mask(npixels, max_threads))
-
       thread_I = 0.0
-      thread_Iv = 0.0
-      thread_Iv2 = 0.0
+      allocate (thread_mask(npixels, max_threads))
       thread_mask = .false.
+
+      ! velocity / dispersion
+      if (req%intensity .eq. velocity .or. req%intensity .eq. dispersion) then
+         allocate (thread_Iv(npixels, max_threads))
+         thread_Iv = 0.0
+      end if
+
+      ! dispersion
+      if (req%intensity .eq. dispersion) then
+         allocate (thread_Iv2(npixels, max_threads))
+         thread_Iv2 = 0.0
+      end if
 
       ! deltaV = req%deltaV
       ! rest = req%rest
@@ -12602,6 +12609,13 @@ contains
          ! calculate the velocity for this frame
          call get_frame2freq_vel(item, frame, req%ref_freq, deltaV, rest, frequency, velocity)
          print *, "thread:", tid, "channel:", frame, "f [GHz]: ", frequency, "v [km/s]:", velocity
+
+         ! the 1st moment
+         if (req%intensity .eq. velocity) then
+            call viewport_moment_map_1_rect(c_loc(item%compressed(frame, 1)%ptr), width, height, item%frame_min(frame, 1), &
+            & item%frame_max(frame, 1), c_loc(thread_I(:, tid)), c_loc(thread_Iv(:, tid)), c_loc(thread_mask(:, tid)), dimx, &
+            & req%x1 - 1, req%x2 - 1, req%y1 - 1, req%y2 - 1, 0, 0, velocity)
+         end if
       end do
       !$omp END DO
       !$omp END PARALLEL
