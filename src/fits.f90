@@ -12141,6 +12141,15 @@ contains
       if (.not. c_associated(user)) return
       call c_f_pointer(user, req)
 
+      ! intercept the request intensity parameter, handle higher moments in a separate subroutine
+      if (req%intensity .ne. mean .and. req%intensity .ne. integrated) then
+         print *, 'ws_image_spectrum_request: detected a higher-order moment:', req%intensity
+         nullify (req) ! disassociate the FORTRAN pointer from the C memory region
+         ! pass the user pointer to a separate subroutine that handles higher moments, which should free the user pointer when done
+         call moment_map_request(user)
+         return
+      end if
+
       if (.not. c_associated(req%ptr)) return
       call c_f_pointer(req%ptr, item)
 
@@ -12483,6 +12492,106 @@ contains
       return
 
    end subroutine ws_image_spectrum_request
+
+   ! higher moments are not used for Stokes parameters other than I
+   ! max_planes defaults to 1 in this subroutine (always process Stokes I)
+   subroutine moment_map_request(user)
+      use omp_lib
+      use :: unix_pthread
+      use, intrinsic :: iso_c_binding
+      implicit none
+
+      type(C_PTR), intent(in), value :: user
+
+      type(dataset), pointer :: item
+      type(image_spectrum_request_f), pointer :: req
+
+      ! output variables
+      real(kind=c_float), allocatable, target :: pixels(:), view_pixels(:, :)
+      logical(kind=c_bool), allocatable, target :: mask(:), view_mask(:, :)
+      real(kind=c_float), dimension(:, :), allocatable, target :: spectrum
+
+      integer :: first, last, length, threshold
+      integer :: max_threads, frame, tid
+      integer(kind=8) :: npixels
+      integer(c_int) :: width, height
+      real(kind=c_double) :: frequency, velocity, deltaV
+      logical(kind=c_bool) :: rest
+
+      real(kind=c_float), allocatable, target :: thread_I(:, :), thread_Iv(:, :), thread_Iv2(:, :)
+      logical(kind=c_bool), allocatable, target :: thread_mask(:, :)
+
+      integer :: dimx, dimy, i, j, k
+
+      if (.not. c_associated(user)) return
+      call c_f_pointer(user, req)
+
+      if (.not. c_associated(req%ptr)) return
+      call c_f_pointer(req%ptr, item)
+
+      print *, 'moment map request for ', item%datasetid,&
+      &', dx:', req%dx, ', quality:', req%quality, ', width:', req%width, &
+      &', height', req%height, ', beam:', req%beam, ', intensity:', req%intensity,&
+      &', frame_start:', req%frame_start, ', frame_end:', req%frame_end, ', ref_freq:', &
+         req%ref_freq, ', timestamp:', req%timestamp, ', fd:', req%fd
+
+      if (.not. allocated(item%compressed)) then
+         if (req%fd .ne. -1) call close_pipe(req%fd)
+         nullify (item)
+         nullify (req) ! disassociate the FORTRAN pointer from the C memory region
+         call free(user) ! release C memory
+         return
+      end if
+
+      ! set the viewport to the whole image
+      req%x1 = 1
+      req%y1 = 1
+      req%x2 = item%naxes(1)
+      req%y2 = item%naxes(2)
+
+      ! get the range of the cube planes
+      call get_spectrum_range(item, req%frame_start, req%frame_end, req%ref_freq, first, last)
+
+      length = last - first + 1
+      print *, 'first:', first, 'last:', last, 'length:', length, 'depth:', item%naxes(3)
+
+      width = item%naxes(1)
+      height = item%naxes(2)
+
+      dimx = abs(req%x2 - req%x1) + 1
+      dimy = abs(req%y2 - req%y1) + 1
+      npixels = dimx*dimy
+
+      ! get #physical cores (ignore HT)
+      max_threads = get_max_threads()
+
+      ! we need the viewport too
+      allocate (pixels(npixels))
+      allocate (mask(npixels))
+
+      pixels = 0.0
+      mask = .false.
+
+      ! allocate thread-local buffers
+
+      ! deltaV = req%deltaV
+      ! rest = req%rest
+      deltaV = 0.0 ! override for now; this parameter should be added to the request structure sent by the client
+      rest = .false. ! override for now; this parameter should be added to the request structure sent by the client
+
+      do frame = first, last
+         ! calculate the velocity for this frame
+         call get_frame2freq_vel(item, frame, req%ref_freq, deltaV, rest, frequency, velocity)
+         print *, "channel:", frame, "f [GHz]: ", frequency, "v [km/s]:", velocity
+      end do
+
+      ! during development simply close the request without sending anything
+      if (req%fd .ne. -1) call close_pipe(req%fd)
+      nullify (item)
+      nullify (req) ! disassociate the FORTRAN pointer from the C memory region
+      call free(user) ! release C memory
+      return
+   end subroutine moment_map_request
 
    subroutine resizeMask(src, srcW, srcH, dst, dstW, dstH)
       use, intrinsic :: ISO_C_BINDING
