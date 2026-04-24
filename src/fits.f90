@@ -12638,6 +12638,9 @@ contains
 
          ! adjust the mask (account for division by zero and NaNs in the velocity map)
          mask(:) = mask(:) .and. (pixels_I(:) .ne. 0.0) .and. ieee_is_finite(pixels(:))
+
+         ! set pixels to zero where the mask is false
+         pixels(:) = merge(pixels(:), 0.0, mask(:))
       end if
 
       ! during development simply close the request without sending anything
