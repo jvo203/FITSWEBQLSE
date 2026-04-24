@@ -12509,7 +12509,6 @@ contains
       ! output variables
       real(kind=c_float), allocatable, target :: pixels(:), view_pixels(:, :)
       logical(kind=c_bool), allocatable, target :: mask(:), view_mask(:, :)
-      real(kind=c_float), dimension(:, :), allocatable, target :: spectrum
 
       integer :: first, last, length, threshold
       integer :: max_threads, frame, tid
@@ -12573,17 +12572,39 @@ contains
       mask = .false.
 
       ! allocate thread-local buffers
+      allocate (thread_I(npixels, max_threads))
+      allocate (thread_Iv(npixels, max_threads))
+      allocate (thread_Iv2(npixels, max_threads))
+      allocate (thread_mask(npixels, max_threads))
+
+      thread_I = 0.0
+      thread_Iv = 0.0
+      thread_Iv2 = 0.0
+      thread_mask = .false.
 
       ! deltaV = req%deltaV
       ! rest = req%rest
       deltaV = 0.0 ! override for now; this parameter should be added to the request structure sent by the client
       rest = .false. ! override for now; this parameter should be added to the request structure sent by the client
 
+      !$omp PARALLEL DEFAULT(SHARED) SHARED(item, req)&
+      !$omp& SHARED(thread_I, thread_Iv, thread_Iv2, thread_mask)&
+      !$omp& PRIVATE(tid, frame, frequency, velocity)&
+      !$omp& NUM_THREADS(max_threads)
+      !$omp DO
       do frame = first, last
+         ! skip frames for which there is no data on this node
+         if (.not. associated(item%compressed(frame, 1)%ptr)) cycle
+
+         ! get a current OpenMP thread (starting from 0 as in C)
+         tid = 1 + OMP_GET_THREAD_NUM()
+
          ! calculate the velocity for this frame
          call get_frame2freq_vel(item, frame, req%ref_freq, deltaV, rest, frequency, velocity)
-         print *, "channel:", frame, "f [GHz]: ", frequency, "v [km/s]:", velocity
+         print *, "thread:", tid, "channel:", frame, "f [GHz]: ", frequency, "v [km/s]:", velocity
       end do
+      !$omp END DO
+      !$omp END PARALLEL
 
       ! during development simply close the request without sending anything
       if (req%fd .ne. -1) call close_pipe(req%fd)
