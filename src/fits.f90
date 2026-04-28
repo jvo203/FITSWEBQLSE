@@ -1012,6 +1012,21 @@ module fits
          real(c_double), value, intent(in) :: velocity
       end subroutine viewport_moment_map_1_rect
 
+      ! export void viewport_moment_map_2_rect(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform float pmin, uniform float pmax, uniform float view_I[], uniform float view_Iv[], uniform float view_Iv2[], uniform bool view_mask[], uniform int stride, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform int horizontal, uniform int vertical, uniform double velocity)
+      subroutine viewport_moment_map_2_rect(compressed, width, height, pmin, pmax, view_I, view_Iv, view_Iv2, view_mask,&
+      & stride, x1, x2, y1, y2, horizontal, vertical, velocity) BIND(C, name="viewport_moment_map_1_rect")
+         use, intrinsic :: ISO_C_BINDING
+         implicit none
+
+         type(C_PTR), value, intent(in) :: compressed
+         integer(c_int), value, intent(in) :: width, height
+         real(c_float), value, intent(in) :: pmin, pmax
+         type(C_PTR), value, intent(in) :: view_I, view_Iv, view_Iv2, view_mask
+         integer(c_int), value, intent(in) :: stride
+         integer(c_int), value, intent(in) :: x1, x2, y1, y2, horizontal, vertical
+         real(c_double), value, intent(in) :: velocity
+      end subroutine viewport_moment_map_2_rect
+
       ! export void make_global_statistics(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform float median, uniform float sumP[], uniform int64 countP[], uniform float sumN[], uniform int64 countN[])
       subroutine make_global_statistics(compressed, width, height, median,&
       &sumP, countP, sumN, countN) BIND(C, name="make_global_statistics")
