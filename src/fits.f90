@@ -12590,13 +12590,20 @@ contains
       ! allocate thread-local buffers common for all higher moments
       allocate (thread_I(npixels, max_threads))
       allocate (thread_mask(npixels, max_threads))
-      thread_I = 0.0
+
+      if (req%intensity .ne. maximum) then
+         thread_I = 0.0
+      else
+         thread_I = -1.0E30
+      end if
+
       thread_mask = .false.
 
       ! velocity / dispersion
       if (req%intensity .eq. velocity .or. req%intensity .eq. dispersion) then
          allocate (pixels_Iv(npixels))
          allocate (thread_Iv(npixels, max_threads))
+
          pixels_Iv = 0.0
          thread_Iv = 0.0
       end if
@@ -12605,6 +12612,7 @@ contains
       if (req%intensity .eq. dispersion) then
          allocate (pixels_Iv2(npixels))
          allocate (thread_Iv2(npixels, max_threads))
+
          pixels_Iv2 = 0.0
          thread_Iv2 = 0.0
       end if
@@ -12636,6 +12644,13 @@ contains
             & item%frame_max(frame, 1), c_loc(thread_I(:, tid)), c_loc(thread_Iv(:, tid)), c_loc(thread_mask(:, tid)), dimx, &
             & req%x1 - 1, req%x2 - 1, req%y1 - 1, req%y2 - 1, 0, 0, velocity)
          end if
+
+         ! the 2nd moment
+         if (req%intensity .eq. dispersion) then
+            call viewport_moment_map_2_rect(c_loc(item%compressed(frame, 1)%ptr), width, height, item%frame_min(frame, 1), &
+            & item%frame_max(frame, 1), c_loc(thread_I(:, tid)), c_loc(thread_Iv(:, tid)), c_loc(thread_Iv2(:, tid)),&
+            & c_loc(thread_mask(:, tid)), dimx, req%x1 - 1, req%x2 - 1, req%y1 - 1, req%y2 - 1, 0, 0, velocity)
+         end if
       end do
       !$omp END DO
       !$omp END PARALLEL
@@ -12650,6 +12665,24 @@ contains
 
          ! M1
          pixels(:) = pixels_Iv(:)/pixels_I(:)
+
+         ! adjust the mask (account for division by zero and NaNs in the velocity map)
+         mask(:) = mask(:) .and. (pixels_I(:) .ne. 0.0) .and. ieee_is_finite(pixels(:))
+
+         ! set pixels to zero where the mask is false
+         pixels(:) = merge(pixels(:), 0.0, mask(:))
+      end if
+
+      if (req%intensity .eq. dispersion) then
+         do tid = 1, max_threads
+            pixels_I(:) = pixels_I(:) + thread_I(:, tid)
+            pixels_Iv(:) = pixels_Iv(:) + thread_Iv(:, tid)
+            pixels_Iv2(:) = pixels_Iv2(:) + thread_Iv2(:, tid)
+            mask(:) = mask(:) .or. thread_mask(:, tid)
+         end do
+
+         ! M2
+         pixels(:) = pixels_Iv2(:)/pixels_I(:) - (pixels_Iv(:)/pixels_I(:))**2
 
          ! adjust the mask (account for division by zero and NaNs in the velocity map)
          mask(:) = mask(:) .and. (pixels_I(:) .ne. 0.0) .and. ieee_is_finite(pixels(:))
