@@ -60,7 +60,8 @@ module fits
       integer(c_int) :: width, height
       integer(kind(circle)) :: beam
       integer(kind(integrated)) :: intensity
-      real(c_double) :: frame_start, frame_end, ref_freq
+      real(c_double) :: frame_start, frame_end, ref_freq, deltaV
+      logical(kind=c_bool) :: rest
       real(c_float) :: median(4)
       integer(c_int) :: x, y
       logical(kind=c_bool) :: tracking
@@ -12544,8 +12545,7 @@ contains
       integer :: max_threads, frame, tid
       integer(kind=8) :: npixels
       integer(c_int) :: width, height
-      real(kind=c_double) :: frequency, velocity, deltaV
-      logical(kind=c_bool) :: rest
+      real(kind=c_double) :: frequency, velocity
 
       real(kind=c_float), allocatable, target :: thread_I(:, :), thread_Iv(:, :), thread_Iv2(:, :)
       logical(kind=c_bool), allocatable, target :: thread_mask(:, :)
@@ -12562,7 +12562,7 @@ contains
       &', dx:', req%dx, ', quality:', req%quality, ', width:', req%width, &
       &', height', req%height, ', beam:', req%beam, ', intensity:', req%intensity,&
       &', frame_start:', req%frame_start, ', frame_end:', req%frame_end, ', ref_freq:', &
-         req%ref_freq, ', timestamp:', req%timestamp, ', fd:', req%fd
+         req%ref_freq, ', deltaV:', req%deltaV, ', rest:', req%rest, ', timestamp:', req%timestamp, ', fd:', req%fd
 
       if (.not. allocated(item%compressed)) then
          if (req%fd .ne. -1) call close_pipe(req%fd)
@@ -12632,11 +12632,6 @@ contains
          thread_Iv2 = 0.0
       end if
 
-      ! deltaV = req%deltaV
-      ! rest = req%rest
-      deltaV = 0.0 ! override for now; this parameter should be added to the request structure sent by the client
-      rest = .false. ! override for now; this parameter should be added to the request structure sent by the client
-
       !$omp PARALLEL DEFAULT(SHARED) SHARED(item, req)&
       !$omp& SHARED(thread_I, thread_Iv, thread_Iv2, thread_mask)&
       !$omp& PRIVATE(tid, frame, frequency, velocity)&
@@ -12650,7 +12645,7 @@ contains
          tid = 1 + OMP_GET_THREAD_NUM()
 
          ! calculate the velocity for this frame
-         call get_frame2freq_vel(item, frame, req%ref_freq, deltaV, rest, frequency, velocity)
+         call get_frame2freq_vel(item, frame, req%ref_freq, req%deltaV, req%rest, frequency, velocity)
          print *, "thread:", tid, "channel:", frame, "f [GHz]: ", frequency, "v [km/s]:", velocity
 
          ! the 1st moment

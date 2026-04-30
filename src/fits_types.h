@@ -118,6 +118,8 @@ struct image_spectrum_request
     double frame_start;
     double frame_end;
     double ref_freq;
+    double deltaV;
+    bool rest;
     float median[4];
     int x;
     int y;
