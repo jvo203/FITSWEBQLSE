@@ -2059,7 +2059,7 @@ export void viewport_moment_map_2_rect(uniform struct fixed_block_t compressed[]
 }
 
 // maximum (the 8th moment)
-export void viewport_moment_map_8_rect(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform float pmin, uniform float pmax, uniform float view_I[], uniform bool view_mask[], uniform int stride, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform int horizontal, uniform int vertical, uniform double velocity)
+export void viewport_moment_map_8_rect(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform float pmin, uniform float pmax, uniform float view_I[], uniform bool view_mask[], uniform int stride, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform int horizontal, uniform int vertical)
 {
     uniform int cn, cm;
 

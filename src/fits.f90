@@ -1015,7 +1015,7 @@ module fits
 
       ! export void viewport_moment_map_2_rect(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform float pmin, uniform float pmax, uniform float view_I[], uniform float view_Iv[], uniform float view_Iv2[], uniform bool view_mask[], uniform int stride, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform int horizontal, uniform int vertical, uniform double velocity)
       subroutine viewport_moment_map_2_rect(compressed, width, height, pmin, pmax, view_I, view_Iv, view_Iv2, view_mask,&
-      & stride, x1, x2, y1, y2, horizontal, vertical, velocity) BIND(C, name="viewport_moment_map_1_rect")
+      & stride, x1, x2, y1, y2, horizontal, vertical, velocity) BIND(C, name="viewport_moment_map_2_rect")
          use, intrinsic :: ISO_C_BINDING
          implicit none
 
@@ -1028,9 +1028,9 @@ module fits
          real(c_double), value, intent(in) :: velocity
       end subroutine viewport_moment_map_2_rect
 
-      ! export void viewport_moment_map_8_rect(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform float pmin, uniform float pmax, uniform float view_I[], uniform bool view_mask[], uniform int stride, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform int horizontal, uniform int vertical, uniform double velocity)
+      ! export void viewport_moment_map_8_rect(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform float pmin, uniform float pmax, uniform float view_I[], uniform bool view_mask[], uniform int stride, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform int horizontal, uniform int vertical)
       subroutine viewport_moment_map_8_rect(compressed, width, height, pmin, pmax, view_I, view_mask, stride,&
-      &x1, x2, y1, y2, horizontal, vertical, velocity) BIND(C, name="viewport_moment_map_1_rect")
+      &x1, x2, y1, y2, horizontal, vertical) BIND(C, name="viewport_moment_map_8_rect")
          use, intrinsic :: ISO_C_BINDING
          implicit none
 
@@ -1040,7 +1040,6 @@ module fits
          type(C_PTR), value, intent(in) :: view_I, view_mask
          integer(c_int), value, intent(in) :: stride
          integer(c_int), value, intent(in) :: x1, x2, y1, y2, horizontal, vertical
-         real(c_double), value, intent(in) :: velocity
       end subroutine viewport_moment_map_8_rect
 
       ! export void make_global_statistics(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform float median, uniform float sumP[], uniform int64 countP[], uniform float sumN[], uniform int64 countN[])
@@ -12660,6 +12659,13 @@ contains
             call viewport_moment_map_2_rect(c_loc(item%compressed(frame, 1)%ptr), width, height, item%frame_min(frame, 1), &
             & item%frame_max(frame, 1), c_loc(thread_I(:, tid)), c_loc(thread_Iv(:, tid)), c_loc(thread_Iv2(:, tid)),&
             & c_loc(thread_mask(:, tid)), dimx, req%x1 - 1, req%x2 - 1, req%y1 - 1, req%y2 - 1, 0, 0, velocity)
+         end if
+
+         ! the 8th moment (maximum)
+         if (req%intensity .eq. maximum) then
+            call viewport_moment_map_8_rect(c_loc(item%compressed(frame, 1)%ptr), width, height, item%frame_min(frame, 1), &
+            & item%frame_max(frame, 1), c_loc(thread_I(:, tid)), c_loc(thread_mask(:, tid)),&
+            & dimx, req%x1 - 1, req%x2 - 1, req%y1 - 1, req%y2 - 1, 0, 0)
          end if
       end do
       !$omp END DO
