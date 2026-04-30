@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2026-04-23.0";
+    return "JS2026-04-30.0";
 }
 
 function uuidv4() {
@@ -421,7 +421,7 @@ function get_freq2vel_bounds(freq_start, freq_end, fitsData) {
     if (fitsData.RESTFRQ <= 0.0 && RESTFRQ <= 0.0)
         return { frame_start: 0, frame_end: fitsData.depth - 1 };
 
-    let c = 299792458;//speed of light [m/s]
+    const c = 299792458; //speed of light [m/s]
 
     var fRatio, v1, v2, x1, x2;
 
@@ -9074,13 +9074,13 @@ function display_dataset_info() {
     }
 
     if (has_velocity_info && has_frequency_info) {
-        var c = 299792.458;//speed of light [km/s]
+        const c = 299792.458; //speed of light [km/s]
 
         var v1 = fitsData.CRVAL3 + fitsData.CDELT3 * (1 - fitsData.CRPIX3);
-        v1 /= 1000;//[km/s]
+        v1 /= 1000; //[km/s]
 
         var v2 = fitsData.CRVAL3 + fitsData.CDELT3 * (fitsData.depth - fitsData.CRPIX3);
-        v2 /= 1000;//[km/s]
+        v2 /= 1000; //[km/s]
 
         var f1 = RESTFRQ * Math.sqrt((1 - v1 / c) / (1 + v1 / c));
         var f2 = RESTFRQ * Math.sqrt((1 - v2 / c) / (1 + v2 / c));
@@ -9503,7 +9503,7 @@ function submit_delta_v() {
     }
 
     //range checks
-    var c = 299792.458;//speed of light [km/s]
+    const c = 299792.458; //speed of light [km/s]
 
     var value = sessionStorage.getItem("redshift");
 
@@ -9631,10 +9631,10 @@ function validate_redshift() {
             document.getElementById('redshift').value = 299792;
 
         // convert z redshift to velocity
-        let c = 299792.458;//speed of light [km/s]
-        let vel = document.getElementById('redshift').valueAsNumber;
+        const c = 299792.458; //speed of light [km/s]
+        const vel = document.getElementById('redshift').valueAsNumber;
 
-        let beta = vel / c;
+        const beta = vel / c;
         redshift = Math.sqrt((1.0 + beta) / (1.0 - beta)) - 1.0;
     }
 
@@ -9831,6 +9831,36 @@ function cube_refresh(index) {
     var width = Math.round(rect.width - 20);
     var height = Math.round(rect.height - 20);
 
+    const c = 299792.458; //speed of light [km/s]
+
+    var deltaV = 0.0;
+
+    try {
+        deltaV = document.getElementById('velocityInput').valueAsNumber;//[km/s]
+    }
+    catch (e) {
+        console.log(e);
+        console.log("USER_DELTAV = ", USER_DELTAV);
+    }
+
+    //convert redshift z to V
+    var value = sessionStorage.getItem("redshift");
+
+    if (value == "z") {
+        var tmp = - (1.0 - (1.0 + deltaV) * (1.0 + deltaV)) / (1.0 + (1.0 + deltaV) * (1.0 + deltaV));
+
+        deltaV = tmp * c;
+    };
+
+    var checkbox = document.getElementById('restcheckbox');
+    var rest = false;
+
+    try {
+        rest = checkbox.checked;
+    } catch (e) {
+        console.log(e);
+    }
+
     var request = {
         type: "image",
         dx: dx,
@@ -9841,6 +9871,8 @@ function cube_refresh(index) {
         frame_start: data_band_lo,
         frame_end: data_band_hi,
         ref_freq: RESTFRQ,
+        deltaV: 1000.0 * deltaV, // [m/s]
+        rest: rest,
         timestamp: performance.now()
     };
 
@@ -11713,13 +11745,13 @@ function display_histogram(index, initPlanes = true) {
 }
 
 function Einstein_velocity_addition(v1, v2) {
-    var c = 299792.458;//speed of light [km/s]
+    const c = 299792.458; //speed of light [km/s]
 
     return (v1 + v2) / (1 + v1 * v2 / (c * c));
 }
 
 function Einstein_relative_velocity(f, f0) {
-    var c = 299792.458;//speed of light [km/s]
+    const c = 299792.458; //speed of light [km/s]
 
     var deltaV = 0.0;
 
@@ -11746,11 +11778,11 @@ function Einstein_relative_velocity(f, f0) {
 }
 
 function relativistic_rest_frequency(f) {
-    var c = 299792.458;//speed of light [km/s]
+    const c = 299792.458; //speed of light [km/s]
 
-    var v = document.getElementById('velocityInput').valueAsNumber;//[km/s]
+    const v = document.getElementById('velocityInput').valueAsNumber; //[km/s]
 
-    var beta = v / c;
+    const beta = v / c;
 
     //convert redshift z to V
     var value = sessionStorage.getItem("redshift");
@@ -12076,7 +12108,7 @@ function setup_csv_export(plane_index = previous_plane) {
     elem.onclick = function () {
         console.log("export spectrum to CSV.");
 
-        var c = 299792.458;//speed of light [km/s]
+        const c = 299792.458;//speed of light [km/s]
 
         var deltaV = 0.0;
 
@@ -17775,7 +17807,7 @@ function imageTimeout() {
             elem.onclick = function () {
                 console.log("export viewport to CSV.");
 
-                var c = 299792.458;//speed of light [km/s]
+                const c = 299792.458;//speed of light [km/s]
 
                 var deltaV = 0.0;
 
@@ -18399,7 +18431,7 @@ function pv_contour(left, top, width, height, pvCanvas, flipY, pv_width, pv_heig
 }
 
 function send_pv_request(x1, y1, x2, y2) {
-    var c = 299792.458;//speed of light [km/s]
+    const c = 299792.458; //speed of light [km/s]
 
     var deltaV = 0.0;
 
