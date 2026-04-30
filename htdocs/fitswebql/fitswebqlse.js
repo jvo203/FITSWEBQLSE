@@ -421,7 +421,7 @@ function get_freq2vel_bounds(freq_start, freq_end, fitsData) {
     if (fitsData.RESTFRQ <= 0.0 && RESTFRQ <= 0.0)
         return { frame_start: 0, frame_end: fitsData.depth - 1 };
 
-    const c = 299792458; //speed of light [m/s]
+    var c = 299792458; //speed of light [m/s]
 
     var fRatio, v1, v2, x1, x2;
 
@@ -9074,7 +9074,7 @@ function display_dataset_info() {
     }
 
     if (has_velocity_info && has_frequency_info) {
-        const c = 299792.458; //speed of light [km/s]
+        let c = 299792.458; //speed of light [km/s]
 
         var v1 = fitsData.CRVAL3 + fitsData.CDELT3 * (1 - fitsData.CRPIX3);
         v1 /= 1000; //[km/s]
@@ -9503,7 +9503,7 @@ function submit_delta_v() {
     }
 
     //range checks
-    const c = 299792.458; //speed of light [km/s]
+    var c = 299792.458; //speed of light [km/s]
 
     var value = sessionStorage.getItem("redshift");
 
@@ -9631,10 +9631,10 @@ function validate_redshift() {
             document.getElementById('redshift').value = 299792;
 
         // convert z redshift to velocity
-        const c = 299792.458; //speed of light [km/s]
-        const vel = document.getElementById('redshift').valueAsNumber;
+        let c = 299792.458; //speed of light [km/s]
+        let vel = document.getElementById('redshift').valueAsNumber;
 
-        const beta = vel / c;
+        let beta = vel / c;
         redshift = Math.sqrt((1.0 + beta) / (1.0 - beta)) - 1.0;
     }
 
@@ -9831,7 +9831,7 @@ function cube_refresh(index) {
     var width = Math.round(rect.width - 20);
     var height = Math.round(rect.height - 20);
 
-    const c = 299792.458; //speed of light [km/s]
+    var c = 299792.458; //speed of light [km/s]
 
     var deltaV = 0.0;
 
@@ -11780,9 +11780,9 @@ function Einstein_relative_velocity(f, f0) {
 function relativistic_rest_frequency(f) {
     const c = 299792.458; //speed of light [km/s]
 
-    const v = document.getElementById('velocityInput').valueAsNumber; //[km/s]
+    var v = document.getElementById('velocityInput').valueAsNumber; //[km/s]
 
-    const beta = v / c;
+    var beta = v / c;
 
     //convert redshift z to V
     var value = sessionStorage.getItem("redshift");
@@ -18431,7 +18431,7 @@ function pv_contour(left, top, width, height, pvCanvas, flipY, pv_width, pv_heig
 }
 
 function send_pv_request(x1, y1, x2, y2) {
-    const c = 299792.458; //speed of light [km/s]
+    var c = 299792.458; //speed of light [km/s]
 
     var deltaV = 0.0;
 
