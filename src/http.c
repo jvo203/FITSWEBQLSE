@@ -4945,8 +4945,12 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
                           "src=\"https://cdn.jsdelivr.net/gh/zerodevx/zero-md@2/dist/zero-md.min.js\" "
                           "type=\"module\"></script>\n");
 
-    // Font Awesome
-    g_string_append(html, "<script src=\"https://kit.fontawesome.com/8433b7dde2.js?ver=5.15.4\" crossorigin=\"anonymous\"></script>\n");
+    // Font Awesome Free Kit
+    // g_string_append(html, "<script src=\"https://kit.fontawesome.com/8433b7dde2.js?ver=5.15.4\" crossorigin=\"anonymous\"></script>\n");
+    // self-hosted Font Awesome
+    g_string_append(html, "<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/fitswebql/css/fontawesome.min.css\"/>\n");
+    g_string_append(html, "<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/fitswebql/css/solid.min.css\"/>\n");
+    g_string_append(html, "<link rel=\"stylesheet\" href=\"https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/fitswebql/css/regular.min.css\"/>\n");
 
     // Bzip2 decoder
     g_string_append(html, "<script src=\"https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@" STR(VERSION_MAJOR) "." STR(VERSION_MINOR) "." STR(VERSION_SUB) "/htdocs/fitswebql/bzip2.min.js\"></script>\n");
