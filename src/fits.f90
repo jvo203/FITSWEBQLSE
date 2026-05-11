@@ -12550,6 +12550,11 @@ contains
       logical(kind=c_bool), allocatable, target :: thread_mask(:, :)
 
       integer :: dimx, dimy, i, j, k
+      integer :: inner_width, inner_height
+      integer :: img_width, img_height
+      integer(c_int) :: precision
+      integer :: x1, x2, y1, y2 ! unused
+      real :: scale
 
       if (.not. c_associated(user)) return
       call c_f_pointer(user, req)
@@ -12717,6 +12722,12 @@ contains
          ! M8
          pixels(:) = pixels_I(:)
       end if
+
+      ! get the inner image bounding box (excluding NaNs)
+      call inherent_image_dimensions_from_mask(reshape(mask, (/dimx, dimy/)), inner_width, inner_height, x1, y1, x2, y2)
+
+      ! get the downscaled image dimensions
+      scale = get_image_scale(req%width, req%height, inner_width, inner_height)
 
       ! during development simply close the request without sending anything
       if (req%fd .ne. -1) call close_pipe(req%fd)
