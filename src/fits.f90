@@ -12537,8 +12537,8 @@ contains
       type(image_spectrum_request_f), pointer :: req
 
       ! output variables
-      real(kind=c_float), allocatable, target :: pixels(:), pixels_I(:), pixels_Iv(:), pixels_Iv2(:)
-      logical(kind=c_bool), allocatable, target :: mask(:)
+      real(kind=c_float), allocatable, target :: pixels(:), pixels_I(:), pixels_Iv(:), pixels_Iv2(:), view_pixels(:, :)
+      logical(kind=c_bool), allocatable, target :: mask(:), view_mask(:, :)
 
       integer :: first, last, length, threshold
       integer :: max_threads, frame, tid
@@ -12555,6 +12555,10 @@ contains
       integer(c_int) :: precision
       integer :: x1, x2, y1, y2 ! unused
       real :: scale
+
+      type(resize_task_t), target :: pixels_task
+      type(c_ptr) :: pixels_pid
+      integer(kind=c_int) :: pixels_rc, rc
 
       if (.not. c_associated(user)) return
       call c_f_pointer(user, req)
@@ -12728,6 +12732,45 @@ contains
 
       ! get the downscaled image dimensions
       scale = get_image_scale(req%width, req%height, inner_width, inner_height)
+
+      if (scale .lt. 1.0) then
+         img_width = floor(scale*item%naxes(1))
+         img_height = floor(scale*item%naxes(2))
+
+         print *, "downscaled image dimensions:", img_width, img_height
+         allocate (view_pixels(img_width, img_height))
+         allocate (view_mask(img_width, img_height))
+
+         pixels_task%pSrc = c_loc(pixels(:))
+         pixels_task%srcWidth = item%naxes(1)
+         pixels_task%srcHeight = item%naxes(2)
+
+         pixels_task%pDest = c_loc(view_pixels(:, :))
+         pixels_task%dstWidth = img_width
+         pixels_task%dstHeight = img_height
+
+         if (scale .gt. 0.2) then
+            pixels_task%numLobes = 3
+         else
+            pixels_task%numLobes = 0
+         end if
+
+         ! launch a pthread to resize pixels
+         pixels_pid = my_pthread_create(start_routine=c_funloc(launch_resize_task),&
+         & arg=c_loc(pixels_task), rc=pixels_rc)
+
+         call resizeNearest(c_loc(mask), item%naxes(1), item%naxes(2), c_loc(view_mask), img_width, img_height)
+         ! call resizeMask(mask, item%naxes(1), item%naxes(2), view_mask, img_width, img_height)
+
+         ! join pixels thread
+         rc = my_pthread_join(pixels_pid)
+      else
+         img_width = item%naxes(1)
+         img_height = item%naxes(2)
+
+         view_pixels = reshape(pixels, item%naxes(1:2))
+         view_mask = reshape(mask, item%naxes(1:2))
+      end if
 
       ! during development simply close the request without sending anything
       if (req%fd .ne. -1) call close_pipe(req%fd)
