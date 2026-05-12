@@ -12560,6 +12560,12 @@ contains
       type(c_ptr) :: pixels_pid
       integer(kind=c_int) :: pixels_rc, rc
 
+      ! image histogram
+      integer(kind=c_int), target :: hist(NBINS)
+
+      ! image tone mapping
+      type(image_tone_mapping), target :: tone
+
       if (.not. c_associated(user)) return
       call c_f_pointer(user, req)
 
@@ -12772,8 +12778,24 @@ contains
          view_mask = reshape(mask, item%naxes(1:2))
       end if
 
-      ! during development simply close the request without sending anything
-      if (req%fd .ne. -1) call close_pipe(req%fd)
+      tone%flux = c_null_char ! a C-style null-terminated string
+
+      call make_image_statistics(item, img_width, img_height, view_pixels(:, :), view_mask, hist(:), tone)
+
+      if (req%fd .ne. -1) then
+
+         select case (req%quality)
+          case (low)
+            precision = ZFP_LOW_PRECISION
+          case (high)
+            precision = ZFP_HIGH_PRECISION
+          case default
+            precision = ZFP_MEDIUM_PRECISION
+         end select
+
+         call close_pipe(req%fd)
+      end if
+
       nullify (item)
       nullify (req) ! disassociate the FORTRAN pointer from the C memory region
       call free(user) ! release C memory
