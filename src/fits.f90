@@ -12172,6 +12172,12 @@ contains
       call c_f_pointer(user, req)
 
       ! intercept the request intensity parameter, handle higher moments in a separate subroutine
+      if (req%intensity .eq. mean) print *, "ws_image_spectrum_request: detected a mean intensity request"
+      if (req%intensity .eq. integrated) print *, "ws_image_spectrum:_request: detected an integrated intensity request"
+      if (req%intensity .eq. velocity) print *, "ws_image_spectrum_request: detected a velocity request"
+      if (req%intensity .eq. dispersion) print *, "ws_image_spectrum_request: detected a velocity dispersion request"
+      if (req%intensity .eq. maximum) print *, "ws_image_spectrum_request: detected a maximum request"
+
       if (req%intensity .ne. mean .and. req%intensity .ne. integrated) then
          print *, 'ws_image_spectrum_request: detected a higher-order moment:', req%intensity
          nullify (req) ! disassociate the FORTRAN pointer from the C memory region
@@ -12544,7 +12550,7 @@ contains
       integer :: max_threads, frame, tid
       integer(kind=8) :: npixels
       integer(c_int) :: width, height
-      real(kind=c_double) :: frequency, velocity
+      real(kind=c_double) :: freq, vel
 
       real(kind=c_float), allocatable, target :: thread_I(:, :), thread_Iv(:, :), thread_Iv2(:, :)
       logical(kind=c_bool), allocatable, target :: thread_mask(:, :)
@@ -12648,7 +12654,7 @@ contains
 
       !$omp PARALLEL DEFAULT(SHARED) SHARED(item, req)&
       !$omp& SHARED(thread_I, thread_Iv, thread_Iv2, thread_mask)&
-      !$omp& PRIVATE(tid, frame, frequency, velocity)&
+      !$omp& PRIVATE(tid, frame, freq, vel)&
       !$omp& NUM_THREADS(max_threads)
       !$omp DO
       do frame = first, last
@@ -12659,21 +12665,21 @@ contains
          tid = 1 + OMP_GET_THREAD_NUM()
 
          ! calculate the velocity for this frame
-         call get_frame2freq_vel(item, frame, req%ref_freq, req%deltaV, req%rest, frequency, velocity)
-         print *, "thread:", tid, "channel:", frame, "f [GHz]: ", frequency, "v [km/s]:", velocity
+         call get_frame2freq_vel(item, frame, req%ref_freq, req%deltaV, req%rest, freq, vel)
+         ! print *, "thread:", tid, "channel:", frame, "f [GHz]: ", freq, "v [km/s]:", vel
 
          ! the 1st moment
          if (req%intensity .eq. velocity) then
             call viewport_moment_map_1_rect(c_loc(item%compressed(frame, 1)%ptr), width, height, item%frame_min(frame, 1), &
             & item%frame_max(frame, 1), c_loc(thread_I(:, tid)), c_loc(thread_Iv(:, tid)), c_loc(thread_mask(:, tid)), dimx, &
-            & req%x1 - 1, req%x2 - 1, req%y1 - 1, req%y2 - 1, 0, 0, velocity)
+            & req%x1 - 1, req%x2 - 1, req%y1 - 1, req%y2 - 1, 0, 0, vel)
          end if
 
          ! the 2nd moment
          if (req%intensity .eq. dispersion) then
             call viewport_moment_map_2_rect(c_loc(item%compressed(frame, 1)%ptr), width, height, item%frame_min(frame, 1), &
             & item%frame_max(frame, 1), c_loc(thread_I(:, tid)), c_loc(thread_Iv(:, tid)), c_loc(thread_Iv2(:, tid)),&
-            & c_loc(thread_mask(:, tid)), dimx, req%x1 - 1, req%x2 - 1, req%y1 - 1, req%y2 - 1, 0, 0, velocity)
+            & c_loc(thread_mask(:, tid)), dimx, req%x1 - 1, req%x2 - 1, req%y1 - 1, req%y2 - 1, 0, 0, vel)
          end if
 
          ! the 8th moment (maximum)
@@ -12699,6 +12705,12 @@ contains
 
          ! adjust the mask (account for division by zero and NaNs in the velocity map)
          mask(:) = mask(:) .and. (pixels_I(:) .ne. 0.0) .and. ieee_is_finite(pixels(:))
+
+         ! print 10 pixels and mask from the centre of the image for debugging
+         !print *, "sample pixels (velocity map):"
+         !do i = -5, 4
+         !   print *, pixels(dimx/2 + i + 1 + (dimy/2)*dimx), mask(dimx/2 + i + 1 + (dimy/2)*dimx)
+         !end do
 
          ! set pixels to zero where the mask is false
          pixels(:) = merge(pixels(:), 0.0, mask(:))
@@ -12779,6 +12791,10 @@ contains
       end if
 
       tone%flux = c_null_char ! a C-style null-terminated string
+      ! force a logistic tone mapping for moment maps, tone%flux needs to be written character by character as it is a fixed-size C string, terminated by a null character
+      !do i = 1, min(len_trim("logistic"), size(tone%flux) - 1)
+      !   tone%flux(i) = "logistic"(i:i)
+      !end do
 
       call make_image_statistics(item, img_width, img_height, view_pixels(:, :), view_mask, hist(:), tone)
 
