@@ -12796,6 +12796,9 @@ contains
          call write_image_spectrum(req%fd, 1, c_loc(tone), img_width, img_height, precision,&
          & c_loc(view_pixels), c_loc(view_mask))
 
+         ! send dummy polarisation information
+         call write_polarisation(req%fd, 0, 0, 0, c_null_ptr, c_null_ptr, 0)
+
          deallocate (view_pixels)
          deallocate (view_mask)
 
