@@ -12172,12 +12172,6 @@ contains
       call c_f_pointer(user, req)
 
       ! intercept the request intensity parameter, handle higher moments in a separate subroutine
-      if (req%intensity .eq. mean) print *, "ws_image_spectrum_request: detected a mean intensity request"
-      if (req%intensity .eq. integrated) print *, "ws_image_spectrum:_request: detected an integrated intensity request"
-      if (req%intensity .eq. velocity) print *, "ws_image_spectrum_request: detected a velocity request"
-      if (req%intensity .eq. dispersion) print *, "ws_image_spectrum_request: detected a velocity dispersion request"
-      if (req%intensity .eq. maximum) print *, "ws_image_spectrum_request: detected a maximum request"
-
       if (req%intensity .ne. mean .and. req%intensity .ne. integrated) then
          print *, 'ws_image_spectrum_request: detected a higher-order moment:', req%intensity
          nullify (req) ! disassociate the FORTRAN pointer from the C memory region
@@ -12791,10 +12785,11 @@ contains
       end if
 
       tone%flux = c_null_char ! a C-style null-terminated string
+
       ! force a logistic tone mapping for moment maps, tone%flux needs to be written character by character as it is a fixed-size C string, terminated by a null character
-      !do i = 1, min(len_trim("logistic"), size(tone%flux) - 1)
-      !   tone%flux(i) = "logistic"(i:i)
-      !end do
+      do i = 1, min(len_trim("logistic"), size(tone%flux) - 1)
+         tone%flux(i) = "logistic"(i:i)
+      end do
 
       call make_image_statistics(item, img_width, img_height, view_pixels(:, :), view_mask, hist(:), tone)
 
