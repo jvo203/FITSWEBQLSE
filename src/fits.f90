@@ -12700,12 +12700,6 @@ contains
          ! adjust the mask (account for division by zero and NaNs in the velocity map)
          mask(:) = mask(:) .and. (pixels_I(:) .ne. 0.0) .and. ieee_is_finite(pixels(:))
 
-         ! print 10 pixels and mask from the centre of the image for debugging
-         !print *, "sample pixels (velocity map):"
-         !do i = -5, 4
-         !   print *, pixels(dimx/2 + i + 1 + (dimy/2)*dimx), mask(dimx/2 + i + 1 + (dimy/2)*dimx)
-         !end do
-
          ! set pixels to zero where the mask is false
          pixels(:) = merge(pixels(:), 0.0, mask(:))
       end if
