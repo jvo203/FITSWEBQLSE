@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2026-05-07.0";
+    return "JS2026-05-13.0";
 }
 
 function uuidv4() {
@@ -4696,7 +4696,7 @@ function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, i
         }
 
         // re-use the existing tone mapping settings if possible
-        tone_mapping = imageContainer[index - 1].tone_mapping;
+        //tone_mapping = imageContainer[index - 1].tone_mapping; // why???
     }
 
     imageContainer[index - 1] = { width: img_width, height: img_height, pixels: pixels, alpha: alpha, texture: texture, image_bounding_dims: image_bounding_dims, pixel_range: pixel_range, tone_mapping: tone_mapping, viewportContainer: null, first: false };
@@ -10795,7 +10795,7 @@ function setup_histogram_interaction(index) {
 
     let fitsData = imageContainer[index - 1].tone_mapping;
 
-    //console.log("min:", fitsData.min, "max:", fitsData.max, "median:", fitsData.median, "black:", fitsData.black, "white:", fitsData.white);
+    console.log("min:", fitsData.min, "max:", fitsData.max, "median:", fitsData.median, "black:", fitsData.black, "white:", fitsData.white);
 
     var flux = document.getElementById('flux' + index).value;
     var min = fitsData.min;
