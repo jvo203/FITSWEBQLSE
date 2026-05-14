@@ -2348,10 +2348,10 @@ contains
 
       ! item%flux
       if (allocated(item%flux)) then
-         write (unit=fileunit, IOSTAT=ios) len(item%flux)
+         write (unit=fileunit, IOSTAT=ios) len_trim(item%flux)
          if (ios .ne. 0) bSuccess = bSuccess .and. .false.
 
-         write (unit=fileunit, IOSTAT=ios) item%flux
+         write (unit=fileunit, IOSTAT=ios) trim(item%flux)
          if (ios .ne. 0) bSuccess = bSuccess .and. .false.
       else
          write (unit=fileunit, IOSTAT=ios) 0
@@ -6068,7 +6068,7 @@ contains
             end select
 
             if (allocated(flux)) then
-               do i = 1, min(len(flux), size(tone%flux) - 1)
+               do i = 1, min(len_trim(flux), size(tone%flux) - 1)
                   tone%flux(i) = flux(i:i)
                end do
             end if
@@ -6911,7 +6911,7 @@ contains
 
          if (allocated(item%flux)) then
             ! allocate (tone(i)%flux, source=item%flux)
-            do j = 1, min(len(item%flux), size(tone(i)%flux) - 1)
+            do j = 1, min(len_trim(item%flux), size(tone(i)%flux) - 1)
                tone(i)%flux(j) = item%flux(j:j)
             end do
          end if
