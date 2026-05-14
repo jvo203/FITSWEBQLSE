@@ -6666,6 +6666,17 @@ async function open_websocket_connection(_datasetId, index) {
                             display_legend();
                         }
 
+                        // remove the axes if (moment_map != "mean" && moment_map != "integrated")
+                        if (moment_map != "mean" && moment_map != "integrated") {
+                            try {
+                                d3.select("#axes").remove();
+                                d3.select("#axes_selection").remove();
+                                d3.select("#foreignCSV").remove();
+                            }
+                            catch (e) {
+                            }
+                        }
+
                         return;
 
                         //clear the Video Canvas
@@ -12174,6 +12185,7 @@ function setup_axes(plane_index = previous_plane) {
 
     try {
         d3.select("#axes").remove();
+        d3.select("#axes_selection").remove();
         d3.select("#foreignCSV").remove();
     }
     catch (e) {
