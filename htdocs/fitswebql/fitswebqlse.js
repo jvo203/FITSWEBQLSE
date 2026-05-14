@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2026-05-13.0";
+    return "JS2026-05-14.0";
 }
 
 function uuidv4() {
@@ -6666,14 +6666,28 @@ async function open_websocket_connection(_datasetId, index) {
                             display_legend();
                         }
 
-                        // remove the axes if (moment_map != "mean" && moment_map != "integrated")
+                        // remove the axes & spectrum if (moment_map != "mean" && moment_map != "integrated")                        
                         if (moment_map != "mean" && moment_map != "integrated") {
+                            let elem = document.getElementById("SpectrumCanvas");
+
                             try {
+                                elem.style.display = "none";
+                                d3.select("#yaxis").attr("opacity", 0);
+                                d3.select("#ylabel").attr("opacity", 0);
+
                                 d3.select("#axes").remove();
                                 d3.select("#axes_selection").remove();
                                 d3.select("#foreignCSV").remove();
                             }
                             catch (e) {
+                            }
+                        } else {
+                            let elem = document.getElementById("SpectrumCanvas");
+
+                            if (displaySpectrum) {
+                                elem.style.display = "block";
+                                d3.select("#yaxis").attr("opacity", 1);
+                                d3.select("#ylabel").attr("opacity", 1);
                             }
                         }
 
