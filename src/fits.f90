@@ -12565,6 +12565,7 @@ contains
 
       ! image tone mapping
       type(image_tone_mapping), target :: tone
+      character(len=:), allocatable :: flux
 
       if (.not. c_associated(user)) return
       call c_f_pointer(user, req)
@@ -12780,10 +12781,14 @@ contains
 
       tone%flux = c_null_char ! a C-style null-terminated string
 
-      ! force a logistic tone mapping for moment maps, tone%flux needs to be written character by character as it is a fixed-size C string, terminated by a null character
-      do i = 1, min(len_trim("logistic"), size(tone%flux) - 1)
-         tone%flux(i) = "logistic"(i:i)
-      end do
+      ! force a logistic tone mapping for some moment maps, tone%flux needs to be written character by character as it is a fixed-size C string, terminated by a null character
+      if (req%intensity .eq. dispersion .or. req%intensity .eq. velocity) then
+         flux = 'logistic'
+
+         do i = 1, min(len_trim(flux), size(tone%flux) - 1)
+            tone%flux(i) = flux(i:i)
+         end do
+      end if
 
       call make_image_statistics(item, img_width, img_height, view_pixels(:, :), view_mask, hist(:), tone)
 
