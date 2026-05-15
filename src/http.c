@@ -5285,6 +5285,14 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
               "    \"three/addons/\": \"https://cdn.jsdelivr.net/npm/three@0.184.0/examples/jsm/\"\n"
               "  }\n"
               "}\n"
+              "</script>\n"
+              "<script type=\"module\">\n"
+              "  import * as THREE from 'three';\n"
+              "  import { OrbitControls } from 'three/addons/controls/OrbitControls.js';\n"
+              "  import { ImprovedNoise } from 'three/addons/math/ImprovedNoise.js';\n"
+              "  window.THREE = THREE;\n"
+              "  window.OrbitControls = OrbitControls;\n"
+              "  window.ImprovedNoise = ImprovedNoise;\n"
               "</script>\n");
 
     // HTML content
