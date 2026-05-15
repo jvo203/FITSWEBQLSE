@@ -337,5 +337,3 @@ function animateSurface() {
     controls.update();
     renderer.render(scene, camera);
 }
-
-window.init_surface = init_surface;
