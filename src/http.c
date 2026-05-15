@@ -5276,6 +5276,21 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
     }
 #endif
 
+    // Three.js import script (used by the 3D viewer)
+    g_string_append(
+        html, "<script type=\"importmap\">\n"
+              "{\n"
+              "  \"imports\": {\n"
+              "    \"three\": \"https://cdn.jsdelivr.net/npm/three@0.184.0/build/three.module.js\",\n"
+              "    \"three/addons/\": \"https://cdn.jsdelivr.net/npm/three@0.184.0/examples/jsm/\"\n"
+              "  }\n"
+              "}\n"
+              "</script>\n"
+              "<script type=\"module\" async>\n"
+              "  import * as THREE from 'three';\n"
+              "  window.THREE = THREE;\n"
+              "</script>\n");
+
     // HTML content
     g_string_append(html, "<title>FITSWEBQLSE</title></head><body>\n");
     g_string_append_printf(html, "<div id='votable' style='width: 0; height: 0;' data-va_count='%d' ", va_count);
