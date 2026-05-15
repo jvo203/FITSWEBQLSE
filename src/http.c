@@ -5285,10 +5285,6 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
               "    \"three/addons/\": \"https://cdn.jsdelivr.net/npm/three@0.184.0/examples/jsm/\"\n"
               "  }\n"
               "}\n"
-              "</script>\n"
-              "<script type=\"module\" async>\n"
-              "  import * as THREE from 'three';\n"
-              "  window.THREE = THREE;\n"
               "</script>\n");
 
     // HTML content
