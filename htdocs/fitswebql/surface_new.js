@@ -8,7 +8,6 @@ let controls;
 let scene;
 let renderer;
 let mesh;
-let helper;
 let wireTexture;
 let geometry;
 let material;
@@ -16,10 +15,7 @@ let isActive = false;
 let initTimer = 0;
 
 const segments = 512;
-let raycaster = null;
-let pointer = null;
 let surfacePoint = null;
-let helperLookAt = null;
 let improvedNoise = null;
 let threeReadyPromise = null;
 
@@ -38,10 +34,7 @@ function ensureThreeDeps() {
                 THREE = window.THREE;
                 OrbitControls = window.OrbitControls;
                 ImprovedNoise = window.ImprovedNoise;
-                raycaster = new THREE.Raycaster();
-                pointer = new THREE.Vector2();
                 surfacePoint = new THREE.Vector3();
-                helperLookAt = new THREE.Vector3();
                 improvedNoise = new ImprovedNoise();
                 resolve();
                 return;
@@ -167,7 +160,6 @@ function disposeSurfaceResources() {
     window.removeEventListener('resize', onWindowResize);
 
     if (renderer != null) {
-        renderer.domElement.removeEventListener('pointermove', onPointerMove);
         renderer.setAnimationLoop(null);
         renderer.dispose();
     }
@@ -188,18 +180,12 @@ function disposeSurfaceResources() {
         material.dispose();
     }
 
-    if (helper != null) {
-        helper.geometry.dispose();
-        helper.material.dispose();
-    }
-
     container = null;
     camera = null;
     controls = null;
     scene = null;
     renderer = null;
     mesh = null;
-    helper = null;
     wireTexture = null;
     geometry = null;
     material = null;
@@ -298,15 +284,6 @@ function initSurfaceScene() {
 
     mesh = new THREE.Mesh(geometry, material);
     scene.add(mesh);
-
-    const helperGeometry = new THREE.ConeGeometry(0.0125, 0.05, 3);
-    helperGeometry.translate(0, 0.025, 0);
-    helperGeometry.rotateX(Math.PI / 2);
-    helper = new THREE.Mesh(helperGeometry, new THREE.MeshNormalMaterial());
-    helper.visible = false;
-    scene.add(helper);
-
-    renderer.domElement.addEventListener('pointermove', onPointerMove);
     window.addEventListener('resize', onWindowResize);
 
     d3.select('#hourglassThreeJS').remove();
@@ -364,28 +341,6 @@ function animateSurface() {
 
     controls.update();
     renderer.render(scene, camera);
-}
-
-function onPointerMove(event) {
-    if (renderer == null || camera == null || mesh == null || helper == null) {
-        return;
-    }
-
-    pointer.x = event.clientX / renderer.domElement.clientWidth * 2 - 1;
-    pointer.y = -(event.clientY / renderer.domElement.clientHeight) * 2 + 1;
-    raycaster.setFromCamera(pointer, camera);
-
-    const intersects = raycaster.intersectObject(mesh);
-
-    if (intersects.length === 0) {
-        helper.visible = false;
-        return;
-    }
-
-    helper.visible = true;
-    helper.position.copy(intersects[0].point);
-    helperLookAt.copy(intersects[0].point).add(intersects[0].face.normal);
-    helper.lookAt(helperLookAt);
 }
 
 window.init_surface = init_surface;
