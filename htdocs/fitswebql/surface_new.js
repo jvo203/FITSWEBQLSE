@@ -1,270 +1,391 @@
-//import * as THREE from 'three';
-//import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-//import { ImprovedNoise } from 'three/addons/math/ImprovedNoise.js';
+let THREE = null;
+let OrbitControls = null;
+let ImprovedNoise = null;
 
-// standard global variables
-var container, scene, camera, renderer, controls;
-var resize, fullscreen;
-var wireTexture, geometry, material, plane;
+let container;
+let camera;
+let controls;
+let scene;
+let renderer;
+let mesh;
+let helper;
+let wireTexture;
+let geometry;
+let material;
+let isActive = false;
+let initTimer = 0;
 
-var segments = 512;//512
-var is_active;
+const segments = 512;
+let raycaster = null;
+let pointer = null;
+let surfacePoint = null;
+let helperLookAt = null;
+let improvedNoise = null;
+let threeReadyPromise = null;
 
-//get z from imageFrame raw float32 pixels
-function meshFunction(x, y, p0) {
-    var imageFrame, image_bounding_dims;
+function ensureThreeDeps() {
+    if (THREE != null && OrbitControls != null && ImprovedNoise != null) {
+        return Promise.resolve();
+    }
 
-    var z;
+    if (threeReadyPromise != null) {
+        return threeReadyPromise;
+    }
 
-    if (composite_view) {
-        image_bounding_dims = compositeImage.image_bounding_dims;
+    threeReadyPromise = new Promise((resolve) => {
+        function attemptResolve() {
+            if (window.THREE != null && window.OrbitControls != null && window.ImprovedNoise != null) {
+                THREE = window.THREE;
+                OrbitControls = window.OrbitControls;
+                ImprovedNoise = window.ImprovedNoise;
+                raycaster = new THREE.Raycaster();
+                pointer = new THREE.Vector2();
+                surfacePoint = new THREE.Vector3();
+                helperLookAt = new THREE.Vector3();
+                improvedNoise = new ImprovedNoise();
+                resolve();
+                return;
+            }
 
-        let xcoord = Math.round(image_bounding_dims.x1 + (1 - x) * (image_bounding_dims.width - 1));
-        let ycoord = Math.round(image_bounding_dims.y1 + (1 - y) * (image_bounding_dims.height - 1));
-
-        let pixel = ycoord * compositeImage.width + xcoord;
-
-        var mean_pixel = 0.0;
-
-        for (index = 1; index <= va_count; index++) {
-            imageFrame = imageContainer[index - 1];
-            let tone_mapping = imageFrame.tone_mapping;
-            let black = tone_mapping.black;
-            let white = tone_mapping.white;
-            let median = tone_mapping.median;
-            let noise_sensitivity = document.getElementById('sensitivity' + index).value;
-            let multiplier = get_noise_sensitivity(noise_sensitivity);
-            let flux = document.getElementById('flux' + index).value;
-
-            let raw = imageFrame.pixels[pixel];
-            let rgb = get_tone_mapping(raw, flux, black, white, median, multiplier, index);
-            mean_pixel += rgb;
+            setTimeout(attemptResolve, 10);
         }
 
-        //z = imageDataCopy[pixel] - 127;
-        mean_pixel /= va_count;
-        z = mean_pixel - 127;
+        attemptResolve();
+    });
+
+    return threeReadyPromise;
+}
+
+function getMainRect() {
+    return document.getElementById('mainDiv').getBoundingClientRect();
+}
+
+function getSurfaceDimensions() {
+    let imageBoundingDims;
+
+    if (composite_view) {
+        imageBoundingDims = compositeImage.image_bounding_dims;
+    } else {
+        const imageFrame = imageContainer[previous_plane - 1];
+        imageBoundingDims = imageFrame.image_bounding_dims;
     }
-    else {
-        let index = previous_plane;
+
+    return imageBoundingDims;
+}
+
+function getAspectRatio() {
+    const imageBoundingDims = getSurfaceDimensions();
+    return imageBoundingDims.height / imageBoundingDims.width;
+}
+
+function getToneMappedPixel(imageFrame, pixel, index) {
+    const toneMapping = imageFrame.tone_mapping;
+    const noiseSensitivity = document.getElementById('sensitivity' + index).value;
+    const multiplier = get_noise_sensitivity(noiseSensitivity);
+    const flux = document.getElementById('flux' + index).value;
+    const raw = imageFrame.pixels[pixel];
+
+    return get_tone_mapping(raw, flux, toneMapping.black, toneMapping.white, toneMapping.median, multiplier, index);
+}
+
+function meshFunction(x, y, target) {
+    let imageFrame;
+    let imageBoundingDims;
+    let z;
+
+    if (composite_view) {
+        imageBoundingDims = compositeImage.image_bounding_dims;
+
+        const xcoord = Math.round(imageBoundingDims.x1 + (1 - x) * (imageBoundingDims.width - 1));
+        const ycoord = Math.round(imageBoundingDims.y1 + (1 - y) * (imageBoundingDims.height - 1));
+        const pixel = ycoord * compositeImage.width + xcoord;
+
+        let meanPixel = 0.0;
+
+        for (let index = 1; index <= va_count; index++) {
+            imageFrame = imageContainer[index - 1];
+            meanPixel += getToneMappedPixel(imageFrame, pixel, index);
+        }
+
+        meanPixel /= va_count;
+        z = meanPixel - 127;
+    } else {
+        const index = previous_plane;
 
         imageFrame = imageContainer[index - 1];
-        image_bounding_dims = imageFrame.image_bounding_dims;
+        imageBoundingDims = imageFrame.image_bounding_dims;
 
-        let tone_mapping = imageFrame.tone_mapping;
-        let black = tone_mapping.black;
-        let white = tone_mapping.white;
-        let median = tone_mapping.median;
-        let noise_sensitivity = document.getElementById('sensitivity' + index).value;
-        let multiplier = get_noise_sensitivity(noise_sensitivity);
-        let flux = document.getElementById('flux' + index).value;
+        const xcoord = Math.round(imageBoundingDims.x1 + (1 - x) * (imageBoundingDims.width - 1));
+        const ycoord = Math.round(imageBoundingDims.y1 + (1 - y) * (imageBoundingDims.height - 1));
+        const pixel = ycoord * imageFrame.width + xcoord;
 
-        let xcoord = Math.round(image_bounding_dims.x1 + (1 - x) * (image_bounding_dims.width - 1));
-        let ycoord = Math.round(image_bounding_dims.y1 + (1 - y) * (image_bounding_dims.height - 1));
-
-        let pixel = ycoord * imageFrame.width + xcoord;
-        let raw = imageFrame.pixels[pixel];
-        // <raw> needs to be transformed into a pixel range in [0, 255] via the tone mapping function
-        pixel = get_tone_mapping(raw, flux, black, white, median, multiplier, index);
-        z = pixel - 127;
-        //console.log(xcoord, ycoord, "raw:", raw, "pixel:", pixel, "z:", z);
+        z = getToneMappedPixel(imageFrame, pixel, index) - 127;
     }
 
-    var aspect = image_bounding_dims.height / image_bounding_dims.width;
+    const aspect = imageBoundingDims.height / imageBoundingDims.width;
+    const subtleNoise = improvedNoise.noise(x * 2, y * 2, 0.125) * 0.0005;
 
-    p0.set(x - 0.5, (y - 0.5) * aspect, z / 2048);
+    target.set(x - 0.5, (y - 0.5) * aspect, z / 2048 + subtleNoise);
 }
 
 function colourFunction(x, y) {
-    var imageFrame, image_bounding_dims;
-    var rgb = [0, 0, 0];
+    let imageFrame;
+    let imageBoundingDims;
+    let rgb = [0, 0, 0];
 
     if (composite_view) {
-        image_bounding_dims = compositeImage.image_bounding_dims;
+        imageBoundingDims = compositeImage.image_bounding_dims;
 
-        let aspect = image_bounding_dims.height / image_bounding_dims.width;
-        let xcoord = Math.round(image_bounding_dims.x1 + ((1 - x) - 0.5) * (image_bounding_dims.width - 1));
-        let ycoord = Math.round(image_bounding_dims.y1 + ((- y) / aspect + 0.5) * (image_bounding_dims.height - 1));
-        let pixel = ycoord * compositeImage.width + xcoord;
+        const aspect = imageBoundingDims.height / imageBoundingDims.width;
+        const xcoord = Math.round(imageBoundingDims.x1 + ((1 - x) - 0.5) * (imageBoundingDims.width - 1));
+        const ycoord = Math.round(imageBoundingDims.y1 + ((-y) / aspect + 0.5) * (imageBoundingDims.height - 1));
+        const pixel = ycoord * compositeImage.width + xcoord;
 
-        for (index = 1; index <= va_count; index++) {
+        for (let index = 1; index <= va_count; index++) {
             imageFrame = imageContainer[index - 1];
-            let tone_mapping = imageFrame.tone_mapping;
-            let black = tone_mapping.black;
-            let white = tone_mapping.white;
-            let median = tone_mapping.median;
-            let noise_sensitivity = document.getElementById('sensitivity' + index).value;
-            let multiplier = get_noise_sensitivity(noise_sensitivity);
-            let flux = document.getElementById('flux' + index).value;
-
-            let raw = imageFrame.pixels[pixel];
-            rgb[index - 1] = Math.round(get_tone_mapping(raw, flux, black, white, median, multiplier, index));
+            rgb[index - 1] = Math.round(getToneMappedPixel(imageFrame, pixel, index));
         }
     } else {
-        let index = previous_plane;
+        const index = previous_plane;
 
         imageFrame = imageContainer[index - 1];
-        image_bounding_dims = imageFrame.image_bounding_dims;
+        imageBoundingDims = imageFrame.image_bounding_dims;
 
-        let tone_mapping = imageFrame.tone_mapping;
-        let black = tone_mapping.black;
-        let white = tone_mapping.white;
-        let median = tone_mapping.median;
-        let noise_sensitivity = document.getElementById('sensitivity' + index).value;
-        let multiplier = get_noise_sensitivity(noise_sensitivity);
-        let flux = document.getElementById('flux' + index).value;
+        const aspect = imageBoundingDims.height / imageBoundingDims.width;
+        const xcoord = Math.round(imageBoundingDims.x1 + ((1 - x) - 0.5) * (imageBoundingDims.width - 1));
+        const ycoord = Math.round(imageBoundingDims.y1 + ((-y) / aspect + 0.5) * (imageBoundingDims.height - 1));
+        const pixel = ycoord * imageFrame.width + xcoord;
+        const toneMappedPixel = Math.round(getToneMappedPixel(imageFrame, pixel, index));
 
-        let aspect = image_bounding_dims.height / image_bounding_dims.width;
-        let xcoord = Math.round(image_bounding_dims.x1 + ((1 - x) - 0.5) * (image_bounding_dims.width - 1));
-        let ycoord = Math.round(image_bounding_dims.y1 + ((- y) / aspect + 0.5) * (image_bounding_dims.height - 1));
-        let pixel = ycoord * imageFrame.width + xcoord;
-
-        let raw = imageFrame.pixels[pixel];
-        pixel = Math.round(get_tone_mapping(raw, flux, black, white, median, multiplier, index));
-        rgb = [pixel, pixel, pixel];
+        rgb = [toneMappedPixel, toneMappedPixel, toneMappedPixel];
     }
 
-    return new THREE.Color("rgb(" + rgb[0] + "," + rgb[1] + "," + rgb[2] + ")");
+    return new THREE.Color('rgb(' + rgb[0] + ',' + rgb[1] + ',' + rgb[2] + ')');
 }
 
-function init_surface() {
-    var div = d3.select("body").append("div")
-        .attr("id", "ThreeJS")
-        .attr("class", "threejs");
+function disposeSurfaceResources() {
+    window.removeEventListener('resize', onWindowResize);
 
-    div.append("span")
-        .attr("id", "closeThreeJS")
-        .attr("class", "close myclose")
-        .on("click", function () {
-            is_active = false;
-            d3.select("#ThreeJS").remove();
-            resize.destroy();
-            fullscreen.unbind();
-            wireTexture.dispose();
-            geometry.dispose();
-            material.dispose();
-            scene = null;
-            container = null;
-            camera = null;
-            renderer = null;
-            controls = null;
-            //stats = null ;            
-        })
-        .text("×");
-
-    div.append("img")
-        .attr("id", "hourglassThreeJS")
-        .attr("class", "hourglass")
-        .attr("src", "https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/fitswebql/loading.gif")
-        .attr("alt", "hourglass")
-        .style("width", 200)
-        .style("height", 200);
-
-    setTimeout(init_graph, 50);
-}
-
-function init_graph() {
-    var rect = document.getElementById('mainDiv').getBoundingClientRect();
-
-    var SCREEN_WIDTH = rect.width;
-    var SCREEN_HEIGHT = rect.height;
-
-    // SCENE
-    scene = new THREE.Scene();
-
-    // CAMERA
-    var VIEW_ANGLE = 25, ASPECT = SCREEN_WIDTH / SCREEN_HEIGHT, NEAR = 0.1, FAR = 20000;
-    camera = new THREE.PerspectiveCamera(VIEW_ANGLE, ASPECT, NEAR, FAR);
-    scene.add(camera);
-
-    //camera.position.set( 1.1*imageCanvas.width, 1.1*imageCanvas.height, 1024);//0.5*(imageCanvas.width+imageCanvas.height)/2);
-    camera.position.set(1.1, 1.1, 1);
-    camera.up = new THREE.Vector3(0, 0, 1);
-
-    //camera.position.set(0,-1000,1.25*(imageCanvas.width+imageCanvas.height)/2);
-    camera.lookAt(scene.position);
-
-    // RENDERER
-    if (Detector.webgl)
-        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    else
-        renderer = new THREE.CanvasRenderer();
-
-    renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
-    container = document.getElementById('ThreeJS');
-    container.appendChild(renderer.domElement);
-
-    // EVENTS
-    resize = THREEx.WindowResize(renderer, camera);
-    fullscreen = THREEx.FullScreen.bindKey({ charCode: 'm'.charCodeAt(0) });
-
-    // CONTROLS
-    controls = new THREE.TrackballControls(camera, renderer.domElement);
-
-    // LIGHT
-    scene.add(new THREE.AmbientLight(0x404040 /*0xeeeeee*/));
-
-    geometry = new THREE.ParametricGeometry(meshFunction, segments, segments);
-
-    var color, point, face, numberOfSides, vertexIndex;
-    // faces are indexed using characters
-    var faceIndices = ['a', 'b', 'c', 'd'];
-
-    for (var i = 0; i < geometry.vertices.length; i++) {
-        point = geometry.vertices[i];
-        color = colourFunction(point.x, point.y);
-        geometry.colors[i] = color;
+    if (renderer != null) {
+        renderer.domElement.removeEventListener('pointermove', onPointerMove);
+        renderer.setAnimationLoop(null);
+        renderer.dispose();
     }
 
-    for (var i = 0; i < geometry.faces.length; i++) {
-        face = geometry.faces[i];
-        numberOfSides = (face instanceof THREE.Face3) ? 3 : 4;
-        for (var j = 0; j < numberOfSides; j++) {
-            vertexIndex = face[faceIndices[j]];
-            face.vertexColors[j] = geometry.colors[vertexIndex];
+    if (controls != null) {
+        controls.dispose();
+    }
+
+    if (wireTexture != null) {
+        wireTexture.dispose();
+    }
+
+    if (geometry != null) {
+        geometry.dispose();
+    }
+
+    if (material != null) {
+        material.dispose();
+    }
+
+    if (helper != null) {
+        helper.geometry.dispose();
+        helper.material.dispose();
+    }
+
+    container = null;
+    camera = null;
+    controls = null;
+    scene = null;
+    renderer = null;
+    mesh = null;
+    helper = null;
+    wireTexture = null;
+    geometry = null;
+    material = null;
+}
+
+function closeSurface() {
+    if (initTimer !== 0) {
+        clearTimeout(initTimer);
+        initTimer = 0;
+    }
+
+    isActive = false;
+    disposeSurfaceResources();
+    d3.select('#ThreeJS').remove();
+}
+
+function buildGeometry() {
+    geometry = new THREE.PlaneGeometry(1, getAspectRatio(), segments, segments);
+
+    const position = geometry.attributes.position;
+    const colors = new Float32Array(position.count * 3);
+
+    for (let iy = 0; iy <= segments; iy++) {
+        for (let ix = 0; ix <= segments; ix++) {
+            const index = iy * (segments + 1) + ix;
+            const x = ix / segments;
+            const y = iy / segments;
+
+            meshFunction(x, y, surfacePoint);
+            position.setXYZ(index, surfacePoint.x, surfacePoint.y, surfacePoint.z);
+
+            const color = colourFunction(surfacePoint.x, surfacePoint.y);
+            colors[3 * index] = color.r;
+            colors[3 * index + 1] = color.g;
+            colors[3 * index + 2] = color.b;
         }
     }
 
-    //wireTexture = new THREE.TextureLoader().load(ROOT_PATH + 'square.png');
-    wireTexture = new THREE.TextureLoader().load("https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/fitswebql/square.png")
-    wireTexture.wrapS = wireTexture.wrapT = THREE.RepeatWrapping;
-    //wireTexture.minFilter = wireTexture.magFilter = THREE.LinearFilter;
-    wireTexture.repeat.set(segments, segments);
-
-    material = new THREE.MeshBasicMaterial({
-        //color: 0xFFFFFF,
-        map: wireTexture,
-        vertexColors: THREE.VertexColors,
-        side: THREE.DoubleSide,
-        wireframe: false
-    });
-
-    plane = new THREE.Mesh(geometry, material);
-    plane.doubleSided = true;
-    scene.add(plane);
-
-    is_active = true;
-    animate_surface();
-
-    d3.select("#hourglassThreeJS").remove();
+    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    geometry.computeVertexNormals();
 }
 
-function animate_surface() {
-    if (!is_active) {
-        console.log("exiting animate_surface()");
+function initSurfaceScene() {
+    initTimer = 0;
+
+    if (!isActive) {
         return;
     }
 
-    requestAnimationFrame(animate_surface);
+    const rect = getMainRect();
+    const screenWidth = rect.width;
+    const screenHeight = rect.height;
 
-    render();
-    update();
-}
+    scene = new THREE.Scene();
 
-function update() {
+    camera = new THREE.PerspectiveCamera(45, screenWidth / screenHeight, 0.01, 100);
+    camera.position.set(1.15, -1.35, 0.85);
+    camera.up.set(0, 0, 1);
+
+    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setSize(screenWidth, screenHeight);
+    renderer.setAnimationLoop(animateSurface);
+
+    container = document.getElementById('ThreeJS');
+    container.appendChild(renderer.domElement);
+
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.enablePan = false;
+    controls.minDistance = 0.35;
+    controls.maxDistance = 4.0;
+    controls.maxPolarAngle = Math.PI / 2;
+    controls.target.set(0, 0, 0);
     controls.update();
+
+    scene.add(new THREE.AmbientLight(0xffffff, 1.8));
+
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1.2);
+    directionalLight.position.set(1.5, -1.0, 2.0);
+    scene.add(directionalLight);
+
+    buildGeometry();
+
+    wireTexture = new THREE.TextureLoader().load('https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/fitswebql/square.png');
+    wireTexture.wrapS = THREE.RepeatWrapping;
+    wireTexture.wrapT = THREE.RepeatWrapping;
+    wireTexture.repeat.set(segments, segments);
+    wireTexture.colorSpace = THREE.SRGBColorSpace;
+
+    material = new THREE.MeshPhongMaterial({
+        map: wireTexture,
+        vertexColors: true,
+        side: THREE.DoubleSide
+    });
+
+    mesh = new THREE.Mesh(geometry, material);
+    scene.add(mesh);
+
+    const helperGeometry = new THREE.ConeGeometry(0.0125, 0.05, 3);
+    helperGeometry.translate(0, 0.025, 0);
+    helperGeometry.rotateX(Math.PI / 2);
+    helper = new THREE.Mesh(helperGeometry, new THREE.MeshNormalMaterial());
+    helper.visible = false;
+    scene.add(helper);
+
+    renderer.domElement.addEventListener('pointermove', onPointerMove);
+    window.addEventListener('resize', onWindowResize);
+
+    d3.select('#hourglassThreeJS').remove();
 }
 
-function render() {
+function init_surface() {
+    if (isActive) {
+        closeSurface();
+    }
+
+    const div = d3.select('body').append('div')
+        .attr('id', 'ThreeJS')
+        .attr('class', 'threejs');
+
+    div.append('span')
+        .attr('id', 'closeThreeJS')
+        .attr('class', 'close myclose')
+        .on('click', closeSurface)
+        .text('×');
+
+    div.append('img')
+        .attr('id', 'hourglassThreeJS')
+        .attr('class', 'hourglass')
+        .attr('src', 'https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/fitswebql/loading.gif')
+        .attr('alt', 'hourglass')
+        .style('width', 200)
+        .style('height', 200);
+
+    isActive = true;
+
+    ensureThreeDeps().then(() => {
+        if (!isActive) {
+            return;
+        }
+
+        initTimer = setTimeout(initSurfaceScene, 50);
+    });
+}
+
+function onWindowResize() {
+    if (camera == null || renderer == null) {
+        return;
+    }
+
+    const rect = getMainRect();
+    camera.aspect = rect.width / rect.height;
+    camera.updateProjectionMatrix();
+    renderer.setSize(rect.width, rect.height);
+}
+
+function animateSurface() {
+    if (!isActive || renderer == null) {
+        return;
+    }
+
+    controls.update();
     renderer.render(scene, camera);
 }
+
+function onPointerMove(event) {
+    if (renderer == null || camera == null || mesh == null || helper == null) {
+        return;
+    }
+
+    pointer.x = event.clientX / renderer.domElement.clientWidth * 2 - 1;
+    pointer.y = -(event.clientY / renderer.domElement.clientHeight) * 2 + 1;
+    raycaster.setFromCamera(pointer, camera);
+
+    const intersects = raycaster.intersectObject(mesh);
+
+    if (intersects.length === 0) {
+        helper.visible = false;
+        return;
+    }
+
+    helper.visible = true;
+    helper.position.copy(intersects[0].point);
+    helperLookAt.copy(intersects[0].point).add(intersects[0].face.normal);
+    helper.lookAt(helperLookAt);
+}
+
+window.init_surface = init_surface;
