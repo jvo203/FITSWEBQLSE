@@ -1,6 +1,5 @@
 let THREE = null;
 let OrbitControls = null;
-let ImprovedNoise = null;
 
 let container;
 let camera;
@@ -16,11 +15,10 @@ let initTimer = 0;
 
 const segments = 512;
 let surfacePoint = null;
-let improvedNoise = null;
 let threeReadyPromise = null;
 
 function ensureThreeDeps() {
-    if (THREE != null && OrbitControls != null && ImprovedNoise != null) {
+    if (THREE != null && OrbitControls != null) {
         return Promise.resolve();
     }
 
@@ -30,12 +28,10 @@ function ensureThreeDeps() {
 
     threeReadyPromise = new Promise((resolve) => {
         function attemptResolve() {
-            if (window.THREE != null && window.OrbitControls != null && window.ImprovedNoise != null) {
+            if (window.THREE != null && window.OrbitControls != null) {
                 THREE = window.THREE;
                 OrbitControls = window.OrbitControls;
-                ImprovedNoise = window.ImprovedNoise;
                 surfacePoint = new THREE.Vector3();
-                improvedNoise = new ImprovedNoise();
                 resolve();
                 return;
             }
@@ -116,9 +112,8 @@ function meshFunction(x, y, target) {
     }
 
     const aspect = imageBoundingDims.height / imageBoundingDims.width;
-    const subtleNoise = improvedNoise.noise(x * 2, y * 2, 0.125) * 0.0005;
 
-    target.set(x - 0.5, (y - 0.5) * aspect, z / 2048 + subtleNoise);
+    target.set(x - 0.5, (y - 0.5) * aspect, z / 2048);
 }
 
 function colourFunction(x, y) {

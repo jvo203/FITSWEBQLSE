@@ -5292,7 +5292,6 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
               "  import { ImprovedNoise } from 'three/addons/math/ImprovedNoise.js';\n"
               "  window.THREE = THREE;\n"
               "  window.OrbitControls = OrbitControls;\n"
-              "  window.ImprovedNoise = ImprovedNoise;\n"
               "</script>\n");
 
     // HTML content
