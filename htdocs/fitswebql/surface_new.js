@@ -17,6 +17,19 @@ const segments = 512;
 let surfacePoint = null;
 let threeReadyPromise = null;
 
+// Handle page unload/navigation to dispose resources
+window.addEventListener('beforeunload', function () {
+    if (isActive) {
+        closeSurface();
+    }
+});
+
+window.addEventListener('pagehide', function () {
+    if (isActive) {
+        closeSurface();
+    }
+});
+
 function ensureThreeDeps() {
     if (THREE != null && OrbitControls != null) {
         return Promise.resolve();
@@ -154,6 +167,24 @@ function colourFunction(x, y) {
 function disposeSurfaceResources() {
     window.removeEventListener('resize', onWindowResize);
 
+    // Clear lights from scene
+    if (scene != null) {
+        scene.clear();  // Removes all objects and lights from the scene
+    }
+
+    // Dispose camera
+    if (camera != null) {
+        camera.clear();
+    }
+
+    if (geometry != null) {
+        geometry.dispose();
+    }
+
+    if (material != null) {
+        material.dispose();
+    }
+
     if (renderer != null) {
         renderer.setAnimationLoop(null);
         renderer.dispose();
@@ -167,14 +198,6 @@ function disposeSurfaceResources() {
         wireTexture.dispose();
     }
 
-    if (geometry != null) {
-        geometry.dispose();
-    }
-
-    if (material != null) {
-        material.dispose();
-    }
-
     container = null;
     camera = null;
     controls = null;
@@ -184,6 +207,8 @@ function disposeSurfaceResources() {
     wireTexture = null;
     geometry = null;
     material = null;
+
+    console.log('Surface resources disposed');
 }
 
 function closeSurface() {
@@ -194,6 +219,7 @@ function closeSurface() {
 
     isActive = false;
     disposeSurfaceResources();
+    threeReadyPromise = null;  // Reset promise for next open
     d3.select('#ThreeJS').remove();
 }
 
