@@ -782,8 +782,8 @@ function getStrokeStyle() {
     }
 
     // use a predominantly green colour for the wolfram colourmap
-    //if (colourmap == "wolfram")
-    //    style = "rgba(0,204,0,1.0)";//green
+    if (colourmap == "wolfram")
+        style = "rgba(0,255,0,1.0)";//green
 
     console.log("getStrokeStyle: theme:", theme, "colourmap:", colourmap, "style:", style);
 
@@ -1099,6 +1099,10 @@ function plot_spectrum(dataArray) {
       if (d3.select("#pvline").attr("opacity") > 0.0)
         return;
     } catch (e) { };*/
+
+    // do not plot the spectrum if the moment map is not "mean" or "integrated"
+    if (moment_map != "mean" && moment_map != "integrated")
+        return;
 
     if (mousedown)
         return;
@@ -6671,7 +6675,7 @@ async function open_websocket_connection(_datasetId, index) {
                             display_legend();
                         }
 
-                        // remove the axes & spectrum if (moment_map != "mean" && moment_map != "integrated")                        
+                        // remove the axes & spectrum if (moment_map != "mean" && moment_map != "integrated")
                         if (moment_map != "mean" && moment_map != "integrated") {
                             let elem = document.getElementById("SpectrumCanvas");
 
