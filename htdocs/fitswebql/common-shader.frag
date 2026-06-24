@@ -2274,7 +2274,6 @@ vec4 colormap_wolfram(float x, float alpha) {
     return vec4(0.0, 0.0, 0.0, 0.0);
 }
 
-
 void main() {
     vec4 colour = texture2D(u_texture, v_texcoord.xy);// the raw floating-point colour
 
