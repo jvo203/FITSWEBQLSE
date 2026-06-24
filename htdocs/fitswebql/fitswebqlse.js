@@ -752,6 +752,10 @@ function getStrokeStyle() {
     style = "rgba(255,255,255,1.0)";//white
     //style = "rgba(153, 102, 153, 0.9)" ;//violet
 
+    // use a predominantly green colour for the blue/red wolfram colourmap, as the blue/red wolfram colourmap is not very visible on a dark background
+    if (colourmap == "wolfram")
+        style = "rgba(0,204,0,1.0)";//green
+
     if (theme == 'light') {
         //style = "rgba(0,0,0,1.0)";//black
         style = "rgba(127,127,127,1.0)";// grey
@@ -759,7 +763,6 @@ function getStrokeStyle() {
         if (colourmap == "greyscale")
             style = "rgba(255,204,0,1.0)";//yellowish ALMAWebQL v2
     }
-
 
     if (theme == 'dark') {
         if (colourmap == "green")
@@ -776,7 +779,7 @@ function getStrokeStyle() {
             style = "rgba(255,215,0,1.0)";//gold
 
         if (colourmap == "hot")
-            style = "rgba(0,191,255,1.0)";//deepskyblue
+            style = "rgba(0,191,255,1.0)";//deepskyblue        
 
         //if(document.getElementById('colourmap').value == "rainbow")// || document.getElementById('colourmap').value == "parula" || document.getElementById('colourmap').value == "viridis")
         //	style = "rgba(204,204,204,0.9)" ;
