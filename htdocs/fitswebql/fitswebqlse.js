@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2026-06-29.0";
+    return "JS2026-06-30.0";
 }
 
 function uuidv4() {
@@ -11638,7 +11638,7 @@ function display_histogram(index, initPlanes = true) {
             .style("padding-left", "0");
     }
 
-    var colourmap_string = "<option value=\"amber\">amber</option><option value=\"red\">red</option><option value=\"green\">green</option><option value=\"blue\">blue</option><option value=\"greyscale\">greyscale</option><option value=\"negative\">negative</option><option disabled>---</option><option value=\"wolfram\">blue/white/red</option><option value=\"cubehelix\">cubehelix</option><option value=\"haxby\">haxby</option><option value=\"hot\">hot</option><option value=\"parula\">parula</option><option value=\"rainbow\">rainbow</option><option disabled>---</option><option value=\"inferno\">inferno</option><option value=\"magma\">magma</option><option value=\"plasma\">plasma</option><option value=\"viridis\">viridis</option>";
+    var colourmap_string = "<option value=\"amber\">amber</option><option value=\"red\">red</option><option value=\"green\">green</option><option value=\"blue\">blue</option><option value=\"greyscale\">greyscale</option><option value=\"negative\">negative</option><option disabled>---</option><option value=\"wolfram\">blue-white-red</option><option value=\"cubehelix\">cubehelix</option><option value=\"haxby\">haxby</option><option value=\"hot\">hot</option><option value=\"parula\">parula</option><option value=\"rainbow\">rainbow</option><option disabled>---</option><option value=\"inferno\">inferno</option><option value=\"magma\">magma</option><option value=\"plasma\">plasma</option><option value=\"viridis\">viridis</option>";
 
     tmpA = imageDropdown.append("li")
         //.style("background-color", "#FFF")
