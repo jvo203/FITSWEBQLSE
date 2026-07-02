@@ -2864,6 +2864,18 @@ function webgl_viewport_renderer(gl, container, height) {
     } else {
         if (image.tone_mapping.flux == "ratio")
             var params = [image.tone_mapping.median, multiplier * image.tone_mapping.ratio_sensitivity, image.tone_mapping.black, image.tone_mapping.white];
+        else if (image.tone_mapping.flux == "z-score") {
+            // recover the original madN and madP values from the black and white levels and the median value
+            // u = 7.5
+            // black = max(pmin, pmedian - u*madN)
+            // white = min(pmax, pmedian + u*madP)
+
+            let u = 7.5;
+            let madN = (image.tone_mapping.median - image.tone_mapping.black) / u;
+            let madP = (image.tone_mapping.white - image.tone_mapping.median) / u;
+
+            var params = [image.tone_mapping.median, multiplier * image.tone_mapping.z_score_sensitivity, madN, madP];
+        }
         else
             var params = [image.tone_mapping.median, multiplier * image.tone_mapping.sensitivity, image.tone_mapping.black, image.tone_mapping.white];
 
