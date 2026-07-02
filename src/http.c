@@ -5038,6 +5038,22 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
 #endif
         g_string_append(html, "</script>\n");
 
+        g_string_append(html, "<script id=\"z-score-shader\" type=\"x-shader/x-vertex\">\n");
+#ifdef SHARE
+        include_file(html, SHARE "/htdocs/fitswebql/z-score-shader.frag");
+#else
+        include_file(html, "htdocs/fitswebql/z-score-shader.frag");
+#endif
+        g_string_append(html, "</script>\n");
+
+        g_string_append(html, "<script id=\"z-score-composite-shader\" type=\"x-shader/x-vertex\">\n");
+#ifdef SHARE
+        include_file(html, SHARE "/htdocs/fitswebql/z-score-composite-shader.frag");
+#else
+        include_file(html, "htdocs/fitswebql/z-score-composite-shader.frag");
+#endif
+        g_string_append(html, "</script>\n");
+
         g_string_append(html, "<script id=\"logistic-shader\" type=\"x-shader/x-vertex\">\n");
 #ifdef SHARE
         include_file(html, SHARE "/htdocs/fitswebql/logistic-shader.frag");
