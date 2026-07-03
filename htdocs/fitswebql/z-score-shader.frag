@@ -5,7 +5,7 @@
      
      // asymmetric z-score calculation around the median, using the median absolute deviation (MAD) as a robust measure of scale
      float val = x - median;
-     float pixel = (val < 0.0) ? 5.0 * val * sensitivity / madN : 5.0 * val * sensitivity / madP;
+     float pixel = (val < 0.0) ? 100.0 * val * sensitivity / madN : 100.0 * val * sensitivity / madP;
 
      // finally convert to a 0-1 range for colour mapping
      pixel = pixel / 6.0 + 0.5;     
