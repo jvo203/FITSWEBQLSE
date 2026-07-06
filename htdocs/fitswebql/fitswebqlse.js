@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2026-07-03.0";
+    return "JS2026-07-06.0";
 }
 
 function uuidv4() {
@@ -21969,8 +21969,8 @@ function enable_3d_view() {
     if (test_webgl_support()) {
         (function () {
             var po = document.createElement('script'); po.type = 'text/javascript'; po.async = false;
-            po.src = 'surface_new.js' + '?' + encodeURIComponent(get_js_version());
-            //po.src = 'https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@' + votable.getAttribute('data-version-major') + '.' + votable.getAttribute('data-version-minor') + '.' + votable.getAttribute('data-version-sub') + '/htdocs/fitswebql/surface.min.js';
+            //po.src = 'surface_new.js' + '?' + encodeURIComponent(get_js_version());
+            po.src = 'https://cdn.jsdelivr.net/gh/jvo203/FITSWEBQLSE@' + votable.getAttribute('data-version-major') + '.' + votable.getAttribute('data-version-minor') + '.' + votable.getAttribute('data-version-sub') + '/htdocs/fitswebql/surface_new.min.js';
             var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
         })();
 
