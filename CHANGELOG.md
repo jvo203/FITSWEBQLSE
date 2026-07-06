@@ -1,3 +1,8 @@
+## [5.2.4] - 2026-07-06
+
+* updated the 3D Three JavaScript library (modernised the 3D view)
+* fixed client-side JavaScript full-spectrum refresh
+
 ## [5.2.3] - 2026-04-15
 
 * correctly handle RA/DEC gridlines rotated by 90°

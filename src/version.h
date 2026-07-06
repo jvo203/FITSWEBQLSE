@@ -2,7 +2,7 @@
 
 #define VERSION_MAJOR 5
 #define VERSION_MINOR 2
-#define VERSION_SUB 3
+#define VERSION_SUB 4
 
 #define STR_HELPER(x) #x
 #define STR(x) STR_HELPER(x)
@@ -12,4 +12,4 @@
         VERSION_SUB)
 
 #define WASM_VERSION "26.04.06.0"
-#define VERSION_STRING "F/SV2026-05-15.0"
+#define VERSION_STRING "F/SV2026-07-06.0"
