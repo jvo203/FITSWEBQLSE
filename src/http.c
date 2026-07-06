@@ -5303,8 +5303,8 @@ static enum MHD_Result execute_alma(struct MHD_Connection *connection, char **va
     // Three.js import script (used by the 3D viewer)
     g_string_append(
         html, "<script type=\"module\">\n"
-              "  import * as THREE from 'https://esm.sh/three@0.184.0';\n"
-              "  import { OrbitControls } from 'https://esm.sh/three@0.184.0/examples/jsm/controls/OrbitControls.js';\n"
+              "  import * as THREE from 'https://esm.sh/three@0.185.1';\n"
+              "  import { OrbitControls } from 'https://esm.sh/three@0.185.1/examples/jsm/controls/OrbitControls.js';\n"
               "  window.THREE = THREE;\n"
               "  window.OrbitControls = OrbitControls;\n"
               "</script>\n");
