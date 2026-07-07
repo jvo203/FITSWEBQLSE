@@ -6238,8 +6238,7 @@ contains
       implicit none
 
       real, dimension(:), intent(in), target :: X
-      real, intent(in) :: DMIN, DMAX
-      real, intent(in) :: Q
+      real, intent(in) :: DMIN, DMAX, Q
       integer, allocatable, intent(inout) :: HIST(:)
       integer :: NPASS
 
