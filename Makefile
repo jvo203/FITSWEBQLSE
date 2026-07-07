@@ -293,7 +293,7 @@ endif
 -include $(DEP)
 
 %.o: %.ispc
-	ispc -g -O3 $(ISPC_TARGET)  --pic --opt=fast-math --addressing=64 -o $@ -h $(subst .o,.h,$@) $<
+	ispc -g -O3 $(ISPC_TARGET)  --pic --opt=fast-math:balanced --addressing=64 -o $@ -h $(subst .o,.h,$@) $<
 
 %.o: %.c
 	$(CC) $(CFLAGS) $(DEF) $(INC) -MMD -o $@ -c $<
