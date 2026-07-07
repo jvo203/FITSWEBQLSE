@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2026-07-07.0";
+    return "JS2026-07-07.1";
 }
 
 function uuidv4() {
@@ -6537,10 +6537,10 @@ async function open_websocket_connection(_datasetId, index) {
                             tone_mapping.black = dv.getFloat32(offset, endianness);
                             offset += 4;
 
-                            if (tone_mapping.flux == "legacy") {
+                            /*if (tone_mapping.flux == "legacy") {
                                 tone_mapping.black = tone_mapping.min;
                                 tone_mapping.white = tone_mapping.max;
-                            }
+                            }*/
 
                             console.log("polarisation plane:", i, "tone mapping:", tone_mapping);
 
@@ -16754,10 +16754,10 @@ async function fetch_image_spectrum(_datasetId, index, fetch_data, add_timestamp
                         tone_mapping.black = dv.getFloat32(offset, endianness);
                         offset += 4;
 
-                        if (tone_mapping.flux == "legacy") {
+                        /*if (tone_mapping.flux == "legacy") {
                             tone_mapping.black = tone_mapping.min;
                             tone_mapping.white = tone_mapping.max;
-                        }
+                        }*/
 
                         console.log(tone_mapping);
 
