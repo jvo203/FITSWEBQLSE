@@ -292,6 +292,7 @@ endif
 # include dependencies (all .d files)
 -include $(DEP)
 
+# the <balanced> fast mode preserves handling of NaN / Inf values, unlike the <aggressive> mode which ignores them, leading to incorrect results
 %.o: %.ispc
 	ispc -g -O3 $(ISPC_TARGET)  --pic --opt=fast-math:balanced --addressing=64 -o $@ -h $(subst .o,.h,$@) $<
 
@@ -349,11 +350,11 @@ block128:
 	$(FORT) $(FLAGS) src/wavelet.f90 tests/zfp_block_128.f90 -o zfp_block_128 $(LIBS)
 
 fixed:
-	ispc -g -O3 --pic --opt=fast-math --addressing=32 tests/fixed.ispc -o tests/fixed.o
+	ispc -g -O3 --pic --opt=fast-math:balanced --addressing=32 tests/fixed.ispc -o tests/fixed.o
 	$(FORT) $(FLAGS) tests/test_fixed_array.f90 tests/fixed.o -o test_fixed_array $(LIBS)
 
 encode:
-	ispc -g -O3 --pic --opt=fast-math --addressing=32 src/webql.ispc -o src/zfp.o -h tests/webql.h
+	ispc -g -O3 --pic --opt=fast-math:balanced --addressing=32 src/webql.ispc -o src/zfp.o -h tests/webql.h
 	$(CC) $(CFLAGS) tests/zfp_encode.c src/zfp.o -o zfp_encode -lm
 #icc -O0 tests/zfp_encode.c -o zfp_encode -lm
 
