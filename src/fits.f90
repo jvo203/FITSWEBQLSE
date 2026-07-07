@@ -6233,22 +6233,24 @@ contains
 
    end subroutine make_histogram
 
-   ! a recursive multi-pass histogram-based median
-   recursive function rec_hist_median(X, DMIN, DMAX, HIST, NPASS) result(med)
+   ! a recursive multi-pass histogram-based quantile estimation
+   recursive function rec_hist_quantile(X, DMIN, DMAX, Q, HIST, NPASS) result(quant)
       implicit none
 
       real, dimension(:), intent(in), target :: X
       real, intent(in) :: DMIN, DMAX
+      real, intent(in) :: Q
       integer, allocatable, intent(inout) :: HIST(:)
       integer :: NPASS
 
       integer :: i, N
 
       ! statistics
-      integer :: cumulative, previous_cumulative
-      real :: med, bin_start, bin_end, bin_width
+      integer :: cumulative, previous_cumulative, target
+      real :: quant, bin_start, bin_end, bin_width
 
       N = size(X)
+      target = nint(Q*real(N))
 
       call make_histogram(HIST, X, DMIN, DMAX)
 
@@ -6257,7 +6259,7 @@ contains
       cumulative = 0
 
       do i = 1, N
-         if (cumulative .ge. N/2) exit ! we've got the bin with the median
+         if (cumulative .ge. target) exit ! we've got the bin with the median
 
          previous_cumulative = cumulative
          cumulative = cumulative + HIST(i)
@@ -6275,12 +6277,12 @@ contains
          !return
          !end if
 
-         med = bin_start + bin_width*(real(N)/2 - real(previous_cumulative))/real(HIST(i))
+         quant = bin_start + bin_width*(real(target) - real(previous_cumulative))/real(HIST(i))
       else
-         med = rec_hist_median(X, bin_start, bin_end, HIST, NPASS - 1)
+         quant = rec_hist_quantile(X, bin_start, bin_end, Q, HIST, NPASS - 1)
       end if
 
-   end function rec_hist_median
+   end function rec_hist_quantile
 
    ! histogram-based median estimation
    function hist_median(X, DMIN, DMAX, PASSES) result(med)
@@ -6320,7 +6322,7 @@ contains
       ! start the timer
       call system_clock(count=start_t, count_rate=crate, count_max=cmax)
 
-      med = rec_hist_median(X, DMIN, DMAX, hist, PCOUNT)
+      med = rec_hist_quantile(X, DMIN, DMAX, 0.5, hist, PCOUNT)
 
       ! check if the med value is finite, otherwise fall back to simple median
       if (.not. ieee_is_finite(med)) then
