@@ -5977,7 +5977,7 @@ contains
       ! make a histogram with a range given by [pmin, pmax]
       call make_histogram(hist, data, pmin, pmax)
 
-      pmedian = hist_quantile(data, pmin, pmax, 0.5, 2) ! a two-pass median estimation
+      pmedian = hist_quantile(data, pmin, pmax, 0.5, 5) ! a multi-pass median estimation
       print *, 'plane:', plane, 'pmin =', pmin, 'pmax =', pmax, 'hist. median =', pmedian
 
       ! pmedian = median(data)
@@ -6013,8 +6013,8 @@ contains
       !u = 7.5
       !black = max(pmin, pmedian - u*madN)
       !white = min(pmax, pmedian + u*madP)
-      black = hist_quantile(data, pmin, pmax, 0.01) ! 0.01 or 0.05
-      white = hist_quantile(data, pmin, pmax, 0.99) ! 0.99 or 0.95
+      black = hist_quantile(data, pmin, pmax, 0.01, 5) ! 0.01 or 0.05
+      white = hist_quantile(data, pmin, pmax, 0.99, 5) ! 0.99 or 0.95
       sensitivity = 1.0/(white - black)
       ratio_sensitivity = sensitivity
 
