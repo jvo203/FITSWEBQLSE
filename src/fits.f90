@@ -6239,7 +6239,7 @@ contains
 
       real, dimension(:), intent(in), target :: X
       real, intent(in) :: DMIN, DMAX
-      integer, allocatable, intent(inout) :: hist(:)
+      integer, allocatable, intent(inout) :: HIST(:)
       integer :: NPASS
 
       integer :: i, N
