@@ -5231,7 +5231,7 @@ contains
                      item%frame_min(frame, plane) = frame_min
                      item%frame_max(frame, plane) = frame_max
                      ! item%frame_median(frame, plane) = median(pack(thread_buffer, data_mask))
-                     item%frame_median(frame, plane) = hist_median(pack(thread_buffer, data_mask), frame_min, frame_max)
+                     item%frame_median(frame, plane) = hist_quantile(pack(thread_buffer, data_mask), frame_min, frame_max, 0.5)
 
                      dmin(plane) = min(dmin(plane), frame_min)
                      dmax(plane) = max(dmax(plane), frame_max)
@@ -5455,7 +5455,7 @@ contains
 
       item%frame_min(frame, plane) = frame_min
       item%frame_max(frame, plane) = frame_max
-      item%frame_median(frame, plane) = hist_median(pack(data, data_mask), frame_min, frame_max)
+      item%frame_median(frame, plane) = hist_quantile(pack(data, data_mask), frame_min, frame_max, 0.5)
 
       item%mean_spectrum(frame, plane) = mean_spec_val
       item%integrated_spectrum(frame, plane) = int_spec_val
@@ -5977,7 +5977,7 @@ contains
       ! make a histogram with a range given by [pmin, pmax]
       call make_histogram(hist, data, pmin, pmax)
 
-      pmedian = hist_median(data, pmin, pmax, 2) ! a two-pass median estimation
+      pmedian = hist_quantile(data, pmin, pmax, 0.5, 2) ! a two-pass median estimation
       print *, 'plane:', plane, 'pmin =', pmin, 'pmax =', pmax, 'hist. median =', pmedian
 
       ! pmedian = median(data)
@@ -6283,18 +6283,19 @@ contains
 
    end function rec_hist_quantile
 
-   ! histogram-based median estimation
-   function hist_median(X, DMIN, DMAX, PASSES) result(med)
+   ! histogram-based quantile estimation
+   function hist_quantile(X, DMIN, DMAX, Q, PASSES) result(quant)
+      use quantile_mod
       implicit none
 
       real, dimension(:), intent(in), target :: X
-      real, intent(in) :: DMIN, DMAX
+      real, intent(in) :: DMIN, DMAX, Q
       integer, intent(in), optional :: PASSES
       integer :: N
 
       integer, allocatable :: hist(:)
       integer :: PCOUNT
-      real :: med
+      real :: quant
 
       ! timing
       integer(8) :: start_t, finish_t, crate, cmax
@@ -6303,12 +6304,12 @@ contains
       N = size(X)
 
       if (N .lt. 1) then
-         med = ieee_value(0.0, ieee_quiet_nan)
+         quant = ieee_value(0.0, ieee_quiet_nan)
          return
       end if
 
       if (N .eq. 1) then
-         med = X(1)
+         quant = X(1)
          return
       end if
 
@@ -6321,20 +6322,20 @@ contains
       ! start the timer
       call system_clock(count=start_t, count_rate=crate, count_max=cmax)
 
-      med = rec_hist_quantile(X, DMIN, DMAX, 0.5, hist, PCOUNT)
+      quant = rec_hist_quantile(X, DMIN, DMAX, Q, hist, PCOUNT)
 
-      ! check if the med value is finite, otherwise fall back to simple median
-      if (.not. ieee_is_finite(med)) then
-         med = median(X)
+      ! check if the quant value is finite, otherwise fall back to simple quantile
+      if (.not. ieee_is_finite(quant)) then
+         quant = quantile(nint(Q*N), X) ! was median(X) for Q=0.5
       end if
 
       ! end the timer
       call system_clock(finish_t)
       elapsed = real(finish_t - start_t)/real(crate)
 
-      ! print *, 'histogram elapsed time:', 1000*elapsed, ' [ms]', '; median:', med
+      ! print *, 'histogram elapsed time:', 1000*elapsed, ' [ms]', '; quantile:', quant
 
-   end function hist_median
+   end function hist_quantile
 
    ! --------------------------------------------------------------------
    ! REAL FUNCTION  median() :
