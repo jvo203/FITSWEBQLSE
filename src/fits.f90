@@ -6265,7 +6265,7 @@ contains
 
       i = i - 1
 
-      bin_start = DMIN + (i - 1)*(DMAX - DMIN)/NBINS
+      bin_start = DMIN + real(i - 1)*(DMAX - DMIN)/NBINS
       bin_end = DMIN + i*(DMAX - DMIN)/NBINS
       bin_width = (DMAX - DMIN)/NBINS
 
@@ -6275,7 +6275,7 @@ contains
          !return
          !end if
 
-         med = bin_start + bin_width*(N/2 - previous_cumulative)/HIST(i)
+         med = bin_start + bin_width*(real(N)/2 - real(previous_cumulative))/real(HIST(i))
       else
          med = rec_hist_median(X, bin_start, bin_end, HIST, NPASS - 1)
       end if
