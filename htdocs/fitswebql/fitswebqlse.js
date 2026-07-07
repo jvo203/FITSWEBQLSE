@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2026-07-06.0";
+    return "JS2026-07-07.0";
 }
 
 function uuidv4() {
@@ -2864,7 +2864,7 @@ function webgl_viewport_renderer(gl, container, height) {
     } else {
         if (image.tone_mapping.flux == "ratio")
             var params = [image.tone_mapping.median, multiplier * image.tone_mapping.ratio_sensitivity, image.tone_mapping.black, image.tone_mapping.white];
-        else if (image.tone_mapping.flux == "z-score") {
+        /*else if (image.tone_mapping.flux == "z-score") {
             // recover the original madN and madP values from the black and white levels and the median value
             // u = 7.5
             // black = max(pmin, pmedian - u*madN)
@@ -2876,7 +2876,7 @@ function webgl_viewport_renderer(gl, container, height) {
 
             var params = [image.tone_mapping.median, multiplier * image.tone_mapping.sensitivity, madN, madP];
             console.log("z-score params:", params);
-        }
+        }*/
         else
             var params = [image.tone_mapping.median, multiplier * image.tone_mapping.sensitivity, image.tone_mapping.black, image.tone_mapping.white];
 
@@ -3053,7 +3053,7 @@ function webgl_composite_viewport_renderer(gl, container, height) {
         } else if (tone_mapping.flux == "ratio") {
             let params = [tone_mapping.median, multiplier * tone_mapping.ratio_sensitivity, tone_mapping.black, tone_mapping.white];
             gl.uniform4fv(locationOfParams[index - 1], params);
-        } else if (tone_mapping.flux == "z-score") {
+        } /*else if (tone_mapping.flux == "z-score") {
             // recover the original madN and madP values from the black and white levels and the median value
             // u = 7.5
             // black = max(pmin, pmedian - u*madN)
@@ -3065,7 +3065,7 @@ function webgl_composite_viewport_renderer(gl, container, height) {
 
             let params = [tone_mapping.median, multiplier * tone_mapping.sensitivity, madN, madP];
             gl.uniform4fv(locationOfParams[index - 1], params);
-        }
+        }*/
         else {
             let params = [tone_mapping.median, multiplier * tone_mapping.sensitivity, tone_mapping.black, tone_mapping.white];
             gl.uniform4fv(locationOfParams[index - 1], params);
@@ -5945,7 +5945,7 @@ function webgl_image_renderer(index, gl, width, height) {
         } else {
             if (image.tone_mapping.flux == "ratio")
                 var params = [image.tone_mapping.median, multiplier * image.tone_mapping.ratio_sensitivity, image.tone_mapping.black, image.tone_mapping.white];
-            else if (image.tone_mapping.flux == "z-score") {
+            /*else if (image.tone_mapping.flux == "z-score") {
                 // recover the original madN and madP values from the black and white levels and the median value
                 // u = 7.5
                 // black = max(pmin, pmedian - u*madN)
@@ -5957,7 +5957,7 @@ function webgl_image_renderer(index, gl, width, height) {
 
                 var params = [image.tone_mapping.median, multiplier * image.tone_mapping.sensitivity, madN, madP];
                 console.log("z-score params:", params);
-            }
+            }*/
             else
                 var params = [image.tone_mapping.median, multiplier * image.tone_mapping.sensitivity, image.tone_mapping.black, image.tone_mapping.white];
 
