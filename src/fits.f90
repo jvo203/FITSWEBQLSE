@@ -6010,11 +6010,11 @@ contains
       print *, 'plane:', plane, 'mad = ', mad, ', madP = ', madP, ', madN = ', madN
 
       ! ALMAWebQL v2 - style
-      u = 7.5
-      black = max(pmin, pmedian - u*madN)
-      white = min(pmax, pmedian + u*madP)
-      !black = hist_quantile(data, pmin, pmax, 0.05) ! 0.01 or 0.05
-      !white = hist_quantile(data, pmin, pmax, 0.95) ! 0.99 or 0.95
+      !u = 7.5
+      !black = max(pmin, pmedian - u*madN)
+      !white = min(pmax, pmedian + u*madP)
+      black = hist_quantile(data, pmin, pmax, 0.05) ! 0.01 or 0.05
+      white = hist_quantile(data, pmin, pmax, 0.95) ! 0.99 or 0.95
       sensitivity = 1.0/(white - black)
       ratio_sensitivity = sensitivity
 
