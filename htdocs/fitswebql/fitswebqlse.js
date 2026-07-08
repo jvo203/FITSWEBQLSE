@@ -10630,6 +10630,9 @@ function get_flux(value, flux, black, white, median, multiplier, index) {
         case 'square':
             return get_flux_value_square(value, black, white);
             break;
+        case 'z-score':
+            return get_flux_value_linear(value, black, white, median, multiplier);
+            break;
         default:
             return NaN;
             break;
@@ -10820,6 +10823,10 @@ function get_flux_path(width, height, flux, black, white, median, multiplier, in
 
         case 'square':
             return get_flux_path_square(width, height, min, max, black, white, index);
+            break;
+
+        case 'z-score':
+            return get_flux_path_z_score(width, height, black, white, median, multiplier, index);
             break;
 
         default:
