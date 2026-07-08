@@ -10791,6 +10791,18 @@ function get_flux_path_linear(width, height, black, white) {
     return path;
 }
 
+function get_flux_path_z_score(width, height, black, white, median, multiplier, index) {
+    // start at the black point and zero height
+    var path = "M0 " + (emStrokeWidth + height - 1) + " L" + black + " " + (emStrokeWidth + height - 1);
+
+    // TO-DO: implement z-score flux path calculation between black and white points (like logistic)
+    var segments = 100;
+
+    // then finish the line
+    path += " L" + width + " " + emStrokeWidth;//0
+
+}
+
 function get_flux_path(width, height, flux, black, white, median, multiplier, index) {
     let fitsData = imageContainer[index - 1].tone_mapping;
     var min = fitsData.min;
