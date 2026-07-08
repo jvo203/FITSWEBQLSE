@@ -10795,8 +10795,11 @@ function get_flux_path_z_score(width, height, black, white, median, multiplier, 
     // start at the black point and zero height
     var path = "M0 " + (emStrokeWidth + height - 1) + " L" + black + " " + (emStrokeWidth + height - 1);
 
-    // TO-DO: implement z-score flux path calculation between black and white points (like logistic)
-    var segments = 100;
+    // black to median segment (scaled pixel is 0.5 at median)
+    path += " L" + median + " " + (emStrokeWidth + (height - 1) * 0.5); //0.5
+
+    // then median to white segment (scaled pixel is 1.0 at white)
+    path += " L" + white + " " + (emStrokeWidth + (height - 1) * 1.0); //1.0
 
     // then finish the line
     path += " L" + width + " " + emStrokeWidth;//0
