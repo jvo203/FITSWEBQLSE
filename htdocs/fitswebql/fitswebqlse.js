@@ -10353,6 +10353,12 @@ function add_histogram_line(g, pos, width, height, offset, info, position, addLi
             image.tone_mapping.sensitivity = 1 / (white - black);
         }
 
+        if (document.getElementById('flux' + index).value == "z-score") {
+            image.tone_mapping.black = black;
+            image.tone_mapping.white = white;
+            image.tone_mapping.median = median;
+        }
+
         var multiplier = get_noise_sensitivity(noise_sensitivity);
         var path = get_flux_path(width, height, document.getElementById('flux' + index).value, black, white, median, multiplier, index);
         flux_elem.attr("d", path);
