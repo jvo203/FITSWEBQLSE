@@ -12785,9 +12785,9 @@ contains
 
       tone%flux = c_null_char ! a C-style null-terminated string
 
-      ! force a logistic tone mapping for some moment maps, tone%flux needs to be written character by character as it is a fixed-size C string, terminated by a null character
+      ! force a logistic --> z-score tone mapping for some moment maps, tone%flux needs to be written character by character as it is a fixed-size C string, terminated by a null character
       if (req%intensity .eq. dispersion .or. req%intensity .eq. velocity) then
-         flux = 'logistic'
+         flux = 'z-score'
 
          do i = 1, min(len_trim(flux), size(tone%flux) - 1)
             tone%flux(i) = flux(i:i)

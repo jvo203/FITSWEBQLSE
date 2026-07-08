@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2026-07-07.2";
+    return "JS2026-07-08.0";
 }
 
 function uuidv4() {
@@ -10905,7 +10905,14 @@ function setup_histogram_interaction(index) {
             add_histogram_line(group, white, width, height, offset, 'white', 'top right', true, index);
             break;
 
+        case 'z-score':
+            add_histogram_line(group, black, width, height, offset, 'black', 'right', false, index);
+            add_histogram_line(group, white, width, height, offset, 'white', 'top left', true, index);
+            add_histogram_line(group, median, width, height, offset, 'median', 'right', true, index);
+            break;
+
         default:
+            // this will cover 'logistic' and any other flux types that may be added in the future
             add_histogram_line(group, median, width, height, offset, 'median', 'right', true, index);
             break;
     };
