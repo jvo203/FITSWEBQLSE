@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2026-07-08.0";
+    return "JS2026-07-09.0";
 }
 
 function uuidv4() {
@@ -2866,7 +2866,6 @@ function webgl_viewport_renderer(gl, container, height) {
             var params = [image.tone_mapping.median, multiplier * image.tone_mapping.ratio_sensitivity, image.tone_mapping.black, image.tone_mapping.white];
         else if (image.tone_mapping.flux == "z-score") {
             var params = [image.tone_mapping.median, multiplier, image.tone_mapping.black, image.tone_mapping.white];
-            console.log("z-score params:", params);
         }
         else
             var params = [image.tone_mapping.median, multiplier * image.tone_mapping.sensitivity, image.tone_mapping.black, image.tone_mapping.white];
@@ -5929,7 +5928,6 @@ function webgl_image_renderer(index, gl, width, height) {
                 var params = [image.tone_mapping.median, multiplier * image.tone_mapping.ratio_sensitivity, image.tone_mapping.black, image.tone_mapping.white];
             else if (image.tone_mapping.flux == "z-score") {
                 var params = [image.tone_mapping.median, multiplier, image.tone_mapping.black, image.tone_mapping.white];
-                console.log("z-score params:", params);
             }
             else
                 var params = [image.tone_mapping.median, multiplier * image.tone_mapping.sensitivity, image.tone_mapping.black, image.tone_mapping.white];
@@ -10799,11 +10797,12 @@ function get_flux_path_z_score(width, height, black, white, median, multiplier, 
     path += " L" + median + " " + (emStrokeWidth + (height - 1) * 0.5); //0.5
 
     // then median to white segment (scaled pixel is 1.0 at white)
-    path += " L" + white + " " + (emStrokeWidth + (height - 1) * 1.0); //1.0
+    path += " L" + white + " " + emStrokeWidth;//0
 
     // then finish the line
     path += " L" + width + " " + emStrokeWidth;//0
 
+    return path;
 }
 
 function get_flux_path(width, height, flux, black, white, median, multiplier, index) {
