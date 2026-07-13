@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2026-07-09.0";
+    return "JS2026-07-13.0";
 }
 
 function uuidv4() {
@@ -10287,7 +10287,7 @@ function add_histogram_line(g, pos, width, height, offset, info, position, addLi
         var black = (parseFloat(flux_elem.attr("black")) - min) / (max - min) * width;
         var white = (parseFloat(flux_elem.attr("white")) - min) / (max - min) * width;
 
-        if (document.getElementById('flux' + index).value != "logistic" && document.getElementById('flux' + index).value != "ratio") {
+        if (document.getElementById('flux' + index).value != "logistic" && document.getElementById('flux' + index).value != "ratio" && document.getElementById('flux' + index).value != "z-score") {
             switch (info) {
                 case 'black':
                     d.x = Math.min(white - x - 1, d.x);
@@ -10295,6 +10295,29 @@ function add_histogram_line(g, pos, width, height, offset, info, position, addLi
 
                 case 'white':
                     d.x = Math.max(black - x + 1, d.x);
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        if (document.getElementById('flux' + index).value == "z-score") {
+            let median = (parseFloat(flux_elem.attr("median")) - min) / (max - min) * width;
+
+            // enforce ordering: black < median < white
+            switch (info) {
+                case 'black':
+                    d.x = Math.min(median - x - 1, d.x);
+                    break;
+
+                case 'median':
+                    d.x = Math.max(black - x + 1, d.x);
+                    d.x = Math.min(white - x - 1, d.x);
+                    break;
+
+                case 'white':
+                    d.x = Math.max(median - x + 1, d.x);
                     break;
 
                 default:
