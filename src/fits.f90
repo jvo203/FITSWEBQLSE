@@ -5974,6 +5974,10 @@ contains
 
       if (n .eq. 0) return
 
+      ! pmin, pmax override: estimate the 0.01% and 99.99% quantiles, getting rid of outliers, and then make a histogram
+      pmin = hist_quantile(data, pmin, pmax, 0.0001, 5)
+      pmax = hist_quantile(data, pmin, pmax, 0.9999, 5)
+
       ! make a histogram with a range given by [pmin, pmax]
       call make_histogram(hist, data, pmin, pmax)
 
