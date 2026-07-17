@@ -1912,7 +1912,7 @@ export uniform int polarisation_simd_4(uniform float pixels[], uniform unsigned 
 // (moment map) higher moments
 
 // the 1st moment map is the intensity-weighted velocity map, which is used to trace the kinematics of the gas. The 0th moment map is the integrated intensity map, which is used to trace the distribution of the gas. The 2nd moment map is the velocity dispersion map, which is used to trace the turbulence of the gas.
-export void viewport_moment_map_1_rect(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform float pmin, uniform float pmax, uniform float view_I[], uniform float view_Iv[], uniform bool view_mask[], uniform int stride, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform int horizontal, uniform int vertical, uniform double velocity)
+export void viewport_moment_map_1_rect(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform float pmin, uniform float pmax, uniform double view_I[], uniform double view_Iv[], uniform bool view_mask[], uniform int stride, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform int horizontal, uniform int vertical, uniform double velocity)
 {
     uniform int cn, cm;
 
@@ -1976,8 +1976,8 @@ export void viewport_moment_map_1_rect(uniform struct fixed_block_t compressed[]
             // recover the original range
             // tmp = pmin + (exp(tmp) - 0.5f)*(pmax - pmin);
 
-            view_I[offset] += tmp ;
-            view_Iv[offset] += tmp * velocity ;    
+            view_I[offset] += (double)tmp ;
+            view_Iv[offset] += (double)tmp * velocity ;
             view_mask[offset] |= isnan ? false : true ;
           }      
         }
@@ -1985,7 +1985,7 @@ export void viewport_moment_map_1_rect(uniform struct fixed_block_t compressed[]
 }
 
 // the 2nd moment
-export void viewport_moment_map_2_rect(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform float pmin, uniform float pmax, uniform float view_I[], uniform float view_Iv[], uniform float view_Iv2[], uniform bool view_mask[], uniform int stride, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform int horizontal, uniform int vertical, uniform double velocity)
+export void viewport_moment_map_2_rect(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform float pmin, uniform float pmax, uniform double view_I[], uniform double view_Iv[], uniform double view_Iv2[], uniform bool view_mask[], uniform int stride, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform int horizontal, uniform int vertical, uniform double velocity)
 {
     uniform int cn, cm;
 
@@ -2049,9 +2049,9 @@ export void viewport_moment_map_2_rect(uniform struct fixed_block_t compressed[]
             // recover the original range
             // tmp = pmin + (exp(tmp) - 0.5f)*(pmax - pmin);
 
-            view_I[offset] += tmp ;
-            view_Iv[offset] += tmp * velocity ;
-            view_Iv2[offset] += tmp * velocity * velocity ;  
+            view_I[offset] += (double)tmp ;
+            view_Iv[offset] += (double)tmp * velocity ;
+            view_Iv2[offset] += (double)tmp * velocity * velocity ;  
             view_mask[offset] |= isnan ? false : true ;
           }      
         }
@@ -2059,7 +2059,7 @@ export void viewport_moment_map_2_rect(uniform struct fixed_block_t compressed[]
 }
 
 // maximum (the 8th moment)
-export void viewport_moment_map_8_rect(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform float pmin, uniform float pmax, uniform float view_I[], uniform bool view_mask[], uniform int stride, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform int horizontal, uniform int vertical)
+export void viewport_moment_map_8_rect(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform float pmin, uniform float pmax, uniform double view_I[], uniform bool view_mask[], uniform int stride, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform int horizontal, uniform int vertical)
 {
     uniform int cn, cm;
 
@@ -2124,7 +2124,7 @@ export void viewport_moment_map_8_rect(uniform struct fixed_block_t compressed[]
             // tmp = pmin + (exp(tmp) - 0.5f)*(pmax - pmin);
 
             // compute the maximum value 
-            view_I[offset] = max(view_I[offset], tmp) ;
+            view_I[offset] = max(view_I[offset], (double)tmp) ;
             view_mask[offset] |= isnan ? false : true ;
           }      
         }

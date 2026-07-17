@@ -12541,7 +12541,8 @@ contains
       type(image_spectrum_request_f), pointer :: req
 
       ! output variables
-      real(kind=c_float), allocatable, target :: pixels(:), pixels_I(:), pixels_Iv(:), pixels_Iv2(:), view_pixels(:, :)
+      real(kind=c_float), allocatable, target :: pixels(:), view_pixels(:, :)
+      real(kind=c_double), allocatable, target :: pixels_I(:), pixels_Iv(:), pixels_Iv2(:)
       logical(kind=c_bool), allocatable, target :: mask(:), view_mask(:, :)
 
       integer :: first, last, length, threshold
@@ -12550,7 +12551,7 @@ contains
       integer(c_int) :: width, height
       real(kind=c_double) :: freq, vel
 
-      real(kind=c_float), allocatable, target :: thread_I(:, :), thread_Iv(:, :), thread_Iv2(:, :)
+      real(kind=c_double), allocatable, target :: thread_I(:, :), thread_Iv(:, :), thread_Iv2(:, :)
       logical(kind=c_bool), allocatable, target :: thread_mask(:, :)
 
       integer :: dimx, dimy, i, j, k
@@ -12700,7 +12701,7 @@ contains
          end do
 
          ! M1
-         pixels(:) = pixels_Iv(:)/pixels_I(:)
+         pixels(:) = real(pixels_Iv(:)/pixels_I(:), kind=c_float)
 
          ! adjust the mask (account for division by zero and NaNs in the velocity map)
          mask(:) = mask(:) .and. (pixels_I(:) .ne. 0.0) .and. ieee_is_finite(pixels(:))
@@ -12718,7 +12719,7 @@ contains
          end do
 
          ! M2
-         pixels(:) = pixels_Iv2(:)/pixels_I(:) - (pixels_Iv(:)/pixels_I(:))**2
+         pixels(:) = real(pixels_Iv2(:)/pixels_I(:) - (pixels_Iv(:)/pixels_I(:))**2, kind=c_float)
 
          ! adjust the mask (account for division by zero and NaNs in the velocity map)
          mask(:) = mask(:) .and. (pixels_I(:) .ne. 0.0) .and. ieee_is_finite(pixels(:))
@@ -12735,7 +12736,7 @@ contains
          end do
 
          ! M8
-         pixels(:) = pixels_I(:)
+         pixels(:) = real(pixels_I(:), kind=c_float)
       end if
 
       ! get the inner image bounding box (excluding NaNs)
@@ -12787,7 +12788,7 @@ contains
 
       ! force a logistic --> z-score tone mapping for some moment maps, tone%flux needs to be written character by character as it is a fixed-size C string, terminated by a null character
       if (req%intensity .eq. dispersion .or. req%intensity .eq. velocity) then
-         flux = 'z-score'
+         flux = 'logistic'
 
          do i = 1, min(len_trim(flux), size(tone%flux) - 1)
             tone%flux(i) = flux(i:i)
