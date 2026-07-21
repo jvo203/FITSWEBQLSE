@@ -5915,7 +5915,7 @@ contains
 
    end subroutine get_velocity_bounds
 
-   subroutine make_image_statistics(item, width, height, pixels, mask, outhist, tone, plane)
+   subroutine make_image_statistics(item, width, height, pixels, mask, outhist, tone, plane, moments)
       use, intrinsic :: iso_c_binding
       implicit none
 
@@ -5925,7 +5925,8 @@ contains
       logical(kind=c_bool), dimension(width, height), intent(in) :: mask
       integer, intent(out) :: outhist(:)
       type(image_tone_mapping), intent(inout) :: tone ! this needs to be *INOUT* (tone%flux!!!)
-      integer, value, optional :: plane
+      integer, value :: plane
+      logical, value, optional :: moments
 
       real, dimension(:), allocatable :: data
       integer, allocatable :: hist(:)
@@ -5938,7 +5939,7 @@ contains
       real u, v
       real black, white, sensitivity, ratio_sensitivity
 
-      if (.not. present(plane)) plane = 1
+      if (.not. present(moments)) moments = .false.
 
       tone%pmin = 0.0
       tone%pmax = 0.0
@@ -5974,9 +5975,11 @@ contains
 
       if (n .eq. 0) return
 
-      ! pmin, pmax override: estimate the 0.01% and 99.99% quantiles, getting rid of outliers, and then make a histogram
-      pmin = hist_quantile(data, pmin, pmax, 0.0001, 5)
-      pmax = hist_quantile(data, pmin, pmax, 0.9999, 5)
+      if(moments) then
+         ! pmin, pmax override: estimate the 0.1% and 99.9% quantiles, getting rid of outliers, and then make a histogram
+         pmin = hist_quantile(data, pmin, pmax, 0.001, 5)
+         pmax = hist_quantile(data, pmin, pmax, 0.999, 5)
+      end if
 
       ! make a histogram with a range given by [pmin, pmax]
       call make_histogram(hist, data, pmin, pmax)
@@ -6014,12 +6017,17 @@ contains
       print *, 'plane:', plane, 'mad = ', mad, ', madP = ', madP, ', madN = ', madN
 
       ! ALMAWebQL v2 - style
-      !u = 7.5
-      !black = max(pmin, pmedian - u*madN)
-      !white = min(pmax, pmedian + u*madP)
-      black = hist_quantile(data, pmin, pmax, 0.01, 5) ! 0.01 or 0.05
-      white = hist_quantile(data, pmin, pmax, 0.99, 5) ! 0.99 or 0.95
-      sensitivity = 1.0/(white - black)
+      if(moments) then
+         black = hist_quantile(data, pmin, pmax, 0.01, 5) ! 0.01 or 0.05
+         white = hist_quantile(data, pmin, pmax, 0.99, 5) ! 0.99 or 0.95
+         sensitivity = 10.0/(white - black)
+      else
+         u = 7.5
+         black = max(pmin, pmedian - u*madN)
+         white = min(pmax, pmedian + u*madP)
+         sensitivity = 1.0/(white - black)
+      end if
+
       ratio_sensitivity = sensitivity
 
       if (item%is_optical .and. .not. item%is_spectrum) then
@@ -12456,7 +12464,7 @@ contains
       ! use OpenMP to parallelise the loop
       !$omp parallel do default(shared) private(k)
       do k = 1, max_planes
-         call make_image_statistics(item, img_width, img_height, view_pixels(:, :, k), view_mask, hist(:, k), tone(k))
+         call make_image_statistics(item, img_width, img_height, view_pixels(:, :, k), view_mask, hist(:, k), tone(k), k)
       end do
       !$omp end parallel do
 
@@ -12799,7 +12807,11 @@ contains
          end do
       end if
 
-      call make_image_statistics(item, img_width, img_height, view_pixels(:, :), view_mask, hist(:), tone)
+      if (req%intensity .eq. dispersion .or. req%intensity .eq. velocity) then
+         call make_image_statistics(item, img_width, img_height, view_pixels(:, :), view_mask, hist(:), tone, 1, .true.)
+      else
+         call make_image_statistics(item, img_width, img_height, view_pixels(:, :), view_mask, hist(:), tone, 1)
+      end if
 
       if (req%fd .ne. -1) then
 
