@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2026-07-13.0";
+    return "JS2026-07-22.0";
 }
 
 function uuidv4() {
@@ -2252,11 +2252,16 @@ function crosshair_move(event) {
         .html(velocity.toFixed(2) + " km/s");
 
     var bunit = '';
-    if (fitsData.BUNIT != '') {
-        bunit = fitsData.BUNIT.trim();
 
-        if (fitsData.depth > 1 && has_velocity_info)
-            bunit += '•km/s';
+    if (moment_map == 'velocity' || moment_map == 'dispersion') {
+        bunit = "[km/s]";
+    } else {
+        if (fitsData.BUNIT != '') {
+            bunit = fitsData.BUNIT.trim();
+
+            if (fitsData.depth > 1 && has_velocity_info)
+                bunit += '•km/s';
+        }
     }
 
     // update the intensitytooltip html
@@ -21325,13 +21330,18 @@ function display_legend(index = previous_plane) {
     let fitsData = fitsContainer[index - 1];
 
     var bunit = '';
-    if (fitsData.BUNIT != '') {
-        bunit = fitsData.BUNIT.trim();
 
-        if (fitsData.depth > 1 && has_velocity_info)
-            bunit += '•km/s';
+    if (moment_map == 'velocity' || moment_map == 'dispersion') {
+        bunit = "[km/s]";
+    } else {
+        if (fitsData.BUNIT != '') {
+            bunit = fitsData.BUNIT.trim();
 
-        bunit = "[" + bunit + "]";
+            if (fitsData.depth > 1 && has_velocity_info)
+                bunit += '•km/s';
+
+            bunit = "[" + bunit + "]";
+        }
     }
 
     group.append("text")
