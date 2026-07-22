@@ -2252,16 +2252,11 @@ function crosshair_move(event) {
         .html(velocity.toFixed(2) + " km/s");
 
     var bunit = '';
+    if (fitsData.BUNIT != '') {
+        bunit = fitsData.BUNIT.trim();
 
-    if (moment_map == 'velocity' || moment_map == 'dispersion') {
-        bunit = "[km/s]";
-    } else {
-        if (fitsData.BUNIT != '') {
-            bunit = fitsData.BUNIT.trim();
-
-            if (fitsData.depth > 1 && has_velocity_info)
-                bunit += '•km/s';
-        }
+        if (fitsData.depth > 1 && has_velocity_info)
+            bunit += '•km/s';
     }
 
     // update the intensitytooltip html
@@ -16063,8 +16058,13 @@ function setup_image_selection(plane_index = previous_plane) {
                 var alpha = imageFrame.alpha[pixel_coord];
 
                 let bunit = fitsData.BUNIT.trim();
-                if (fitsData.depth > 1 && has_velocity_info)
-                    bunit += '•km/s';
+
+                if (moment_map == 'velocity' || moment_map == 'dispersion') {
+                    bunit = "km/s";
+                } else {
+                    if (fitsData.depth > 1 && has_velocity_info)
+                        bunit += '•km/s';
+                }
 
                 if (alpha > 0 && !isNaN(pixel)) {
                     //d3.select("#pixel").text(prefix + pixelVal.toPrecision(3) + " " + bunit).attr("opacity", 1.0) ;
