@@ -12722,6 +12722,7 @@ contains
          pixels(:) = merge(pixels(:), 0.0, mask(:))
       end if
 
+      ! the 2nd moment (dispersion) --> the current implementation is not numerically stable, but it is fast and works for most cases
       if (req%intensity .eq. dispersion) then
          do tid = 1, max_threads
             pixels_I(:) = pixels_I(:) + thread_I(:, tid)
@@ -12734,10 +12735,10 @@ contains
          pixels(:) = real(pixels_Iv2(:)/pixels_I(:) - (pixels_Iv(:)/pixels_I(:))**2, kind=c_float)
 
          ! adjust the mask (account for division by zero and NaNs in the velocity map)
-         mask(:) = mask(:) .and. (pixels_I(:) .ne. 0.0) .and. ieee_is_finite(pixels(:))
+         mask(:) = mask(:) .and. (pixels_I(:) .ne. 0.0) .and. ieee_is_finite(pixels(:)) .and. (pixels(:) .ge. 0.0)
 
          ! set pixels to zero where the mask is false
-         pixels(:) = merge(pixels(:), 0.0, mask(:))
+         pixels(:) = merge(sqrt(pixels(:)), 0.0, mask(:))
       end if
 
       if (req%intensity .eq. maximum) then
@@ -12799,7 +12800,7 @@ contains
       tone%flux = c_null_char ! a C-style null-terminated string
 
       ! force a logistic --> z-score tone mapping for some moment maps, tone%flux needs to be written character by character as it is a fixed-size C string, terminated by a null character
-      if (req%intensity .eq. dispersion .or. req%intensity .eq. velocity) then
+      if (req%intensity .eq. velocity) then
          flux = 'logistic'
 
          do i = 1, min(len_trim(flux), size(tone%flux) - 1)
@@ -12807,7 +12808,15 @@ contains
          end do
       end if
 
-      if (req%intensity .eq. dispersion .or. req%intensity .eq. velocity) then
+      if (req%intensity .eq. dispersion) then
+         flux = 'ratio'
+
+         do i = 1, min(len_trim(flux), size(tone%flux) - 1)
+            tone%flux(i) = flux(i:i)
+         end do
+      end if
+
+      if (req%intensity .eq. velocity) then
          call make_image_statistics(item, img_width, img_height, view_pixels(:, :), view_mask, hist(:), tone, 1, .true.)
       else
          call make_image_statistics(item, img_width, img_height, view_pixels(:, :), view_mask, hist(:), tone, 1)
