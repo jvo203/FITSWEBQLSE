@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2026-07-23.0";
+    return "JS2026-07-28.0";
 }
 
 function uuidv4() {
@@ -11743,7 +11743,7 @@ function display_histogram(index, initPlanes = true) {
         //.attr("class", "form-control")
         .attr("id", "flux" + index)
         .attr("onchange", "javascript:image_count=0;change_tone_mapping(" + index + ",true);")
-        .html("<option value='linear'>linear</option><option value='legacy'>logarithmic</option><option value='logistic'>logistic</option><option value='ratio'>ratio</option><option value='square'>square</option><option value='z-score'>z-score</option>");//<option value='log'>log</option>
+        .html("<option value='linear'>linear</option><option value='legacy'>logarithmic</option><option value='logistic'>logistic</option><option value='ratio'>ratio</option><option value='square'>square</option>");//<option value='log'>log</option>//<option value='z-score'>z-score</option>
 
     document.getElementById('flux' + index).value = imageData.tone_mapping.flux;
     //document.querySelectorAll('[value="' + fitsData.flux + '"]')[0].text = fitsData.flux + ' (default)' ;
