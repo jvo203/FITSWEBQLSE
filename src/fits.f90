@@ -7726,6 +7726,7 @@ contains
       real(c_float) :: cx, cy, r, r2
       real(c_float) :: spec
       real(kind=8) :: cdelt3
+      real(kind=c_double) :: freq, vel
 
       real(kind=c_float), allocatable, target :: thread_pixels(:, :, :, :)
       logical(kind=c_bool), allocatable, target :: thread_mask(:, :, :)
@@ -7906,7 +7907,7 @@ contains
       thread_countN = 0
 
       !$omp PARALLEL DEFAULT(SHARED) SHARED(item, spectrum)&
-      !$omp& SHARED(thread_pixels, thread_mask) PRIVATE(tid, frame, k, spec)&
+      !$omp& SHARED(thread_pixels, thread_mask) PRIVATE(tid, frame, k, spec, freq, vel)&
       !$omp& NUM_THREADS(max_threads)
       !$omp DO
       do frame = first, last
@@ -7953,6 +7954,11 @@ contains
                end do
             else
                ! handle higher moments here
+               if (req%intensity .ne. maximum) then
+                  ! calculate the velocity for this frame
+                  call get_frame2freq_vel(item, frame, req%ref_freq, req%deltaV, req%rest, freq, vel)
+                  ! print *, "thread:", tid, "channel:", frame, "f [GHz]: ", freq, "v [km/s]:", vel
+               end if
             end if
          end if
 
