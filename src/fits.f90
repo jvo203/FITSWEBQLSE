@@ -7930,26 +7930,30 @@ contains
                &x1 - 1, x2 - 1, y1 - 1, y2 - 1, cx - 1, cy - 1, r2, average, cdelt3)
             end if
          else
-            do k = 1, max_planes
-               spec = 0.0
+            if (req%intensity .eq. mean .or. req%intensity .eq. integrated) then
+               do k = 1, max_planes
+                  spec = 0.0
 
-               if (req%beam .eq. square) then
-                  spec = viewport_image_spectrum_rect(c_loc(item%compressed(frame, k)%ptr),&
-                  &width, height, item%frame_min(frame, k), item%frame_max(frame, k),&
-                  &c_loc(thread_pixels(:, :, k, tid)), c_loc(thread_mask(:, :, tid)), dimx, &
-                  &x1 - 1, x2 - 1, y1 - 1, y2 - 1, x1 - req%x1, y1 - req%y1, average, cdelt3, req%median(k),&
-                  &thread_sumP, thread_countP, thread_sumN, thread_countN)
-               end if
+                  if (req%beam .eq. square) then
+                     spec = viewport_image_spectrum_rect(c_loc(item%compressed(frame, k)%ptr),&
+                     &width, height, item%frame_min(frame, k), item%frame_max(frame, k),&
+                     &c_loc(thread_pixels(:, :, k, tid)), c_loc(thread_mask(:, :, tid)), dimx, &
+                     &x1 - 1, x2 - 1, y1 - 1, y2 - 1, x1 - req%x1, y1 - req%y1, average, cdelt3, req%median(k),&
+                     &thread_sumP, thread_countP, thread_sumN, thread_countN)
+                  end if
 
-               if (req%beam .eq. circle) then
-                  spec = viewport_image_spectrum_circle(c_loc(item%compressed(frame, k)%ptr),&
-                  &width, height, item%frame_min(frame, k), item%frame_max(frame, k), c_loc(thread_pixels(:, :, k, tid)),&
-                  & c_loc(thread_mask(:, :, tid)), dimx, x1 - 1, x2 - 1, y1 - 1, y2 - 1,&
-                  & x1 - req%x1, y1 - req%y1, cx - 1, cy - 1, r2, average, cdelt3)
-               end if
+                  if (req%beam .eq. circle) then
+                     spec = viewport_image_spectrum_circle(c_loc(item%compressed(frame, k)%ptr),&
+                     &width, height, item%frame_min(frame, k), item%frame_max(frame, k), c_loc(thread_pixels(:, :, k, tid)),&
+                     & c_loc(thread_mask(:, :, tid)), dimx, x1 - 1, x2 - 1, y1 - 1, y2 - 1,&
+                     & x1 - req%x1, y1 - req%y1, cx - 1, cy - 1, r2, average, cdelt3)
+                  end if
 
-               if (k .eq. plane) spectrum(frame) = spec
-            end do
+                  if (k .eq. plane) spectrum(frame) = spec
+               end do
+            else
+               ! handle higher moments here
+            end if
          end if
 
       end do
@@ -12676,9 +12680,11 @@ contains
          ! get a current OpenMP thread (starting from 0 as in C)
          tid = 1 + OMP_GET_THREAD_NUM()
 
-         ! calculate the velocity for this frame
-         call get_frame2freq_vel(item, frame, req%ref_freq, req%deltaV, req%rest, freq, vel)
-         ! print *, "thread:", tid, "channel:", frame, "f [GHz]: ", freq, "v [km/s]:", vel
+         if (req%intensity .ne. maximum) then
+            ! calculate the velocity for this frame
+            call get_frame2freq_vel(item, frame, req%ref_freq, req%deltaV, req%rest, freq, vel)
+            ! print *, "thread:", tid, "channel:", frame, "f [GHz]: ", freq, "v [km/s]:", vel
+         end if
 
          ! the 1st moment
          if (req%intensity .eq. velocity) then
