@@ -7959,6 +7959,10 @@ contains
                   call get_frame2freq_vel(item, frame, req%ref_freq, req%deltaV, req%rest, freq, vel)
                   ! print *, "thread:", tid, "channel:", frame, "f [GHz]: ", freq, "v [km/s]:", vel
                end if
+
+               if (req%beam .eq. square) then
+
+               end if
             end if
          end if
 
