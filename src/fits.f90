@@ -7722,11 +7722,14 @@ contains
 
       integer :: first, last, plane, length, threshold, k, max_planes
       integer :: max_threads, frame, tid
+      integer(kind=8) :: npixels
       integer(c_int) :: x1, x2, y1, y2, width, height, average
       real(c_float) :: cx, cy, r, r2
       real(c_float) :: spec
       real(kind=8) :: cdelt3
       real(kind=c_double) :: freq, vel
+
+      real(kind=c_double), allocatable, target :: thread_I(:, :), thread_Iv(:, :), thread_Iv2(:, :)
 
       real(kind=c_float), allocatable, target :: thread_pixels(:, :, :, :)
       logical(kind=c_bool), allocatable, target :: thread_mask(:, :, :)
@@ -7808,6 +7811,7 @@ contains
       ! obtain viewport dimensions (even going beyond the dims of pixels&mask)
       dimx = abs(req%x2 - req%x1) + 1
       dimy = abs(req%y2 - req%y1) + 1
+      npixels = dimx*dimy
 
       ! sanity checks
       x1 = max(1, req%x1)
@@ -7849,6 +7853,31 @@ contains
 
          thread_pixels = 0.0
          thread_mask = .false.
+
+         if (req%intensity .eq. velocity .or. req%intensity .eq. dispersion .or. req%intensity .eq. maximum) then
+            ! allocate thread-local buffers common for all higher moments
+            allocate (thread_I(npixels, max_threads))
+
+            if (req%intensity .ne. maximum) then
+               thread_I = 0.0
+            else
+               thread_I = -1.0E30
+            end if
+
+            ! velocity / dispersion
+            if (req%intensity .eq. velocity .or. req%intensity .eq. dispersion) then
+               allocate (thread_Iv(npixels, max_threads))
+
+               thread_Iv = 0.0
+            end if
+
+            ! dispersion
+            if (req%intensity .eq. dispersion) then
+               allocate (thread_Iv2(npixels, max_threads))
+
+               thread_Iv2 = 0.0
+            end if
+         end if
       end if
 
       ! launch a cluster thread (check if the number of cluster nodes is .gt. 0)
@@ -7907,7 +7936,7 @@ contains
       thread_countN = 0
 
       !$omp PARALLEL DEFAULT(SHARED) SHARED(item, spectrum)&
-      !$omp& SHARED(thread_pixels, thread_mask) PRIVATE(tid, frame, k, spec, freq, vel)&
+      !$omp& SHARED(thread_pixels, thread_mask, thread_I, thread_Iv, thread_Iv2) PRIVATE(tid, frame, k, spec, freq, vel)&
       !$omp& NUM_THREADS(max_threads)
       !$omp DO
       do frame = first, last
@@ -7965,20 +7994,20 @@ contains
                   if (req%intensity .eq. velocity) then
                      call viewport_moment_map_1_rect(c_loc(item%compressed(frame, 1)%ptr), width, height,&
                      &item%frame_min(frame, 1), item%frame_max(frame, 1), c_loc(thread_I(:, tid)),&
-                     &c_loc(thread_Iv(:, tid)), c_loc(thread_mask(:, tid)), dimx, x1 - 1, x2 - 1, y1 - 1, y2 - 1, 0, 0, vel)
+                     &c_loc(thread_Iv(:, tid)), c_loc(thread_mask(:, :, tid)), dimx, x1 - 1, x2 - 1, y1 - 1, y2 - 1, 0, 0, vel)
                   end if
 
                   ! the 2nd moment
                   if (req%intensity .eq. dispersion) then
                      call viewport_moment_map_2_rect(c_loc(item%compressed(frame, 1)%ptr), width, height,&
                      &item%frame_min(frame, 1), item%frame_max(frame, 1), c_loc(thread_I(:, tid)), c_loc(thread_Iv(:, tid)),&
-                     & c_loc(thread_Iv2(:, tid)),c_loc(thread_mask(:, tid)), dimx, x1 - 1, x2 - 1, y1 - 1, y2 - 1, 0, 0, vel)
+                     & c_loc(thread_Iv2(:, tid)),c_loc(thread_mask(:, :, tid)), dimx, x1 - 1, x2 - 1, y1 - 1, y2 - 1, 0, 0, vel)
                   end if
 
                   ! the 8th moment (maximum)
                   if (req%intensity .eq. maximum) then
                      call viewport_moment_map_8_rect(c_loc(item%compressed(frame, 1)%ptr), width, height, &
-                     &item%frame_min(frame, 1), item%frame_max(frame, 1), c_loc(thread_I(:, tid)), c_loc(thread_mask(:, tid)),&
+                     &item%frame_min(frame, 1), item%frame_max(frame, 1), c_loc(thread_I(:, tid)), c_loc(thread_mask(:, :, tid)),&
                      & dimx, x1 - 1, x2 - 1, y1 - 1, y2 - 1, 0, 0)
                   end if
                end if
