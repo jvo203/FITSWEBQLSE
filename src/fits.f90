@@ -7722,14 +7722,13 @@ contains
 
       integer :: first, last, plane, length, threshold, k, max_planes
       integer :: max_threads, frame, tid
-      integer(kind=8) :: npixels
       integer(c_int) :: x1, x2, y1, y2, width, height, average
       real(c_float) :: cx, cy, r, r2
       real(c_float) :: spec
       real(kind=8) :: cdelt3
       real(kind=c_double) :: freq, vel
 
-      real(kind=c_double), allocatable, target :: thread_I(:, :), thread_Iv(:, :), thread_Iv2(:, :)
+      real(kind=c_double), allocatable, target :: thread_I(:, :, :), thread_Iv(:, :, :), thread_Iv2(:, :, :)
 
       real(kind=c_float), allocatable, target :: thread_pixels(:, :, :, :)
       logical(kind=c_bool), allocatable, target :: thread_mask(:, :, :)
@@ -7811,7 +7810,6 @@ contains
       ! obtain viewport dimensions (even going beyond the dims of pixels&mask)
       dimx = abs(req%x2 - req%x1) + 1
       dimy = abs(req%y2 - req%y1) + 1
-      npixels = dimx*dimy
 
       ! sanity checks
       x1 = max(1, req%x1)
@@ -7856,7 +7854,7 @@ contains
 
          if (req%intensity .eq. velocity .or. req%intensity .eq. dispersion .or. req%intensity .eq. maximum) then
             ! allocate thread-local buffers common for all higher moments
-            allocate (thread_I(npixels, max_threads))
+            allocate (thread_I(dimx, dimy, max_threads))
 
             if (req%intensity .ne. maximum) then
                thread_I = 0.0
@@ -7866,14 +7864,14 @@ contains
 
             ! velocity / dispersion
             if (req%intensity .eq. velocity .or. req%intensity .eq. dispersion) then
-               allocate (thread_Iv(npixels, max_threads))
+               allocate (thread_Iv(dimx, dimy, max_threads))
 
                thread_Iv = 0.0
             end if
 
             ! dispersion
             if (req%intensity .eq. dispersion) then
-               allocate (thread_Iv2(npixels, max_threads))
+               allocate (thread_Iv2(dimx, dimy, max_threads))
 
                thread_Iv2 = 0.0
             end if
@@ -7993,21 +7991,22 @@ contains
                   ! the 1st moment
                   if (req%intensity .eq. velocity) then
                      call viewport_moment_map_1_rect(c_loc(item%compressed(frame, 1)%ptr), width, height,&
-                     &item%frame_min(frame, 1), item%frame_max(frame, 1), c_loc(thread_I(:, tid)),&
-                     &c_loc(thread_Iv(:, tid)), c_loc(thread_mask(:, :, tid)), dimx, x1 - 1, x2 - 1, y1 - 1, y2 - 1, 0, 0, vel)
+                     &item%frame_min(frame, 1), item%frame_max(frame, 1), c_loc(thread_I(:, :, tid)),&
+                     &c_loc(thread_Iv(:, :, tid)), c_loc(thread_mask(:, :, tid)), dimx, x1 - 1, x2 - 1, y1 - 1, y2 - 1, 0, 0, vel)
                   end if
 
                   ! the 2nd moment
                   if (req%intensity .eq. dispersion) then
                      call viewport_moment_map_2_rect(c_loc(item%compressed(frame, 1)%ptr), width, height,&
-                     &item%frame_min(frame, 1), item%frame_max(frame, 1), c_loc(thread_I(:, tid)), c_loc(thread_Iv(:, tid)),&
-                     & c_loc(thread_Iv2(:, tid)),c_loc(thread_mask(:, :, tid)), dimx, x1 - 1, x2 - 1, y1 - 1, y2 - 1, 0, 0, vel)
+                     &item%frame_min(frame, 1), item%frame_max(frame, 1), c_loc(thread_I(:, :, tid)), c_loc(thread_Iv(:, :, tid)),&
+                     & c_loc(thread_Iv2(:, :, tid)),c_loc(thread_mask(:, :, tid)), dimx, x1 - 1, x2 - 1, y1 - 1, y2 - 1, 0, 0, vel)
                   end if
 
                   ! the 8th moment (maximum)
                   if (req%intensity .eq. maximum) then
                      call viewport_moment_map_8_rect(c_loc(item%compressed(frame, 1)%ptr), width, height, &
-                     &item%frame_min(frame, 1), item%frame_max(frame, 1), c_loc(thread_I(:, tid)), c_loc(thread_mask(:, :, tid)),&
+                     &item%frame_min(frame, 1), item%frame_max(frame, 1), &
+                     &c_loc(thread_I(:, :, tid)), c_loc(thread_mask(:, :, tid)),&
                      & dimx, x1 - 1, x2 - 1, y1 - 1, y2 - 1, 0, 0)
                   end if
                end if
@@ -8023,14 +8022,12 @@ contains
 
       ! reduce the pixels/mask locally
       if (req%image) then
-         do tid = 1, max_threads
-            ! handle the common mask first
-            mask(:, :) = mask(:, :) .or. thread_mask(:, :, tid)
-
-            if (req%intensity .eq. mean .or. req%intensity .eq. integrated) then
+         if (req%intensity .eq. mean .or. req%intensity .eq. integrated) then
+            do tid = 1, max_threads
                pixels(:, :, :) = pixels(:, :, :) + thread_pixels(:, :, :, tid)
-            end if
-         end do
+               mask(:, :) = mask(:, :) .or. thread_mask(:, :, tid)
+            end do
+         end if
       end if
 
       ! combine the spectra from other cluster nodes (if any)
@@ -12317,7 +12314,7 @@ contains
 
       dimx = abs(req%x2 - req%x1) + 1
       dimy = abs(req%y2 - req%y1) + 1
-      npixels = dimx*dimy
+      npixels = int(dimx, kind=8)*int(dimy, kind=8)
 
       ! allocate and zero-out the spectrum
       allocate (spectrum(first:last, max_planes))
@@ -12687,7 +12684,7 @@ contains
 
       dimx = abs(req%x2 - req%x1) + 1
       dimy = abs(req%y2 - req%y1) + 1
-      npixels = dimx*dimy
+      npixels = int(dimx, kind=8)*int(dimy, kind=8)
 
       ! get #physical cores (ignore HT)
       max_threads = get_max_threads()
