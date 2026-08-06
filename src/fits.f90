@@ -7717,6 +7717,7 @@ contains
 
       ! output variables
       real(kind=c_float), allocatable, target :: pixels(:, :, :), view_pixels(:, :, :)
+      real(kind=c_double), allocatable, target :: pixels_I(:, :), pixels_Iv(:, :), pixels_Iv2(:, :)
       logical(kind=c_bool), allocatable, target :: mask(:, :), view_mask(:, :)
       real(kind=c_float), dimension(:), allocatable, target :: spectrum, reduced_spectrum, cluster_spectrum
 
@@ -7855,6 +7856,9 @@ contains
          if (req%intensity .eq. velocity .or. req%intensity .eq. dispersion .or. req%intensity .eq. maximum) then
             ! allocate thread-local buffers common for all higher moments
             allocate (thread_I(dimx, dimy, max_threads))
+            allocate (pixels_I(dimx, dimy))
+
+            pixels_I = 0.0
 
             if (req%intensity .ne. maximum) then
                thread_I = 0.0
@@ -7864,15 +7868,19 @@ contains
 
             ! velocity / dispersion
             if (req%intensity .eq. velocity .or. req%intensity .eq. dispersion) then
+               allocate (pixels_Iv(dimx, dimy))
                allocate (thread_Iv(dimx, dimy, max_threads))
 
+               pixels_Iv = 0.0
                thread_Iv = 0.0
             end if
 
             ! dispersion
             if (req%intensity .eq. dispersion) then
+               allocate (pixels_Iv2(dimx, dimy))
                allocate (thread_Iv2(dimx, dimy, max_threads))
 
+               pixels_Iv2 = 0.0
                thread_Iv2 = 0.0
             end if
          end if
