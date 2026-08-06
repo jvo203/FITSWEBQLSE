@@ -8024,8 +8024,11 @@ contains
       ! reduce the pixels/mask locally
       if (req%image) then
          do tid = 1, max_threads
-            pixels(:, :, :) = pixels(:, :, :) + thread_pixels(:, :, :, tid)
             mask(:, :) = mask(:, :) .or. thread_mask(:, :, tid)
+
+            if (req%intensity .eq. mean .or. req%intensity .eq. integrated) then
+               pixels(:, :, :) = pixels(:, :, :) + thread_pixels(:, :, :, tid)
+            end if
          end do
       end if
 
