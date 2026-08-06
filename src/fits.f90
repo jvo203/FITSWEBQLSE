@@ -8024,6 +8024,7 @@ contains
       ! reduce the pixels/mask locally
       if (req%image) then
          do tid = 1, max_threads
+            ! handle the common mask first
             mask(:, :) = mask(:, :) .or. thread_mask(:, :, tid)
 
             if (req%intensity .eq. mean .or. req%intensity .eq. integrated) then
