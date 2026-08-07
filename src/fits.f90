@@ -7730,7 +7730,6 @@ contains
       real(kind=c_double) :: freq, vel
 
       real(kind=c_double), allocatable, target :: thread_I(:, :, :), thread_Iv(:, :, :), thread_Iv2(:, :, :)
-
       real(kind=c_float), allocatable, target :: thread_pixels(:, :, :, :)
       logical(kind=c_bool), allocatable, target :: thread_mask(:, :, :)
 
@@ -8035,6 +8034,53 @@ contains
                pixels(:, :, :) = pixels(:, :, :) + thread_pixels(:, :, :, tid)
                mask(:, :) = mask(:, :) .or. thread_mask(:, :, tid)
             end do
+         end if
+
+         if (req%intensity .eq. velocity) then
+            do tid = 1, max_threads
+               pixels_I(:, :) = pixels_I(:, :) + thread_I(:, :, tid)
+               pixels_Iv(:, :) = pixels_Iv(:, :) + thread_Iv(:, :, tid)
+               mask(:, :) = mask(:, :) .or. thread_mask(:, :, tid)
+            end do
+
+            ! M1
+            pixels(:, :, 1) = real(pixels_Iv(:, :)/pixels_I(:, :), kind=c_float)
+
+            ! adjust the mask (account for division by zero and NaNs in the velocity map)
+            mask(:, :) = mask(:, :) .and. (pixels_I(:, :) .ne. 0.0) .and. ieee_is_finite(pixels(:, :, 1))
+
+            ! set pixels to zero where the mask is false
+            pixels(:, :, 1) = merge(pixels(:, :, 1), 0.0, mask(:, :))
+         end if
+
+         if (req%intensity .eq. dispersion) then
+            do tid = 1, max_threads
+               pixels_I(:, :) = pixels_I(:, :) + thread_I(:, :, tid)
+               pixels_Iv(:, :) = pixels_Iv(:, :) + thread_Iv(:, :, tid)
+               pixels_Iv2(:, :) = pixels_Iv2(:, :) + thread_Iv2(:, :, tid)
+               mask(:, :) = mask(:, :) .or. thread_mask(:, :, tid)
+            end do
+
+            ! M2
+            pixels(:, :, 1) = real(pixels_Iv2(:, :)/pixels_I(:, :) - (pixels_Iv(:, :)/pixels_I(:, :))**2, kind=c_float)
+
+            ! adjust the mask (account for division by zero and NaNs in the velocity map)
+            mask(:, :) = mask(:, :) .and. (pixels_I(:, :) .ne. 0.0) .and. ieee_is_finite(pixels(:, :, 1))&
+            & .and. (pixels(:, :, 1) .ge. 0.0)
+
+            ! set pixels to zero where the mask is false
+            pixels(:, :, 1) = merge(sqrt(pixels(:, :, 1)), 0.0, mask(:, :))
+         end if
+
+         if (req%intensity .eq. maximum) then
+            do tid = 1, max_threads
+               ! use a maximum operator
+               pixels_I(:, :) = max(pixels_I(:, :), thread_I(:, :, tid))
+               mask(:, :) = mask(:, :) .or. thread_mask(:, :, tid)
+            end do
+
+            ! M8
+            pixels(:, :, 1) = real(pixels_I(:, :), kind=c_float)
          end if
       end if
 
