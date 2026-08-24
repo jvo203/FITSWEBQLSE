@@ -8167,6 +8167,14 @@ contains
             ! join a thread(s)
             do k = 1, max_planes
                rc = my_pthread_join(task_pid(k))
+
+               if (req%intensity .eq. dispersion) then
+                  ! count the number of negative view_pixels (should be zero for a physically meaningful dispersion map)
+                  if (any(view_pixels(:, :, k) .lt. 0.0)) then
+                     print *, "warning: detected negative view_pixels in the dispersion map, setting them to zero"
+                     view_pixels(:, :, k) = merge(view_pixels(:, :, k), 0.0, view_pixels(:, :, k) .ge. 0.0)
+                  end if
+               end if
             end do
 
             json = DownsizeJSONPolarization(item%hdr, item%naxes(1), item%naxes(2), view_pixels, view_mask, req%width, &
