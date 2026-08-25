@@ -1013,22 +1013,6 @@ module fits
          real(c_double), value, intent(in) :: velocity
       end subroutine viewport_moment_map_1_rect
 
-      ! export void viewport_moment_map_1_circle(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform float pmin, uniform float pmax, uniform double view_I[], uniform double view_Iv[], uniform bool view_mask[], uniform int stride, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform int horizontal, uniform int vertical, uniform float cx, uniform float cy, uniform float r2, uniform double velocity)
-      subroutine viewport_moment_map_1_circle(compressed, width, height, pmin, pmax, view_I, view_Iv, view_mask,&
-      & stride, x1, x2, y1, y2, horizontal, vertical, cx, cy, r2, velocity) BIND(C, name="viewport_moment_map_1_circle")
-         use, intrinsic :: ISO_C_BINDING
-         implicit none
-
-         type(C_PTR), value, intent(in) :: compressed
-         integer(c_int), value, intent(in) :: width, height
-         real(c_float), value, intent(in) :: pmin, pmax
-         type(C_PTR), value, intent(in) :: view_I, view_Iv, view_mask
-         integer(c_int), value, intent(in) :: stride
-         integer(c_int), value, intent(in) :: x1, x2, y1, y2, horizontal, vertical
-         real(c_float), value, intent(in) :: cx, cy, r2
-         real(c_double), value, intent(in) :: velocity
-      end subroutine viewport_moment_map_1_circle
-
       ! export void viewport_moment_map_2_rect(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform float pmin, uniform float pmax, uniform float view_I[], uniform float view_Iv[], uniform float view_Iv2[], uniform bool view_mask[], uniform int stride, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform int horizontal, uniform int vertical, uniform double velocity)
       subroutine viewport_moment_map_2_rect(compressed, width, height, pmin, pmax, view_I, view_Iv, view_Iv2, view_mask,&
       & stride, x1, x2, y1, y2, horizontal, vertical, velocity) BIND(C, name="viewport_moment_map_2_rect")
@@ -1044,22 +1028,6 @@ module fits
          real(c_double), value, intent(in) :: velocity
       end subroutine viewport_moment_map_2_rect
 
-      ! export void viewport_moment_map_2_circle(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform float pmin, uniform float pmax, uniform double view_I[], uniform double view_Iv[], uniform double view_Iv2[], uniform bool view_mask[], uniform int stride, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform int horizontal, uniform int vertical, uniform float cx, uniform float cy, uniform float r2, uniform double velocity)
-      subroutine viewport_moment_map_2_circle(compressed, width, height, pmin, pmax, view_I, view_Iv, view_Iv2, view_mask,&
-      & stride, x1, x2, y1, y2, horizontal, vertical, cx, cy, r2, velocity) BIND(C, name="viewport_moment_map_2_circle")
-         use, intrinsic :: ISO_C_BINDING
-         implicit none
-
-         type(C_PTR), value, intent(in) :: compressed
-         integer(c_int), value, intent(in) :: width, height
-         real(c_float), value, intent(in) :: pmin, pmax
-         type(C_PTR), value, intent(in) :: view_I, view_Iv, view_Iv2, view_mask
-         integer(c_int), value, intent(in) :: stride
-         integer(c_int), value, intent(in) :: x1, x2, y1, y2, horizontal, vertical
-         real(c_float), value, intent(in) :: cx, cy, r2
-         real(c_double), value, intent(in) :: velocity
-      end subroutine viewport_moment_map_2_circle
-
       ! export void viewport_moment_map_8_rect(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform float pmin, uniform float pmax, uniform float view_I[], uniform bool view_mask[], uniform int stride, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform int horizontal, uniform int vertical)
       subroutine viewport_moment_map_8_rect(compressed, width, height, pmin, pmax, view_I, view_mask, stride,&
       &x1, x2, y1, y2, horizontal, vertical) BIND(C, name="viewport_moment_map_8_rect")
@@ -1073,21 +1041,6 @@ module fits
          integer(c_int), value, intent(in) :: stride
          integer(c_int), value, intent(in) :: x1, x2, y1, y2, horizontal, vertical
       end subroutine viewport_moment_map_8_rect
-
-      ! export void viewport_moment_map_8_circle(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform float pmin, uniform float pmax, uniform double view_I[], uniform bool view_mask[], uniform int stride, uniform int x1, uniform int x2, uniform int y1, uniform int y2, uniform int horizontal, uniform int vertical, uniform float cx, uniform float cy, uniform float r2)
-      subroutine viewport_moment_map_8_circle(compressed, width, height, pmin, pmax, view_I, view_mask, stride,&
-      &x1, x2, y1, y2, horizontal, vertical, cx, cy, r2) BIND(C, name="viewport_moment_map_8_circle")
-         use, intrinsic :: ISO_C_BINDING
-         implicit none
-
-         type(C_PTR), value, intent(in) :: compressed
-         integer(c_int), value, intent(in) :: width, height
-         real(c_float), value, intent(in) :: pmin, pmax
-         type(C_PTR), value, intent(in) :: view_I, view_mask
-         integer(c_int), value, intent(in) :: stride
-         integer(c_int), value, intent(in) :: x1, x2, y1, y2, horizontal, vertical
-         real(c_float), value, intent(in) :: cx, cy, r2
-      end subroutine viewport_moment_map_8_circle
 
       ! export void make_global_statistics(uniform struct fixed_block_t compressed[], uniform int width, uniform int height, uniform float median, uniform float sumP[], uniform int64 countP[], uniform float sumN[], uniform int64 countN[])
       subroutine make_global_statistics(compressed, width, height, median,&
@@ -8041,56 +7994,31 @@ contains
                   ! print *, "thread:", tid, "channel:", frame, "f [GHz]: ", freq, "v [km/s]:", vel
                end if
 
-               if (req%beam .eq. square) then
-                  ! the 1st moment
-                  if (req%intensity .eq. velocity) then
-                     call viewport_moment_map_1_rect(c_loc(item%compressed(frame, 1)%ptr), width, height,&
-                     &item%frame_min(frame, 1), item%frame_max(frame, 1), c_loc(thread_I(:, :, tid)),&
-                     &c_loc(thread_Iv(:, :, tid)), c_loc(thread_mask(:, :, tid)), dimx, x1 - 1, x2 - 1, y1 - 1, y2 - 1,&
-                     & x1 - req%x1, y1 - req%y1, vel)
-                  end if
+               ! handle both square and circle viewports by the same function
+               ! the circle is a special case of the square, the client side will trim the pixels outside the circle
 
-                  ! the 2nd moment
-                  if (req%intensity .eq. dispersion) then
-                     call viewport_moment_map_2_rect(c_loc(item%compressed(frame, 1)%ptr), width, height,&
-                     &item%frame_min(frame, 1), item%frame_max(frame, 1), c_loc(thread_I(:, :, tid)), c_loc(thread_Iv(:, :, tid)),&
-                     & c_loc(thread_Iv2(:, :, tid)),c_loc(thread_mask(:, :, tid)), dimx, x1 - 1, x2 - 1, y1 - 1, y2 - 1,&
-                     & x1 - req%x1, y1 - req%y1, vel)
-                  end if
-
-                  ! the 8th moment (maximum)
-                  if (req%intensity .eq. maximum) then
-                     call viewport_moment_map_8_rect(c_loc(item%compressed(frame, 1)%ptr), width, height, &
-                     &item%frame_min(frame, 1), item%frame_max(frame, 1), &
-                     &c_loc(thread_I(:, :, tid)), c_loc(thread_mask(:, :, tid)),&
-                     & dimx, x1 - 1, x2 - 1, y1 - 1, y2 - 1, x1 - req%x1, y1 - req%y1)
-                  end if
-               end if
-
-               if (req%beam .eq. circle) then
-                  ! the 1st moment
-                  if (req%intensity .eq. velocity) then
-                     call viewport_moment_map_1_circle(c_loc(item%compressed(frame, 1)%ptr), width, height,&
-                     &item%frame_min(frame, 1), item%frame_max(frame, 1), c_loc(thread_I(:, :, tid)),&
-                     &c_loc(thread_Iv(:, :, tid)), c_loc(thread_mask(:, :, tid)), dimx, x1 - 1, x2 - 1, y1 - 1, y2 - 1,&
-                     & x1 - req%x1, y1 - req%y1, cx - 1, cy - 1, r2, vel)
-                  end if
+               ! the 1st moment
+               if (req%intensity .eq. velocity) then
+                  call viewport_moment_map_1_rect(c_loc(item%compressed(frame, 1)%ptr), width, height,&
+                  &item%frame_min(frame, 1), item%frame_max(frame, 1), c_loc(thread_I(:, :, tid)),&
+                  &c_loc(thread_Iv(:, :, tid)), c_loc(thread_mask(:, :, tid)), dimx, x1 - 1, x2 - 1, y1 - 1, y2 - 1,&
+                  & x1 - req%x1, y1 - req%y1, vel)
                end if
 
                ! the 2nd moment
                if (req%intensity .eq. dispersion) then
-                  call viewport_moment_map_2_circle(c_loc(item%compressed(frame, 1)%ptr), width, height,&
+                  call viewport_moment_map_2_rect(c_loc(item%compressed(frame, 1)%ptr), width, height,&
                   &item%frame_min(frame, 1), item%frame_max(frame, 1), c_loc(thread_I(:, :, tid)), c_loc(thread_Iv(:, :, tid)),&
                   & c_loc(thread_Iv2(:, :, tid)),c_loc(thread_mask(:, :, tid)), dimx, x1 - 1, x2 - 1, y1 - 1, y2 - 1,&
-                  & x1 - req%x1, y1 - req%y1, cx - 1, cy - 1, r2, vel)
+                  & x1 - req%x1, y1 - req%y1, vel)
                end if
 
                ! the 8th moment (maximum)
                if (req%intensity .eq. maximum) then
-                  call viewport_moment_map_8_circle(c_loc(item%compressed(frame, 1)%ptr), width, height, &
+                  call viewport_moment_map_8_rect(c_loc(item%compressed(frame, 1)%ptr), width, height, &
                   &item%frame_min(frame, 1), item%frame_max(frame, 1), &
                   &c_loc(thread_I(:, :, tid)), c_loc(thread_mask(:, :, tid)),&
-                  & dimx, x1 - 1, x2 - 1, y1 - 1, y2 - 1, x1 - req%x1, y1 - req%y1, cx - 1, cy - 1, r2)
+                  & dimx, x1 - 1, x2 - 1, y1 - 1, y2 - 1, x1 - req%x1, y1 - req%y1)
                end if
             end if
          end if
