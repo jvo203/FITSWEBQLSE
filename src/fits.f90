@@ -8066,6 +8066,32 @@ contains
                      & dimx, x1 - 1, x2 - 1, y1 - 1, y2 - 1, x1 - req%x1, y1 - req%y1)
                   end if
                end if
+
+               if (req%beam .eq. circle) then
+                  ! the 1st moment
+                  if (req%intensity .eq. velocity) then
+                     call viewport_moment_map_1_circle(c_loc(item%compressed(frame, 1)%ptr), width, height,&
+                     &item%frame_min(frame, 1), item%frame_max(frame, 1), c_loc(thread_I(:, :, tid)),&
+                     &c_loc(thread_Iv(:, :, tid)), c_loc(thread_mask(:, :, tid)), dimx, x1 - 1, x2 - 1, y1 - 1, y2 - 1,&
+                     & x1 - req%x1, y1 - req%y1, cx - 1, cy - 1, r2, vel)
+                  end if
+               end if
+
+               ! the 2nd moment
+               if (req%intensity .eq. dispersion) then
+                  call viewport_moment_map_2_circle(c_loc(item%compressed(frame, 1)%ptr), width, height,&
+                  &item%frame_min(frame, 1), item%frame_max(frame, 1), c_loc(thread_I(:, :, tid)), c_loc(thread_Iv(:, :, tid)),&
+                  & c_loc(thread_Iv2(:, :, tid)),c_loc(thread_mask(:, :, tid)), dimx, x1 - 1, x2 - 1, y1 - 1, y2 - 1,&
+                  & x1 - req%x1, y1 - req%y1, cx - 1, cy - 1, r2, vel)
+               end if
+
+               ! the 8th moment (maximum)
+               if (req%intensity .eq. maximum) then
+                  call viewport_moment_map_8_circle(c_loc(item%compressed(frame, 1)%ptr), width, height, &
+                  &item%frame_min(frame, 1), item%frame_max(frame, 1), &
+                  &c_loc(thread_I(:, :, tid)), c_loc(thread_mask(:, :, tid)),&
+                  & dimx, x1 - 1, x2 - 1, y1 - 1, y2 - 1, x1 - req%x1, y1 - req%y1, cx - 1, cy - 1, r2)
+               end if
             end if
          end if
 
