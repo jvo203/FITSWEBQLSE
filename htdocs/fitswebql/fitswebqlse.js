@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2026-08-26.0";
+    return "JS2026-08-26.1";
 }
 
 function uuidv4() {
@@ -10157,7 +10157,7 @@ function change_moment_map() {
     spectrum_count = 0;
 
     // store the current colourmap for velocity/dispersion moment maps, so that it can be restored when switching back to intensity moment maps
-    if (moment_map == "velocity" || moment_map == "dispersion") {
+    if (previous_colourmap == null && (moment_map == "velocity" || moment_map == "dispersion")) {
         previous_colourmap = colourmap;
 
         // switch to the "wolfram" colourmap for velocity/dispersion moment maps
