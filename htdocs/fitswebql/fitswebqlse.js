@@ -10170,6 +10170,7 @@ function change_moment_map() {
     } else if (previous_colourmap != null) {
         // restore the previous colourmap when switching back to intensity moment maps        
         colourmap = previous_colourmap;
+        previous_colourmap = null;
 
         if (!composite_view) {
             for (let index = 1; index <= va_count; index++)
