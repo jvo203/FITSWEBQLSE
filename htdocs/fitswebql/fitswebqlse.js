@@ -10157,15 +10157,20 @@ function change_moment_map() {
     spectrum_count = 0;
 
     // store the current colourmap for velocity/dispersion moment maps, so that it can be restored when switching back to intensity moment maps
-    if (previous_colourmap == null && (moment_map == "velocity" || moment_map == "dispersion")) {
-        previous_colourmap = colourmap;
+    if (moment_map == "velocity" || moment_map == "dispersion") {
+        // only switch to the "wolfram" colourmap if the previous_colourmap is null, otherwise keep the previous_colourmap
+        // this check is needed if a user selects a velocity map, then switches to a dispersion map, and then switches back to a normal intensity map,
+        // in which case the <previous_colourmap> should be restored instead of switching to the "wolfram" colourmap
+        if (previous_colourmap == null) {
+            previous_colourmap = colourmap;
 
-        // switch to the "wolfram" colourmap for velocity/dispersion moment maps
-        colourmap = "wolfram";
+            // switch to the "wolfram" colourmap for velocity/dispersion moment maps
+            colourmap = "wolfram";
 
-        if (!composite_view) {
-            for (let index = 1; index <= va_count; index++)
-                document.getElementById('colourmap' + index).value = colourmap;
+            if (!composite_view) {
+                for (let index = 1; index <= va_count; index++)
+                    document.getElementById('colourmap' + index).value = colourmap;
+            }
         }
     } else if (previous_colourmap != null) {
         // restore the previous colourmap when switching back to intensity moment maps        
