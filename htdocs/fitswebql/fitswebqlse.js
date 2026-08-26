@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2026-07-28.0";
+    return "JS2026-08-26.0";
 }
 
 function uuidv4() {
@@ -10155,6 +10155,27 @@ function change_moment_map() {
     image_count = 0;
     viewport_count = 0;
     spectrum_count = 0;
+
+    // store the current colourmap for velocity/dispersion moment maps, so that it can be restored when switching back to intensity moment maps
+    if (moment_map == "velocity" || moment_map == "dispersion") {
+        previous_colourmap = colourmap;
+
+        // switch to the "wolfram" colourmap for velocity/dispersion moment maps
+        colourmap = "wolfram";
+
+        if (!composite_view) {
+            for (let index = 1; index <= va_count; index++)
+                document.getElementById('colourmap' + index).value = colourmap;
+        }
+    } else if (previous_colourmap != null) {
+        // restore the previous colourmap when switching back to intensity moment maps        
+        colourmap = previous_colourmap;
+
+        if (!composite_view) {
+            for (let index = 1; index <= va_count; index++)
+                document.getElementById('colourmap' + index).value = colourmap;
+        }
+    }
 
     for (let index = 1; index <= va_count; index++)
         cube_refresh(index);
@@ -22476,7 +22497,8 @@ async function mainRenderer() {
 
         plane_count = 1; // by default there is only one intensity plane
         previous_plane = 1;
-        polarisation = null; // by default there is no polarisation information
+        polarisation = null; // by default there is no polarisation information         
+        previous_colourmap = null; // used by higher moments
 
         va_count = parseInt(votable.getAttribute('data-va_count'));
         datasetId = votable.getAttribute('data-datasetId');//make it a global variable
