@@ -10156,6 +10156,10 @@ function change_moment_map() {
     viewport_count = 0;
     spectrum_count = 0;
 
+    try {
+        clear_webgl_zoom_buffers();
+    } catch (e) { };
+
     // store the current colourmap for velocity/dispersion moment maps, so that it can be restored when switching back to intensity moment maps
     if (moment_map == "velocity" || moment_map == "dispersion") {
         // only switch to the "wolfram" colourmap if the previous_colourmap is null, otherwise keep the previous_colourmap
