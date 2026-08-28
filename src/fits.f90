@@ -9295,7 +9295,7 @@ contains
 
       IF (IERR .NE. 0) WCSP = c_null_ptr
 
-      fits_angle = get_northern_direction(WCSP, 0.5*real(fits_width), 0.5*real(fits_height)/2)
+      fits_angle = get_northern_direction(WCSP, 0.5*real(fits_width), 0.5*real(fits_height))
       print *, 'fits_angle [rad]:', fits_angle
 
       total_count = 0
@@ -9629,7 +9629,7 @@ contains
 
       IF (IERR .NE. 0) WCSP = c_null_ptr
 
-      fits_angle = get_northern_direction(WCSP, 0.5*real(fits_width), 0.5*real(fits_height)/2)
+      fits_angle = get_northern_direction(WCSP, 0.5*real(fits_width), 0.5*real(fits_height))
       print *, 'fits_angle [rad]:', fits_angle
 
       ! loop over the pixels and mask
