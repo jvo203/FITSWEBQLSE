@@ -1,3 +1,7 @@
+## [5.2.5] - 2026-08-31
+
+* removed the velocity/dispersion/maximum higher-moments selection options (they are under development in a separate develop branch)
+
 ## [5.2.4] - 2026-07-06
 
 * updated the 3D Three JavaScript library (modernised the 3D view)
