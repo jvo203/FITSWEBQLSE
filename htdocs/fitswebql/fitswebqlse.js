@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2026-09-01.0";
+    return "JS2026-09-15.0";
 }
 
 function uuidv4() {
@@ -785,7 +785,7 @@ function getStrokeStyle() {
     if (colourmap == "wolfram")
         style = "rgba(0,255,0,1.0)";//green
 
-    console.log("getStrokeStyle: theme:", theme, "colourmap:", colourmap, "style:", style);
+    //console.log("getStrokeStyle: theme:", theme, "colourmap:", colourmap, "style:", style);
 
     return style;
 }
@@ -15571,6 +15571,7 @@ function setup_image_selection(plane_index = previous_plane) {
         )
         .call(zoom)
         .on("mouseenter", (event) => {
+            console.log("setup_image_selection: mouseenter");
             hide_navigation_bar();
 
             // cancel the image animation loop
@@ -15656,6 +15657,7 @@ function setup_image_selection(plane_index = previous_plane) {
             setup_window_timeout();
         })
         .on("mouseleave", (event) => {
+            console.log("setup_image_selection: mouseleave");
             clearTimeout(idleMouse);
 
             // send a "Kalman Filter reset" WebSocket message in order to reset the server-side Kalman Filter
