@@ -15590,6 +15590,13 @@ function setup_image_selection(plane_index = previous_plane) {
                 console.log('NON-CRITICAL:', e);
             }
 
+            // just in case cancel the viewport animation loop
+            try {
+                cancelAnimationFrame(viewport.loopId);
+            } catch (e) {
+                console.log('NON-CRITICAL:', e);
+            }
+
             if (d3.select("#pvline").attr("opacity") < 1.0) {
                 // commented out on 2023/10/20
                 // these two lines were interfering with the ds9 region import
