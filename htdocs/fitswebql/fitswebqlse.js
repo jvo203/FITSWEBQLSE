@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2026-09-15.0";
+    return "JS2026-09-15.1";
 }
 
 function uuidv4() {
@@ -15574,6 +15574,13 @@ function setup_image_selection(plane_index = previous_plane) {
             console.log("setup_image_selection: mouseenter");
             hide_navigation_bar();
 
+            // just in case cancel the viewport animation loop
+            try {
+                cancelAnimationFrame(viewport.loopId);
+            } catch (e) {
+                console.log('NON-CRITICAL:', e);
+            }
+
             // cancel the image animation loop
             if (va_count == 1) {
                 clear_webgl_image_buffers(plane_index);
@@ -15587,13 +15594,6 @@ function setup_image_selection(plane_index = previous_plane) {
                 zoom_beam(plane_index);
             }
             catch (e) {
-                console.log('NON-CRITICAL:', e);
-            }
-
-            // just in case cancel the viewport animation loop
-            try {
-                cancelAnimationFrame(viewport.loopId);
-            } catch (e) {
                 console.log('NON-CRITICAL:', e);
             }
 
