@@ -1,5 +1,5 @@
 function get_js_version() {
-    return "JS2026-09-15.1";
+    return "JS2026-09-16.1";
 }
 
 function uuidv4() {
@@ -4706,6 +4706,13 @@ function process_hdr_image(img_width, img_height, pixels, alpha, tone_mapping, i
     }
 
     if (imageContainer[index - 1] != null) {
+        // just in case cancel the viewport animation loop
+        try {
+            cancelAnimationFrame(viewport.loopId);
+        } catch (e) {
+            console.log('NON-CRITICAL:', e);
+        }
+
         if (!streaming) {
             clear_webgl_image_buffers(index);
         }
@@ -15195,6 +15202,12 @@ function setup_image_selection_index(index, topx, topy, img_width, img_height) {
             }
         })
         .on("mousemove", function (event) {
+            // return if the element id 'hourglass' exists            
+            if (!d3.select("#hourglass").empty()) {
+                // Element exists
+                return;
+            }
+
             //moving = true;
             windowLeft = false;
 
@@ -15571,7 +15584,6 @@ function setup_image_selection(plane_index = previous_plane) {
         )
         .call(zoom)
         .on("mouseenter", (event) => {
-            console.log("setup_image_selection: mouseenter");
             hide_navigation_bar();
 
             // just in case cancel the viewport animation loop
@@ -15664,7 +15676,6 @@ function setup_image_selection(plane_index = previous_plane) {
             setup_window_timeout();
         })
         .on("mouseleave", (event) => {
-            console.log("setup_image_selection: mouseleave");
             clearTimeout(idleMouse);
 
             // send a "Kalman Filter reset" WebSocket message in order to reset the server-side Kalman Filter
@@ -15865,6 +15876,12 @@ function setup_image_selection(plane_index = previous_plane) {
             }
         })
         .on("mousemove", (event) => {
+            // return if the element id 'hourglass' exists            
+            if (!d3.select("#hourglass").empty()) {
+                // Element exists
+                return;
+            }
+
             // cancel the image animation loop
             if (va_count == 1) {
                 clear_webgl_image_buffers(plane_index);
