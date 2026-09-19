@@ -279,7 +279,7 @@ ifeq ($(UNAME_S),Darwin)
 		ISPC_TARGET =
 
 		# try clang for a change; force the use of libgomp instead of libomp (FORTRAN has been compiled with gfortran, flang is immature at the moment)
-		CC = ${HOMEBREW_PREFIX}/opt/llvm/bin/clang
+		CC = clang-mp-23
 		##FORT = ${HOMEBREW_PREFIX}/opt/flang/bin/flang-new
 		CFLAGS := -Xpreprocessor -Ofast -flto -fopenmp=libgomp -fno-finite-math-only -Wno-register -funroll-loops -ftree-vectorize -Rpass-missed=loop-vectorize -Rpass=loop-vectorize -flax-vector-conversions -Wl,-no_compact_unwind -Wno-unused-command-line-argument
 		#FLAGS := -Ofast -flto -fopenmp=libomp
