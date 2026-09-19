@@ -257,7 +257,7 @@ ifeq ($(UNAME_S),Darwin)
 
 		INC += -I/opt/local/include/postgresql18 -I/opt/local/include
 		# -I${HOMEBREW_PREFIX}/opt/libtar/include
-		LIBS += -L/opt/local/lib/postgresql18 -L$/opt/local/lib -L${HOMEBREW_PREFIX}/opt/gperftools/lib
+		LIBS += -L/opt/local/lib/postgresql18 -L/opt/local/lib -L${HOMEBREW_PREFIX}/opt/gperftools/lib
 		# -L${HOMEBREW_PREFIX}/opt/libtar/lib
 
 		CC = gcc-mp-15
