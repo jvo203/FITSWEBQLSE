@@ -131,7 +131,7 @@ ld: symbol(s) not found for architecture arm64
 
     wget https://ftpmirror.gnu.org/libmicrohttpd/libmicrohttpd-latest.tar.gz
     tar zxvf libmicrohttpd-latest.tar.gz
-    cd libmicrohttpd-1.0.1
+    cd libmicrohttpd-1.0.10
     ./configure --enable-experimental
     make
     sudo make install
