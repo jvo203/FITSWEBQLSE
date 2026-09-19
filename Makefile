@@ -240,15 +240,7 @@ ifeq ($(UNAME_S),Darwin)
 		## -flto -Wl,-no_compact_unwind -Wno-unused-command-line-argument
 		# LIBS += -lgomp
 		## INC += -I${HOMEBREW_PREFIX}/opt/libomp/include
-		## LIBS += -L${HOMEBREW_PREFIX}/opt/libomp/lib -lomp	
-
-		# try Intel compilers for a change! ... compilation (mongoose!?) & linking problems ...
-		# CC = icc
-		# FORT = ifort
-		# FLAGS := -Ofast -xHost -mavx -axAVX -qopt-report=2 -qopenmp -mcmodel=large -shared-intel
-		# CFLAGS := $(FLAGS) -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include
-		# icc main.c -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk
-		# FLAGS += -heap-arrays 32 -align array64byte -fpp -D__$(OS)__
+		## LIBS += -L${HOMEBREW_PREFIX}/opt/libomp/lib -lomp
 
 		ifeq ($(FORT),nagfor)
 			MPI_LINK_FLAGS = $(shell mpifort --showme:link)
@@ -298,7 +290,7 @@ ifeq ($(UNAME_S),Darwin)
 		#CFLAGS := -Xpreprocessor -Ofast -flto -fopenmp=libgomp -fno-finite-math-only -Wno-register -funroll-loops -ftree-vectorize -Rpass-missed=loop-vectorize -Rpass=loop-vectorize -flax-vector-conversions -Wl,-no_compact_unwind -Wno-unused-command-line-argument
 		# CFLAGS += -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free
 		## INC += -I${HOMEBREW_PREFIX}/opt/libomp/include
-		## LIBS += -L${HOMEBREW_PREFIX}/opt/llvm/lib -lomp	
+		## LIBS += -L${HOMEBREW_PREFIX}/opt/llvm/lib -lomp
 
 		# CC = zig cc
 		# CFLAGS := -Xpreprocessor -Ofast -fopenmp=libgomp -fno-finite-math-only -Wno-register -funroll-loops -ftree-vectorize -Rpass-missed=loop-vectorize -Rpass=loop-vectorize -flax-vector-conversions
