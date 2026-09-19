@@ -21,6 +21,9 @@ endif
 # detect the OS
 UNAME_S := $(shell uname -s)
 
+# detect the CPU architecture (ARM64 or x86-64)
+UNAME_M := $(shell uname -m)
+
 # detect NVIDIA HPC SDK
 NVFORTRAN := $(shell command -v nvfortran -v 2> /dev/null)
 NVC := $(shell command -v nvc -v 2> /dev/null)
