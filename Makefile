@@ -255,9 +255,9 @@ ifeq ($(UNAME_S),Darwin)
 		# LIBS += -L/usr/local/opt/openssl/lib -L/usr/local/opt/curl/lib -lcurl
 		#MOD += `pkg-config --cflags json-fortran`	
 
-		INC += -I${HOMEBREW_PREFIX}/opt/libpq/include -I${HOMEBREW_PREFIX}/opt/bzip2/include
+		INC += -I/opt/local/include/postgresql18 -I${HOMEBREW_PREFIX}/opt/bzip2/include
 		# -I${HOMEBREW_PREFIX}/opt/libtar/include
-		LIBS += -L${HOMEBREW_PREFIX}/opt/libpq/lib -L${HOMEBREW_PREFIX}/opt/bzip2/lib -L${HOMEBREW_PREFIX}/opt/gperftools/lib
+		LIBS += -L/opt/local/lib/postgresql18 -L${HOMEBREW_PREFIX}/opt/bzip2/lib -L${HOMEBREW_PREFIX}/opt/gperftools/lib
 		# -L${HOMEBREW_PREFIX}/opt/libtar/lib
 
 		CC = gcc-mp-15
