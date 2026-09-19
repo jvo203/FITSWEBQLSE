@@ -21,9 +21,6 @@ endif
 # detect the OS
 UNAME_S := $(shell uname -s)
 
-# detect the CPU architecture (ARM64 or x86-64)
-UNAME_M := $(shell uname -m)
-
 # detect NVIDIA HPC SDK
 NVFORTRAN := $(shell command -v nvfortran -v 2> /dev/null)
 NVC := $(shell command -v nvc -v 2> /dev/null)
@@ -194,73 +191,136 @@ ifeq ($(CC),icx)
 endif
 
 ifeq ($(UNAME_S),Darwin)
-	# INC += -I/usr/local/include -I/usr/local/opt/openssl/include -I/usr/local/opt/curl/include
-	# LIBS += -L/usr/local/opt/openssl/lib -L/usr/local/opt/curl/lib -lcurl
-	#MOD += `pkg-config --cflags json-fortran`	
+	ifeq ($(UNAME_M),arm64)
+		# INC += -I/usr/local/include -I/usr/local/opt/openssl/include -I/usr/local/opt/curl/include
+		# LIBS += -L/usr/local/opt/openssl/lib -L/usr/local/opt/curl/lib -lcurl
+		#MOD += `pkg-config --cflags json-fortran`	
 
-	INC += -I${HOMEBREW_PREFIX}/opt/libpq/include -I${HOMEBREW_PREFIX}/opt/bzip2/include
-	# -I${HOMEBREW_PREFIX}/opt/libtar/include
-	LIBS += -L${HOMEBREW_PREFIX}/opt/libpq/lib -L${HOMEBREW_PREFIX}/opt/bzip2/lib -L${HOMEBREW_PREFIX}/opt/gperftools/lib
-	# -L${HOMEBREW_PREFIX}/opt/libtar/lib
+		INC += -I${HOMEBREW_PREFIX}/opt/libpq/include -I${HOMEBREW_PREFIX}/opt/bzip2/include
+		# -I${HOMEBREW_PREFIX}/opt/libtar/include
+		LIBS += -L${HOMEBREW_PREFIX}/opt/libpq/lib -L${HOMEBREW_PREFIX}/opt/bzip2/lib -L${HOMEBREW_PREFIX}/opt/gperftools/lib
+		# -L${HOMEBREW_PREFIX}/opt/libtar/lib
 
-	CC = ${HOMEBREW_PREFIX}/opt/gcc/bin/gcc-16
-	FORT = ${HOMEBREW_PREFIX}/opt/gcc/bin/gfortran-16
-	FLAGS = -march=native -Ofast -flto -fPIC -fno-finite-math-only -funroll-loops -ftree-vectorize -fopenmp	
-	# -mcmodel=large results in "error: invalid variant 'BLEAH'"
-	# Apple Silicon: -march=native conflicts between macOS-arm64 and macOS-x86_64 with Intel oneAPI
-	CFLAGS := $(FLAGS) -flax-vector-conversions
-	# CFLAGS += -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free
-	FLAGS := $(FLAGS) -std=f2018 -fall-intrinsics
+		CC = ${HOMEBREW_PREFIX}/opt/gcc/bin/gcc-16
+		FORT = ${HOMEBREW_PREFIX}/opt/gcc/bin/gfortran-16
+		FLAGS = -march=native -Ofast -flto -fPIC -fno-finite-math-only -funroll-loops -ftree-vectorize -fopenmp	
+		# -mcmodel=large results in "error: invalid variant 'BLEAH'"
+		# Apple Silicon: -march=native conflicts between macOS-arm64 and macOS-x86_64 with Intel oneAPI
+		CFLAGS := $(FLAGS) -flax-vector-conversions
+		# CFLAGS += -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free
+		FLAGS := $(FLAGS) -std=f2018 -fall-intrinsics
 
-	# GCC FORTRAN runtime
-	LIBS += -L${HOMEBREW_PREFIX}/opt/gcc/lib/gcc/16 -lgfortran -lm -framework Accelerate
+		# GCC FORTRAN runtime
+		LIBS += -L${HOMEBREW_PREFIX}/opt/gcc/lib/gcc/16 -lgfortran -lm -framework Accelerate
 	
-	# disable the use of Intel IPP and MKL on macOS
-	# use the built-in macOS Accelerate instead but only on Apple Silicon (OK, Intel macOS too)
-	IPP =
-	MKL =
+		# disable the use of Intel IPP and MKL on macOS
+		# use the built-in macOS Accelerate instead but only on Apple Silicon (OK, Intel macOS too)
+		IPP =
+		MKL =
 	
-	# double-pump ISPC on Apple Silicon
-	ifeq ($(UNAME_M),arm64)		
+		# double-pump ISPC on Apple Silicon
 		ISPC_TARGET = --target=neon-i32x8
-	else
-		ISPC_TARGET = 
+
+		# try clang for a change; force the use of libgomp instead of libomp (FORTRAN has been compiled with gfortran, flang is immature at the moment)
+		CC = ${HOMEBREW_PREFIX}/opt/llvm/bin/clang
+		##FORT = ${HOMEBREW_PREFIX}/opt/flang/bin/flang-new
+		CFLAGS := -Xpreprocessor -Ofast -flto -fopenmp=libgomp -fno-finite-math-only -Wno-register -funroll-loops -ftree-vectorize -Rpass-missed=loop-vectorize -Rpass=loop-vectorize -flax-vector-conversions -Wl,-no_compact_unwind -Wno-unused-command-line-argument
+		#FLAGS := -Ofast -flto -fopenmp=libomp
+		#-Wno-register -Rpass-missed=loop-vectorize -Rpass=loop-vectorize
+		#-Wl,-no_compact_unwind
+		#-Wno-unused-command-line-argument
+
+		#CFLAGS := -Xpreprocessor -Ofast -flto -fopenmp=libgomp -fno-finite-math-only -Wno-register -funroll-loops -ftree-vectorize -Rpass-missed=loop-vectorize -Rpass=loop-vectorize -flax-vector-conversions -Wl,-no_compact_unwind -Wno-unused-command-line-argument
+		# CFLAGS += -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free
+		## INC += -I${HOMEBREW_PREFIX}/opt/libomp/include
+		## LIBS += -L${HOMEBREW_PREFIX}/opt/llvm/lib -lomp	
+
+		# CC = zig cc
+		# CFLAGS := -Xpreprocessor -Ofast -fopenmp=libgomp -fno-finite-math-only -Wno-register -funroll-loops -ftree-vectorize -Rpass-missed=loop-vectorize -Rpass=loop-vectorize -flax-vector-conversions
+		## -flto -Wl,-no_compact_unwind -Wno-unused-command-line-argument
+		# LIBS += -lgomp
+		## INC += -I${HOMEBREW_PREFIX}/opt/libomp/include
+		## LIBS += -L${HOMEBREW_PREFIX}/opt/libomp/lib -lomp	
+
+		# try Intel compilers for a change! ... compilation (mongoose!?) & linking problems ...
+		# CC = icc
+		# FORT = ifort
+		# FLAGS := -Ofast -xHost -mavx -axAVX -qopt-report=2 -qopenmp -mcmodel=large -shared-intel
+		# CFLAGS := $(FLAGS) -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include
+		# icc main.c -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk
+		# FLAGS += -heap-arrays 32 -align array64byte -fpp -D__$(OS)__
+
+		ifeq ($(FORT),nagfor)
+			MPI_LINK_FLAGS = $(shell mpifort --showme:link)
+			FLAGS := -target=core2 -O4 -f2018 -kind=byte -openmp -colour $(MPI_LINK_FLAGS)
+		else		
+			FLAGS += -cpp -D__$(OS)__ -fallow-invalid-boz -fmax-stack-var-size=32768		
+		endif
 	endif
 
-	# try clang for a change; force the use of libgomp instead of libomp (FORTRAN has been compiled with gfortran, flang is immature at the moment)
-	CC = ${HOMEBREW_PREFIX}/opt/llvm/bin/clang
-	##FORT = ${HOMEBREW_PREFIX}/opt/flang/bin/flang-new
-	CFLAGS := -Xpreprocessor -Ofast -flto -fopenmp=libgomp -fno-finite-math-only -Wno-register -funroll-loops -ftree-vectorize -Rpass-missed=loop-vectorize -Rpass=loop-vectorize -flax-vector-conversions -Wl,-no_compact_unwind -Wno-unused-command-line-argument
-	#FLAGS := -Ofast -flto -fopenmp=libomp
-	#-Wno-register -Rpass-missed=loop-vectorize -Rpass=loop-vectorize
-	#-Wl,-no_compact_unwind
-	#-Wno-unused-command-line-argument
+	ifeq ($(UNAME_M),x86_64)
+		# INC += -I/usr/local/include -I/usr/local/opt/openssl/include -I/usr/local/opt/curl/include
+		# LIBS += -L/usr/local/opt/openssl/lib -L/usr/local/opt/curl/lib -lcurl
+		#MOD += `pkg-config --cflags json-fortran`	
 
-	#CFLAGS := -Xpreprocessor -Ofast -flto -fopenmp=libgomp -fno-finite-math-only -Wno-register -funroll-loops -ftree-vectorize -Rpass-missed=loop-vectorize -Rpass=loop-vectorize -flax-vector-conversions -Wl,-no_compact_unwind -Wno-unused-command-line-argument
-	# CFLAGS += -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free
-	## INC += -I${HOMEBREW_PREFIX}/opt/libomp/include
-	## LIBS += -L${HOMEBREW_PREFIX}/opt/llvm/lib -lomp	
+		INC += -I${HOMEBREW_PREFIX}/opt/libpq/include -I${HOMEBREW_PREFIX}/opt/bzip2/include
+		# -I${HOMEBREW_PREFIX}/opt/libtar/include
+		LIBS += -L${HOMEBREW_PREFIX}/opt/libpq/lib -L${HOMEBREW_PREFIX}/opt/bzip2/lib -L${HOMEBREW_PREFIX}/opt/gperftools/lib
+		# -L${HOMEBREW_PREFIX}/opt/libtar/lib
 
-	# CC = zig cc
-	# CFLAGS := -Xpreprocessor -Ofast -fopenmp=libgomp -fno-finite-math-only -Wno-register -funroll-loops -ftree-vectorize -Rpass-missed=loop-vectorize -Rpass=loop-vectorize -flax-vector-conversions
-	## -flto -Wl,-no_compact_unwind -Wno-unused-command-line-argument
-	# LIBS += -lgomp
-	## INC += -I${HOMEBREW_PREFIX}/opt/libomp/include
-	## LIBS += -L${HOMEBREW_PREFIX}/opt/libomp/lib -lomp	
+		CC = ${HOMEBREW_PREFIX}/opt/gcc/bin/gcc-16
+		FORT = ${HOMEBREW_PREFIX}/opt/gcc/bin/gfortran-16
+		FLAGS = -march=native -Ofast -flto -fPIC -fno-finite-math-only -funroll-loops -ftree-vectorize -fopenmp	
+		# -mcmodel=large results in "error: invalid variant 'BLEAH'"
+		# Apple Silicon: -march=native conflicts between macOS-arm64 and macOS-x86_64 with Intel oneAPI
+		CFLAGS := $(FLAGS) -flax-vector-conversions
+		# CFLAGS += -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free
+		FLAGS := $(FLAGS) -std=f2018 -fall-intrinsics
 
-	# try Intel compilers for a change! ... compilation (mongoose!?) & linking problems ...
-	# CC = icc
-	# FORT = ifort
-	# FLAGS := -Ofast -xHost -mavx -axAVX -qopt-report=2 -qopenmp -mcmodel=large -shared-intel
-	# CFLAGS := $(FLAGS) -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include
-	# icc main.c -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk
-	# FLAGS += -heap-arrays 32 -align array64byte -fpp -D__$(OS)__
+		# GCC FORTRAN runtime
+		LIBS += -L${HOMEBREW_PREFIX}/opt/gcc/lib/gcc/16 -lgfortran -lm -framework Accelerate
+	
+		# disable the use of Intel IPP and MKL on macOS
+		# use the built-in macOS Accelerate instead but only on Apple Silicon (OK, Intel macOS too)
+		IPP =
+		MKL =
+		ISPC_TARGET =
 
-	ifeq ($(FORT),nagfor)
-		MPI_LINK_FLAGS = $(shell mpifort --showme:link)
-		FLAGS := -target=core2 -O4 -f2018 -kind=byte -openmp -colour $(MPI_LINK_FLAGS)
-	else		
-		FLAGS += -cpp -D__$(OS)__ -fallow-invalid-boz -fmax-stack-var-size=32768		
+		# try clang for a change; force the use of libgomp instead of libomp (FORTRAN has been compiled with gfortran, flang is immature at the moment)
+		CC = ${HOMEBREW_PREFIX}/opt/llvm/bin/clang
+		##FORT = ${HOMEBREW_PREFIX}/opt/flang/bin/flang-new
+		CFLAGS := -Xpreprocessor -Ofast -flto -fopenmp=libgomp -fno-finite-math-only -Wno-register -funroll-loops -ftree-vectorize -Rpass-missed=loop-vectorize -Rpass=loop-vectorize -flax-vector-conversions -Wl,-no_compact_unwind -Wno-unused-command-line-argument
+		#FLAGS := -Ofast -flto -fopenmp=libomp
+		#-Wno-register -Rpass-missed=loop-vectorize -Rpass=loop-vectorize
+		#-Wl,-no_compact_unwind
+		#-Wno-unused-command-line-argument
+
+		#CFLAGS := -Xpreprocessor -Ofast -flto -fopenmp=libgomp -fno-finite-math-only -Wno-register -funroll-loops -ftree-vectorize -Rpass-missed=loop-vectorize -Rpass=loop-vectorize -flax-vector-conversions -Wl,-no_compact_unwind -Wno-unused-command-line-argument
+		# CFLAGS += -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free
+		## INC += -I${HOMEBREW_PREFIX}/opt/libomp/include
+		## LIBS += -L${HOMEBREW_PREFIX}/opt/llvm/lib -lomp	
+
+		# CC = zig cc
+		# CFLAGS := -Xpreprocessor -Ofast -fopenmp=libgomp -fno-finite-math-only -Wno-register -funroll-loops -ftree-vectorize -Rpass-missed=loop-vectorize -Rpass=loop-vectorize -flax-vector-conversions
+		## -flto -Wl,-no_compact_unwind -Wno-unused-command-line-argument
+		# LIBS += -lgomp
+		## INC += -I${HOMEBREW_PREFIX}/opt/libomp/include
+		## LIBS += -L${HOMEBREW_PREFIX}/opt/libomp/lib -lomp	
+
+		# try Intel compilers for a change! ... compilation (mongoose!?) & linking problems ...
+		# CC = icc
+		# FORT = ifort
+		# FLAGS := -Ofast -xHost -mavx -axAVX -qopt-report=2 -qopenmp -mcmodel=large -shared-intel
+		# CFLAGS := $(FLAGS) -I/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include
+		# icc main.c -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk
+		# FLAGS += -heap-arrays 32 -align array64byte -fpp -D__$(OS)__
+
+		ifeq ($(FORT),nagfor)
+			MPI_LINK_FLAGS = $(shell mpifort --showme:link)
+			FLAGS := -target=core2 -O4 -f2018 -kind=byte -openmp -colour $(MPI_LINK_FLAGS)
+		else		
+			FLAGS += -cpp -D__$(OS)__ -fallow-invalid-boz -fmax-stack-var-size=32768		
+		endif
 	endif
 endif
 
