@@ -269,7 +269,7 @@ ifeq ($(UNAME_S),Darwin)
 		FLAGS := $(FLAGS) -std=f2018 -fall-intrinsics
 
 		# GCC FORTRAN runtime
-		LIBS += -L${HOMEBREW_PREFIX}/opt/gcc/lib/gcc/15 -lgfortran -lm -framework Accelerate
+		LIBS += -L/opt/local/lib/gcc15 -lgfortran -lm -framework Accelerate
 	
 		# disable the use of Intel IPP and MKL on macOS
 		# use the built-in macOS Accelerate instead but only on Apple Silicon (OK, Intel macOS too)
