@@ -151,7 +151,9 @@ ifeq ($(CC),icx)
 endif
 
 # `pkg-config --cflags libavif` `pkg-config --cflags libjpeg`
-INC = `pkg-config --cflags glib-2.0` `pkg-config --cflags libmicrohttpd` `pkg-config --cflags libcurl` `pkg-config --cflags liblz4` `pkg-config --cflags cfitsio` `pkg-config --cflags wcslib` `pkg-config --cflags x265` `pkg-config --cflags libczmq` `pkg-config --cflags libpq` -I./$(ZFP)/include -I./$(ZFP)/src
+MICROHTTPD_INC = `pkg-config --cflags libmicrohttpd`
+MICROHTTPD_LIBS = `pkg-config --libs libmicrohttpd` -lmicrohttpd_ws
+INC = `pkg-config --cflags glib-2.0` $(MICROHTTPD_INC) `pkg-config --cflags libcurl` `pkg-config --cflags liblz4` `pkg-config --cflags cfitsio` `pkg-config --cflags wcslib` `pkg-config --cflags x265` `pkg-config --cflags libczmq` `pkg-config --cflags libpq` -I./$(ZFP)/include -I./$(ZFP)/src
 
 ifneq ($(UNAME_S),Darwin)
 	INC += `pkg-config --cflags libcpuid`
@@ -172,7 +174,7 @@ ifneq ($(SHARE),)
 endif
 
 # `pkg-config --libs libavif` `pkg-config --libs libjpeg`
-LIBS = -L/usr/local/lib `pkg-config --libs glib-2.0` `pkg-config --libs libmicrohttpd` -lmicrohttpd_ws `pkg-config --libs liblz4` `pkg-config --libs cfitsio` `pkg-config --libs wcslib` -lsqlite3 `pkg-config --libs libcurl` -lz -lbz2 -pthread `pkg-config --libs libzmq` `pkg-config --libs libczmq` `pkg-config --libs x265` `pkg-config --libs libpq` `ast_link` `pkg-config --libs openssl`
+LIBS = `pkg-config --libs glib-2.0` $(MICROHTTPD_LIBS) `pkg-config --libs liblz4` `pkg-config --libs cfitsio` `pkg-config --libs wcslib` -lsqlite3 `pkg-config --libs libcurl` -lz -lbz2 -pthread `pkg-config --libs libzmq` `pkg-config --libs libczmq` `pkg-config --libs x265` `pkg-config --libs libpq` `ast_link` `pkg-config --libs openssl`
 #-ltar
 
 ifneq ($(UNAME_S),Darwin)
@@ -191,6 +193,11 @@ ifeq ($(CC),icx)
 endif
 
 ifeq ($(UNAME_S),Darwin)
+	# FITSWEBQLSE requires the experimental microhttpd_ws extension, installed from source.
+	MICROHTTPD_PREFIX ?= /usr/local
+	MICROHTTPD_INC = -I$(MICROHTTPD_PREFIX)/include
+	MICROHTTPD_LIBS = -L$(MICROHTTPD_PREFIX)/lib -Wl,-rpath,$(MICROHTTPD_PREFIX)/lib -lmicrohttpd -lmicrohttpd_ws
+
 	ifeq ($(UNAME_M),arm64)
 		# INC += -I/usr/local/include -I/usr/local/opt/openssl/include -I/usr/local/opt/curl/include
 		# LIBS += -L/usr/local/opt/openssl/lib -L/usr/local/opt/curl/lib -lcurl

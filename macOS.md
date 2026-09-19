@@ -129,9 +129,10 @@ ld: symbol(s) not found for architecture arm64
 
     or, when using the experimental libmicrohttpd websocket support (define MICROWS in the Makefile)
 
-    wget https://ftpmirror.gnu.org/libmicrohttpd/libmicrohttpd-latest.tar.gz
-    tar zxvf libmicrohttpd-latest.tar.gz
-    cd libmicrohttpd-1.0.10
+    # The experimental WebSocket extension is provided by version 1.0.1.
+    wget https://ftpmirror.gnu.org/libmicrohttpd/libmicrohttpd-1.0.1.tar.gz
+    tar zxvf libmicrohttpd-1.0.1.tar.gz
+    cd libmicrohttpd-1.0.1
     ./configure --enable-experimental
     make
     sudo make install
