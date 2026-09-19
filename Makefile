@@ -257,7 +257,7 @@ ifeq ($(UNAME_S),Darwin)
 
 		INC += -I/opt/local/include/postgresql18 -I/opt/local/include
 		# -I${HOMEBREW_PREFIX}/opt/libtar/include
-		LIBS += -L/opt/local/lib/postgresql18 -L/opt/local/lib -L${HOMEBREW_PREFIX}/opt/gperftools/lib
+		LIBS += -L/opt/local/lib/postgresql18 -L/opt/local/lib
 		# -L${HOMEBREW_PREFIX}/opt/libtar/lib
 
 		CC = gcc-mp-15
@@ -269,7 +269,7 @@ ifeq ($(UNAME_S),Darwin)
 		FLAGS := $(FLAGS) -std=f2018 -fall-intrinsics
 
 		# GCC FORTRAN runtime
-		LIBS += -L/opt/local/lib/gcc15 -lgfortran -lm -framework Accelerate
+		LIBS += -L/opt/local/lib/gcc15 -Wl,-rpath,/opt/local/lib/libgcc -lgfortran -lm -framework Accelerate
 	
 		# disable the use of Intel IPP and MKL on macOS
 		# use the built-in macOS Accelerate instead but only on Apple Silicon (OK, Intel macOS too)
