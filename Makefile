@@ -260,8 +260,8 @@ ifeq ($(UNAME_S),Darwin)
 		LIBS += -L${HOMEBREW_PREFIX}/opt/libpq/lib -L${HOMEBREW_PREFIX}/opt/bzip2/lib -L${HOMEBREW_PREFIX}/opt/gperftools/lib
 		# -L${HOMEBREW_PREFIX}/opt/libtar/lib
 
-		CC = ${HOMEBREW_PREFIX}/opt/gcc/bin/gcc-16
-		FORT = ${HOMEBREW_PREFIX}/opt/gcc/bin/gfortran-16
+		CC = gcc-mp-15
+		FORT = gfortran-mp-15
 		FLAGS = -march=native -Ofast -flto -fPIC -fno-finite-math-only -funroll-loops -ftree-vectorize -fopenmp	
 		# -mcmodel=large results in "error: invalid variant 'BLEAH'"
 		# Apple Silicon: -march=native conflicts between macOS-arm64 and macOS-x86_64 with Intel oneAPI
