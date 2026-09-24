@@ -151,6 +151,7 @@ ifeq ($(CC),icx)
 endif
 
 # `pkg-config --cflags libavif` `pkg-config --cflags libjpeg`
+# FITSWEBQLSE can compile against vanilla libmicrohttpd using the bundled compatibility layer.
 MICROHTTPD_INC = `pkg-config --cflags libmicrohttpd`
 MICROHTTPD_LIBS = `pkg-config --libs libmicrohttpd`
 INC = `pkg-config --cflags glib-2.0` $(MICROHTTPD_INC) `pkg-config --cflags libcurl` `pkg-config --cflags liblz4` `pkg-config --cflags cfitsio` `pkg-config --cflags wcslib` `pkg-config --cflags x265` `pkg-config --cflags libczmq` `pkg-config --cflags libpq` -I./$(ZFP)/include -I./$(ZFP)/src -Isrc
@@ -193,10 +194,8 @@ ifeq ($(CC),icx)
 endif
 
 ifeq ($(UNAME_S),Darwin)
-# FITSWEBQLSE can compile against vanilla libmicrohttpd using the bundled compatibility layer.
-		MICROHTTPD_PREFIX ?= /usr/local
-		MICROHTTPD_INC = -I$(MICROHTTPD_PREFIX)/include
-		MICROHTTPD_LIBS = -L$(MICROHTTPD_PREFIX)/lib -Wl,-rpath,$(MICROHTTPD_PREFIX)/lib -lmicrohttpd
+	INC += -I/usr/local/include
+	LIBS += -L/usr/local/lib
 
 	ifeq ($(UNAME_M),arm64)
 		# INC += -I/usr/local/include -I/usr/local/opt/openssl/include -I/usr/local/opt/curl/include
