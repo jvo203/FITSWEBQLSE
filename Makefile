@@ -118,7 +118,7 @@ ZFP_SRC := $(wildcard $(ZFP)/src/*.c)
 # src/wavelet.f90
 # src/lz4.f90
 # src/ipp.c src/psrs_sort.c src/http.c src/hash_table.c src/json.c src/json_write.c src/m_mrgrnk.f90 src/mod_sort.f90 src/wavelet.f90 src/fixed_array.f90 src/fixed_array2.f90 src/zfp_array.f90 src/histogram.c src/classifier.f90 src/fits_omp.f90 src/net.f90 src/main.f90
-SRC = $(ZFP_SRC) src/webql.ispc src/microtar.c src/microws.c src/compress.c src/bunzip.c src/zpipe.c src/junzip.c src/unzip.c src/my_threads.c src/cpu.c src/json.c src/ini.c src/mjson.c src/histogram.c src/hash_table.c src/json_write.c src/cluster.c src/http.c src/ws.c src/ring_buffer.c src/lttb.f90 src/fixed_array.f90 src/lz4.f90 src/classifier.f90 src/quantile.f90 src/unix_pthread.f90 src/peaks.f90 src/peaks_implementation.f90 src/risk.f90 src/mt19937-64.f90 src/differential_evolution.f90 src/fits.f90 src/main.c
+SRC = $(ZFP_SRC) src/webql.ispc src/microtar.c src/microhttpd_ws_compat.c src/microws.c src/compress.c src/bunzip.c src/zpipe.c src/junzip.c src/unzip.c src/my_threads.c src/cpu.c src/json.c src/ini.c src/mjson.c src/histogram.c src/hash_table.c src/json_write.c src/cluster.c src/http.c src/ws.c src/ring_buffer.c src/lttb.f90 src/fixed_array.f90 src/lz4.f90 src/classifier.f90 src/quantile.f90 src/unix_pthread.f90 src/peaks.f90 src/peaks_implementation.f90 src/risk.f90 src/mt19937-64.f90 src/differential_evolution.f90 src/fits.f90 src/main.c
 # src/starlink.c src/ast.f90
 # src/UStorage.f90 src/List.f90 # does not compile
 
@@ -152,8 +152,8 @@ endif
 
 # `pkg-config --cflags libavif` `pkg-config --cflags libjpeg`
 MICROHTTPD_INC = `pkg-config --cflags libmicrohttpd`
-MICROHTTPD_LIBS = `pkg-config --libs libmicrohttpd` -lmicrohttpd_ws
-INC = `pkg-config --cflags glib-2.0` $(MICROHTTPD_INC) `pkg-config --cflags libcurl` `pkg-config --cflags liblz4` `pkg-config --cflags cfitsio` `pkg-config --cflags wcslib` `pkg-config --cflags x265` `pkg-config --cflags libczmq` `pkg-config --cflags libpq` -I./$(ZFP)/include -I./$(ZFP)/src
+MICROHTTPD_LIBS = `pkg-config --libs libmicrohttpd`
+INC = `pkg-config --cflags glib-2.0` $(MICROHTTPD_INC) `pkg-config --cflags libcurl` `pkg-config --cflags liblz4` `pkg-config --cflags cfitsio` `pkg-config --cflags wcslib` `pkg-config --cflags x265` `pkg-config --cflags libczmq` `pkg-config --cflags libpq` -I./$(ZFP)/include -I./$(ZFP)/src -Isrc
 
 ifneq ($(UNAME_S),Darwin)
 	INC += `pkg-config --cflags libcpuid`
@@ -193,10 +193,10 @@ ifeq ($(CC),icx)
 endif
 
 ifeq ($(UNAME_S),Darwin)
-	# FITSWEBQLSE requires the experimental microhttpd_ws extension, installed from source.
-	MICROHTTPD_PREFIX ?= /usr/local
-	MICROHTTPD_INC = -I$(MICROHTTPD_PREFIX)/include
-	MICROHTTPD_LIBS = -L$(MICROHTTPD_PREFIX)/lib -Wl,-rpath,$(MICROHTTPD_PREFIX)/lib -lmicrohttpd -lmicrohttpd_ws
+# FITSWEBQLSE can compile against vanilla libmicrohttpd using the bundled compatibility layer.
+		MICROHTTPD_PREFIX ?= /usr/local
+		MICROHTTPD_INC = -I$(MICROHTTPD_PREFIX)/include
+		MICROHTTPD_LIBS = -L$(MICROHTTPD_PREFIX)/lib -Wl,-rpath,$(MICROHTTPD_PREFIX)/lib -lmicrohttpd
 
 	ifeq ($(UNAME_M),arm64)
 		# INC += -I/usr/local/include -I/usr/local/opt/openssl/include -I/usr/local/opt/curl/include

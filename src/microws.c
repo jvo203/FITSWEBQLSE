@@ -13,10 +13,9 @@
 #include "ws.h"
 #include "mjson.h"
 #include "hash_table.h"
+#include "microhttpd_ws_compat.h"
 
 void *send_cluster_heartbeat(void *arg);
-
-#include <microhttpd_ws.h>
 
 // combined WebSocket write functions, to be used from FORTRAN
 // image/spectrum/polarisation
@@ -2810,6 +2809,9 @@ on_ws_connection(void *cls,
          * It requires the value of the Sec-WebSocket-Key header of the request.
          * See also: https://tools.ietf.org/html/rfc6455#section-4.2.2
          */
+        MHD_add_response_header(response,
+                                MHD_HTTP_HEADER_CONNECTION,
+                                "Upgrade");
         MHD_add_response_header(response,
                                 MHD_HTTP_HEADER_UPGRADE,
                                 "websocket");

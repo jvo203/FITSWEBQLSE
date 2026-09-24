@@ -8,7 +8,7 @@
 #include "ws.h"
 #include "mjson.h"
 
-#include <microhttpd_ws.h>
+#include "microhttpd_ws_compat.h"
 
 #include <curl/curl.h>
 #include "cluster.h"
