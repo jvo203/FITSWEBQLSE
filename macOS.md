@@ -170,6 +170,14 @@ ld: symbol(s) not found for architecture arm64
 # 19. PostgreSQL (needed by JVO)
     brew install libpq
 
-# 20. FORTRAN formatting in Visual Studio Code
+# 20. Starlink AST
+    wget https://github.com/Starlink/ast/releases/download/v9.5.0/ast-9.5.0.tar.gz
+    tar zxvf ast-9.5.0.tar.gz
+    cd ast-9.5.0
+    ./configure --prefix=/usr/local
+    make -j16
+    sudo make install
+
+# 21. FORTRAN formatting in Visual Studio Code
     brew install fortran-language-server
     brew install findent
