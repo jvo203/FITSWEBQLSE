@@ -1,3 +1,8 @@
+## [X.X.X] - 2026-XX-XX
+
+* added higher moments M1, M2 and M8 (see a menu item _*Preferences*_ / _*moment map*_)
+* gracefully handle _*wire texture loading errors*_ in the 3D view
+
 ## [5.2.5] - 2026-08-31
 
 * removed the velocity/dispersion/maximum higher-moments selection options (they are under development in a separate develop branch)

@@ -12,6 +12,9 @@ let geometry;
 let material;
 let isActive = false;
 let initTimer = 0;
+let surfacePrepared = false;
+let wireTextureReady = false;
+let wireTextureLoadFailed = false;
 
 const segments = 512;
 let surfacePoint = null;
@@ -198,6 +201,10 @@ function disposeSurfaceResources() {
         wireTexture.dispose();
     }
 
+    surfacePrepared = false;
+    wireTextureReady = false;
+    wireTextureLoadFailed = false;
+
     container = null;
     camera = null;
     controls = null;
@@ -249,6 +256,43 @@ function buildGeometry() {
     geometry.computeVertexNormals();
 }
 
+function showPreparedSurface() {
+    if (!isActive || !surfacePrepared || !wireTextureReady || renderer == null || material == null) {
+        return;
+    }
+
+    if (wireTextureLoadFailed) {
+        console.error('Unable to load the 3D surface wire texture; showing the surface without the wire overlay.');
+        material.map = null;
+        material.needsUpdate = true;
+        if (wireTexture != null) {
+            wireTexture.dispose();
+            wireTexture = null;
+        }
+
+        const errorMessage = document.createElement('div');
+        errorMessage.setAttribute('role', 'alert');
+        errorMessage.textContent = 'Wire texture failed to load; showing the surface without the wire overlay.';
+        Object.assign(errorMessage.style, {
+            position: 'absolute',
+            top: '12px',
+            left: '12px',
+            zIndex: '1',
+            padding: '8px',
+            color: 'white',
+            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+            pointerEvents: 'none'
+        });
+        container.appendChild(errorMessage);
+    }
+
+    controls.update();
+    renderer.render(scene, camera);
+    renderer.domElement.style.visibility = 'visible';
+    renderer.setAnimationLoop(animateSurface);
+    d3.select('#hourglassThreeJS').remove();
+}
+
 function initSurfaceScene() {
     initTimer = 0;
 
@@ -269,10 +313,39 @@ function initSurfaceScene() {
     renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(screenWidth, screenHeight);
-    renderer.setAnimationLoop(animateSurface);
+    renderer.domElement.style.visibility = 'hidden';
 
     container = document.getElementById('ThreeJS');
     container.appendChild(renderer.domElement);
+
+    surfacePrepared = false;
+    wireTextureReady = false;
+    wireTextureLoadFailed = false;
+    let loadedTexture;
+    loadedTexture = new THREE.TextureLoader().load(
+        'https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/fitswebql/square.png',
+        () => {
+            if (!isActive || wireTexture !== loadedTexture) {
+                return;
+            }
+            wireTextureReady = true;
+            showPreparedSurface();
+        },
+        undefined,
+        () => {
+            if (!isActive || wireTexture !== loadedTexture) {
+                return;
+            }
+            wireTextureLoadFailed = true;
+            wireTextureReady = true;
+            showPreparedSurface();
+        }
+    );
+    wireTexture = loadedTexture;
+    wireTexture.wrapS = THREE.RepeatWrapping;
+    wireTexture.wrapT = THREE.RepeatWrapping;
+    wireTexture.repeat.set(segments, segments);
+    wireTexture.colorSpace = THREE.SRGBColorSpace;
 
     controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
@@ -291,12 +364,6 @@ function initSurfaceScene() {
 
     buildGeometry();
 
-    wireTexture = new THREE.TextureLoader().load('https://cdn.jsdelivr.net/gh/jvo203/fits_web_ql/htdocs/fitswebql/square.png');
-    wireTexture.wrapS = THREE.RepeatWrapping;
-    wireTexture.wrapT = THREE.RepeatWrapping;
-    wireTexture.repeat.set(segments, segments);
-    wireTexture.colorSpace = THREE.SRGBColorSpace;
-
     material = new THREE.MeshPhongMaterial({
         map: wireTexture,
         vertexColors: true,
@@ -307,7 +374,8 @@ function initSurfaceScene() {
     scene.add(mesh);
     window.addEventListener('resize', onWindowResize);
 
-    d3.select('#hourglassThreeJS').remove();
+    surfacePrepared = true;
+    showPreparedSurface();
 }
 
 function init_surface() {
