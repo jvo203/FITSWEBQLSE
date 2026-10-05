@@ -67,6 +67,10 @@ gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.
 
 # 5. libmicrohttpd
 
+    CentOS Stream 9: sudo dnf config-manager --set-enabled crb
+
+    sudo dnf install libmicrohttpd-devel
+
     ('--enable-experimental' is needed for websocket support, define MICROWS in the Makefile)
 
     wget https://ftpmirror.gnu.org/libmicrohttpd/libmicrohttpd-latest.tar.gz

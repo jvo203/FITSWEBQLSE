@@ -2828,9 +2828,10 @@ on_ws_connection(void *cls,
         /* return error page */
         struct MHD_Response *response;
         response =
-            MHD_create_response_from_buffer_static(
+            MHD_create_response_from_buffer(
                 strlen(PAGE_INVALID_WEBSOCKET_REQUEST),
-                PAGE_INVALID_WEBSOCKET_REQUEST);
+                (void *)PAGE_INVALID_WEBSOCKET_REQUEST,
+                MHD_RESPMEM_PERSISTENT);
         ret = MHD_queue_response(connection,
                                  MHD_HTTP_BAD_REQUEST,
                                  response);
