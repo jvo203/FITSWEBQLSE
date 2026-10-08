@@ -35,6 +35,10 @@ gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.
 
 # 3. NASM
 
+    sudo dnf install nasm
+
+    or
+
     wget https://www.nasm.us/pub/nasm/releasebuilds/2.16.01/nasm-2.16.01.tar.gz
     tar zxvf nasm-2.16.01.tar.gz
     cd nasm-2.16.01
