@@ -139,6 +139,10 @@ gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.
 
 # 11. CZMQ
 
+    sudo dnf install czmq-devel
+
+    or
+
     wget https://github.com/zeromq/czmq/archive/refs/tags/v4.2.1.tar.gz
     tar zxvf v4.2.1.tar.gz
     cd czmq-4.2.1
