@@ -108,7 +108,7 @@ gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.
 
 # 8. WCSLIB
 
-    wget ftp://ftp.atnf.csiro.au/pub/software/wcslib/wcslib-8.10.tar.bz2
+    wget https://www.atnf.csiro.au/computing/software/wcs/wcslib-releases/wcslib-8.10.tar.bz2
     bunzip2 wcslib-8.10.tar.bz2
     tar xvf wcslib-8.10.tar
     cd wcslib-8.10
