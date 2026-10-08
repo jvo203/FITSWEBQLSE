@@ -152,6 +152,10 @@ gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.
 
 # 12. jemalloc
 
+    sudo dnf install jemalloc-devel
+
+    or
+
     wget https://github.com/jemalloc/jemalloc/releases/download/5.3.0/jemalloc-5.3.0.tar.bz2
     bunzip2 jemalloc-5.3.0.tar.bz2
     tar xvf jemalloc-5.3.0.tar
