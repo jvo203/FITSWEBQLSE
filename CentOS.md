@@ -86,6 +86,10 @@ gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.
 
 # 6. libcpuid
     
+    sudo dnf install libcpuid-devel
+
+    or
+
     wget https://github.com/anrieff/libcpuid/releases/download/v0.7.0/libcpuid-0.7.0.tar.gz
     tar zxvf libcpuid-0.7.0.tar.gz
     cd libcpuid-0.7.0
