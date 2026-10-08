@@ -127,6 +127,10 @@ gpgkey=https://yum.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.
 
 # 10. ZeroMQ
 
+    sudo dnf install zeromq-devel
+
+    or
+
     wget https://github.com/zeromq/libzmq/archive/refs/tags/v4.3.5.tar.gz
     tar zxvf v4.3.5.tar.gz
     cd libzmq-4.3.5
