@@ -12713,7 +12713,7 @@ contains
       character(len=:), allocatable :: flux
 
       ! cluster
-      !type(image_spectrum_request_t), target :: cluster_req
+      type(image_spectrum_request_t), target :: cluster_req
       type(c_ptr) :: cluster_pid
       integer(kind=c_int) :: cluster_rc
 
