@@ -9296,10 +9296,10 @@ void *fetch_realtime_image_moments(void *ptr)
                 continue;
             }
 
-            const double *pixels_I = (const double *)chunks[idx].memory;
-            const double *pixels_Iv = NULL;
-            const double *pixels_Iv2 = NULL;
-            const bool *mask = (const bool *)(chunks[idx].memory + arrays_size);
+            const double *restrict pixels_I = (const double *)chunks[idx].memory;
+            const double *restrict pixels_Iv = NULL;
+            const double *restrict pixels_Iv2 = NULL;
+            const bool *restrict mask = (const bool *)(chunks[idx].memory + arrays_size);
 
             if (req->intensity == velocity)
                 pixels_Iv = pixels_I + pixel_count;
