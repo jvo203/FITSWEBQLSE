@@ -311,14 +311,13 @@ struct http_image_moment_request
     bool rest;
 
     // output
-    float *restrict pixels_I;
-    float *restrict pixels_Iv;
-    float *restrict pixels_Iv2;
+    double *restrict pixels_I;
+    double *restrict pixels_Iv;
+    double *restrict pixels_Iv2;
     bool *restrict mask;
 
     int dimx;
     int dimy;
-    bool valid;
 };
 
 void start_http();

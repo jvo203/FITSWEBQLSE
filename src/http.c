@@ -9143,12 +9143,6 @@ void *fetch_realtime_image_moments(void *ptr)
     const char *intensity;
     switch (req->intensity)
     {
-    case mean:
-        intensity = "mean";
-        break;
-    case integrated:
-        intensity = "integrated";
-        break;
     case velocity:
         intensity = "velocity";
         break;
@@ -9263,7 +9257,87 @@ void *fetch_realtime_image_moments(void *ptr)
 
             printf("[C] HTTP transfer #%d completed; cURL status %d, HTTP code %ld.\n", idx + 1, msg->data.result, response_code);
 
-            // reduce (gather) the moments
+            // reduce (gather) the moments and mask
+            if (idx == handle_count || msg->data.result != CURLE_OK || response_code != 200)
+                continue;
+
+            if (req->dimx <= 0 || req->dimy <= 0 || req->pixels_I == NULL || req->mask == NULL)
+            {
+                fprintf(stderr, "[C] invalid output buffers or dimensions in fetch_realtime_image_moments\n");
+                continue;
+            }
+
+            size_t pixel_count = (size_t)req->dimx * (size_t)req->dimy;
+            size_t array_count = 1;
+            if (req->intensity == velocity)
+            {
+                if (req->pixels_Iv == NULL)
+                {
+                    fprintf(stderr, "[C] missing velocity output buffer in fetch_realtime_image_moments\n");
+                    continue;
+                }
+                array_count++;
+            }
+            else if (req->intensity == dispersion)
+            {
+                if (req->pixels_Iv == NULL || req->pixels_Iv2 == NULL)
+                {
+                    fprintf(stderr, "[C] missing dispersion output buffer in fetch_realtime_image_moments\n");
+                    continue;
+                }
+                array_count += 2;
+            }
+
+            size_t arrays_size = array_count * pixel_count * sizeof(double);
+            size_t mask_size = pixel_count * sizeof(bool);
+            if (chunks[idx].size != arrays_size + mask_size)
+            {
+                fprintf(stderr, "[C] unexpected moment response size from cluster node (expected %zu bytes, got %zu)\n", arrays_size + mask_size, chunks[idx].size);
+                continue;
+            }
+
+            const double *pixels_I = (const double *)chunks[idx].memory;
+            const double *pixels_Iv = NULL;
+            const double *pixels_Iv2 = NULL;
+            const bool *mask = (const bool *)(chunks[idx].memory + arrays_size);
+
+            if (req->intensity == velocity)
+                pixels_Iv = pixels_I + pixel_count;
+            else if (req->intensity == dispersion)
+            {
+                pixels_Iv = pixels_I + pixel_count;
+                pixels_Iv2 = pixels_Iv + pixel_count;
+            }
+
+            if (req->intensity == maximum)
+            {
+#pragma GCC ivdep
+                for (size_t pixel = 0; pixel < pixel_count; pixel++)
+                    req->pixels_I[pixel] = MAX(req->pixels_I[pixel], pixels_I[pixel]);
+            }
+            else if (req->intensity == velocity)
+            {
+#pragma GCC ivdep
+                for (size_t pixel = 0; pixel < pixel_count; pixel++)
+                {
+                    req->pixels_I[pixel] += pixels_I[pixel];
+                    req->pixels_Iv[pixel] += pixels_Iv[pixel];
+                }
+            }
+            else
+            {
+#pragma GCC ivdep
+                for (size_t pixel = 0; pixel < pixel_count; pixel++)
+                {
+                    req->pixels_I[pixel] += pixels_I[pixel];
+                    req->pixels_Iv[pixel] += pixels_Iv[pixel];
+                    req->pixels_Iv2[pixel] += pixels_Iv2[pixel];
+                }
+            }
+
+#pragma GCC ivdep
+            for (size_t pixel = 0; pixel < pixel_count; pixel++)
+                req->mask[pixel] |= mask[pixel];
         }
     }
 

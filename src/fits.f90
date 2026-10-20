@@ -432,7 +432,6 @@ module fits
 
       integer(c_int) :: dimx
       integer(c_int) :: dimy
-      logical(kind=c_bool) :: valid
    end type image_moment_request_t
 
    type, bind(C) :: resize_task_t
@@ -12788,19 +12787,22 @@ contains
 
       ! we need the viewport too
       allocate (pixels(npixels))
-      allocate (pixels_I(npixels))
       allocate (mask(npixels))
       pixels = 0.0
-      pixels_I = 0.0
       mask = .false.
+
+      ! common to all higher moments
+      allocate (pixels_I(npixels))
 
       ! allocate thread-local buffers common for all higher moments
       allocate (thread_I(npixels, max_threads))
       allocate (thread_mask(npixels, max_threads))
 
       if (req%intensity .ne. maximum) then
+         pixels_I = 0.0
          thread_I = 0.0
       else
+         pixels_I = -1.0E30
          thread_I = -1.0E30
       end if
 
@@ -12855,7 +12857,6 @@ contains
       cluster_req%mask = c_loc(mask)
       cluster_req%dimx = dimx
       cluster_req%dimy = dimy
-      cluster_req%valid = .false.
 
       ! launch a thread
       cluster_pid = my_pthread_create(start_routine=c_funloc(fetch_realtime_image_moments), arg=c_loc(cluster_req), rc=cluster_rc)
