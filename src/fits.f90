@@ -12832,6 +12832,28 @@ contains
       cluster_req%deltaV = req%deltaV
       cluster_req%rest = req%rest
 
+      ! outputs
+      cluster_req%pixels_I = c_loc(pixels_I)
+
+      if (req%intensity .eq. velocity) then
+         cluster_req%pixels_Iv = c_loc(pixels_Iv)
+      else if (req%intensity .eq. dispersion) then
+         cluster_req%pixels_Iv = c_loc(pixels_Iv)
+         cluster_req%pixels_Iv2 = c_loc(pixels_Iv2)
+      else
+         cluster_req%pixels_Iv = c_null_ptr
+         cluster_req%pixels_Iv2 = c_null_ptr
+      end if
+
+      cluster_req%mask = c_loc(mask)
+      cluster_req%dimx = dimx
+      cluster_req%dimy = dimy
+      cluster_req%valid = .false.
+
+      ! launch a thread
+      cluster_pid = my_pthread_create(start_routine=c_funloc(fetch_realtime_image_moments), arg=c_loc(cluster_req), rc=cluster_rc)
+      ! end of cluster
+
       !$omp PARALLEL DEFAULT(SHARED) SHARED(item, req)&
       !$omp& SHARED(thread_I, thread_Iv, thread_Iv2, thread_mask)&
       !$omp& PRIVATE(tid, frame, freq, vel)&
@@ -12873,6 +12895,9 @@ contains
       end do
       !$omp END DO
       !$omp END PARALLEL
+
+      ! join a thread
+      rc = my_pthread_join(cluster_pid)
 
       ! reduce the thread-local buffers
       if (req%intensity .eq. velocity) then
