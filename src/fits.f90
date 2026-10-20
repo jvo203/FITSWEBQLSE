@@ -816,6 +816,13 @@ module fits
          type(c_ptr), intent(in), value :: arg   ! a pointer to type(image_spectrum_request_t)
       end subroutine fetch_realtime_image_spectrum
 
+      recursive subroutine fetch_realtime_image_moments(arg) BIND(C)
+         use, intrinsic :: ISO_C_BINDING
+         implicit none
+
+         type(c_ptr), intent(in), value :: arg   ! a pointer to type(image_moment_request_t)
+      end subroutine fetch_realtime_image_moments
+
       recursive subroutine fetch_pv_diagram(arg) BIND(C)
          use, intrinsic :: ISO_C_BINDING
          implicit none
