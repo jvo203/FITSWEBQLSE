@@ -9154,6 +9154,10 @@ void *fetch_realtime_image_moments(void *ptr)
         g_mutex_unlock(&cluster_mtx);
         pthread_exit(NULL);
     };
+
+    // ...
+
+    pthread_exit(NULL);
 }
 
 void *fetch_image(void *ptr)
