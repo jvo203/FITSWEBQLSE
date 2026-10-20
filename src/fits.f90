@@ -415,6 +415,26 @@ module fits
       logical(kind=c_bool) :: valid
    end type image_spectrum_request_t
 
+   type, bind(C) :: image_moment_request_t
+      type(c_ptr) :: datasetid
+      integer(c_int) :: len
+      ! input parameters
+      integer(c_int) :: x1, y1, x2, y2
+      integer(kind(integrated)) :: intensity
+      real(c_double) :: frame_start, frame_end, ref_freq, deltaV
+      logical(kind=c_bool) :: rest
+
+      ! outputs
+      type(c_ptr) :: pixels_I
+      type(c_ptr) :: pixels_Iv
+      type(c_ptr) :: pixels_Iv2
+      type(c_ptr) :: mask
+
+      integer(c_int) :: dimx
+      integer(c_int) :: dimy
+      logical(kind=c_bool) :: valid
+   end type image_moment_request_t
+
    type, bind(C) :: resize_task_t
       integer(c_int) :: srcWidth, srcHeight
       integer(c_int) :: dstWidth, dstHeight
@@ -12713,7 +12733,7 @@ contains
       character(len=:), allocatable :: flux
 
       ! cluster
-      type(image_spectrum_request_t), target :: cluster_req
+      type(image_moment_request_t), target :: cluster_req
       type(c_ptr) :: cluster_pid
       integer(kind=c_int) :: cluster_rc
 
