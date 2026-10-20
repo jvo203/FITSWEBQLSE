@@ -12817,6 +12817,21 @@ contains
          thread_Iv2 = 0.0
       end if
 
+      cluster_req%datasetid = c_loc(item%datasetid)
+      cluster_req%len = size(item%datasetid)
+
+      ! inputs
+      cluster_req%x1 = req%x1
+      cluster_req%y1 = req%y1
+      cluster_req%x2 = req%x2
+      cluster_req%y2 = req%y2
+      cluster_req%intensity = req%intensity
+      cluster_req%frame_start = req%frame_start
+      cluster_req%frame_end = req%frame_end
+      cluster_req%ref_freq = req%ref_freq
+      cluster_req%deltaV = req%deltaV
+      cluster_req%rest = req%rest
+
       !$omp PARALLEL DEFAULT(SHARED) SHARED(item, req)&
       !$omp& SHARED(thread_I, thread_Iv, thread_Iv2, thread_mask)&
       !$omp& PRIVATE(tid, frame, freq, vel)&
