@@ -8200,7 +8200,7 @@ void *fetch_global_statistics(void *ptr)
     multi_handle = curl_multi_init();
 
     // html-encode the datasetid
-    char datasetid[2 * req->len];
+    char datasetid[3 * req->len];
     size_t len = mg_url_encode(req->datasetid, req->len, datasetid, sizeof(datasetid) - 1);
 
     for (i = 0, iterator = cluster; iterator; iterator = iterator->next)
@@ -8385,7 +8385,7 @@ void *fetch_video_frame(void *ptr)
     multi_handle = curl_multi_init();
 
     // html-encode the datasetid
-    char datasetid[2 * req->len];
+    char datasetid[3 * req->len];
     size_t len = mg_url_encode(req->datasetid, req->len, datasetid, sizeof(datasetid) - 1);
 
     for (i = 0, iterator = cluster; iterator; iterator = iterator->next)
@@ -8540,7 +8540,7 @@ void *fetch_polarisation(void *ptr)
     multi_handle = curl_multi_init();
 
     // html-encode the datasetid
-    char datasetid[2 * req->len];
+    char datasetid[3 * req->len];
     size_t len = mg_url_encode(req->datasetid, req->len, datasetid, sizeof(datasetid) - 1);
 
     for (i = 0, iterator = cluster; iterator; iterator = iterator->next)
@@ -8689,7 +8689,7 @@ void *fetch_inner_dimensions(void *ptr)
     multi_handle = curl_multi_init();
 
     // html-encode the datasetid
-    char datasetid[2 * req->len];
+    char datasetid[3 * req->len];
     size_t len = mg_url_encode(req->datasetid, req->len, datasetid, sizeof(datasetid) - 1);
 
     for (i = 0, iterator = cluster; iterator; iterator = iterator->next)
@@ -8835,7 +8835,7 @@ void *fetch_pv_diagram(void *ptr)
     multi_handle = curl_multi_init();
 
     // html-encode the datasetid
-    char datasetid[2 * req->len];
+    char datasetid[3 * req->len];
     size_t len = mg_url_encode(req->datasetid, req->len, datasetid, sizeof(datasetid) - 1);
 
     for (i = 0, iterator = cluster; iterator; iterator = iterator->next)
@@ -8979,7 +8979,7 @@ void *fetch_realtime_image_spectrum(void *ptr)
     multi_handle = curl_multi_init();
 
     // html-encode the datasetid
-    char datasetid[2 * req->len];
+    char datasetid[3 * req->len];
     size_t len = mg_url_encode(req->datasetid, req->len, datasetid, sizeof(datasetid) - 1);
 
     for (i = 0, iterator = cluster; iterator; iterator = iterator->next)
@@ -9049,8 +9049,8 @@ void *fetch_realtime_image_spectrum(void *ptr)
             {
                 // printf("[C] fetch_realtime_image_spectrum received %zu bytes.\n", chunks[idx].size);
 
-                size_t spectrum_size = req->length * sizeof(float);
-                size_t plane_size = req->dimx * req->dimy;
+                size_t spectrum_size = (size_t)req->length * sizeof(float);
+                size_t plane_size = (size_t)req->dimx * (size_t)req->dimy;
                 size_t pixels_size = plane_size * req->no_planes * sizeof(float);
                 size_t mask_size = plane_size * sizeof(uint8);
 
@@ -9195,7 +9195,7 @@ void *fetch_realtime_image_moments(void *ptr)
     multi_handle = curl_multi_init();
 
     // html-encode the datasetid
-    char datasetid[2 * req->len];
+    char datasetid[3 * req->len];
     size_t len = mg_url_encode(req->datasetid, req->len, datasetid, sizeof(datasetid) - 1);
 
     for (i = 0, iterator = cluster; iterator; iterator = iterator->next)
@@ -9401,7 +9401,7 @@ void *fetch_image(void *ptr)
     multi_handle = curl_multi_init();
 
     // html-encode the datasetid
-    char datasetid[2 * req->len];
+    char datasetid[3 * req->len];
     size_t len = mg_url_encode(req->datasetid, req->len, datasetid, sizeof(datasetid) - 1);
 
     for (i = 0, iterator = cluster; iterator; iterator = iterator->next)
