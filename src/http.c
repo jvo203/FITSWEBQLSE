@@ -8395,9 +8395,9 @@ void *fetch_video_frame(void *ptr)
         g_string_append_printf(url, "%" PRIu16 "/video/%.*s", options.http_port, (int)len, datasetid);
         g_string_append_printf(url, "?frame=%d&plane=%d&fill=%d&keyframe=%d&width=%d&height=%d&downsize=%d", req->frame, req->plane, req->fill, req->keyframe, req->width, req->height, req->downsize);
         g_string_append_printf(url, "&mask=%d", (req->mask != NULL ? 1 : 0));
-        g_string_append_printf(url, "&flux=%s&dmin=%f&dmax=%f&dmedian=%f", req->flux, req->dmin, req->dmax, req->dmedian);
-        g_string_append_printf(url, "&sensitivity=%f&slope=%f", req->sensitivity, req->slope);
-        g_string_append_printf(url, "&white=%f&black=%f", req->white, req->black);
+        g_string_append_printf(url, "&flux=%s&dmin=%.17f&dmax=%.17f&dmedian=%.17f", req->flux, req->dmin, req->dmax, req->dmedian);
+        g_string_append_printf(url, "&sensitivity=%.17f&slope=%.17f", req->sensitivity, req->slope);
+        g_string_append_printf(url, "&white=%.17f&black=%.17f", req->white, req->black);
         // printf("[C] URL: '%s'\n", url->str);
 
         // set the individual URL
@@ -8986,7 +8986,7 @@ void *fetch_realtime_image_spectrum(void *ptr)
     {
         GString *url = g_string_new("http://");
         g_string_append_printf(url, "%s:", (char *)iterator->data);
-        g_string_append_printf(url, "%" PRIu16 "/viewport/%.*s?x1=%d&y1=%d&x2=%d&y2=%d&plane=%d&frame_start=%f&frame_end=%f&ref_freq=%f&median[0]=%.*g&median[1]=%.*g&median[2]=%.*g&median[3]=%.*g", options.http_port, (int)len, datasetid, req->x1, req->y1, req->x2, req->y2, req->plane, req->frame_start, req->frame_end, req->ref_freq, 12, req->median[0], 12, req->median[1], 12, req->median[2], 12, req->median[3]);
+        g_string_append_printf(url, "%" PRIu16 "/viewport/%.*s?x1=%d&y1=%d&x2=%d&y2=%d&plane=%d&frame_start=%.17f&frame_end=%.17f&ref_freq=%.17f&median[0]=%.*g&median[1]=%.*g&median[2]=%.*g&median[3]=%.*g", options.http_port, (int)len, datasetid, req->x1, req->y1, req->x2, req->y2, req->plane, req->frame_start, req->frame_end, req->ref_freq, 12, req->median[0], 12, req->median[1], 12, req->median[2], 12, req->median[3]);
         g_string_append_printf(url, "&image=%s", req->image ? "true" : "false");                            // image
         g_string_append_printf(url, "&beam=%s", req->beam == circle ? "circle" : "square");                 // beam
         g_string_append_printf(url, "&intensity=%s", req->intensity == integrated ? "integrated" : "mean"); // intensity
@@ -9140,6 +9140,29 @@ void *fetch_realtime_image_moments(void *ptr)
     struct http_image_moment_request *req = (struct http_image_moment_request *)ptr;
     printf("[C] calling fetch_realtime_image_moments across the cluster for '%.*s'\n", req->len, req->datasetid);
 
+    const char *intensity;
+    switch (req->intensity)
+    {
+    case mean:
+        intensity = "mean";
+        break;
+    case integrated:
+        intensity = "integrated";
+        break;
+    case velocity:
+        intensity = "velocity";
+        break;
+    case dispersion:
+        intensity = "dispersion";
+        break;
+    case maximum:
+        intensity = "maximum";
+        break;
+    default:
+        fprintf(stderr, "[C] invalid intensity mode in fetch_realtime_image_moments\n");
+        pthread_exit(NULL);
+    }
+
     int i;
     GSList *iterator = NULL;
 
@@ -9177,7 +9200,72 @@ void *fetch_realtime_image_moments(void *ptr)
     /* init a multi stack */
     multi_handle = curl_multi_init();
 
-    // ...
+    // html-encode the datasetid
+    char datasetid[2 * req->len];
+    size_t len = mg_url_encode(req->datasetid, req->len, datasetid, sizeof(datasetid) - 1);
+
+    for (i = 0, iterator = cluster; iterator; iterator = iterator->next)
+    {
+        GString *url = g_string_new("http://");
+        g_string_append_printf(url, "%s:", (char *)iterator->data);
+        g_string_append_printf(url, "%" PRIu16 "/moment/%.*s?x1=%d&y1=%d&x2=%d&y2=%d&frame_start=%.17f&frame_end=%.17f&ref_freq=%.17f&deltaV=%.17f&rest=%s&intensity=%s", options.http_port, (int)len, datasetid, req->x1, req->y1, req->x2, req->y2, req->frame_start, req->frame_end, req->ref_freq, req->deltaV, req->rest ? "true" : "false", intensity);
+        printf("[C] URL: '%s'\n", url->str);
+
+        // set the individual URL
+        curl_easy_setopt(handles[i], CURLOPT_URL, url->str);
+
+        /* send all data to this function  */
+        curl_easy_setopt(handles[i], CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
+
+        /* we pass our 'chunk' struct to the callback function */
+        curl_easy_setopt(handles[i], CURLOPT_WRITEDATA, (void *)&(chunks[i]));
+
+        // add the individual transfer
+        curl_multi_add_handle(multi_handle, handles[i]);
+
+        g_string_free(url, TRUE);
+
+        // move on to the next cluster node
+        i++;
+    }
+
+    g_mutex_unlock(&cluster_mtx);
+
+    /* Wait for the transfers */
+    while (still_running)
+    {
+        CURLMcode mc = curl_multi_perform(multi_handle, &still_running);
+
+        if (still_running)
+            /* wait for activity, timeout or "nothing" */
+            mc = curl_multi_poll(multi_handle, NULL, 0, 1000, NULL);
+
+        if (mc)
+            break;
+    }
+
+    /* See how the transfers went */
+    while ((msg = curl_multi_info_read(multi_handle, &msgs_left)))
+    {
+        if (msg->msg == CURLMSG_DONE)
+        {
+            int idx;
+            /* Find out which handle this message is about */
+            for (idx = 0; idx < handle_count; idx++)
+            {
+                int found = (msg->easy_handle == handles[idx]);
+                if (found)
+                    break;
+            }
+
+            long response_code = 0;
+            curl_easy_getinfo(msg->easy_handle, CURLINFO_RESPONSE_CODE, &response_code);
+
+            printf("[C] HTTP transfer #%d completed; cURL status %d, HTTP code %ld.\n", idx + 1, msg->data.result, response_code);
+
+            // reduce (gather) the moments
+        }
+    }
 
     /* remove the transfers and cleanup the handles */
     for (i = 0; i < handle_count; i++)
