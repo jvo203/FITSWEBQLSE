@@ -293,6 +293,34 @@ struct http_image_spectrum_request
     bool valid;
 };
 
+struct http_image_moment_request
+{
+    char *datasetid;
+    int len;
+
+    // input
+    int x1;
+    int y1;
+    int x2;
+    int y2;
+    enum intensity_mode intensity;
+    double frame_start;
+    double frame_end;
+    double ref_freq;
+    double deltaV;
+    bool rest;
+
+    // output
+    float *restrict pixels_I;
+    float *restrict pixels_Iv;
+    float *restrict pixels_Iv2;
+    bool *restrict mask;
+
+    int dimx;
+    int dimy;
+    bool valid;
+};
+
 void start_http();
 void quiesce_http();
 void stop_http();

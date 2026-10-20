@@ -175,6 +175,7 @@ void *fetch_polarisation(void *ptr);
 void *fetch_global_statistics(void *ptr);
 void *fetch_image(void *ptr);
 void *fetch_realtime_image_spectrum(void *ptr);
+void *fetch_realtime_image_moments(void *ptr);
 void *fetch_pv_diagram(void *ptr);
 int submit_progress(char *root, char *datasetid, int len, int progress);
 extern void update_timestamp(void *ptr);
@@ -9129,6 +9130,30 @@ void *fetch_realtime_image_spectrum(void *ptr)
     curl_multi_cleanup(multi_handle);
 
     pthread_exit(NULL);
+}
+
+void *fetch_realtime_image_moments(void *ptr)
+{
+    if (ptr == NULL)
+        pthread_exit(NULL);
+
+    struct http_image_moment_request *req = (struct http_image_moment_request *)ptr;
+    printf("[C] calling fetch_realtime_image_moments across the cluster for '%.*s'\n", req->len, req->datasetid);
+
+    int i;
+    GSList *iterator = NULL;
+
+    g_mutex_lock(&cluster_mtx);
+
+    int handle_count = g_slist_length(cluster);
+
+    if (handle_count == 0)
+    {
+        printf("[C] aborting fetch_realtime_image_moments (no cluster nodes found)\n");
+
+        g_mutex_unlock(&cluster_mtx);
+        pthread_exit(NULL);
+    };
 }
 
 void *fetch_image(void *ptr)
