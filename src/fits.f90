@@ -10052,6 +10052,18 @@ contains
 
    end subroutine viewport_request
 
+   recursive subroutine moment_request(user) BIND(C, name='moment_request')
+      use omp_lib
+      use, intrinsic :: iso_c_binding
+      implicit none
+
+      type(C_PTR), intent(in), value :: user
+
+      type(dataset), pointer :: item
+      type(image_moment_request_f), pointer :: req
+
+   end subroutine moment_request
+
    recursive subroutine cluster_pv_request(user) BIND(C, name='cluster_pv_request')
       use omp_lib
       use, intrinsic :: iso_c_binding
