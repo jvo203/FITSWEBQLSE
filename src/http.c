@@ -166,6 +166,7 @@ extern void *video_request(void *req);
 extern void *polarisation_request(void *req);
 extern void *download_request(void *req);   // a FORTRAN subroutine
 extern void *viewport_request(void *req);   // a FORTRAN subroutine
+extern void *moment_request(void *req);     // a FORTRAN subroutine
 extern void *cluster_pv_request(void *req); // a FORTRAN subroutine
 void download_response(int fd, const char *filename);
 void fetch_channel_range(char *root, char *datasetid, int len, int *start, int *end, int *no_planes, int stride, int *status, float *frame_min, float *frame_max, float *frame_median, float *mean_spectrum, float *integrated_spectrum);
@@ -3576,9 +3577,72 @@ static enum MHD_Result on_http_connection(void *cls,
         if (!get_image_status(item))
             return http_internal_server_error(connection);
 
-        // ...
+        // open a pipe
+        status = pipe(pipefd);
 
-        return http_not_implemented(connection);
+        if (0 != status)
+            return http_internal_server_error(connection);
+
+        // create a response from a pipe by passing the read end of the pipe
+        struct MHD_Response *response = MHD_create_response_from_pipe(pipefd[0]);
+
+        if (NULL == response)
+        {
+            close(pipefd[1]);
+            return http_internal_server_error(connection);
+        }
+
+        // add headers
+        MHD_add_response_header(response, "Cache-Control", "no-cache");
+        MHD_add_response_header(response, "Cache-Control", "no-store");
+        MHD_add_response_header(response, "Pragma", "no-cache");
+        MHD_add_response_header(response, "Content-Type", "application/octet-stream");
+
+        // queue the response
+        enum MHD_Result ret = MHD_queue_response(connection, MHD_HTTP_OK, response);
+        MHD_destroy_response(response);
+
+        // the code below should be run in a separate thread
+        // otherwise libmicrohttpd will not have a chance to read from the pipe
+
+        // pass the write end of the pipe to Fortran
+        // the binary response data will be generated in Fortran
+        // printf("[C] calling viewport_request with the pipe file descriptor %d\n", pipefd[1]);
+
+        // got all the data, prepare a request structure and pass it to FORTRAN
+        struct image_moment_request *req = (struct image_moment_request *)malloc(sizeof(struct image_moment_request));
+
+        if (req != NULL)
+        {
+            req->x1 = x1;
+            req->y1 = y1;
+            req->x2 = x2;
+            req->y2 = y2;
+            req->intensity = intensity;
+            req->frame_start = frame_start;
+            req->frame_end = frame_end;
+            req->ref_freq = ref_freq;
+            req->deltaV = deltaV;
+            req->rest = rest;
+
+            req->fd = pipefd[1];
+            req->ptr = item;
+
+            // create and detach the FORTRAN thread
+            int stat = pthread_create(&tid, NULL, &moment_request, req);
+
+            if (stat == 0)
+                pthread_detach(tid);
+            else
+            {
+                close(pipefd[1]);
+                free(req);
+            }
+        }
+        else
+            close(pipefd[1]);
+
+        return ret;
     }
 
     if (strstr(url, "/pv/") != NULL)
