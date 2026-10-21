@@ -3464,6 +3464,123 @@ static enum MHD_Result on_http_connection(void *cls,
         return ret;
     }
 
+    if (strstr(url, "/moment/") != NULL)
+    {
+        int x1, y1, x2, y2;
+        double frame_start, frame_end, ref_freq, deltaV;
+        bool rest;
+        enum intensity_mode intensity;
+
+        int status;
+        int pipefd[2];
+        pthread_t tid;
+
+        char *datasetId = strrchr(url, '/');
+
+        if (datasetId != NULL)
+            datasetId++; // skip the slash character
+
+        if (datasetId == NULL)
+            return http_bad_request(connection);
+
+        char *x1str = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "x1");
+
+        if (x1str == NULL)
+            return http_bad_request(connection);
+        else
+            x1 = atoi(x1str);
+
+        char *y1str = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "y1");
+
+        if (y1str == NULL)
+            return http_bad_request(connection);
+        else
+            y1 = atoi(y1str);
+
+        char *x2str = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "x2");
+
+        if (x2str == NULL)
+            return http_bad_request(connection);
+        else
+            x2 = atoi(x2str);
+
+        char *y2str = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "y2");
+
+        if (y2str == NULL)
+            return http_bad_request(connection);
+        else
+            y2 = atoi(y2str);
+
+        char *frame_start_str = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "frame_start");
+
+        if (frame_start_str == NULL)
+            return http_bad_request(connection);
+        else
+            frame_start = atof(frame_start_str);
+
+        char *frame_end_str = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "frame_end");
+
+        if (frame_end_str == NULL)
+            return http_bad_request(connection);
+        else
+            frame_end = atof(frame_end_str);
+
+        char *ref_freq_str = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "ref_freq");
+
+        if (ref_freq_str == NULL)
+            return http_bad_request(connection);
+        else
+            ref_freq = atof(ref_freq_str);
+
+        char *deltaV_str = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "deltaV");
+
+        if (deltaV_str == NULL)
+            return http_bad_request(connection);
+        else
+            deltaV = atof(deltaV_str);
+
+        char *rest_str = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "rest");
+
+        if (rest_str == NULL)
+            return http_bad_request(connection);
+        else
+            rest = strcmp(rest_str, "true") == 0 ? true : false;
+
+        char *intensity_str = (char *)MHD_lookup_connection_value(connection, MHD_GET_ARGUMENT_KIND, "intensity");
+
+        if (intensity_str == NULL)
+            return http_bad_request(connection);
+        else
+        {
+            // only three intensity modes are supported for moment maps: velocity, dispersion and maximum
+            // else return a bad request
+            if (strcmp(intensity_str, "velocity") == 0)
+                intensity = velocity;
+            else if (strcmp(intensity_str, "dispersion") == 0)
+                intensity = dispersion;
+            else if (strcmp(intensity_str, "maximum") == 0)
+                intensity = maximum;
+            else
+                return http_bad_request(connection);
+        }
+
+        // do we have a dataset?
+        void *item = get_dataset(datasetId);
+
+        if (item == NULL)
+            return http_not_found(connection);
+
+        if (get_error_status(item))
+            return http_internal_server_error(connection);
+
+        if (!get_image_status(item))
+            return http_internal_server_error(connection);
+
+        // ...
+
+        return http_not_implemented(connection);
+    }
+
     if (strstr(url, "/pv/") != NULL)
     {
         int x1, y1, x2, y2, first, last, npoints;

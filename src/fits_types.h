@@ -137,6 +137,24 @@ struct image_spectrum_request
     void *ptr;
 };
 
+struct image_moment_request
+{
+    // input
+    int x1, y1, x2, y2;
+    enum intensity_mode intensity;
+    double frame_start;
+    double frame_end;
+    double ref_freq;
+    double deltaV;
+    bool rest;
+
+    // output (the 'write' end of a Unix pipe)
+    int fd;
+
+    // dataset pointer
+    void *ptr;
+};
+
 struct spectrum_request
 {
     // input
@@ -156,6 +174,7 @@ struct spectrum_request
     // output (the 'write' end of a Unix pipe)
     int fd;
 
+    // dataset pointer
     void *ptr;
 };
 
