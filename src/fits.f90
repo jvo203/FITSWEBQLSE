@@ -79,6 +79,21 @@ module fits
 
    end type image_spectrum_request_f
 
+   type, bind(c) :: image_moment_request_f
+      ! input
+      integer(c_int) :: x1, y1, x2, y2
+      integer(kind(integrated)) :: intensity
+      real(c_double) :: frame_start, frame_end, ref_freq, deltaV
+      logical(kind=c_bool) :: rest
+
+      ! output (a Unix pipe)
+      integer(kind=c_int) :: fd
+
+      ! dataset pointer
+      type(C_PTR) :: ptr
+
+   end type image_moment_request_f
+
    type, bind(c) :: spectrum_request_f
       ! input
       type(C_PTR) :: ra, dec
