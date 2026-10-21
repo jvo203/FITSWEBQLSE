@@ -7883,11 +7883,11 @@ contains
             allocate (thread_I(dimx, dimy, max_threads))
             allocate (pixels_I(dimx, dimy))
 
-            pixels_I = 0.0
-
             if (req%intensity .ne. maximum) then
+               pixels_I = 0.0
                thread_I = 0.0
             else
+               pixels_I = -1.0E30
                thread_I = -1.0E30
             end if
 
@@ -12788,6 +12788,7 @@ contains
       ! we need the viewport too
       allocate (pixels(npixels))
       allocate (mask(npixels))
+
       pixels = 0.0
       mask = .false.
 
