@@ -10065,7 +10065,7 @@ contains
       integer :: first, last, length
       integer :: max_threads, frame, tid
       integer(kind=8) :: npixels
-      integer(c_int) :: width, height
+      integer(c_int) :: x1, x2, y1, y2, width, height
       real(kind=c_double) :: freq, vel
 
       real(kind=c_double), allocatable, target :: thread_I(:, :), thread_Iv(:, :), thread_Iv2(:, :)
@@ -10126,10 +10126,10 @@ contains
       npixels = int(dimx, kind=8)*int(dimy, kind=8)
 
       ! sanity checks
-      req%x1 = max(1, req%x1)
-      req%y1 = max(1, req%y1)
-      req%x2 = min(width, req%x2)
-      req%y2 = min(height, req%y2)
+      x1 = max(1, req%x1)
+      y1 = max(1, req%y1)
+      x2 = min(width, req%x2)
+      y2 = min(height, req%y2)
 
       ! get #physical cores (ignore HT)
       max_threads = get_max_threads()
@@ -10194,21 +10194,21 @@ contains
          if (req%intensity .eq. velocity) then
             call viewport_moment_map_1_rect(c_loc(item%compressed(frame, 1)%ptr), width, height, item%frame_min(frame, 1), &
             & item%frame_max(frame, 1), c_loc(thread_I(:, tid)), c_loc(thread_Iv(:, tid)), c_loc(thread_mask(:, tid)), dimx, &
-            & req%x1 - 1, req%x2 - 1, req%y1 - 1, req%y2 - 1, 0, 0, vel)
+            & x1 - 1, x2 - 1, y1 - 1, y2 - 1, x1 - req%x1, y1 - req%y1, vel)
          end if
 
          ! the 2nd moment
          if (req%intensity .eq. dispersion) then
             call viewport_moment_map_2_rect(c_loc(item%compressed(frame, 1)%ptr), width, height, item%frame_min(frame, 1), &
             & item%frame_max(frame, 1), c_loc(thread_I(:, tid)), c_loc(thread_Iv(:, tid)), c_loc(thread_Iv2(:, tid)),&
-            & c_loc(thread_mask(:, tid)), dimx, req%x1 - 1, req%x2 - 1, req%y1 - 1, req%y2 - 1, 0, 0, vel)
+            & c_loc(thread_mask(:, tid)), dimx, x1 - 1, x2 - 1, y1 - 1, y2 - 1, x1 - req%x1, y1 - req%y1, vel)
          end if
 
          ! the 8th moment (maximum)
          if (req%intensity .eq. maximum) then
             call viewport_moment_map_8_rect(c_loc(item%compressed(frame, 1)%ptr), width, height, item%frame_min(frame, 1), &
             & item%frame_max(frame, 1), c_loc(thread_I(:, tid)), c_loc(thread_mask(:, tid)),&
-            & dimx, req%x1 - 1, req%x2 - 1, req%y1 - 1, req%y2 - 1, 0, 0)
+            & dimx, x1 - 1, x2 - 1, y1 - 1, y2 - 1, x1 - req%x1, y1 - req%y1)
          end if
       end do
       !$omp END DO
