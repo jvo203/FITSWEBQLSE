@@ -10172,6 +10172,75 @@ contains
          thread_Iv2 = 0.0
       end if
 
+      !$omp PARALLEL DEFAULT(SHARED) SHARED(item, req)&
+      !$omp& SHARED(thread_I, thread_Iv, thread_Iv2, thread_mask)&
+      !$omp& PRIVATE(tid, frame, freq, vel)&
+      !$omp& NUM_THREADS(max_threads)
+      !$omp DO
+      do frame = first, last
+         ! skip frames for which there is no data on this node
+         if (.not. associated(item%compressed(frame, 1)%ptr)) cycle
+
+         ! get a current OpenMP thread (starting from 0 as in C)
+         tid = 1 + OMP_GET_THREAD_NUM()
+
+         if (req%intensity .ne. maximum) then
+            ! calculate the velocity for this frame
+            call get_frame2freq_vel(item, frame, req%ref_freq, req%deltaV, req%rest, freq, vel)
+            ! print *, "thread:", tid, "channel:", frame, "f [GHz]: ", freq, "v [km/s]:", vel
+         end if
+
+         ! the 1st moment
+         if (req%intensity .eq. velocity) then
+            call viewport_moment_map_1_rect(c_loc(item%compressed(frame, 1)%ptr), width, height, item%frame_min(frame, 1), &
+            & item%frame_max(frame, 1), c_loc(thread_I(:, tid)), c_loc(thread_Iv(:, tid)), c_loc(thread_mask(:, tid)), dimx, &
+            & req%x1 - 1, req%x2 - 1, req%y1 - 1, req%y2 - 1, 0, 0, vel)
+         end if
+
+         ! the 2nd moment
+         if (req%intensity .eq. dispersion) then
+            call viewport_moment_map_2_rect(c_loc(item%compressed(frame, 1)%ptr), width, height, item%frame_min(frame, 1), &
+            & item%frame_max(frame, 1), c_loc(thread_I(:, tid)), c_loc(thread_Iv(:, tid)), c_loc(thread_Iv2(:, tid)),&
+            & c_loc(thread_mask(:, tid)), dimx, req%x1 - 1, req%x2 - 1, req%y1 - 1, req%y2 - 1, 0, 0, vel)
+         end if
+
+         ! the 8th moment (maximum)
+         if (req%intensity .eq. maximum) then
+            call viewport_moment_map_8_rect(c_loc(item%compressed(frame, 1)%ptr), width, height, item%frame_min(frame, 1), &
+            & item%frame_max(frame, 1), c_loc(thread_I(:, tid)), c_loc(thread_mask(:, tid)),&
+            & dimx, req%x1 - 1, req%x2 - 1, req%y1 - 1, req%y2 - 1, 0, 0)
+         end if
+      end do
+      !$omp END DO
+      !$omp END PARALLEL
+
+      ! reduce the thread-local buffers
+      if (req%intensity .eq. velocity) then
+         do tid = 1, max_threads
+            pixels_I(:) = pixels_I(:) + thread_I(:, tid)
+            pixels_Iv(:) = pixels_Iv(:) + thread_Iv(:, tid)
+            mask(:) = mask(:) .or. thread_mask(:, tid)
+         end do
+      end if
+
+      ! the 2nd moment (dispersion) --> the current implementation is not numerically stable, but it is fast and works for most cases
+      if (req%intensity .eq. dispersion) then
+         do tid = 1, max_threads
+            pixels_I(:) = pixels_I(:) + thread_I(:, tid)
+            pixels_Iv(:) = pixels_Iv(:) + thread_Iv(:, tid)
+            pixels_Iv2(:) = pixels_Iv2(:) + thread_Iv2(:, tid)
+            mask(:) = mask(:) .or. thread_mask(:, tid)
+         end do
+      end if
+
+      if (req%intensity .eq. maximum) then
+         do tid = 1, max_threads
+            ! use a maximum operator
+            pixels_I(:) = max(pixels_I(:), thread_I(:, tid))
+            mask(:) = mask(:) .or. thread_mask(:, tid)
+         end do
+      end if
+
       ! ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
       ! close the connection, release pointers
