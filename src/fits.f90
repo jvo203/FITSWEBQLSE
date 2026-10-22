@@ -10062,6 +10062,25 @@ contains
       type(dataset), pointer :: item
       type(image_moment_request_f), pointer :: req
 
+      if (.not. c_associated(user)) return
+      call c_f_pointer(user, req)
+
+      if (.not. c_associated(req%ptr)) then
+         call close_pipe(req%fd)
+         nullify (req) ! disassociate the FORTRAN pointer from the C memory region
+         call free(user) ! release C memory
+         return
+      else
+         call c_f_pointer(req%ptr, item)
+      end if
+
+      ! close the connection, release pointers
+      call close_pipe(req%fd)
+      nullify (item)
+      nullify (req) ! disassociate the FORTRAN pointer from the C memory region
+      call free(user) ! release C memory
+      return
+
    end subroutine moment_request
 
    recursive subroutine cluster_pv_request(user) BIND(C, name='cluster_pv_request')
