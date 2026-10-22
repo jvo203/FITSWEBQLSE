@@ -10215,33 +10215,64 @@ contains
       !$omp END PARALLEL
 
       ! reduce the thread-local buffers
+      ! interleave transmitting data via a network with array reductions
       if (req%intensity .eq. velocity) then
          do tid = 1, max_threads
             pixels_I(:) = pixels_I(:) + thread_I(:, tid)
-            pixels_Iv(:) = pixels_Iv(:) + thread_Iv(:, tid)
-            mask(:) = mask(:) .or. thread_mask(:, tid)
          end do
+
+         ! send pixels_I
+         written = chunked_write(req%fd, c_loc(pixels_I), sizeof(pixels_I))
+
+         do tid = 1, max_threads
+            pixels_Iv(:) = pixels_Iv(:) + thread_Iv(:, tid)
+         end do
+
+         ! send pixels_Iv
+         written = chunked_write(req%fd, c_loc(pixels_Iv), sizeof(pixels_Iv))
       end if
 
       ! the 2nd moment (dispersion) --> the current implementation is not numerically stable, but it is fast and works for most cases
       if (req%intensity .eq. dispersion) then
          do tid = 1, max_threads
             pixels_I(:) = pixels_I(:) + thread_I(:, tid)
-            pixels_Iv(:) = pixels_Iv(:) + thread_Iv(:, tid)
-            pixels_Iv2(:) = pixels_Iv2(:) + thread_Iv2(:, tid)
-            mask(:) = mask(:) .or. thread_mask(:, tid)
          end do
+
+         ! send pixels_I
+         written = chunked_write(req%fd, c_loc(pixels_I), sizeof(pixels_I))
+
+         do tid = 1, max_threads
+            pixels_Iv(:) = pixels_Iv(:) + thread_Iv(:, tid)
+         end do
+
+         ! send pixels_Iv
+         written = chunked_write(req%fd, c_loc(pixels_Iv), sizeof(pixels_Iv))
+
+         do tid = 1, max_threads
+            pixels_Iv2(:) = pixels_Iv2(:) + thread_Iv2(:, tid)
+         end do
+
+         ! send pixels_Iv2
+         written = chunked_write(req%fd, c_loc(pixels_Iv2), sizeof(pixels_Iv2))
       end if
 
       if (req%intensity .eq. maximum) then
          do tid = 1, max_threads
             ! use a maximum operator
             pixels_I(:) = max(pixels_I(:), thread_I(:, tid))
-            mask(:) = mask(:) .or. thread_mask(:, tid)
          end do
+
+         ! send pixels_I
+         written = chunked_write(req%fd, c_loc(pixels_I), sizeof(pixels_I))
       end if
 
-      ! ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+      ! reduce the common mask
+      do tid = 1, max_threads
+         mask(:) = mask(:) .or. thread_mask(:, tid)
+      end do
+
+      ! send mask
+      written = chunked_write(req%fd, c_loc(mask), sizeof(mask))
 
       ! close the connection, release pointers
       call close_pipe(req%fd)
