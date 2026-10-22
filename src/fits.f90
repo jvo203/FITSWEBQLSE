@@ -10062,6 +10062,14 @@ contains
       type(dataset), pointer :: item
       type(image_moment_request_f), pointer :: req
 
+      integer :: first, last, length
+      integer(kind=8) :: npixels
+      integer(c_int) :: x1, x2, y1, y2
+
+      integer :: dimx, dimy
+      integer(kind=c_size_t) :: written
+
+
       if (.not. c_associated(user)) return
       call c_f_pointer(user, req)
 
@@ -10073,6 +10081,45 @@ contains
       else
          call c_f_pointer(req%ptr, item)
       end if
+
+      print *, 'moment_request for ', item%datasetid,&
+      &', x1:', req%x1, ', y1:', req%y1, ', x2:', req%x2, ', y2:', req%y2, ', intensity:', req%intensity,&
+      & ', frame_start:', req%frame_start, ', frame_end:', req%frame_end, ', ref_freq:', &
+      &req%ref_freq, ', deltaV:', req%deltaV, ', rest:', req%rest, ', fd:', req%fd
+
+      if (req%fd .eq. -1) then
+         nullify (item)
+         nullify (req) ! disassociate the FORTRAN pointer from the C memory region
+         call free(user) ! release C memory
+         return
+      end if
+
+      ! only applicable to FITS data cubes
+      if (.not. allocated(item%compressed)) then
+         call close_pipe(req%fd)
+         nullify (item)
+         nullify (req) ! disassociate the FORTRAN pointer from the C memory region
+         call free(user) ! release C memory
+         return
+      end if
+
+      ! get the range of the cube planes
+      call get_spectrum_range(item, req%frame_start, req%frame_end, req%ref_freq, first, last)
+
+      length = last - first + 1
+
+      ! obtain viewport dimensions (even going beyond the dims of pixels&mask)
+      dimx = abs(req%x2 - req%x1) + 1
+      dimy = abs(req%y2 - req%y1) + 1
+      npixels = int(dimx, kind=8)*int(dimy, kind=8)
+
+      ! sanity checks
+      x1 = max(1, req%x1)
+      y1 = max(1, req%y1)
+      x2 = min(item%naxes(1), req%x2)
+      y2 = min(item%naxes(2), req%y2)
+
+      ! ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
       ! close the connection, release pointers
       call close_pipe(req%fd)
