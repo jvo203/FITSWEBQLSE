@@ -10063,12 +10063,20 @@ contains
       type(image_moment_request_f), pointer :: req
 
       integer :: first, last, length
+      integer :: max_threads, frame, tid
       integer(kind=8) :: npixels
-      integer(c_int) :: x1, x2, y1, y2
+      integer(c_int) :: width, height
+      real(kind=c_double) :: freq, vel
+
+      real(kind=c_double), allocatable, target :: thread_I(:, :), thread_Iv(:, :), thread_Iv2(:, :)
+      logical(kind=c_bool), allocatable, target :: thread_mask(:, :)
 
       integer :: dimx, dimy
       integer(kind=c_size_t) :: written
 
+      ! output variables
+      real(kind=c_double), allocatable, target :: pixels_I(:), pixels_Iv(:), pixels_Iv2(:)
+      logical(kind=c_bool), allocatable, target :: mask(:)
 
       if (.not. c_associated(user)) return
       call c_f_pointer(user, req)
@@ -10107,6 +10115,10 @@ contains
       call get_spectrum_range(item, req%frame_start, req%frame_end, req%ref_freq, first, last)
 
       length = last - first + 1
+      print *, 'first:', first, 'last:', last, 'length:', length, 'depth:', item%naxes(3)
+
+      width = item%naxes(1)
+      height = item%naxes(2)
 
       ! obtain viewport dimensions (even going beyond the dims of pixels&mask)
       dimx = abs(req%x2 - req%x1) + 1
@@ -10114,10 +10126,51 @@ contains
       npixels = int(dimx, kind=8)*int(dimy, kind=8)
 
       ! sanity checks
-      x1 = max(1, req%x1)
-      y1 = max(1, req%y1)
-      x2 = min(item%naxes(1), req%x2)
-      y2 = min(item%naxes(2), req%y2)
+      req%x1 = max(1, req%x1)
+      req%y1 = max(1, req%y1)
+      req%x2 = min(width, req%x2)
+      req%y2 = min(height, req%y2)
+
+      ! get #physical cores (ignore HT)
+      max_threads = get_max_threads()
+
+      allocate (mask(npixels))
+      mask = .false.
+
+      ! common to all higher moments
+      allocate (pixels_I(npixels))
+
+      ! allocate thread-local buffers common for all higher moments
+      allocate (thread_I(npixels, max_threads))
+      allocate (thread_mask(npixels, max_threads))
+
+      if (req%intensity .ne. maximum) then
+         pixels_I = 0.0
+         thread_I = 0.0
+      else
+         pixels_I = -1.0E30
+         thread_I = -1.0E30
+      end if
+
+      thread_mask = .false.
+
+      ! velocity / dispersion
+      if (req%intensity .eq. velocity .or. req%intensity .eq. dispersion) then
+         allocate (pixels_Iv(npixels))
+         allocate (thread_Iv(npixels, max_threads))
+
+         pixels_Iv = 0.0
+         thread_Iv = 0.0
+      end if
+
+      ! dispersion
+      if (req%intensity .eq. dispersion) then
+         allocate (pixels_Iv2(npixels))
+         allocate (thread_Iv2(npixels, max_threads))
+
+         pixels_Iv2 = 0.0
+         thread_Iv2 = 0.0
+      end if
 
       ! ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
