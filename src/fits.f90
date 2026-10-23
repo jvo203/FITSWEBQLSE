@@ -13154,6 +13154,8 @@ contains
       ! join a thread
       rc = my_pthread_join(cluster_pid)
 
+      print *, "cluster synchronisation complete"
+
       ! reduce the thread-local buffers
       if (req%intensity .eq. velocity) then
          do tid = 1, max_threads
@@ -13161,6 +13163,17 @@ contains
             pixels_Iv(:) = pixels_Iv(:) + thread_Iv(:, tid)
             mask(:) = mask(:) .or. thread_mask(:, tid)
          end do
+
+         ! check I
+         print *, "pixels_I min/max:", minval(pixels_I(:)), maxval(pixels_I(:))
+         ! check Iv
+         print *, "pixels_Iv min/max:", minval(pixels_Iv(:)), maxval(pixels_Iv(:))
+         ! check mask
+         print *, "mask count:", count(mask(:))
+
+         ! print some 10 values of pixels_I and pixels_Iv for debugging (use the middle of the image)
+         print *, "pixels_I sample:", pixels_I(dimx/2 - 5:dimx/2 + 5)
+         print *, "pixels_Iv sample:", pixels_Iv(dimx/2 - 5:dimx/2 + 5)
 
          ! M1
          pixels(:) = real(pixels_Iv(:)/pixels_I(:), kind=c_float)
