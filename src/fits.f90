@@ -8125,6 +8125,9 @@ contains
 
             ! M8
             pixels(:, :, 1) = real(pixels_I(:, :), kind=c_float)
+
+            ! replace the no-data sentinel before resizing; Lanczos filtering would spread it into valid pixels
+            pixels(:, :, 1) = merge(pixels(:, :, 1), 0.0, mask(:, :))
          end if
       end if
 
@@ -13248,7 +13251,7 @@ contains
          ! M8
          pixels(:) = real(pixels_I(:), kind=c_float)
 
-         ! replace the no-data sentinel before resizing; Lanczos filtering would spread it into valid pixels.
+         ! replace the no-data sentinel before resizing; Lanczos filtering would spread it into valid pixels
          pixels(:) = merge(pixels(:), 0.0, mask(:))
 
          ! also print the final pixels/mask statistics
