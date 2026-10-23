@@ -13248,6 +13248,9 @@ contains
          ! M8
          pixels(:) = real(pixels_I(:), kind=c_float)
 
+         ! replace the no-data sentinel before resizing; Lanczos filtering would spread it into valid pixels.
+         pixels(:) = merge(pixels(:), 0.0, mask(:))
+
          ! also print the final pixels/mask statistics
          print *, "final pixels min/max:", minval(pixels(:)), maxval(pixels(:))
          print *, "final mask count:", count(mask(:))
