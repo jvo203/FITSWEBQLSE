@@ -9495,6 +9495,7 @@ void *fetch_realtime_image_moments(void *ptr)
 #pragma GCC ivdep
                 for (size_t pixel = 0; pixel < pixel_count; pixel++)
                     req->pixels_I[pixel] = MAX(req->pixels_I[pixel], pixels_I[pixel]);
+                printf("[C] /moment/<maximum>::OK.\n");
             }
             else if (req->intensity == velocity)
             {
@@ -9504,6 +9505,7 @@ void *fetch_realtime_image_moments(void *ptr)
                     req->pixels_I[pixel] += pixels_I[pixel];
                     req->pixels_Iv[pixel] += pixels_Iv[pixel];
                 }
+                printf("[C] /moment/<velocity>::OK.\n");
             }
             else
             {
@@ -9514,11 +9516,13 @@ void *fetch_realtime_image_moments(void *ptr)
                     req->pixels_Iv[pixel] += pixels_Iv[pixel];
                     req->pixels_Iv2[pixel] += pixels_Iv2[pixel];
                 }
+                printf("[C] /moment/<dispersion>::OK.\n");
             }
 
 #pragma GCC ivdep
             for (size_t pixel = 0; pixel < pixel_count; pixel++)
                 req->mask[pixel] |= mask[pixel];
+            printf("[C] /moment/<image>::OK.\n");
         }
     }
 
