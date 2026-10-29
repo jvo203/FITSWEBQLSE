@@ -7786,6 +7786,11 @@ contains
       type(c_ptr) :: pid
       integer(kind=c_int) :: rc, task_rc(4)
 
+      ! moment cluster
+      type(image_moment_request_t), target :: moment_req
+      type(c_ptr) :: moment_pid
+      integer(kind=c_int) :: moment_rc
+
       ! OpenMP thread-local variables
       real(c_float) :: thread_sumP, thread_sumN
       integer(c_int64_t) :: thread_countP, thread_countN
