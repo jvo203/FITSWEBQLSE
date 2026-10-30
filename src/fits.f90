@@ -7928,6 +7928,45 @@ contains
                pixels_Iv2 = 0.0
                thread_Iv2 = 0.0
             end if
+
+            moment_req%datasetid = c_loc(item%datasetid)
+            moment_req%len = size(item%datasetid)
+
+            ! inputs
+            moment_req%x1 = req%x1
+            moment_req%y1 = req%y1
+            moment_req%x2 = req%x2
+            moment_req%y2 = req%y2
+            moment_req%intensity = req%intensity
+            moment_req%frame_start = req%frame_start
+            moment_req%frame_end = req%frame_end
+            moment_req%ref_freq = req%ref_freq
+            moment_req%deltaV = req%deltaV
+            moment_req%rest = req%rest
+
+            ! outputs
+            moment_req%pixels_I = c_loc(pixels_I)
+
+            if (req%intensity .eq. velocity) then
+               moment_req%pixels_Iv = c_loc(pixels_Iv)
+            else if (req%intensity .eq. dispersion) then
+               moment_req%pixels_Iv = c_loc(pixels_Iv)
+               moment_req%pixels_Iv2 = c_loc(pixels_Iv2)
+            else
+               moment_req%pixels_Iv = c_null_ptr
+               moment_req%pixels_Iv2 = c_null_ptr
+            end if
+
+            moment_req%mask = c_loc(mask)
+            moment_req%dimx = dimx
+            moment_req%dimy = dimy
+
+            ! launch a thread
+            moment_pid = my_pthread_create(start_routine=c_funloc(fetch_realtime_image_moments),&
+            & arg=c_loc(moment_req), rc=moment_rc)
+            ! end of cluster
+         else
+            moment_pid = c_null_ptr
          end if
       end if
 
@@ -8084,6 +8123,9 @@ contains
                mask(:, :) = mask(:, :) .or. thread_mask(:, :, tid)
             end do
          end if
+
+         ! join a thread
+         rc = my_pthread_join(moment_pid)
 
          if (req%intensity .eq. velocity) then
             do tid = 1, max_threads
