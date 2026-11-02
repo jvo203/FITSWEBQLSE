@@ -13204,8 +13204,6 @@ contains
       ! join a thread
       rc = my_pthread_join(cluster_pid)
 
-      print *, "cluster synchronisation complete"
-
       ! reduce the thread-local buffers
       if (req%intensity .eq. velocity) then
          do tid = 1, max_threads
@@ -13213,17 +13211,6 @@ contains
             pixels_Iv(:) = pixels_Iv(:) + thread_Iv(:, tid)
             mask(:) = mask(:) .or. thread_mask(:, tid)
          end do
-
-         ! check I
-         print *, "pixels_I min/max:", minval(pixels_I(:)), maxval(pixels_I(:))
-         ! check Iv
-         print *, "pixels_Iv min/max:", minval(pixels_Iv(:)), maxval(pixels_Iv(:))
-         ! check mask
-         print *, "mask count:", count(mask(:))
-
-         ! print some 10 values of pixels for debugging (use the middle of the image)
-         print *, "pixels_I sample:", pixels_I(dimx/2 - 5:dimx/2 + 5)
-         print *, "pixels_Iv sample:", pixels_Iv(dimx/2 - 5:dimx/2 + 5)
 
          ! M1
          pixels(:) = real(pixels_Iv(:)/pixels_I(:), kind=c_float)
@@ -13233,12 +13220,6 @@ contains
 
          ! set pixels to zero where the mask is false
          pixels(:) = merge(pixels(:), 0.0, mask(:))
-
-         ! also print the final pixels/mask statistics
-         print *, "final pixels min/max:", minval(pixels(:)), maxval(pixels(:))
-         print *, "final mask count:", count(mask(:))
-         ! print some 10 values of pixels for debugging (use the middle of the image)
-         print *, "final pixels sample:", pixels(dimx/2 - 5:dimx/2 + 5)
       end if
 
       ! the 2nd moment (dispersion) --> the current implementation is not numerically stable, but it is fast and works for most cases
@@ -13250,20 +13231,6 @@ contains
             mask(:) = mask(:) .or. thread_mask(:, tid)
          end do
 
-         ! check I
-         print *, "pixels_I min/max:", minval(pixels_I(:)), maxval(pixels_I(:))
-         ! check Iv
-         print *, "pixels_Iv min/max:", minval(pixels_Iv(:)), maxval(pixels_Iv(:))
-         ! check Iv2
-         print *, "pixels_Iv2 min/max:", minval(pixels_Iv2(:)), maxval(pixels_Iv2(:))
-         ! check mask
-         print *, "mask count:", count(mask(:))
-
-         ! print some 10 values of pixels for debugging (use the middle of the image)
-         print *, "pixels_I sample:", pixels_I(dimx/2 - 5:dimx/2 + 5)
-         print *, "pixels_Iv sample:", pixels_Iv(dimx/2 - 5:dimx/2 + 5)
-         print *, "pixels_Iv2 sample:", pixels_Iv2(dimx/2 - 5:dimx/2 + 5)
-
          ! M2
          pixels(:) = real(pixels_Iv2(:)/pixels_I(:) - (pixels_Iv(:)/pixels_I(:))**2, kind=c_float)
 
@@ -13272,12 +13239,6 @@ contains
 
          ! set pixels to zero where the mask is false
          pixels(:) = merge(sqrt(pixels(:)), 0.0, mask(:))
-
-         ! also print the final pixels/mask statistics
-         print *, "final pixels min/max:", minval(pixels(:)), maxval(pixels(:))
-         print *, "final mask count:", count(mask(:))
-         ! print some 10 values of pixels for debugging (use the middle of the image)
-         print *, "final pixels sample:", pixels(dimx/2 - 5:dimx/2 + 5)
       end if
 
       if (req%intensity .eq. maximum) then
@@ -13287,25 +13248,11 @@ contains
             mask(:) = mask(:) .or. thread_mask(:, tid)
          end do
 
-         ! check I
-         print *, "pixels_I min/max:", minval(pixels_I(:)), maxval(pixels_I(:))
-         ! check mask
-         print *, "mask count:", count(mask(:))
-
-         ! print some 10 values of pixels for debugging (use the middle of the image)
-         print *, "pixels_I sample:", pixels_I(dimx/2 - 5:dimx/2 + 5)
-
          ! M8
          pixels(:) = real(pixels_I(:), kind=c_float)
 
          ! replace the no-data sentinel before resizing; Lanczos filtering would spread it into valid pixels
          pixels(:) = merge(pixels(:), 0.0, mask(:))
-
-         ! also print the final pixels/mask statistics
-         print *, "final pixels min/max:", minval(pixels(:)), maxval(pixels(:))
-         print *, "final mask count:", count(mask(:))
-         ! print some 10 values of pixels for debugging (use the middle of the image)
-         print *, "final pixels sample:", pixels(dimx/2 - 5:dimx/2 + 5)
       end if
 
       ! get the inner image bounding box (excluding NaNs)

@@ -9384,7 +9384,7 @@ void *fetch_realtime_image_moments(void *ptr)
         GString *url = g_string_new("http://");
         g_string_append_printf(url, "%s:", (char *)iterator->data);
         g_string_append_printf(url, "%" PRIu16 "/moment/%.*s?x1=%d&y1=%d&x2=%d&y2=%d&frame_start=%.17f&frame_end=%.17f&ref_freq=%.17f&deltaV=%.17f&rest=%s&intensity=%s", options.http_port, (int)len, datasetid, req->x1, req->y1, req->x2, req->y2, req->frame_start, req->frame_end, req->ref_freq, req->deltaV, req->rest ? "true" : "false", intensity);
-        printf("[C] URL: '%s'\n", url->str);
+        // printf("[C] URL: '%s'\n", url->str);
 
         // set the individual URL
         curl_easy_setopt(handles[i], CURLOPT_URL, url->str);
