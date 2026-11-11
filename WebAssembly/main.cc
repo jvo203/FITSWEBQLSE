@@ -68,7 +68,9 @@ static size_t pvLength = 0;
 
 #include <iostream>
 #include <algorithm>
+#include <cmath>
 #include <cstdint>
+#include <limits>
 #include <map>
 #include <stdexcept>
 #include <string>
@@ -462,7 +464,7 @@ void hevc_init_frame(int va_count, int width, int height)
         {
             // initialise canvasBuffer with NaN
             for (size_t i = 0; i < len; i++)
-                canvasBuffer[i] = NAN;
+                canvasBuffer[i] = std::numeric_limits<float>::quiet_NaN();
 
             canvasLength = len;
         }
@@ -624,8 +626,8 @@ buffer decompressPVdiagram(int img_width, int img_height, std::string const &byt
         unsigned char a = 255;
 
         float pos = value * (NO_COLOURS - 1);
-        float frac = pos - floorf(pos);
-        int x0 = floorf(pos);
+        float frac = pos - std::floor(pos);
+        int x0 = std::floor(pos);
 
         r = 0xFF * (math_r[x0] + (math_r[x0 + 1] - math_r[x0]) * frac);
         g = 0xFF * (math_g[x0] + (math_g[x0 + 1] - math_g[x0]) * frac);
@@ -881,8 +883,8 @@ buffer decompressCompositePVdiagram(int img_width, int img_height, int va_count,
     {
         printf("[WCSLIB] pix2sky status: %d\n", status[0]);
 
-        coords[0] = NAN;
-        coords[1] = NAN;
+        coords[0] = std::numeric_limits<float>::quiet_NaN();
+        coords[1] = std::numeric_limits<float>::quiet_NaN();
     }
 
     return val(typed_memory_view(coordsLength, coords));
@@ -902,8 +904,8 @@ buffer decompressCompositePVdiagram(int img_width, int img_height, int va_count,
     {
         printf("[WCSLIB] sky2pix status: %d\n", status[0]);
 
-        coords[0] = NAN;
-        coords[1] = NAN;
+        coords[0] = std::numeric_limits<float>::quiet_NaN();
+        coords[1] = std::numeric_limits<float>::quiet_NaN();
     }
 
     return val(typed_memory_view(coordsLength, coords));
@@ -956,25 +958,27 @@ val sky2pix(int index, double ra, double dec)
     {
         printf("[WCSTools] wcs2pix offscl: %d\n", offscl);
 
-        coords[0] = NAN;
-        coords[1] = NAN;
+        coords[0] = std::numeric_limits<float>::quiet_NaN();
+        coords[1] = std::numeric_limits<float>::quiet_NaN();
     }
 
     return val(typed_memory_view(coordsLength, coords));
 }
 
 // Hanning smoothing function coefficients
+static constexpr float PI = 3.14159265358979323846f;
+
 void Hann_window(int length, float *window)
 {
     for (int i = 0; i < length; i++)
-        window[i] = 0.5f * (1.0f - cosf(2.0f * M_PI * i / (length - 1)));
+        window[i] = 0.5f * (1.0f - std::cos(2.0f * PI * i / (length - 1)));
 }
 
 // Hamming smoothing function coefficients
 void Hamming_window(int length, float *window)
 {
     for (int i = 0; i < length; i++)
-        window[i] = 0.54f - 0.46f * cosf(2.0f * M_PI * i / (length - 1));
+        window[i] = 0.54f - 0.46f * std::cos(2.0f * PI * i / (length - 1));
 }
 
 buffer spectrum_smoothing(int length, uintptr_t src_ptr, int width)

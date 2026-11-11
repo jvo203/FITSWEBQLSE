@@ -2,6 +2,7 @@
 
 * added higher moments M1, M2 and M8 (see a menu item _*Preferences*_ / _*moment map*_)
 * gracefully handle _*wire texture loading errors*_ in the 3D view
+* upgrade WebAssembly code to _*Emscripten v7*_ 
 
 ## [5.2.5] - 2026-08-31
 
