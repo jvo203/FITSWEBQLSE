@@ -41,6 +41,7 @@ end
 function copy_dataset(datasetid, file_size, path)
     src = "/home/alma/" * path
     dst = "/mnt/fits/files/" * datasetid * ".fits"
+    tmp = "/mnt/fits/files/" * datasetid * ".fits.tmp"
 
     # check if the src file exists
     if !isfile(src)
@@ -76,12 +77,22 @@ function copy_dataset(datasetid, file_size, path)
 
     # copy the source file in chunks
     open(src, "r") do src_file
-        open(dst, "w") do dst_file
+        open(tmp, "w") do dst_file
             while !eof(src_file)
                 write(dst_file, (read(src_file, chunk)))
                 update!(p, position(src_file))
             end
         end
+    end
+
+    # rename the tmp file to the final destination if the copy was successful and the file sizes match
+    if filesize(tmp) == src_filesize
+        mv(tmp, dst; force=true)
+    else
+        println("The copied file $(tmp) has a different size than the source file $(src). Skipping.")
+        # remove the tmp file
+        rm(tmp)
+        return false
     end
 
     return true
@@ -187,7 +198,7 @@ for (datasetid, file_size, path, date) in zip(ids, sizes, paths, dates)
         # copy should be enabled for large datasets only 
         # otherwise we will run out of disk space
         println("\tCOPY: #$count/$total_count :: $datasetid :: $(round(file_size / 1024^3,digits=1)) GB")
-        copy_dataset(datasetid, file_size, path)
+        copy_dataset(datasetid, file_size, path) || error("Copy failed for dataset $(datasetid)")
     else
         # preload
         println("\tPRELOAD: #$count/$total_count :: $datasetid :: $(round(file_size / 1024^3,digits=1)) GB")
